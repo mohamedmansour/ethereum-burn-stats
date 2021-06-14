@@ -1,10 +1,10 @@
 import React from 'react';
 
-interface TopLevelLoaderProps {
+interface LoaderProps {
   children: React.ReactNode;
 }
 
-export function TopLevelLoader(props: TopLevelLoaderProps) {
+export function Loader(props: LoaderProps) {
   return (
     <div>
       <span>{props.children}</span>

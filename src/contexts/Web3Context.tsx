@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { TopLevelLoader } from './TopLevelLoader';
+import { Loader } from '../components/Loader';
 import Web3 from 'web3';
 
 declare module 'web3' {
@@ -32,7 +32,10 @@ const Web3Provider = ({
   const [web3, setWeb3] = useState<Web3 | undefined>()
 
   useEffect(() => {
-    const web3 = new Web3('ws://localhost:8546');
+    if (!url)
+      return;
+
+    const web3 = new Web3(url);
 
     web3.extend({
       property: 'debug',
@@ -47,7 +50,7 @@ const Web3Provider = ({
     })
 
     setWeb3(web3)
-  }, [])
+  }, [url])
 
   return (
     <Web3Context.Provider
@@ -55,7 +58,7 @@ const Web3Provider = ({
         web3
       }}
     >
-      {web3 ? children : <TopLevelLoader>connecting to web3 node</TopLevelLoader>}
+      {web3 ? children : <Loader>connecting to web3 node</Loader>}
     </Web3Context.Provider>
   )
 }
