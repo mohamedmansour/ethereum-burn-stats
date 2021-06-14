@@ -3,17 +3,17 @@
   "name": "Showcasing how much ETH has burned in each block",
   "icons": [
     {
-      "src": "favicon.png",
+      "src": "logo_64.png",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/png",
+      "type": "image/png"
     },
     {
-      "src": "favicon.png",
+      "src": "logo_192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "favicon.png",
+      "src": "logo_512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
