@@ -1,11 +1,9 @@
 import { useWeb3 } from '../contexts/Web3Context';
 import { useEffect, useState } from 'react';
 import Web3 from 'web3';
-import { BlockTransactionString } from 'web3-eth';
-
-interface BurnedBlockTransactionString extends BlockTransactionString {
-  gweiBurned: string
-}
+import { BlockHeader } from 'web3-eth';
+import { Subscription } from 'web3-core-subscriptions';
+import { EthBlockList, BurnedBlockTransactionString } from '../components/EthBlockList';
 
 export function DashboardPage() {
   const { web3 } = useWeb3()
@@ -13,25 +11,45 @@ export function DashboardPage() {
   const [blocks, setBlocks] = useState<BurnedBlockTransactionString[]>([])
 
   useEffect(() => {
-    (async () => {
-      if (!web3)
+    if (!web3)
+      return
+
+    const onNewBlockHeader = async (error: Error, blockHeader: BlockHeader) => {
+      const block = await web3.eth.getBlock(blockHeader.number)
+      if (!block)
         return
+      
+      const blockNumberInHex = web3.utils.toHex(blockHeader.number)
+      const burned = await web3.debug.burned(blockNumberInHex, blockNumberInHex)
+      if (burned !== '0x0') {
+        setTotalBurned(total => {
+          const burnedInWei = Web3.utils.fromWei(burned)
+          if (total)
+            return web3.utils.toBN(burnedInWei).add(web3.utils.toBN(total)).toString(10)
+          else
+            return burnedInWei
+        })
+      }
 
-      setTotalBurned(Web3.utils.fromWei(await web3.debug.burned()))
+      setBlocks(blocks => [{
+        ...block,
+        gweiBurned: Web3.utils.fromWei(burned)
+      }, ...blocks])
+    }
 
+    const prefetchBlockHeaders = async (blockHeaderCount: number) => {
       const latestBlockNumber = await web3.eth.getBlockNumber()
-      const blockNumberInHexEnd = web3.utils.toHex(latestBlockNumber)
 
       if (latestBlockNumber) {
         const processedBlocks: BurnedBlockTransactionString[] = []
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < blockHeaderCount; i++) {
           const blockNumber = latestBlockNumber - i
-          const blockNumberInHexStart = web3.utils.toHex(blockNumber - 1)
+          const blockNumberInHex = web3.utils.toHex(blockNumber)
           const block = await web3.eth.getBlock(blockNumber)
 
           if (block) {
             console.log(block)
-            const burned = await web3.debug.burned(blockNumberInHexStart, blockNumberInHexEnd)
+            const burned = await web3.debug.burned(blockNumberInHex, blockNumberInHex)
             processedBlocks.push({
               ...block,
               gweiBurned: Web3.utils.fromWei(burned)
@@ -41,7 +59,17 @@ export function DashboardPage() {
 
         setBlocks(processedBlocks)
       }
+    }
+
+    let newBlockHeadersSubscription: Subscription<BlockHeader>
+
+    (async () => {
+      setTotalBurned(Web3.utils.fromWei(await web3.debug.burned()))
+      prefetchBlockHeaders(10)
+      newBlockHeadersSubscription = web3.eth.subscribe('newBlockHeaders', onNewBlockHeader);
     })()
+
+    return () => {newBlockHeadersSubscription && newBlockHeadersSubscription.unsubscribe()}
   }, [web3])
 
   return (
@@ -53,34 +81,7 @@ export function DashboardPage() {
       </div>
       <div>
         <h2>Latest Blocks</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>hash</th>
-              <th>gas used</th>
-              <th>transaction count</th>
-              <th>burned</th>
-            </tr>
-          </thead>
-          <tbody>
-            {blocks.map((block, idx) => (
-              <tr key={idx}>
-                <td>
-                  {block.hash.substr(0, 10)}
-                </td>
-                <td>
-                  {block.gasUsed}
-                </td>
-                <td>
-                  {block.transactions.length}
-                </td>
-                <td>
-                  {block.gweiBurned}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <EthBlockList blocks={blocks} />
       </div>
     </div>
   )
