@@ -1,6 +1,7 @@
 import { Table, Thead, Tr, Th, Tbody, Td } from '@chakra-ui/react';
 import React from 'react';
 import { BlockTransactionString } from 'web3-eth';
+import { timeSince } from '../utils/time';
 
 export interface BurnedBlockTransactionString extends BlockTransactionString {
   weiBurned: string
@@ -19,7 +20,7 @@ function EthBlockItem(props: EthBlockItemProps) {
         {block.number}
       </Td>
       <Td>
-        {block.timestamp}
+        {timeSince(block.timestamp as number)}
       </Td>
       <Td>
         {block.transactions.length}
@@ -31,7 +32,7 @@ function EthBlockItem(props: EthBlockItemProps) {
         {(block.gasUsed / block.gasLimit * 100).toFixed(2)}%
       </Td>
       <Td>
-        {block.gasLimit}
+        {block.gasLimit.toLocaleString()}
       </Td>
       <Td>
         {block.weiBurned}
