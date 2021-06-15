@@ -1,3 +1,4 @@
+import { Center, VStack, Text, Image } from '@chakra-ui/react';
 import React from 'react';
 
 interface LoaderProps {
@@ -6,8 +7,11 @@ interface LoaderProps {
 
 export function Loader(props: LoaderProps) {
   return (
-    <div>
-      <span>{props.children}</span>
-    </div>
+    <Center h="100vh" color="black">
+      <VStack>
+        <Image src="/logo_64.png" w="64px" h="64px" />
+        <Text>{props.children}</Text>
+      </VStack>
+    </Center>
   );
 }

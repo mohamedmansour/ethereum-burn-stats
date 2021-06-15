@@ -49,7 +49,7 @@ const Web3Provider = ({
       ]
     })
 
-    setWeb3(provider)
+     setWeb3(provider)
 
     // Used for debugging
     const w = (window as any)
@@ -64,7 +64,7 @@ const Web3Provider = ({
         web3
       }}
     >
-      {web3 ? children : <Loader>connecting to web3 node</Loader>}
+      {web3 ? children : <Loader>connecting to eth node</Loader>}
     </Web3Context.Provider>
   )
 }

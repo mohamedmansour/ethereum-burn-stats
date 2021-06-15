@@ -4,6 +4,7 @@ import Web3 from 'web3';
 import { BlockHeader } from 'web3-eth';
 import { Subscription } from 'web3-core-subscriptions';
 import { EthBlockList, BurnedBlockTransactionString } from '../components/EthBlockList';
+import { Box, Heading, HStack, Text, VStack } from '@chakra-ui/react';
 
 export function DashboardPage() {
   const { web3 } = useWeb3()
@@ -79,18 +80,18 @@ export function DashboardPage() {
   }, [web3])
 
   return (
-    <div>
-      <h1>ETH Burn</h1>
-      <div>
-        <h2>Total</h2>
-        {!totalBurned && (<p>Loading total burned ...</p>)}
-        {totalBurned && (<div>{totalBurned} ETH</div>)}
-      </div>
-      <div>
-        <h2>Latest Blocks</h2>
-        {!blocks && (<p>Loading blocks ...</p>)}
+    <Box>
+      <Heading>ETH Burn</Heading>
+      <HStack>
+        <Heading size="md">Total</Heading>
+        {!totalBurned && (<Text>Loading total burned ...</Text>)}
+        {totalBurned && (<Text>{totalBurned} ETH</Text>)}
+      </HStack>
+      <Box>
+        <Heading size="md">Latest Blocks</Heading>
+        {!blocks && (<Text>Loading blocks ...</Text>)}
         {blocks && (<EthBlockList blocks={blocks} />)}
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }

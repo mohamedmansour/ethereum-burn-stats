@@ -1,3 +1,4 @@
+import { Table, Thead, Tr, Th, Tbody, Td } from '@chakra-ui/react';
 import React from 'react';
 import { BlockTransactionString } from 'web3-eth';
 
@@ -13,29 +14,29 @@ function EthBlockItem(props: EthBlockItemProps) {
   const { block } = props
 
   return (
-    <tr>
-      <td>
+    <Tr>
+      <Td>
         {block.number}
-      </td>
-      <td>
+      </Td>
+      <Td>
         {block.timestamp}
-      </td>
-      <td>
+      </Td>
+      <Td>
         {block.transactions.length}
-      </td>
-      <td>
+      </Td>
+      <Td>
         {block.uncles.length}
-      </td>
-      <td>
+      </Td>
+      <Td>
         {(block.gasUsed / block.gasLimit * 100).toFixed(2)}%
-      </td>
-      <td>
+      </Td>
+      <Td>
         {block.gasLimit}
-      </td>
-      <td>
+      </Td>
+      <Td>
         {block.weiBurned}
-      </td>
-    </tr>
+      </Td>
+    </Tr>
   )
 }
 
@@ -47,24 +48,23 @@ export function EthBlockList(props: EthBlockListProps) {
   const { blocks } = props
 
   return (
-    
-    <table>
-    <thead>
-      <tr>
-        <th>Block</th>
-        <th>Age</th>
-        <th>Txn</th>
-        <th>Uncles</th>
-        <th>Gas Used</th>
-        <th>Gas Limit</th>
-        <th>Burned Wei</th>
-      </tr>
-    </thead>
-    <tbody>
+    <Table>
+    <Thead>
+      <Tr whiteSpace="nowrap">
+        <Th>Block</Th>
+        <Th>Age</Th>
+        <Th>Txn</Th>
+        <Th>Uncles</Th>
+        <Th>Gas Used</Th>
+        <Th>Gas Limit</Th>
+        <Th>Burned Wei</Th>
+      </Tr>
+    </Thead>
+    <Tbody>
       {blocks.map((block, idx) => (
         <EthBlockItem key={idx} block={block} />
       ))}
-    </tbody>
-  </table>
+    </Tbody>
+  </Table>
   )
 }
