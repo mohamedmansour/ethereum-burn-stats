@@ -1,4 +1,4 @@
-import { Flex, HStack, Text, Image, VStack, Spacer, Button, Badge } from "@chakra-ui/react";
+import { Flex, HStack, Text, Image, Badge } from "@chakra-ui/react";
 import * as CSS from "csstype";
 
 interface LayoutProps {
