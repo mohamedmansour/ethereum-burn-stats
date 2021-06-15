@@ -35,9 +35,9 @@ const Web3Provider = ({
     if (!url)
       return;
 
-    const web3 = new Web3(url);
+    const provider = new Web3(url);
 
-    web3.extend({
+    provider.extend({
       property: 'debug',
       methods: [
         {
@@ -49,7 +49,13 @@ const Web3Provider = ({
       ]
     })
 
-    setWeb3(web3)
+    setWeb3(provider)
+
+    // Used for debugging
+    const w = (window as any)
+    w.web3 = provider//0x23e38
+    
+    return () => {}
   }, [url])
 
   return (

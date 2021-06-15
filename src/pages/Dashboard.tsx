@@ -23,11 +23,14 @@ export function DashboardPage() {
       const burned = await web3.debug.burned(blockNumberInHex, blockNumberInHex)
       if (burned !== '0x0') {
         setTotalBurned(total => {
-          const burnedInWei = Web3.utils.fromWei(burned)
+          console.log(burned, total)
+          const burnedInBN = web3.utils.toBN(burned)
+          const totalInHex = web3.utils.toWei(total || '0', 'ether')
+          const totalInBN = web3.utils.toBN(totalInHex)
           if (total)
-            return web3.utils.toBN(burnedInWei).add(web3.utils.toBN(total)).toString(10)
+            return Web3.utils.fromWei(burnedInBN.add(totalInBN), 'ether')
           else
-            return burnedInWei
+            return Web3.utils.fromWei(burned, 'ether')
         })
       }
 
@@ -37,7 +40,7 @@ export function DashboardPage() {
         
         return [{
           ...block,
-          gweiBurned: Web3.utils.fromWei(burned)
+          weiBurned: Web3.utils.fromWei(burned)
         }, ...blocks]
       })
     }
@@ -57,7 +60,7 @@ export function DashboardPage() {
             const burned = await web3.debug.burned(blockNumberInHex, blockNumberInHex)
             processedBlocks.push({
               ...block,
-              gweiBurned: Web3.utils.fromWei(burned)
+              weiBurned: Web3.utils.fromWei(burned, 'wei')
             })
           }
         }
@@ -69,7 +72,7 @@ export function DashboardPage() {
     let newBlockHeadersSubscription: Subscription<BlockHeader>
 
     (async () => {
-      setTotalBurned(Web3.utils.fromWei(await web3.debug.burned()))
+      setTotalBurned(Web3.utils.fromWei(await web3.debug.burned(), 'ether'))
       prefetchBlockHeaders(10)
       newBlockHeadersSubscription = web3.eth.subscribe('newBlockHeaders', onNewBlockHeader);
     })()

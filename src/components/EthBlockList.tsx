@@ -2,7 +2,7 @@ import React from 'react';
 import { BlockTransactionString } from 'web3-eth';
 
 export interface BurnedBlockTransactionString extends BlockTransactionString {
-  gweiBurned: string
+  weiBurned: string
 }
 
 interface EthBlockItemProps {
@@ -33,7 +33,7 @@ function EthBlockItem(props: EthBlockItemProps) {
         {block.gasLimit}
       </td>
       <td>
-        {block.gweiBurned}
+        {block.weiBurned}
       </td>
     </tr>
   )
@@ -57,7 +57,7 @@ export function EthBlockList(props: EthBlockListProps) {
         <th>Uncles</th>
         <th>Gas Used</th>
         <th>Gas Limit</th>
-        <th>Burned</th>
+        <th>Burned Wei</th>
       </tr>
     </thead>
     <tbody>
