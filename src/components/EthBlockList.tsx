@@ -18,13 +18,19 @@ function EthBlockItem(props: EthBlockItemProps) {
         {block.number}
       </td>
       <td>
-        {block.hash.substr(0, 10)}
-      </td>
-      <td>
-        {block.gasUsed}
+        {block.timestamp}
       </td>
       <td>
         {block.transactions.length}
+      </td>
+      <td>
+        {block.uncles.length}
+      </td>
+      <td>
+        {(block.gasUsed / block.gasLimit * 100).toFixed(2)}%
+      </td>
+      <td>
+        {block.gasLimit}
       </td>
       <td>
         {block.gweiBurned}
@@ -45,11 +51,13 @@ export function EthBlockList(props: EthBlockListProps) {
     <table>
     <thead>
       <tr>
-        <th>#</th>
-        <th>hash</th>
-        <th>gas used</th>
-        <th>transaction count</th>
-        <th>burned</th>
+        <th>Block</th>
+        <th>Age</th>
+        <th>Txn</th>
+        <th>Uncles</th>
+        <th>Gas Used</th>
+        <th>Gas Limit</th>
+        <th>Burned</th>
       </tr>
     </thead>
     <tbody>
