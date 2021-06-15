@@ -23,7 +23,6 @@ export function DashboardPage() {
       const burned = await web3.debug.burned(blockNumberInHex, blockNumberInHex)
       if (burned !== '0x0') {
         setTotalBurned(total => {
-          console.log(burned, total)
           const burnedInBN = web3.utils.toBN(burned)
           const totalInHex = web3.utils.toWei(total || '0', 'ether')
           const totalInBN = web3.utils.toBN(totalInHex)
@@ -56,7 +55,6 @@ export function DashboardPage() {
           const block = await web3.eth.getBlock(blockNumber)
 
           if (block) {
-            console.log(block)
             const burned = await web3.debug.burned(blockNumberInHex, blockNumberInHex)
             processedBlocks.push({
               ...block,
