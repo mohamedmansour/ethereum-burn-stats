@@ -8,7 +8,7 @@ import { EthBlockList, BurnedBlockTransactionString } from '../components/EthBlo
 export function DashboardPage() {
   const { web3 } = useWeb3()
   const [totalBurned, setTotalBurned] = useState<string>()
-  const [blocks, setBlocks] = useState<BurnedBlockTransactionString[]>([])
+  const [blocks, setBlocks] = useState<BurnedBlockTransactionString[]>()
 
   useEffect(() => {
     if (!web3)
@@ -31,10 +31,15 @@ export function DashboardPage() {
         })
       }
 
-      setBlocks(blocks => [{
-        ...block,
-        gweiBurned: Web3.utils.fromWei(burned)
-      }, ...blocks])
+      setBlocks(blocks => {
+        if (!blocks)
+          blocks = []
+        
+        return [{
+          ...block,
+          gweiBurned: Web3.utils.fromWei(burned)
+        }, ...blocks]
+      })
     }
 
     const prefetchBlockHeaders = async (blockHeaderCount: number) => {
@@ -77,11 +82,13 @@ export function DashboardPage() {
       <h1>ETH Burn</h1>
       <div>
         <h2>Total</h2>
-        <div>{totalBurned} ETH</div>
+        {!totalBurned && (<p>Loading total burned ...</p>)}
+        {totalBurned && (<div>{totalBurned} ETH</div>)}
       </div>
       <div>
         <h2>Latest Blocks</h2>
-        <EthBlockList blocks={blocks} />
+        {!blocks && (<p>Loading blocks ...</p>)}
+        {blocks && (<EthBlockList blocks={blocks} />)}
       </div>
     </div>
   )
