@@ -40,7 +40,7 @@ export function DashboardPage() {
         
         return [{
           ...block,
-          weiBurned: Web3.utils.fromWei(burned)
+          weiBurned: Web3.utils.fromWei(burned, 'wei')
         }, ...blocks]
       })
     }
