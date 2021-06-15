@@ -49,7 +49,7 @@ const Web3Provider = ({
       ]
     })
 
-     setWeb3(provider)
+    setWeb3(provider)
 
     // Used for debugging
     const w = (window as any)

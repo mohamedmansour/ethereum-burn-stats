@@ -19,7 +19,7 @@ function EthBlockItem(props: EthBlockItemProps) {
       <Td>
         {block.number}
       </Td>
-      <Td>
+      <Td whiteSpace="nowrap">
         {timeSince(block.timestamp as number)}
       </Td>
       <Td>
