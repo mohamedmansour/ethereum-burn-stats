@@ -4,6 +4,7 @@ import { Web3Provider } from './contexts/Web3Context';
 import { DashboardPage } from './pages/Dashboard';
 import { ChakraProvider, CSSReset } from '@chakra-ui/react';
 import customTheme from './theme';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 function App() {
   const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:'
@@ -12,9 +13,11 @@ function App() {
   return (
     <ChakraProvider theme={customTheme}>
       <CSSReset />
-      <Web3Provider url={url}>
-        <DashboardPage />
-      </Web3Provider>
+      <SettingsProvider>
+        <Web3Provider url={url}>
+          <DashboardPage />
+        </Web3Provider>
+      </SettingsProvider>
     </ChakraProvider>
   )
 }

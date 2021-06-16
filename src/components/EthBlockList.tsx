@@ -1,7 +1,10 @@
 import { Table, Thead, Tr, Th, Tbody, Td } from '@chakra-ui/react';
 import React from 'react';
 import { BlockTransactionString } from 'web3-eth';
+import { Setting } from '../contexts/SettingsContext';
+import { useSetting } from '../hooks/useSetting';
 import { timeSince } from '../utils/time';
+import { GasUsed } from './GasUsed';
 
 export interface BurnedBlockTransactionString extends BlockTransactionString {
   weiBurned: string
@@ -9,10 +12,13 @@ export interface BurnedBlockTransactionString extends BlockTransactionString {
 
 interface EthBlockItemProps {
   block: BurnedBlockTransactionString
+  autoFormatBurn: boolean
 }
 
 function EthBlockItem(props: EthBlockItemProps) {
-  const { block } = props
+  const { block, autoFormatBurn } = props
+  const weiBurned = parseInt(block.weiBurned)
+  const weiBurnedFormatted = weiBurned === 0 ? 0 : (autoFormatBurn ? (weiBurned / 1000000000).toFixed(2) : weiBurned.toLocaleString())
 
   return (
     <Tr>
@@ -29,13 +35,13 @@ function EthBlockItem(props: EthBlockItemProps) {
         {block.uncles.length}
       </Td>
       <Td>
-        {(block.gasUsed / block.gasLimit * 100).toFixed(2)}%
+        <GasUsed gasUsed={block.gasUsed}  gasLimit={block.gasLimit} />
       </Td>
       <Td>
         {block.gasLimit.toLocaleString()}
       </Td>
       <Td>
-        {block.weiBurned}
+        {weiBurnedFormatted}
       </Td>
     </Tr>
   )
@@ -47,9 +53,10 @@ export interface EthBlockListProps {
 
 export function EthBlockList(props: EthBlockListProps) {
   const { blocks } = props
+  const autoFormatBurn = useSetting<boolean>(Setting.autoFormatBurn)
 
   return (
-    <Table>
+    <Table >
     <Thead>
       <Tr whiteSpace="nowrap">
         <Th>Block</Th>
@@ -58,12 +65,12 @@ export function EthBlockList(props: EthBlockListProps) {
         <Th>Uncles</Th>
         <Th>Gas Used</Th>
         <Th>Gas Limit</Th>
-        <Th>Burned Wei</Th>
+        <Th>Burned {autoFormatBurn ? 'Gwei' : 'Wei'}</Th>
       </Tr>
     </Thead>
     <Tbody>
       {blocks.map((block, idx) => (
-        <EthBlockItem key={idx} block={block} />
+        <EthBlockItem key={idx} block={block} autoFormatBurn={autoFormatBurn || false}/>
       ))}
     </Tbody>
   </Table>

@@ -1,5 +1,6 @@
 import { Flex, HStack, Text, Image, Badge } from "@chakra-ui/react";
 import * as CSS from "csstype";
+import { Settings } from "./Settings";
 
 interface LayoutProps {
   children: React.ReactNode
@@ -25,9 +26,10 @@ export function Layout(props: LayoutProps) {
           <Text color="black">ETH Burn</Text>
         </HStack>
         <HStack>
-        <Text fontSize="md" fontWeight="bold" color="black">
-          {totalBurned && (<Badge ml="1" colorScheme="gray">Total Burned: {totalBurned} ETH</Badge>)} 
-        </Text>
+          <Text fontSize="md" fontWeight="bold" color="black">
+            {totalBurned && (<Badge ml="1" colorScheme="gray">Total Burned: {totalBurned} ETH</Badge>)} 
+          </Text>
+          <Settings />
         </HStack>
       </HStack>
       <Flex flex={1} overflowY="auto" w="100%" flexDir={props.direction}>
