@@ -1,35 +1,33 @@
 import { useEffect, useState } from "react"
-import { useWeb3 } from "../contexts/Web3Context"
-import Web3 from 'web3';
-import { BlockHeader } from 'web3-eth';
-import { Subscription } from 'web3-core-subscriptions';
+import { useEthereum } from "../contexts/EthereumContext"
+import { ethers, utils } from 'ethers'
 import { BurnedBlockTransactionString } from '../components/EthBlockList';
 
 export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionString[] | undefined] {
-  const { web3 } = useWeb3()
+  const { eth } = useEthereum()
   const [totalBurned, setTotalBurned] = useState<string>()
   const [blocks, setBlocks] = useState<BurnedBlockTransactionString[]>()
   
   useEffect(() => {
-    if (!web3)
+    if (!eth)
       return
 
-    const onNewBlockHeader = async (error: Error, blockHeader: BlockHeader) => {
-      const block = await web3.eth.getBlock(blockHeader.number)
+    const onNewBlockHeader = async (blockNumber: number) => {
+      const block = await eth.getBlock(blockNumber)
       if (!block)
         return
-      
-      const blockNumberInHex = web3.utils.toHex(blockHeader.number)
-      const burned = await web3.debug.burned(blockNumberInHex, blockNumberInHex)
+
+      const blockNumberInHex = utils.hexlify(blockNumber)
+      const burned = await eth.burned(blockNumberInHex, blockNumberInHex)
       if (burned !== '0x0') {
         setTotalBurned(total => {
-          const burnedInBN = web3.utils.toBN(burned)
-          const totalInHex = web3.utils.toWei(total || '0', 'ether')
-          const totalInBN = web3.utils.toBN(totalInHex)
+          const burnedInBN = ethers.BigNumber.from(burned)
+          const totalInHex = utils.parseUnits(total || '0', 'ether')
+          const totalInBN = ethers.BigNumber.from(totalInHex)
           if (total)
-            return Web3.utils.fromWei(burnedInBN.add(totalInBN), 'ether')
+            return utils.formatUnits(burnedInBN.add(totalInBN).toHexString(), 'ether')
           else
-            return Web3.utils.fromWei(burned, 'ether')
+            return utils.formatUnits(burned, 'ether')
         })
       }
 
@@ -39,26 +37,25 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
         
         return [{
           ...block,
-          weiBurned: Web3.utils.fromWei(burned, 'wei')
+          weiBurned: utils.formatUnits(burned, 'wei')
         }, ...blocks]
       })
     }
 
     const prefetchBlockHeaders = async (blockHeaderCount: number) => {
-      const latestBlockNumber = await web3.eth.getBlockNumber()
+      const latestBlockNumber = (process.env.REACT_APP_START_BLOCK ? parseInt(process.env.REACT_APP_START_BLOCK) : await eth.getBlockNumber())
 
       if (latestBlockNumber) {
         const processedBlocks: BurnedBlockTransactionString[] = []
         for (var i = 0; i < blockHeaderCount; i++) {
           const blockNumber = latestBlockNumber - i
-          const blockNumberInHex = web3.utils.toHex(blockNumber)
-          const block = await web3.eth.getBlock(blockNumber)
-
+          const blockNumberInHex = utils.hexlify(blockNumber)
+          const block = await eth.getBlock(blockNumber)
           if (block) {
-            const burned = await web3.debug.burned(blockNumberInHex, blockNumberInHex)
+            const burned = await eth.burned(blockNumberInHex, blockNumberInHex)
             processedBlocks.push({
               ...block,
-              weiBurned: Web3.utils.fromWei(burned, 'wei')
+              weiBurned: utils.formatUnits(burned, 'wei')
             })
           }
         }
@@ -67,16 +64,14 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
       }
     }
 
-    let newBlockHeadersSubscription: Subscription<BlockHeader>
-
     (async () => {
-      setTotalBurned(Web3.utils.fromWei(await web3.debug.burned(), 'ether'))
-      prefetchBlockHeaders(10)
-      newBlockHeadersSubscription = web3.eth.subscribe('newBlockHeaders', onNewBlockHeader)
+      setTotalBurned(utils.formatUnits(await eth.burned(), 'ether'))
+      prefetchBlockHeaders(15)
+      eth.on('block', onNewBlockHeader)
     })()
 
-    return () => {newBlockHeadersSubscription && newBlockHeadersSubscription.unsubscribe()}
-  }, [web3])
+    return () => { eth.off('block', onNewBlockHeader) }
+  }, [eth])
 
   return [totalBurned, blocks]
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Web3Provider } from './contexts/Web3Context';
+import { EthereumProvider } from './contexts/EthereumContext';
 import { DashboardPage } from './pages/Dashboard';
 import { ChakraProvider, CSSReset } from '@chakra-ui/react';
 import customTheme from './theme';
@@ -14,9 +14,9 @@ function App() {
     <ChakraProvider theme={customTheme}>
       <CSSReset />
       <SettingsProvider>
-        <Web3Provider url={url}>
+        <EthereumProvider url={url}>
           <DashboardPage />
-        </Web3Provider>
+        </EthereumProvider>
       </SettingsProvider>
     </ChakraProvider>
   )

@@ -1,4 +1,4 @@
-import { Flex, HStack, Text, Image, Badge } from "@chakra-ui/react";
+import { Flex, HStack, Text, Image, Badge, Link } from "@chakra-ui/react";
 import * as CSS from "csstype";
 import { Settings } from "./Settings";
 
@@ -35,6 +35,17 @@ export function Layout(props: LayoutProps) {
       <Flex flex={1} overflowY="auto" w="100%" flexDir={props.direction}>
         {props.children}
       </Flex>
+      <HStack alignItems="center" justifyContent="center">
+        <Link color="teal.500" href="https://twitter.com/mohamedmansour">
+          Twitter
+        </Link>
+        <Link color="teal.500" href="https://github.com/mohamedmansour/eth-burn">
+          GitHub
+        </Link>
+        <Link color="teal.500" href="https://github.com/mohamedmansour/eth-burn/blob/main/README.md">
+          Donate for Server Costs
+        </Link>
+      </HStack>
     </Flex>
   )
 }
