@@ -20,9 +20,9 @@ export function Settings() {
         <Button colorScheme="blue" variant="ghost"><VscSettingsGear cursor="pointer" /></Button>
       </PopoverTrigger>
       <Portal>
-        <PopoverContent>
-          <PopoverArrow />
-          <PopoverHeader>Settings</PopoverHeader>
+        <PopoverContent color="white" bg="blue.800" borderColor="blue.800">
+          <PopoverArrow bg="blue.800" borderColor="blue.800" />
+          <PopoverHeader pt={4} fontWeight="bold" border="0">Settings</PopoverHeader>
           <PopoverCloseButton />
           <PopoverBody>
             <FormControl>

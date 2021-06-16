@@ -1,5 +1,6 @@
-import { Flex, HStack, Text, Image, Badge, Link } from "@chakra-ui/react";
+import { Flex, HStack, Text, Image, Badge, Link, Spacer } from "@chakra-ui/react";
 import * as CSS from "csstype";
+import { VscGithub, VscHeart, VscTwitter } from "react-icons/vsc";
 import { Settings } from "./Settings";
 
 interface LayoutProps {
@@ -35,15 +36,19 @@ export function Layout(props: LayoutProps) {
       <Flex flex={1} overflowY="auto" w="100%" flexDir={props.direction}>
         {props.children}
       </Flex>
-      <HStack alignItems="center" justifyContent="center">
+      <HStack alignItems="center" justifyContent="center" bg="gray.100" boxShadow="md" p="1">
         <Link color="teal.500" href="https://twitter.com/mohamedmansour">
-          Twitter
+          <VscTwitter  title="Follow me on Twitter" />
         </Link>
         <Link color="teal.500" href="https://github.com/mohamedmansour/eth-burn">
-          GitHub
+          <VscGithub title="View source code on GitHub"/>
         </Link>
+        <Spacer />
         <Link color="teal.500" href="https://github.com/mohamedmansour/eth-burn/blob/main/README.md">
-          Donate for Server Costs
+          <HStack>
+            <VscHeart />
+            <Text>Help support server costs</Text>
+          </HStack>
         </Link>
       </HStack>
     </Flex>
