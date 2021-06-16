@@ -3,7 +3,7 @@ When EIP-1559 gets deployed, ETH will be burned in every block if transactions e
 
 Currently it is running on Ethereum Dev Net, code named `Calaveras`, it is getting ready for London fork when EIP-1559 will be deployed. Regular testnets (Ropsten, Goerli, Rinkeby) coming in a few weeks, target dates here: https://github.com/ethereum/eth1.0-specs/blob/master/network-upgrades/mainnet-upgrades/london.md
 
-## Server Costs
+## Donate towards Server Costs
 The costs of running this experiment is pretty high since it requires a dev version of Geth to be up and running which requires lots of memory and cpu. The VM and SSD storage currently costs exactly $150/month USD. If you would like to help out with the costs, please reach out to me. If you would like to tip, my ethereum address is `mansour.eth`
 
 ## Setup dev environment
