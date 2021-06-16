@@ -4,6 +4,10 @@ export enum Setting {
     autoFormatBurn = 'autoFormatBurn'
 }
 
+const defaultSettings: {[key: string]: any}  = {
+  [Setting.autoFormatBurn]: true
+}
+
 type SettingsContextType = {
   get: (key: Setting) => any
   set: (key: Setting, value: any) => void
@@ -55,7 +59,7 @@ const SettingsProvider = ({
   children: React.ReactNode
 }) => {
   const get = (key: Setting): any => {
-    return localStorage[key]
+    return localStorage[key] === undefined ? defaultSettings[key] : localStorage[key]
   }
   
   const set = (key: Setting, value: any): void => {
