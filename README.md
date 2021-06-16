@@ -2,7 +2,7 @@
 When EIP-1559 gets deployed, ETH will be burned in every block if transactions exist. This website will show you how much ETH got burned in total and per block.
 
 ## Server Costs
-The costs of running this experiment is pretty high since it requires a dev version of Geth to be up and running which requires lots of memory and cpu. The VM and SSD storage currently costs exactly $150/month USD. If you would like to help out with the costs, please reach out to me. If you would like to tip, my ethereum address is `mmansour.eth`
+The costs of running this experiment is pretty high since it requires a dev version of Geth to be up and running which requires lots of memory and cpu. The VM and SSD storage currently costs exactly $150/month USD. If you would like to help out with the costs, please reach out to me. If you would like to tip, my ethereum address is `mansour.eth`
 
 ## Setup dev environment
 1. Clone geth and build docker image. Assumes `/data` on local system exists
