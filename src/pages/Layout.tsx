@@ -43,8 +43,14 @@ export function Layout(props: LayoutProps) {
       <HStack alignItems="center" justifyContent="center" bg="gray.100" boxShadow="md" p="1">
         <Link color="teal.500" href="https://twitter.com/mohamedmansour">
           <HStack>
-            <VscTwitter title="Follow me on Twitter" />
-            <Text>Follow me on Twitter!</Text>
+            <VscTwitter title="Follow Mohamed Mansour on Twitter" />
+            <Text>@mohamedmansour</Text>
+          </HStack>
+        </Link>
+        <Link color="teal.500" href="https://twitter.com/vdWijden">
+          <HStack>
+            <VscTwitter title="Follow Marius Van Der Wijdenme on Twitter" />
+            <Text>@vdWijden</Text>
           </HStack>
         </Link>
         <Link color="teal.500" href="https://github.com/mohamedmansour/eth-burn">
