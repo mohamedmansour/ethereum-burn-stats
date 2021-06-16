@@ -5,14 +5,23 @@ import { DashboardPage } from './pages/Dashboard';
 import { ChakraProvider, CSSReset } from '@chakra-ui/react';
 import customTheme from './theme';
 
-ReactDOM.render(
-  <React.StrictMode>
+function App() {
+  const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:'
+  const url = `${protocol}//${process.env.REACT_APP_WEB3_URL}`
+
+  return (
     <ChakraProvider theme={customTheme}>
       <CSSReset />
-      <Web3Provider url="ws://localhost:8546">
+      <Web3Provider url={url}>
         <DashboardPage />
       </Web3Provider>
     </ChakraProvider>
+  )
+}
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 )
