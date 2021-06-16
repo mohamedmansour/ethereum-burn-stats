@@ -13,6 +13,9 @@ class JsonEthereumProvider extends ethers.providers.WebSocketProvider {
   public burned(start?: string, end?: string): Promise<string> {
     return this.send('debug_burned', [start, end])
   }
+  public getBlockReward(blockNumberInHex: string): Promise<string> {
+    return this.send('debug_getBlockReward', [blockNumberInHex])
+  }
 } 
 
 type EthereumContextType = {

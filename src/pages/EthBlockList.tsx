@@ -9,6 +9,7 @@ import { GasUsed } from '../components/GasUsed';
 
 export interface BurnedBlockTransactionString extends ethers.providers.Block {
   weiBurned: string
+  ethRewards: string
 }
 
 interface EthBlockItemProps {
@@ -38,6 +39,9 @@ function EthBlockItem(props: EthBlockItemProps) {
         {block.gasLimit.toLocaleString()}
       </Td>
       <Td>
+        {block.ethRewards}
+      </Td>
+      <Td>
         {weiBurnedFormatted}
       </Td>
     </Tr>
@@ -61,6 +65,7 @@ export function EthBlockList(props: EthBlockListProps) {
           <Th>Txn</Th>
           <Th>Gas Used</Th>
           <Th>Gas Limit</Th>
+          <Th>Rewards (ETH)</Th>
           <Th>Burned {autoFormatBurn ? 'Gwei' : 'Wei'}</Th>
         </Tr>
       </Thead>

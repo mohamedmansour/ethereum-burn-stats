@@ -31,13 +31,16 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
         })
       }
 
+      const ethRewards = utils.formatUnits(await eth.getBlockReward(blockNumberInHex), 'ether')
+
       setBlocks(blocks => {
         if (!blocks)
           blocks = []
         
         return [{
           ...block,
-          weiBurned: utils.formatUnits(burned, 'wei')
+          weiBurned: utils.formatUnits(burned, 'wei'),
+          ethRewards,
         }, ...blocks]
       })
     }
@@ -53,9 +56,11 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
           const block = await eth.getBlock(blockNumber)
           if (block) {
             const burned = await eth.burned(blockNumberInHex, blockNumberInHex)
+            const ethRewards = utils.formatUnits(await eth.getBlockReward(blockNumberInHex), 'ether')
             processedBlocks.push({
               ...block,
-              weiBurned: utils.formatUnits(burned, 'wei')
+              weiBurned: utils.formatUnits(burned, 'wei'),
+              ethRewards
             })
           }
         }
