@@ -1,7 +1,9 @@
-import { EthBlockList } from '../components/EthBlockList';
+import { EthBlockList } from './EthBlockList';
 import { useBlockExplorer } from '../hooks/useBlockExplorer';
 import { Layout } from './Layout';
 import { Loader } from '../components/Loader';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { EthBlockDetail } from './EthBlockDetail';
 
 export function DashboardPage() {
   const [totalBurned, blocks] = useBlockExplorer()
@@ -10,8 +12,17 @@ export function DashboardPage() {
     return <Loader>Loading blocks ...</Loader>
 
   return (
-    <Layout direction="column" totalBurned={totalBurned}>
-      <EthBlockList blocks={blocks} />
-    </Layout>
+    <BrowserRouter>
+      <Layout direction="column" totalBurned={totalBurned}>
+        <Switch>
+          <Route path="/block/:id">
+            <EthBlockDetail />
+          </Route>
+          <Route path="/">
+            <EthBlockList blocks={blocks} />
+          </Route>
+        </Switch>
+      </Layout>
+    </BrowserRouter>
   )
 }

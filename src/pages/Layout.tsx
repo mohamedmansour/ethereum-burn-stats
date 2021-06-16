@@ -1,6 +1,7 @@
-import { Flex, HStack, Text, Image, Badge, Link, Spacer } from "@chakra-ui/react";
+import { Flex, HStack, Text, Image, Badge, Link, Spacer, LinkBox } from "@chakra-ui/react";
 import * as CSS from "csstype";
 import { VscGithub, VscHeart, VscTwitter } from "react-icons/vsc";
+import { Link as ReactLink } from 'react-router-dom';
 import { Settings } from "./Settings";
 
 interface LayoutProps {
@@ -22,13 +23,16 @@ export function Layout(props: LayoutProps) {
         color="white"
         boxShadow="md"
       >
-        <HStack cursor="pointer" align="center">
-          <Image src="favicon.png" />
-          <Text color="black">ETH Burn</Text>
-        </HStack>
+        <LinkBox as={ReactLink} to="/">
+          <HStack cursor="pointer" align="center">
+            <Image src="/favicon.png" />
+            <Text color="black">ETH Burn</Text>
+            <Badge>EIP-1559</Badge>
+          </HStack>
+        </LinkBox>
         <HStack>
           <Text fontSize="md" fontWeight="bold" color="black">
-            {totalBurned && (<Badge ml="1" colorScheme="gray">Total Burned: {totalBurned} ETH</Badge>)} 
+            {totalBurned && (<Badge ml="1" colorScheme="red">Total Burned: {totalBurned} ETH</Badge>)}
           </Text>
           <Settings />
         </HStack>
@@ -38,10 +42,16 @@ export function Layout(props: LayoutProps) {
       </Flex>
       <HStack alignItems="center" justifyContent="center" bg="gray.100" boxShadow="md" p="1">
         <Link color="teal.500" href="https://twitter.com/mohamedmansour">
-          <VscTwitter  title="Follow me on Twitter" />
+          <HStack>
+            <VscTwitter title="Follow me on Twitter" />
+            <Text>Follow me on Twitter!</Text>
+          </HStack>
         </Link>
         <Link color="teal.500" href="https://github.com/mohamedmansour/eth-burn">
-          <VscGithub title="View source code on GitHub"/>
+          <HStack>
+            <VscGithub title="View source code on GitHub" />
+            <Text>Source code on GitHub, contribute!</Text>
+          </HStack>
         </Link>
         <Spacer />
         <Link color="teal.500" href="https://github.com/mohamedmansour/eth-burn/blob/main/README.md">

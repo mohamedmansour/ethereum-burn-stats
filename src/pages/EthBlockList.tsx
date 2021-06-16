@@ -1,10 +1,11 @@
-import { Table, Thead, Tr, Th, Tbody, Td } from '@chakra-ui/react';
+import { Table, Thead, Tr, Th, Tbody, Td, Link } from '@chakra-ui/react';
 import { ethers, utils } from 'ethers'
 import React from 'react';
+import { Link as ReactLink } from 'react-router-dom';
 import { Setting } from '../contexts/SettingsContext';
 import { useSetting } from '../hooks/useSetting';
 import { timeSince } from '../utils/time';
-import { GasUsed } from './GasUsed';
+import { GasUsed } from '../components/GasUsed';
 
 export interface BurnedBlockTransactionString extends ethers.providers.Block {
   weiBurned: string
@@ -22,7 +23,7 @@ function EthBlockItem(props: EthBlockItemProps) {
   return (
     <Tr>
       <Td>
-        {block.number}
+        <Link color="blue" to={`/block/${block.number}`} as={ReactLink}>{block.number}</Link>
       </Td>
       <Td whiteSpace="nowrap">
         {timeSince(block.timestamp as number)}
@@ -31,7 +32,7 @@ function EthBlockItem(props: EthBlockItemProps) {
         {block.transactions.length}
       </Td>
       <Td>
-        <GasUsed gasUsed={block.gasUsed}  gasLimit={block.gasLimit} />
+        <GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} />
       </Td>
       <Td>
         {block.gasLimit.toLocaleString()}
@@ -53,21 +54,21 @@ export function EthBlockList(props: EthBlockListProps) {
 
   return (
     <Table >
-    <Thead>
-      <Tr whiteSpace="nowrap">
-        <Th>Block</Th>
-        <Th>Age</Th>
-        <Th>Txn</Th>
-        <Th>Gas Used</Th>
-        <Th>Gas Limit</Th>
-        <Th>Burned {autoFormatBurn ? 'Gwei' : 'Wei'}</Th>
-      </Tr>
-    </Thead>
-    <Tbody>
-      {blocks.map((block, idx) => (
-        <EthBlockItem key={idx} block={block} autoFormatBurn={autoFormatBurn || false}/>
-      ))}
-    </Tbody>
-  </Table>
+      <Thead>
+        <Tr whiteSpace="nowrap">
+          <Th>Block</Th>
+          <Th>Age</Th>
+          <Th>Txn</Th>
+          <Th>Gas Used</Th>
+          <Th>Gas Limit</Th>
+          <Th>Burned {autoFormatBurn ? 'Gwei' : 'Wei'}</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {blocks.map((block, idx) => (
+          <EthBlockItem key={idx} block={block} autoFormatBurn={autoFormatBurn || false} />
+        ))}
+      </Tbody>
+    </Table>
   )
 }

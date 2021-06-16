@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useEthereum } from "../contexts/EthereumContext"
 import { ethers, utils } from 'ethers'
-import { BurnedBlockTransactionString } from '../components/EthBlockList';
+import { BurnedBlockTransactionString } from '../pages/EthBlockList';
 
 export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionString[] | undefined] {
   const { eth } = useEthereum()
