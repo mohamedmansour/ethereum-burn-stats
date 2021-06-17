@@ -17,16 +17,16 @@ export function Settings() {
       placement="bottom"
       closeOnBlur={true}>
       <PopoverTrigger>
-        <Button colorScheme="blue" variant="ghost"><VscSettingsGear cursor="pointer" /></Button>
+        <Button colorScheme="white" variant="ghost"><VscSettingsGear cursor="pointer" /></Button>
       </PopoverTrigger>
       <Portal>
-        <PopoverContent color="white" bg="blue.800" borderColor="blue.800">
-          <PopoverArrow bg="blue.800" borderColor="blue.800" />
+        <PopoverContent color="white" bg="gray.700" borderColor="white" boxShadow="lg">
+          <PopoverArrow bg="gray.700" />
           <PopoverHeader pt={4} fontWeight="bold" border="0">Settings</PopoverHeader>
           <PopoverCloseButton />
           <PopoverBody>
             <FormControl>
-              <Checkbox defaultIsChecked={settings.get(Setting.autoFormatBurn)} id="setting-checkbox" ref={firstFieldRef} onChange={(e) => settings.set(Setting.autoFormatBurn, e.target.checked)}>Auto format burn value</Checkbox>
+              <Checkbox colorScheme="gray" defaultIsChecked={settings.get(Setting.autoFormatBurn)} id="setting-checkbox" ref={firstFieldRef} onChange={(e) => settings.set(Setting.autoFormatBurn, e.target.checked)}>Auto format burn value</Checkbox>
             </FormControl>
           </PopoverBody>
         </PopoverContent>

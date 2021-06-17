@@ -7,6 +7,8 @@ import { useSetting } from '../hooks/useSetting';
 import { timeSince } from '../utils/time';
 import { GasUsed } from '../components/GasUsed';
 
+const responsiveColumn = { display: ['none', 'none', 'block'] }
+
 export interface BurnedBlockTransactionString extends ethers.providers.Block {
   weiBurned: string
   ethRewards: string
@@ -35,7 +37,7 @@ function EthBlockItem(props: EthBlockItemProps) {
       <Td>
         <GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} />
       </Td>
-      <Td>
+      <Td {...responsiveColumn}>
         {block.gasLimit.toLocaleString()}
       </Td>
       <Td>
@@ -57,16 +59,16 @@ export function EthBlockList(props: EthBlockListProps) {
   const autoFormatBurn = useSetting<boolean>(Setting.autoFormatBurn)
 
   return (
-    <Table >
+    <Table>
       <Thead>
         <Tr whiteSpace="nowrap">
           <Th>Block</Th>
           <Th>Age</Th>
           <Th>Txn</Th>
           <Th>Gas Used</Th>
-          <Th>Gas Limit</Th>
+          <Th {...responsiveColumn}>Gas Limit</Th>
           <Th>Rewards (ETH)</Th>
-          <Th>Burned {autoFormatBurn ? 'Gwei' : 'Wei'}</Th>
+          <Th>Burned ({autoFormatBurn ? 'Gwei' : 'Wei'})</Th>
         </Tr>
       </Thead>
       <Tbody>

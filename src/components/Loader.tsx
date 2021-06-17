@@ -1,5 +1,6 @@
-import { Center, VStack, Text, Image } from '@chakra-ui/react';
+import { Center, VStack, Text } from '@chakra-ui/react';
 import React from 'react';
+import { FirePit } from './FirePit';
 
 interface LoaderProps {
   children: React.ReactNode;
@@ -9,7 +10,7 @@ export function Loader(props: LoaderProps) {
   return (
     <Center h="100vh" color="black">
       <VStack>
-        <Image src="/logo_64.png" w="64px" h="64px" />
+        <FirePit sparkCount={10} size="50px"/>
         <Text>{props.children}</Text>
       </VStack>
     </Center>
