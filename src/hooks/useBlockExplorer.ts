@@ -71,7 +71,7 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
 
     (async () => {
       setTotalBurned(utils.formatUnits(await eth.burned(), 'ether'))
-      prefetchBlockHeaders(15)
+      prefetchBlockHeaders(process.env.REACT_APP_PREFETCH_BLOCK_COUNT ? parseInt(process.env.REACT_APP_PREFETCH_BLOCK_COUNT) : 10)
       eth.on('block', onNewBlockHeader)
     })()
 
