@@ -38,7 +38,7 @@ function EthBlockItem(props: EthBlockItemProps) {
         <GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} />
       </Td>
       <Td {...responsiveColumn}>
-        {block.gasLimit.toLocaleString()}
+        {utils.commify(block.gasLimit.toNumber())}
       </Td>
       <Td>
         {block.ethRewards}
