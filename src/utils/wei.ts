@@ -20,5 +20,11 @@ export function formatWei(wei: string, autoFormat: boolean): string {
   if (gwei > 0.001)
     return gwei.toFixed(5)
 
-  return gwei.toFixed(6)
+  if (gwei > 0.0001)
+    return gwei.toFixed(6)
+
+  if (gwei > 0.00001)
+    return gwei.toFixed(7)
+
+  return gwei.toFixed(8)
 }
