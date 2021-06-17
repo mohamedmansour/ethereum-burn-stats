@@ -13,7 +13,7 @@ export function FirePit(props: FirePitProps) {
 
   const sparks = []
   for (let i = 0; i < sparkCount; i++) {
-    sparks.push(<Box className="spark" />)
+    sparks.push(<Box key={i} className="spark" />)
   }
   return (
     <Flex position="relative" w="100%" h="100%" justifyContent="center" alignItems="flex-end">

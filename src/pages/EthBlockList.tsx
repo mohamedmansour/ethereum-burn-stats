@@ -6,6 +6,7 @@ import { Setting } from '../contexts/SettingsContext';
 import { useSetting } from '../hooks/useSetting';
 import { timeSince } from '../utils/time';
 import { GasUsed } from '../components/GasUsed';
+import { formatWei } from '../utils/wei';
 
 const responsiveColumn = { display: ['none', 'none', 'block'] }
 
@@ -21,7 +22,7 @@ interface EthBlockItemProps {
 
 function EthBlockItem(props: EthBlockItemProps) {
   const { block, autoFormatBurn } = props
-  const weiBurnedFormatted = block.weiBurned === '0' ? 0 : (autoFormatBurn ? parseFloat(utils.formatUnits(block.weiBurned, 'gwei')).toFixed(2) : utils.commify(block.weiBurned))
+  const weiBurnedFormatted = formatWei(block.weiBurned, autoFormatBurn)
 
   return (
     <Tr>
@@ -43,7 +44,7 @@ function EthBlockItem(props: EthBlockItemProps) {
       <Td>
         {block.ethRewards}
       </Td>
-      <Td>
+      <Td title={`${utils.commify(block.weiBurned)} wei`}>
         {weiBurnedFormatted}
       </Td>
     </Tr>
