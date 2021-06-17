@@ -13,16 +13,19 @@ const responsiveColumn = { display: ['none', 'none', 'block'] }
 export interface BurnedBlockTransactionString extends ethers.providers.Block {
   weiBurned: string
   ethRewards: string
+  weiBaseFee: string
 }
 
 interface EthBlockItemProps {
   block: BurnedBlockTransactionString
-  autoFormatBurn: boolean
+  formatBurnInGwei: boolean
+  formatBaseFeeInGwei: boolean
 }
 
 function EthBlockItem(props: EthBlockItemProps) {
-  const { block, autoFormatBurn } = props
-  const weiBurnedFormatted = formatWei(block.weiBurned, autoFormatBurn)
+  const { block, formatBurnInGwei, formatBaseFeeInGwei } = props
+  const weiBurnedFormatted = formatWei(block.weiBurned, formatBurnInGwei)
+  const weiBaseFeeFormatted = formatWei(block.weiBaseFee, formatBaseFeeInGwei)
 
   return (
     <Tr>
@@ -44,6 +47,9 @@ function EthBlockItem(props: EthBlockItemProps) {
       <Td>
         {block.ethRewards}
       </Td>
+      <Td title={`${utils.commify(block.weiBaseFee)} wei`}>
+        {weiBaseFeeFormatted}
+      </Td>
       <Td title={`${utils.commify(block.weiBurned)} wei`}>
         {weiBurnedFormatted}
       </Td>
@@ -57,7 +63,8 @@ export interface EthBlockListProps {
 
 export function EthBlockList(props: EthBlockListProps) {
   const { blocks } = props
-  const autoFormatBurn = useSetting<boolean>(Setting.autoFormatBurn)
+  const formatBurnInGwei = useSetting<boolean>(Setting.formatBurnInGwei)
+  const formatBaseFeeInGwei = useSetting<boolean>(Setting.formatBaseFeeInGwei)
 
   return (
     <Table>
@@ -69,12 +76,13 @@ export function EthBlockList(props: EthBlockListProps) {
           <Th>Gas Used</Th>
           <Th {...responsiveColumn}>Gas Limit</Th>
           <Th>Rewards (ETH)</Th>
-          <Th>Burned ({autoFormatBurn ? 'Gwei' : 'Wei'})</Th>
+          <Th>Base Fee ({formatBaseFeeInGwei ? 'Gwei' : 'Wei'})</Th>
+          <Th>Burned ({formatBurnInGwei ? 'Gwei' : 'Wei'})</Th>
         </Tr>
       </Thead>
       <Tbody>
         {blocks.map((block, idx) => (
-          <EthBlockItem key={idx} block={block} autoFormatBurn={autoFormatBurn || false} />
+          <EthBlockItem key={idx} block={block} formatBurnInGwei={formatBurnInGwei} formatBaseFeeInGwei={formatBaseFeeInGwei} />
         ))}
       </Tbody>
     </Table>

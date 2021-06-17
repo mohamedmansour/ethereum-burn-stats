@@ -16,6 +16,9 @@ class JsonEthereumProvider extends ethers.providers.WebSocketProvider {
   public getBlockReward(blockNumberInHex: string): Promise<string> {
     return this.send('debug_getBlockReward', [blockNumberInHex])
   }
+  public async getBaseFeePerGas(blockNumberInHex: string): Promise<string> {
+    return (await this.send('eth_getHeaderByNumber', [blockNumberInHex])).baseFeePerGas
+  }
 } 
 
 type EthereumContextType = {

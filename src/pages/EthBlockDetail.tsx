@@ -13,7 +13,7 @@ export function EthBlockDetail() {
   let { id } = useParams<{ id: string }>()
   const { eth } = useEthereum()
   const [block, setBlock] = useState<BlockWithTransactions>()
-  const autoFormatBurn = useSetting<boolean>(Setting.autoFormatBurn)
+  const formatBurnInGwei = useSetting<boolean>(Setting.formatBurnInGwei)
 
   useEffect(() => {
     if (!eth)
@@ -53,7 +53,7 @@ export function EthBlockDetail() {
                 <Td>{t.from}</Td>
                 <Td>{t.to}</Td>
                 <Td>{utils.formatEther(t.value)} Ether</Td>
-                <Td>{utils.formatUnits(t.gasPrice, autoFormatBurn ? 'gwei' : 'wei')}</Td>
+                <Td>{utils.formatUnits(t.gasPrice, formatBurnInGwei ? 'gwei' : 'wei')}</Td>
               </Tr>
             ))}
           </Tbody>

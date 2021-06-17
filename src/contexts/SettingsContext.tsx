@@ -1,11 +1,26 @@
 import React, { useContext } from 'react';
 
 export enum Setting {
-    autoFormatBurn = 'autoFormatBurn'
+  formatBurnInGwei = 'formatBurnInGwei',
+  formatBaseFeeInGwei = 'formatBaseFeeInGwei'
 }
 
-const defaultSettings: {[key: string]: any}  = {
-  [Setting.autoFormatBurn]: true
+interface Converter<T> {
+  (value: string): T
+}
+
+function BooleanConverter(value: string): boolean {
+  return value === "true"
+}
+
+interface DefaultSettingValue<T> {
+  defaultValue: any
+  convert: Converter<T>
+}
+
+const defaultSettings: {[key: string]: DefaultSettingValue<unknown>}  = {
+  [Setting.formatBurnInGwei]: { convert: BooleanConverter, defaultValue: true },
+  [Setting.formatBaseFeeInGwei]: { convert: BooleanConverter, defaultValue: false },
 }
 
 type SettingsContextType = {
@@ -59,7 +74,8 @@ const SettingsProvider = ({
   children: React.ReactNode
 }) => {
   const get = (key: Setting): any => {
-    return localStorage[key] === undefined ? defaultSettings[key] : localStorage[key]
+    const converter = defaultSettings[key]
+    return localStorage[key] === undefined ? converter.defaultValue : converter.convert(localStorage[key])
   }
   
   const set = (key: Setting, value: any): void => {

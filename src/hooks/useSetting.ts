@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Setting, useSettings } from "../contexts/SettingsContext";
 
-export function useSetting<T>(setting: Setting): T | undefined {
+export function useSetting<T>(setting: Setting): T {
   const settings = useSettings()
   const [value, setValue] = useState<T>(settings.get(setting))
 

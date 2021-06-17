@@ -32,6 +32,7 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
       }
 
       const ethRewards = utils.formatUnits(await eth.getBlockReward(blockNumberInHex), 'ether')
+      const weiBaseFee = utils.formatUnits(await eth.getBaseFeePerGas(blockNumberInHex), 'wei')
 
       setBlocks(blocks => {
         if (!blocks)
@@ -41,6 +42,7 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
           ...block,
           weiBurned: utils.formatUnits(burned, 'wei'),
           ethRewards,
+          weiBaseFee
         }, ...blocks]
       })
     }
@@ -57,10 +59,13 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
           if (block) {
             const burned = await eth.burned(blockNumberInHex, blockNumberInHex)
             const ethRewards = utils.formatUnits(await eth.getBlockReward(blockNumberInHex), 'ether')
+            const weiBaseFee = utils.formatUnits(await eth.getBaseFeePerGas(blockNumberInHex), 'wei')
+
             processedBlocks.push({
               ...block,
               weiBurned: utils.formatUnits(burned, 'wei'),
-              ethRewards
+              ethRewards,
+              weiBaseFee
             })
           }
         }
