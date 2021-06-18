@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Loader } from '../components/Loader';
-import { ethers } from "ethers";
-import { Ethereumish } from '../react-app-env';
+import React, { useContext, useEffect, useState } from 'react'
+import { Loader } from '../components/Loader'
+import { ethers } from 'ethers'
+import { Ethereumish } from '../react-app-env'
 
 declare global {
   interface Window {
@@ -19,32 +19,25 @@ class JsonEthereumProvider extends ethers.providers.WebSocketProvider {
   public async getBaseFeePerGas(blockNumberInHex: string): Promise<string> {
     return (await this.send('eth_getHeaderByNumber', [blockNumberInHex])).baseFeePerGas
   }
-} 
+}
 
 type EthereumContextType = {
-  eth?: JsonEthereumProvider,
+  eth?: JsonEthereumProvider
   connect(): void
 }
 
 const EthereumContext = React.createContext<EthereumContextType>({
   eth: undefined,
-  connect: () => {}
+  connect: () => {},
 })
 
-const useEthereum = () => useContext(EthereumContext);
+const useEthereum = () => useContext(EthereumContext)
 
-const EthereumProvider = ({
-  children,
-  url,
-}: {
-  children: React.ReactNode
-  url?: string | undefined
-}) => {
+const EthereumProvider = ({ children, url }: { children: React.ReactNode; url?: string | undefined }) => {
   const [eth, setEth] = useState<JsonEthereumProvider | undefined>()
 
   useEffect(() => {
-    if (!url)
-      return;
+    if (!url) return
 
     setEth(new JsonEthereumProvider(url))
 
@@ -52,8 +45,7 @@ const EthereumProvider = ({
   }, [url])
 
   const connect = async () => {
-    if (!window.ethereum)
-      return
+    if (!window.ethereum) return
     await window.ethereum.enable()
   }
 
@@ -61,7 +53,7 @@ const EthereumProvider = ({
     <EthereumContext.Provider
       value={{
         eth,
-        connect
+        connect,
       }}
     >
       {eth ? children : <Loader>connecting to eth node</Loader>}

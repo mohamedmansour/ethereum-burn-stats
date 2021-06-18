@@ -16,36 +16,36 @@ $blue: rgb(0, 55, 255);
     position: absolute;
     bottom: 0;
     left: 0;
-    opacity: .9;
+    opacity: 0.9;
     width: 100%;
     height: 100%;
     border-bottom-right-radius: 70%;
     border-bottom-left-radius: 70%;
     border-top-left-radius: 70%;
-    transform: rotate(-45deg)  skew(-10deg, -10deg);
+    transform: rotate(-45deg) skew(-10deg, -10deg);
     background-color: $red;
-    background-image: linear-gradient(to top right, fade-out($red, .1), fade-out($orange, .3));
+    background-image: linear-gradient(to top right, fade-out($red, 0.1), fade-out($orange, 0.3));
     z-index: 1;
-    
+
     animation-iteration-count: infinite;
     animation-fill-mode: forwards;
     animation-name: burn-left;
     animation-duration: 300ms;
-    
-    &:nth-of-type(2n){
+
+    &:nth-of-type(2n) {
       animation-name: burn-right;
       animation-duration: 400ms;
     }
-    
+
     &:nth-of-type(2) {
       height: 80%;
       width: 80%;
       left: 10%;
       background-color: $orange;
-      background-image: linear-gradient(to top right, rgba($orange, .9), rgba($yellow, .9));
+      background-image: linear-gradient(to top right, rgba($orange, 0.9), rgba($yellow, 0.9));
       z-index: 2;
     }
-    
+
     &:nth-of-type(3) {
       height: 50%;
       width: 50%;
@@ -53,13 +53,13 @@ $blue: rgb(0, 55, 255);
       background-image: linear-gradient(to top right, $yellow, white);
       z-index: 3;
     }
-    
+
     &:nth-of-type(4) {
       height: 30%;
       width: 30%;
       left: 35%;
       background-color: white;
-      background-image: linear-gradient(to top right, rgba(white, .7), rgba($blue,.1));
+      background-image: linear-gradient(to top right, rgba(white, 0.7), rgba($blue, 0.1));
       opacity: 1;
       z-index: 4;
     }
@@ -72,14 +72,14 @@ $blue: rgb(0, 55, 255);
   left: 15%;
   width: 3px;
   height: 3px;
-  background-color: fade-out($orange,.6);
+  background-color: fade-out($orange, 0.6);
   box-shadow: 0 0 2px $orange;
   animation-name: fly-up-burnout-1;
   animation-duration: 6s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
-  animation-delay: .4s;
-  
+  animation-delay: 0.4s;
+
   &:nth-of-type(2n) {
     animation-name: fly-up-burnout-2;
     animation-duration: 8.4s;
@@ -105,7 +105,7 @@ $blue: rgb(0, 55, 255);
     left: 61%;
   }
   &:nth-of-type(7n) {
-    animation-delay: .8s;
+    animation-delay: 0.8s;
     animation-duration: 5s;
     left: 64%;
   }
@@ -134,13 +134,25 @@ $blue: rgb(0, 55, 255);
 }
 
 @keyframes burn-left {
-  0%, 100%{transform: rotate(-45deg)  skew(-10deg, -10deg) scale(1);}
-  30%, 60%{transform: rotate(-44deg)  skew(-12deg, -12deg) scale(1.01);}
+  0%,
+  100% {
+    transform: rotate(-45deg) skew(-10deg, -10deg) scale(1);
+  }
+  30%,
+  60% {
+    transform: rotate(-44deg) skew(-12deg, -12deg) scale(1.01);
+  }
 }
 
 @keyframes burn-right {
-  0%, 100%{transform: rotate(-45deg)  skew(-10deg, -10deg) scale(1);}
-  30%, 60%{transform: rotate(-46deg)  skew(-6deg, -6deg) scale(1.01);}
+  0%,
+  100% {
+    transform: rotate(-45deg) skew(-10deg, -10deg) scale(1);
+  }
+  30%,
+  60% {
+    transform: rotate(-46deg) skew(-6deg, -6deg) scale(1.01);
+  }
 }
 
 @keyframes fly-up-burnout-1 {
@@ -148,16 +160,16 @@ $blue: rgb(0, 55, 255);
     transform: translate(0, 0);
     opacity: 1;
   }
-  
-  33%{
+
+  33% {
     transform: translate(12px, -70px);
   }
-  
+
   66% {
     transform: translate(0, -140px);
-    opacity: .6;
+    opacity: 0.6;
   }
-  
+
   100% {
     transform: translate(6px, -200px);
     opacity: 0;
@@ -169,16 +181,16 @@ $blue: rgb(0, 55, 255);
     transform: translate(0, 0);
     opacity: 1;
   }
-  
-  50%{
+
+  50% {
     transform: translate(-10px, -80px);
   }
-  
+
   80% {
     transform: translate(-4px, -140px);
-    opacity: .6;
+    opacity: 0.6;
   }
-  
+
   100% {
     transform: translate(-6px, -160px);
     opacity: 0;

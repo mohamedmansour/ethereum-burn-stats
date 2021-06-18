@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
+import React, { useContext } from 'react'
 
 export enum Setting {
   formatBurnInGwei = 'formatBurnInGwei',
   formatBaseFeeInGwei = 'formatBaseFeeInGwei',
-  maxBlocksToRender = 'maxBlocksToRender'
+  maxBlocksToRender = 'maxBlocksToRender',
 }
 
 interface Converter<T> {
@@ -11,7 +11,7 @@ interface Converter<T> {
 }
 
 function BooleanConverter(value: string): boolean {
-  return value === "true"
+  return value === 'true'
 }
 
 function IntegerConverter(value: string): number {
@@ -23,9 +23,12 @@ interface DefaultSettingValue<T> {
   convert: Converter<T>
 }
 
-const defaultSettings: {[key: string]: DefaultSettingValue<unknown>}  = {
+const defaultSettings: { [key: string]: DefaultSettingValue<unknown> } = {
   [Setting.formatBurnInGwei]: { convert: BooleanConverter, defaultValue: true },
-  [Setting.formatBaseFeeInGwei]: { convert: BooleanConverter, defaultValue: false },
+  [Setting.formatBaseFeeInGwei]: {
+    convert: BooleanConverter,
+    defaultValue: false,
+  },
   [Setting.maxBlocksToRender]: { convert: IntegerConverter, defaultValue: 15 },
 }
 
@@ -40,18 +43,18 @@ const SettingsContext = React.createContext<SettingsContextType>({
   get: () => {},
   set: () => {},
   on: () => {},
-  off: () => {}
+  off: () => {},
 })
 
-const useSettings = () => useContext(SettingsContext);
+const useSettings = () => useContext(SettingsContext)
 
 type EventCallback = (value: any) => void
 const event = {
   list: new Map<Setting, EventCallback[]>(),
   on(setting: Setting, callback: EventCallback) {
-    event.list.has(setting) || event.list.set(setting, []);
-    event.list.get(setting)!.push(callback);
-    return event;
+    event.list.has(setting) || event.list.set(setting, [])
+    event.list.get(setting)!.push(callback)
+    return event
   },
 
   off(setting: Setting, callback: EventCallback) {
@@ -68,22 +71,18 @@ const event = {
 
   emit(eventType: Setting, value: any) {
     event.list.has(eventType) &&
-    event.list.get(eventType)!.forEach((cb: EventCallback) => {
-        cb(value);
-      });
-  }
-};
+      event.list.get(eventType)!.forEach((cb: EventCallback) => {
+        cb(value)
+      })
+  },
+}
 
-const SettingsProvider = ({
-  children
-}: {
-  children: React.ReactNode
-}) => {
+const SettingsProvider = ({ children }: { children: React.ReactNode }) => {
   const get = (key: Setting): any => {
     const converter = defaultSettings[key]
     return localStorage[key] === undefined ? converter.defaultValue : converter.convert(localStorage[key])
   }
-  
+
   const set = (key: Setting, value: any): void => {
     localStorage[key] = value
     event.emit(key, value)
@@ -95,7 +94,7 @@ const SettingsProvider = ({
         get,
         set,
         on: event.on,
-        off: event.off
+        off: event.off,
       }}
     >
       {children}

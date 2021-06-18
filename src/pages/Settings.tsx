@@ -17,17 +17,17 @@ import {
   SliderFilledTrack,
   SliderThumb,
   SliderTrack,
-} from "@chakra-ui/react";
-import { useEffect, useMemo } from "react";
-import { useRef, useState } from "react";
-import { VscSettingsGear } from "react-icons/vsc";
-import { Setting, useSettings } from "../contexts/SettingsContext";
-import { debounce } from "../utils/debounce";
+} from '@chakra-ui/react'
+import { useEffect, useMemo } from 'react'
+import { useRef, useState } from 'react'
+import { VscSettingsGear } from 'react-icons/vsc'
+import { Setting, useSettings } from '../contexts/SettingsContext'
+import { debounce } from '../utils/debounce'
 
 export function Settings() {
-  const { onOpen, onClose, isOpen } = useDisclosure();
-  const firstFieldRef = useRef(null);
-  const settings = useSettings();
+  const { onOpen, onClose, isOpen } = useDisclosure()
+  const firstFieldRef = useRef(null)
+  const settings = useSettings()
   const [maxBlocks, setMaxBlocks] = useState<number>(settings.get(Setting.maxBlocksToRender))
 
   useEffect(() => {
@@ -41,26 +41,14 @@ export function Settings() {
   const debouncedChangeHandler = useMemo(() => debounce(changeHandler, 300), [])
 
   return (
-    <Popover
-      isOpen={isOpen}
-      initialFocusRef={firstFieldRef}
-      onOpen={onOpen}
-      onClose={onClose}
-      placement="bottom"
-      closeOnBlur={true}
-    >
+    <Popover isOpen={isOpen} initialFocusRef={firstFieldRef} onOpen={onOpen} onClose={onClose} placement="bottom" closeOnBlur={true}>
       <PopoverTrigger>
         <Button colorScheme="white" variant="ghost">
           <VscSettingsGear cursor="pointer" />
         </Button>
       </PopoverTrigger>
       <Portal>
-        <PopoverContent
-          color="white"
-          bg="gray.700"
-          borderColor="white"
-          boxShadow="lg"
-        >
+        <PopoverContent color="white" bg="gray.700" borderColor="white" boxShadow="lg">
           <PopoverArrow bg="gray.700" />
           <PopoverHeader pt={4} fontWeight="bold" border="0">
             Settings
@@ -73,18 +61,14 @@ export function Settings() {
                 colorScheme="red"
                 defaultIsChecked={settings.get(Setting.formatBurnInGwei)}
                 ref={firstFieldRef}
-                onChange={(e) =>
-                  settings.set(Setting.formatBurnInGwei, e.target.checked)
-                }
+                onChange={(e) => settings.set(Setting.formatBurnInGwei, e.target.checked)}
               >
                 Format Burned in Gwei
               </Checkbox>
               <Checkbox
                 colorScheme="red"
                 defaultIsChecked={settings.get(Setting.formatBaseFeeInGwei)}
-                onChange={(e) =>
-                  settings.set(Setting.formatBaseFeeInGwei, e.target.checked)
-                }
+                onChange={(e) => settings.set(Setting.formatBaseFeeInGwei, e.target.checked)}
               >
                 Format Base Fee in Gwei
               </Checkbox>
@@ -92,7 +76,7 @@ export function Settings() {
 
             <FormControl as="fieldset" mt="5">
               <FormLabel as="legend">Max Blocks to Render ({maxBlocks} blocks)</FormLabel>
-              <Slider min={0} defaultValue={maxBlocks} max={100} step={10}  onChangeEnd={debouncedChangeHandler}>
+              <Slider min={0} defaultValue={maxBlocks} max={100} step={10} onChangeEnd={debouncedChangeHandler}>
                 <SliderTrack bg="red.100">
                   <Box position="relative" right={10} />
                   <SliderFilledTrack bg="tomato" />
@@ -104,5 +88,5 @@ export function Settings() {
         </PopoverContent>
       </Portal>
     </Popover>
-  );
+  )
 }

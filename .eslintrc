@@ -1,0 +1,8 @@
+{
+  "plugins": ["prettier"],
+  "extends": ["airbnb", "airbnb/hooks", "plugin:react/recommended", "prettier", "plugin:react-hooks/recommended"],
+  "rules": {
+    // Allow Prettier to throw errors via ESLint
+    "prettier/prettier": "error"
+  }
+}

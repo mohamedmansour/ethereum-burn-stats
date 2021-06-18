@@ -1,5 +1,5 @@
-import { HStack, VStack, Text } from "@chakra-ui/react";
-import { ethers } from "ethers";
+import { HStack, VStack, Text } from '@chakra-ui/react'
+import { ethers } from 'ethers'
 
 export interface GasUsedProps {
   gasUsed: ethers.BigNumber
@@ -8,9 +8,8 @@ export interface GasUsedProps {
 
 export function GasUsed(props: GasUsedProps) {
   const gasUsed = props.gasUsed.toNumber()
-  const percentage = gasUsed / props.gasLimit.toNumber() * 100
-  if (percentage === 0)
-    return <Text>0</Text>
+  const percentage = (gasUsed / props.gasLimit.toNumber()) * 100
+  if (percentage === 0) return <Text>0</Text>
 
   return (
     <VStack alignItems="flex-start">
