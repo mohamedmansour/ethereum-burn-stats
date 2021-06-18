@@ -1,4 +1,4 @@
-import { Box, Heading, Table, Text, Tbody, Thead, Tr, Th, Td } from "@chakra-ui/react";
+import { Box, Heading, Table, Text, Tbody, Thead, Tr, Th, Td, Link } from "@chakra-ui/react";
 import { BlockWithTransactions } from '@ethersproject/abstract-provider';
 import { utils } from "ethers";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import { Loader } from "../components/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
 import { Setting } from "../contexts/SettingsContext";
 import { useSetting } from "../hooks/useSetting";
+import { Link as ReactLink } from 'react-router-dom';
 
 export function EthBlockDetail() {
   let { id } = useParams<{ id: string }>()
@@ -40,8 +41,7 @@ export function EthBlockDetail() {
           <Thead>
             <Tr whiteSpace="nowrap">
               <Th>Confirmations</Th>
-              <Th>From</Th>
-              <Th>To</Th>
+              <Th>Tx</Th>
               <Th>Value</Th>
               <Th>Gas Price</Th>
             </Tr>
@@ -50,8 +50,7 @@ export function EthBlockDetail() {
             {block.transactions.map((t, idx) => (
               <Tr whiteSpace="nowrap" key={idx}>
                 <Td>{t.confirmations}</Td>
-                <Td>{t.from}</Td>
-                <Td>{t.to}</Td>
+                <Td><Link color="blue" to={`/transaction/${t.hash}`} as={ReactLink}>{t.hash}</Link></Td>
                 <Td>{utils.formatEther(t.value)} Ether</Td>
                 <Td>{utils.formatUnits(t.gasPrice, formatBurnInGwei ? 'gwei' : 'wei')}</Td>
               </Tr>
