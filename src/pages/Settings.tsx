@@ -10,16 +10,35 @@ import {
   Button,
   useDisclosure,
   FormControl,
+  FormLabel,
   Checkbox,
+  Box,
+  Slider,
+  SliderFilledTrack,
+  SliderThumb,
+  SliderTrack,
 } from "@chakra-ui/react";
-import { useRef } from "react";
+import { useEffect, useMemo } from "react";
+import { useRef, useState } from "react";
 import { VscSettingsGear } from "react-icons/vsc";
 import { Setting, useSettings } from "../contexts/SettingsContext";
+import { debounce } from "../utils/debounce";
 
 export function Settings() {
   const { onOpen, onClose, isOpen } = useDisclosure();
   const firstFieldRef = useRef(null);
   const settings = useSettings();
+  const [maxBlocks, setMaxBlocks] = useState<number>(settings.get(Setting.maxBlocksToRender))
+
+  useEffect(() => {
+    settings.set(Setting.maxBlocksToRender, maxBlocks)
+  }, [settings, maxBlocks])
+
+  const changeHandler = (value: number) => {
+    setMaxBlocks(value)
+  }
+
+  const debouncedChangeHandler = useMemo(() => debounce(changeHandler, 300), [])
 
   return (
     <Popover
@@ -48,32 +67,38 @@ export function Settings() {
           </PopoverHeader>
           <PopoverCloseButton />
           <PopoverBody>
-            <FormControl>
+            <FormControl as="fieldset">
+              <FormLabel as="legend">Gwei or Wei</FormLabel>
               <Checkbox
-                colorScheme="gray"
+                colorScheme="red"
                 defaultIsChecked={settings.get(Setting.formatBurnInGwei)}
-                id="setting-checkbox"
                 ref={firstFieldRef}
                 onChange={(e) =>
                   settings.set(Setting.formatBurnInGwei, e.target.checked)
                 }
               >
-                Format Burned in GWEI
+                Format Burned in Gwei
               </Checkbox>
-            </FormControl>
-
-            <FormControl>
               <Checkbox
-                colorScheme="gray"
+                colorScheme="red"
                 defaultIsChecked={settings.get(Setting.formatBaseFeeInGwei)}
-                id="setting-checkbox"
-                ref={firstFieldRef}
                 onChange={(e) =>
                   settings.set(Setting.formatBaseFeeInGwei, e.target.checked)
                 }
               >
-                Format Base Fee in GWEI
+                Format Base Fee in Gwei
               </Checkbox>
+            </FormControl>
+
+            <FormControl as="fieldset" mt="5">
+              <FormLabel as="legend">Max Blocks to Render ({maxBlocks} blocks)</FormLabel>
+              <Slider min={0} defaultValue={maxBlocks} max={100} step={10}  onChangeEnd={debouncedChangeHandler}>
+                <SliderTrack bg="red.100">
+                  <Box position="relative" right={10} />
+                  <SliderFilledTrack bg="tomato" />
+                </SliderTrack>
+                <SliderThumb boxSize={6} />
+              </Slider>
             </FormControl>
           </PopoverBody>
         </PopoverContent>

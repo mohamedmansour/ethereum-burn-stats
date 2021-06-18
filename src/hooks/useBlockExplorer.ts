@@ -2,12 +2,15 @@ import { useEffect, useState } from "react"
 import { useEthereum } from "../contexts/EthereumContext"
 import { ethers, utils } from 'ethers'
 import { BurnedBlockTransactionString } from '../pages/EthBlockList';
+import { useSetting } from "./useSetting";
+import { Setting } from "../contexts/SettingsContext";
 
 export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionString[] | undefined] {
   const { eth } = useEthereum()
   const [totalBurned, setTotalBurned] = useState<string>()
   const [blocks, setBlocks] = useState<BurnedBlockTransactionString[]>()
-  
+  const maxBlocksToRender = useSetting<number>(Setting.maxBlocksToRender)
+
   useEffect(() => {
     if (!eth)
       return
@@ -43,7 +46,7 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
           weiBurned: utils.formatUnits(burned, 'wei'),
           ethRewards,
           weiBaseFee
-        }, ...blocks]
+        }, ...(blocks.slice(0, maxBlocksToRender - 1))]
       })
     }
 
@@ -81,7 +84,7 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
     })()
 
     return () => { eth.off('block', onNewBlockHeader) }
-  }, [eth])
+  }, [eth, maxBlocksToRender])
 
   return [totalBurned, blocks]
 }
