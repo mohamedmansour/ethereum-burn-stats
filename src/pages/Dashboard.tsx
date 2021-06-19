@@ -5,6 +5,7 @@ import { Loader } from '../components/Loader';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { EthBlockDetail } from './EthBlockDetail';
 import { EthTransactionDetail } from './EthTransactionDetail';
+import { EthAccountDetail } from './EthAccountDetail';
 
 export function DashboardPage() {
   const [totalBurned, blocks] = useBlockExplorer()
@@ -16,6 +17,9 @@ export function DashboardPage() {
     <BrowserRouter>
       <Layout direction="column" totalBurned={totalBurned}>
         <Switch>
+          <Route path="/account/:id">
+            <EthAccountDetail />
+          </Route>
           <Route path="/block/:id">
             <EthBlockDetail />
           </Route>

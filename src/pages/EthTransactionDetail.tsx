@@ -40,11 +40,27 @@ export function EthTransactionDetail() {
         <Tbody>
           <Tr>
             <Td>From</Td>
-            <Td>{transaction.from}</Td>
+            <Td>
+              <Link
+                color="blue"
+                to={`/account/${transaction.from}`}
+                as={ReactLink}
+              >
+                {transaction.from}
+              </Link>
+            </Td>
           </Tr>
           <Tr>
             <Td>To</Td>
-            <Td>{transaction.to}</Td>
+            <Td>
+              <Link
+                color="blue"
+                to={`/account/${transaction.to}`}
+                as={ReactLink}
+              >
+                {transaction.to}
+              </Link>
+            </Td>
           </Tr>
           <Tr>
             <Td>Confirmations</Td>
@@ -64,15 +80,15 @@ export function EthTransactionDetail() {
           </Tr>
           <Tr>
             <Td>Gas Limit (Wei)</Td>
-            <Td>{utils.formatUnits(transaction.gasLimit, 'wei')}</Td>
+            <Td>{utils.formatUnits(transaction.gasLimit, "wei")}</Td>
           </Tr>
           <Tr>
             <Td>Gas Price (Wei)</Td>
-            <Td>{utils.formatUnits(transaction.gasPrice, 'wei')}</Td>
+            <Td>{utils.formatUnits(transaction.gasPrice, "wei")}</Td>
           </Tr>
           <Tr>
             <Td>Value (Wei)</Td>
-            <Td>{utils.formatUnits(transaction.value, 'wei')}</Td>
+            <Td>{utils.formatUnits(transaction.value, "wei")}</Td>
           </Tr>
           <Tr>
             <Td>Data</Td>
