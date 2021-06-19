@@ -109,10 +109,6 @@ export function EthTransactionDetail() {
             <Td>{transaction.v}</Td>
           </Tr>
           <Tr>
-            <Td>Wait</Td>
-            <Td>{transaction.wait}</Td>
-          </Tr>
-          <Tr>
             <Td>Type</Td>
             <Td>{transaction.type}</Td>
           </Tr>
