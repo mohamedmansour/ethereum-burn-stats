@@ -11,16 +11,16 @@ import * as CSS from "csstype";
 import { VscGithub, VscHeart, VscTwitter } from "react-icons/vsc";
 import { Link as ReactLink } from "react-router-dom";
 import { FirePit } from "../components/FirePit";
+import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { Settings } from "./Settings";
 
 interface LayoutProps {
   children: React.ReactNode;
   direction: CSS.Property.FlexDirection;
-  totalBurned: string | undefined;
 }
 
 export function Layout(props: LayoutProps) {
-  const { totalBurned } = props;
+  const { details } = useBlockExplorer()
   return (
     <Flex direction="column" overflow="hidden" height="inherit">
       <Flex
@@ -42,28 +42,37 @@ export function Layout(props: LayoutProps) {
             </HStack>
           </Link>
         </Flex>
-        {totalBurned && (
+        <Box display={['none', 'block', 'block']}>
+          <Settings />
+        </Box>
+      </Flex>
+      <Box>
+      {details && (
           <Flex
-            color="white"
             h="100%"
             flex="1"
             justify="center"
             whiteSpace="nowrap"
           >
-            <HStack color="white" h="inherit">
+            <HStack h="inherit">
               <Text fontSize="md" fontWeight="bold">
                 Total Fees Burned
               </Text>
               <Badge variant="solid" colorScheme="green">
-                {totalBurned} ETH
+                {details.totalBurned}  ETH
+              </Badge>
+            </HStack>
+            <HStack h="inherit">
+              <Text fontSize="md" fontWeight="bold">
+                Gas Price
+              </Text>
+              <Badge variant="solid" colorScheme="green">
+                {details.gasPrice} GWEI
               </Badge>
             </HStack>
           </Flex>
         )}
-        <Box display={['none', 'block', 'block']}>
-          <Settings />
-        </Box>
-      </Flex>
+      </Box>
       <Flex flex={1} overflowY="auto" w="100%" flexDir={props.direction}>
         {props.children}
       </Flex>

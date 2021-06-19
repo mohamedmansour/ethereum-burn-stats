@@ -1,21 +1,14 @@
 import { EthBlockList } from './EthBlockList';
-import { useBlockExplorer } from '../hooks/useBlockExplorer';
 import { Layout } from './Layout';
-import { Loader } from '../components/Loader';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { EthBlockDetail } from './EthBlockDetail';
 import { EthTransactionDetail } from './EthTransactionDetail';
 import { EthAccountDetail } from './EthAccountDetail';
 
 export function DashboardPage() {
-  const [totalBurned, blocks] = useBlockExplorer()
-
-  if (!blocks)
-    return <Loader>Loading blocks ...</Loader>
-
   return (
     <BrowserRouter>
-      <Layout direction="column" totalBurned={totalBurned}>
+      <Layout direction="column">
         <Switch>
           <Route path="/account/:id">
             <EthAccountDetail />
@@ -27,7 +20,7 @@ export function DashboardPage() {
             <EthTransactionDetail />
           </Route>
           <Route path="/">
-            <EthBlockList blocks={blocks} />
+            <EthBlockList />
           </Route>
         </Switch>
       </Layout>

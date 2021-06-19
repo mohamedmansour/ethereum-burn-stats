@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Loader } from '../components/Loader';
 import { ethers } from "ethers";
 import { Ethereumish } from '../react-app-env';
@@ -26,7 +26,7 @@ type EthereumContextType = {
   connect(): void
 }
 
-const EthereumContext = React.createContext<EthereumContextType>({
+const EthereumContext = createContext<EthereumContextType>({
   eth: undefined,
   connect: () => {}
 })

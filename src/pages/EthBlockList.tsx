@@ -1,4 +1,4 @@
-import { Table, Thead, Tr, Th, Tbody, Td, Link } from '@chakra-ui/react';
+import { Table, Thead, Tr, Th, Tbody, Td, Link, Spinner } from '@chakra-ui/react';
 import { ethers, utils } from 'ethers'
 import { Link as ReactLink } from 'react-router-dom';
 import { Setting } from '../contexts/SettingsContext';
@@ -6,6 +6,8 @@ import { useSetting } from '../hooks/useSetting';
 import { timeSince } from '../utils/time';
 import { GasUsed } from '../components/GasUsed';
 import { formatWei } from '../utils/wei';
+import { useBlockExplorer } from '../contexts/BlockExplorerContext';
+import { Loader } from '../components/Loader';
 
 const responsiveColumn = { display: ['none', 'none', 'block'] }
 
@@ -56,14 +58,17 @@ function EthBlockItem(props: EthBlockItemProps) {
   )
 }
 
-export interface EthBlockListProps {
-  blocks: BurnedBlockTransactionString[]
-}
 
-export function EthBlockList(props: EthBlockListProps) {
-  const { blocks } = props
+export function EthBlockList() {
+  const { details, blocks } = useBlockExplorer()
   const formatBurnInGwei = useSetting<boolean>(Setting.formatBurnInGwei)
   const formatBaseFeeInGwei = useSetting<boolean>(Setting.formatBaseFeeInGwei)
+
+  if (!details)
+    return <Loader>Loading block details ...</Loader>
+
+  if (!blocks)
+    return <Loader>Loading blocks ...</Loader>
 
   return (
     <Table>
@@ -80,6 +85,12 @@ export function EthBlockList(props: EthBlockListProps) {
         </Tr>
       </Thead>
       <Tbody>
+        <Tr whiteSpace="nowrap">
+          <Td>
+            <Link color="blue" to={`/block/${details.currentBlock + 1}`} as={ReactLink}>{details.currentBlock + 1}</Link>
+           </Td>
+          <td colSpan={7}><Spinner /></td>
+        </Tr>
         {blocks.map((block, idx) => (
           <EthBlockItem key={idx} block={block} formatBurnInGwei={formatBurnInGwei} formatBaseFeeInGwei={formatBaseFeeInGwei} />
         ))}
