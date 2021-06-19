@@ -1,26 +1,36 @@
-import { Box, Heading, Table, Tbody, Tr, Td, Link, Code } from '@chakra-ui/react'
-import { TransactionResponse } from '@ethersproject/abstract-provider'
-import { utils } from 'ethers'
-import { useState } from 'react'
-import { useEffect } from 'react'
-import { Link as ReactLink, useParams } from 'react-router-dom'
-import { Loader } from '../components/Loader'
-import { useEthereum } from '../contexts/EthereumContext'
+import {
+  Box,
+  Heading,
+  Table,
+  Tbody,
+  Tr,
+  Td,
+  Link,
+  Code,
+} from "@chakra-ui/react";
+import { TransactionResponse } from "@ethersproject/abstract-provider";
+import { utils } from "ethers";
+import { useState } from "react";
+import { useEffect } from "react";
+import { Link as ReactLink, useParams } from "react-router-dom";
+import { Loader } from "../components/Loader";
+import { useEthereum } from "../contexts/EthereumContext";
 
 export function EthTransactionDetail() {
-  let { id } = useParams<{ id: string }>()
-  const { eth } = useEthereum()
-  const [transaction, setTransaction] = useState<TransactionResponse>()
+  let { id } = useParams<{ id: string }>();
+  const { eth } = useEthereum();
+  const [transaction, setTransaction] = useState<TransactionResponse>();
 
   useEffect(() => {
-    if (!eth) return
-    ;(async () => {
-      setTransaction(await eth.getTransaction(id))
-    })()
-  }, [eth, id])
+    if (!eth) return;
+
+    (async () => {
+      setTransaction(await eth.getTransaction(id));
+    })();
+  }, [eth, id]);
 
   if (!transaction) {
-    return <Loader>Loading transaction</Loader>
+    return <Loader>Loading transaction</Loader>;
   }
 
   return (
@@ -43,7 +53,11 @@ export function EthTransactionDetail() {
           <Tr>
             <Td>Block Number</Td>
             <Td>
-              <Link color="blue" to={`/block/${transaction.blockNumber}`} as={ReactLink}>
+              <Link
+                color="blue"
+                to={`/block/${transaction.blockNumber}`}
+                as={ReactLink}
+              >
                 {transaction.blockNumber}
               </Link>
             </Td>
@@ -89,5 +103,5 @@ export function EthTransactionDetail() {
         </Tbody>
       </Table>
     </Box>
-  )
+  );
 }

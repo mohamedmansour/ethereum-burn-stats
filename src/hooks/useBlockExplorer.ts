@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
-import { useEthereum } from '../contexts/EthereumContext'
+import { useEffect, useState } from "react"
+import { useEthereum } from "../contexts/EthereumContext"
 import { ethers, utils } from 'ethers'
-import { BurnedBlockTransactionString } from '../pages/EthBlockList'
-import { useSetting } from './useSetting'
-import { Setting } from '../contexts/SettingsContext'
+import { BurnedBlockTransactionString } from '../pages/EthBlockList';
+import { useSetting } from "./useSetting";
+import { Setting } from "../contexts/SettingsContext";
 
 export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionString[] | undefined] {
   const { eth } = useEthereum()
@@ -12,44 +12,46 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
   const maxBlocksToRender = useSetting<number>(Setting.maxBlocksToRender)
 
   useEffect(() => {
-    if (!eth) return
+    if (!eth)
+      return
 
     const onNewBlockHeader = async (blockNumber: number) => {
       const block = await eth.getBlock(blockNumber)
-      if (!block) return
+      if (!block)
+        return
 
       const blockNumberInHex = utils.hexlify(blockNumber)
       const burned = await eth.burned(blockNumberInHex, blockNumberInHex)
       if (burned !== '0x0') {
-        setTotalBurned((total) => {
+        setTotalBurned(total => {
           const burnedInBN = ethers.BigNumber.from(burned)
           const totalInHex = utils.parseUnits(total || '0', 'ether')
           const totalInBN = ethers.BigNumber.from(totalInHex)
-          if (total) return utils.formatUnits(burnedInBN.add(totalInBN).toHexString(), 'ether')
-          else return utils.formatUnits(burned, 'ether')
+          if (total)
+            return utils.formatUnits(burnedInBN.add(totalInBN).toHexString(), 'ether')
+          else
+            return utils.formatUnits(burned, 'ether')
         })
       }
 
       const ethRewards = utils.formatUnits(await eth.getBlockReward(blockNumberInHex), 'ether')
       const weiBaseFee = utils.formatUnits(await eth.getBaseFeePerGas(blockNumberInHex), 'wei')
 
-      setBlocks((blocks) => {
-        if (!blocks) blocks = []
-
-        return [
-          {
-            ...block,
-            weiBurned: utils.formatUnits(burned, 'wei'),
-            ethRewards,
-            weiBaseFee,
-          },
-          ...blocks.slice(0, maxBlocksToRender - 1),
-        ]
+      setBlocks(blocks => {
+        if (!blocks)
+          blocks = []
+        
+        return [{
+          ...block,
+          weiBurned: utils.formatUnits(burned, 'wei'),
+          ethRewards,
+          weiBaseFee
+        }, ...(blocks.slice(0, maxBlocksToRender - 1))]
       })
     }
 
     const prefetchBlockHeaders = async (blockHeaderCount: number) => {
-      const latestBlockNumber = process.env.REACT_APP_START_BLOCK ? parseInt(process.env.REACT_APP_START_BLOCK) : await eth.getBlockNumber()
+      const latestBlockNumber = (process.env.REACT_APP_START_BLOCK ? parseInt(process.env.REACT_APP_START_BLOCK) : await eth.getBlockNumber())
 
       if (latestBlockNumber) {
         const processedBlocks: BurnedBlockTransactionString[] = []
@@ -66,7 +68,7 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
               ...block,
               weiBurned: utils.formatUnits(burned, 'wei'),
               ethRewards,
-              weiBaseFee,
+              weiBaseFee
             })
           }
         }
@@ -75,15 +77,13 @@ export function useBlockExplorer(): [string | undefined, BurnedBlockTransactionS
       }
     }
 
-    ;(async () => {
+    (async () => {
       setTotalBurned(utils.formatUnits(await eth.burned(), 'ether'))
       prefetchBlockHeaders(process.env.REACT_APP_PREFETCH_BLOCK_COUNT ? parseInt(process.env.REACT_APP_PREFETCH_BLOCK_COUNT) : 10)
       eth.on('block', onNewBlockHeader)
     })()
 
-    return () => {
-      eth.off('block', onNewBlockHeader)
-    }
+    return () => { eth.off('block', onNewBlockHeader) }
   }, [eth, maxBlocksToRender])
 
   return [totalBurned, blocks]

@@ -1,18 +1,26 @@
-import { Flex, HStack, Text, Badge, Link, Spacer, Box } from '@chakra-ui/react'
-import * as CSS from 'csstype'
-import { VscGithub, VscHeart, VscTwitter } from 'react-icons/vsc'
-import { Link as ReactLink } from 'react-router-dom'
-import { FirePit } from '../components/FirePit'
-import { Settings } from './Settings'
+import {
+  Flex,
+  HStack,
+  Text,
+  Badge,
+  Link,
+  Spacer,
+  Box,
+} from "@chakra-ui/react";
+import * as CSS from "csstype";
+import { VscGithub, VscHeart, VscTwitter } from "react-icons/vsc";
+import { Link as ReactLink } from "react-router-dom";
+import { FirePit } from "../components/FirePit";
+import { Settings } from "./Settings";
 
 interface LayoutProps {
-  children: React.ReactNode
-  direction: CSS.Property.FlexDirection
-  totalBurned: string | undefined
+  children: React.ReactNode;
+  direction: CSS.Property.FlexDirection;
+  totalBurned: string | undefined;
 }
 
 export function Layout(props: LayoutProps) {
-  const { totalBurned } = props
+  const { totalBurned } = props;
   return (
     <Flex direction="column" overflow="hidden" height="inherit">
       <Flex
@@ -35,7 +43,13 @@ export function Layout(props: LayoutProps) {
           </Link>
         </Flex>
         {totalBurned && (
-          <Flex color="white" h="100%" flex="1" justify="center" whiteSpace="nowrap">
+          <Flex
+            color="white"
+            h="100%"
+            flex="1"
+            justify="center"
+            whiteSpace="nowrap"
+          >
             <HStack color="white" h="inherit">
               <Text fontSize="md" fontWeight="bold">
                 Total Fees Burned
@@ -61,7 +75,7 @@ export function Layout(props: LayoutProps) {
         p="2"
         gridGap={[0, 0, 8]}
         whiteSpace="nowrap"
-        direction={['column', 'column', 'row']}
+        direction={["column", "column", "row"]}
       >
         <HStack gridGap="8">
           <Link color="teal.500" href="https://twitter.com/mohamedmansour">
@@ -77,14 +91,20 @@ export function Layout(props: LayoutProps) {
             </HStack>
           </Link>
         </HStack>
-        <Link color="teal.500" href="https://github.com/mohamedmansour/eth-burn">
+        <Link
+          color="teal.500"
+          href="https://github.com/mohamedmansour/eth-burn"
+        >
           <HStack>
             <VscGithub title="View source code on GitHub" />
             <Text>Source code on GitHub, contribute!</Text>
           </HStack>
         </Link>
         <Spacer />
-        <Link color="teal.500" href="https://github.com/mohamedmansour/eth-burn/blob/main/README.md">
+        <Link
+          color="teal.500"
+          href="https://github.com/mohamedmansour/eth-burn/blob/main/README.md"
+        >
           <HStack>
             <VscHeart />
             <Text>Help support server costs</Text>
@@ -92,5 +112,5 @@ export function Layout(props: LayoutProps) {
         </Link>
       </Flex>
     </Flex>
-  )
+  );
 }
