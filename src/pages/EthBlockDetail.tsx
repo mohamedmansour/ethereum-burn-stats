@@ -156,7 +156,7 @@ export function EthBlockDetail() {
             </HStack>
             <Card mt="4">
               <Heading size="sm">Info</Heading>
-              <Grid templateColumns="repeat(2, 1fr)" gap={4} p="2">
+              <Grid templateColumns="150px auto" gap={4} p="2">
                 <Text size="sm">Timestamp:</Text>
                 <Text>{block.timestamp}</Text>
                 <Text>Mined by:</Text>
@@ -170,7 +170,7 @@ export function EthBlockDetail() {
                 <Text>Gas limit:</Text>
                 <Text>{utils.commify(utils.formatUnits(block.gasLimit, 'wei'))}</Text>
                 <Text>Extra data:</Text>
-                <Text>{block.extraData}</Text>
+                <Text isTruncated>{block.extraData}</Text>
               </Grid>
             </Card>
           </TabPanel>
