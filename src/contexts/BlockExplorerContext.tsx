@@ -40,7 +40,7 @@ type ActionType =
   | NewBlockAction
   | InitAction
 
-const BlockExplorerApi = {
+export const BlockExplorerApi = {
   fetchDetails: async (eth:  EthereumApi, blockNumber: number, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
     const totalBurned = skipTotalBurned ? '0' : utils.formatUnits(await eth.burned(), 'ether')
     const gasPrice = utils.formatUnits(await eth.getGasPrice(), 'gwei')
