@@ -1,4 +1,4 @@
-import { Table, Thead, Tr, Th, Tbody, Td, Link, Spinner } from '@chakra-ui/react';
+import { Table, Thead, Tr, Th, Tbody, Td, Link } from '@chakra-ui/react';
 import { utils } from 'ethers'
 import { Link as ReactLink } from 'react-router-dom';
 import { Setting } from '../contexts/SettingsContext';
@@ -8,6 +8,7 @@ import { GasUsed } from '../components/GasUsed';
 import { formatWei } from '../utils/wei';
 import { useBlockExplorer, BurnedBlockTransaction } from '../contexts/BlockExplorerContext';
 import { Loader } from '../components/Loader';
+import { BlockProgress } from '../components/BlockProgress';
 
 const responsiveColumn = { display: ['none', 'none', 'block'] }
 
@@ -64,6 +65,7 @@ export function EthBlockList() {
   if (!blocks)
     return <Loader>Loading blocks ...</Loader>
 
+  const latestBlock = blocks[0]
   return (
     <Table>
       <Thead>
@@ -83,7 +85,7 @@ export function EthBlockList() {
           <Td>
             <Link color="blue" to={`/block/${details.currentBlock + 1}`} as={ReactLink}>{details.currentBlock + 1}</Link>
           </Td>
-          <Td colSpan={7}><Spinner /></Td>
+          <Td colSpan={7}><BlockProgress totalSecondsPerBlock={30} block={latestBlock} /></Td>
         </Tr>
         {blocks.map((block, idx) => (
           <EthBlockItem key={idx} block={block} formatBurnInGwei={formatBurnInGwei} formatBaseFeeInGwei={formatBaseFeeInGwei} />
