@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-class JsonEthereumProvider extends ethers.providers.WebSocketProvider {
+export class EthereumApi extends ethers.providers.WebSocketProvider {
   public burned(start?: string, end?: string): Promise<string> {
     return this.send('debug_burned', [start, end])
   }
@@ -22,7 +22,7 @@ class JsonEthereumProvider extends ethers.providers.WebSocketProvider {
 } 
 
 type EthereumContextType = {
-  eth?: JsonEthereumProvider,
+  eth?: EthereumApi,
   connect(): void
 }
 
@@ -40,13 +40,12 @@ const EthereumProvider = ({
   children: React.ReactNode
   url?: string | undefined
 }) => {
-  const [eth, setEth] = useState<JsonEthereumProvider | undefined>()
-
+  const [eth, setEth] = useState<EthereumApi | undefined>()
   useEffect(() => {
     if (!url)
       return;
 
-    setEth(new JsonEthereumProvider(url))
+    setEth(new EthereumApi(url))
 
     return () => {}
   }, [url])

@@ -1,12 +1,4 @@
-import {
-  Flex,
-  HStack,
-  Text,
-  Badge,
-  Link,
-  Spacer,
-  Box,
-} from "@chakra-ui/react";
+import { Flex, HStack, Text, Badge, Link, Spacer, Box } from "@chakra-ui/react";
 import * as CSS from "csstype";
 import { VscGithub, VscHeart, VscTwitter } from "react-icons/vsc";
 import { Link as ReactLink } from "react-router-dom";
@@ -19,8 +11,45 @@ interface LayoutProps {
   direction: CSS.Property.FlexDirection;
 }
 
+function DetailSection() {
+  const { details } = useBlockExplorer();
+  
+  if (!details)
+    return null
+
+  return (
+    <Box>
+      <Flex h="100%" flex="1" justify="center" whiteSpace="nowrap">
+        <HStack>
+          <Text fontSize="md" fontWeight="bold">
+            Block
+          </Text>
+          <Badge variant="solid" colorScheme="green">
+            {details.currentBlock + 1}
+          </Badge>
+        </HStack>
+        <HStack>
+          <Text fontSize="md" fontWeight="bold">
+            Total Fees Burned
+          </Text>
+          <Badge variant="solid" colorScheme="green">
+            {details.totalBurned} ETH
+          </Badge>
+        </HStack>
+        <HStack>
+          <Text fontSize="md" fontWeight="bold">
+            Gas Price
+          </Text>
+          <Badge variant="solid" colorScheme="green">
+            {details.gasPrice} GWEI
+          </Badge>
+        </HStack>
+      </Flex>
+    </Box>
+  );
+}
+
 export function Layout(props: LayoutProps) {
-  const { details } = useBlockExplorer()
   return (
     <Flex direction="column" overflow="hidden" height="inherit">
       <Flex
@@ -31,7 +60,7 @@ export function Layout(props: LayoutProps) {
         bg="blackAlpha.800"
         color="white"
         boxShadow="md"
-        direction={['column', 'row', 'row']}
+        direction={["column", "row", "row"]}
       >
         <Flex cursor="pointer" align="center" justify="center" p="1">
           <Link as={ReactLink} to="/" h="100%" whiteSpace="nowrap">
@@ -42,37 +71,11 @@ export function Layout(props: LayoutProps) {
             </HStack>
           </Link>
         </Flex>
-        <Box display={['none', 'block', 'block']}>
+        <Box display={["none", "block", "block"]}>
           <Settings />
         </Box>
       </Flex>
-      <Box>
-      {details && (
-          <Flex
-            h="100%"
-            flex="1"
-            justify="center"
-            whiteSpace="nowrap"
-          >
-            <HStack h="inherit">
-              <Text fontSize="md" fontWeight="bold">
-                Total Fees Burned
-              </Text>
-              <Badge variant="solid" colorScheme="green">
-                {details.totalBurned}  ETH
-              </Badge>
-            </HStack>
-            <HStack h="inherit">
-              <Text fontSize="md" fontWeight="bold">
-                Gas Price
-              </Text>
-              <Badge variant="solid" colorScheme="green">
-                {details.gasPrice} GWEI
-              </Badge>
-            </HStack>
-          </Flex>
-        )}
-      </Box>
+      <DetailSection />
       <Flex flex={1} overflowY="auto" w="100%" flexDir={props.direction}>
         {props.children}
       </Flex>

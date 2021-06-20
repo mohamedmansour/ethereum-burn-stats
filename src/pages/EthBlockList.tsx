@@ -1,24 +1,18 @@
 import { Table, Thead, Tr, Th, Tbody, Td, Link, Spinner } from '@chakra-ui/react';
-import { ethers, utils } from 'ethers'
+import { utils } from 'ethers'
 import { Link as ReactLink } from 'react-router-dom';
 import { Setting } from '../contexts/SettingsContext';
 import { useSetting } from '../hooks/useSetting';
 import { timeSince } from '../utils/time';
 import { GasUsed } from '../components/GasUsed';
 import { formatWei } from '../utils/wei';
-import { useBlockExplorer } from '../contexts/BlockExplorerContext';
+import { useBlockExplorer, BurnedBlockTransaction } from '../contexts/BlockExplorerContext';
 import { Loader } from '../components/Loader';
 
 const responsiveColumn = { display: ['none', 'none', 'block'] }
 
-export interface BurnedBlockTransactionString extends ethers.providers.Block {
-  weiBurned: string
-  ethRewards: string
-  weiBaseFee: string
-}
-
 interface EthBlockItemProps {
-  block: BurnedBlockTransactionString
+  block: BurnedBlockTransaction
   formatBurnInGwei: boolean
   formatBaseFeeInGwei: boolean
 }
@@ -88,8 +82,8 @@ export function EthBlockList() {
         <Tr whiteSpace="nowrap">
           <Td>
             <Link color="blue" to={`/block/${details.currentBlock + 1}`} as={ReactLink}>{details.currentBlock + 1}</Link>
-           </Td>
-          <td colSpan={7}><Spinner /></td>
+          </Td>
+          <Td colSpan={7}><Spinner /></Td>
         </Tr>
         {blocks.map((block, idx) => (
           <EthBlockItem key={idx} block={block} formatBurnInGwei={formatBurnInGwei} formatBaseFeeInGwei={formatBaseFeeInGwei} />
