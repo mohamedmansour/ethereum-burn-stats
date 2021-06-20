@@ -89,35 +89,41 @@ export function EthBlockDetail() {
   }
 
   const onBeforeRender = state.onBeforeRender ? (
-    <Button colorScheme="blackAlpha" variant="ghost">
+    <Button
+      colorScheme="blackAlpha"
+      variant="ghost"
+      onClick={() => history.push(`/block/${parseInt(id) - 1}`)}
+    >
       <Icon
         w="24px"
         h="24px"
         cursor="pointer"
         userSelect="none"
         as={VscChevronLeft}
-        onClick={() => history.push(`/block/${parseInt(id) - 1}`)}
       />
     </Button>
   ) : undefined;
 
   const onAfterRender = state.onAfterRender ? (
-    <Button colorScheme="blackAlpha" variant="ghost">
+    <Button
+      colorScheme="blackAlpha"
+      variant="ghost"
+      onClick={() => history.push(`/block/${parseInt(id) + 1}`)}
+    >
       <Icon
         w="24px"
         h="24px"
         cursor="pointer"
         userSelect="none"
         as={VscChevronRight}
-        onClick={() => history.push(`/block/${parseInt(id) + 1}`)}
       />
     </Button>
   ) : undefined;
 
   const infoCardStyle = {
-    h: '100%',
-    minW: '200px'
-  }
+    h: "100%",
+    minW: "200px",
+  };
 
   return (
     <VStack m="4" mt="0" pt="1" pl="1" align="flex-start" h="100%">
@@ -166,9 +172,13 @@ export function EthBlockDetail() {
                 <Text>Difficulty:</Text>
                 <Text>{utils.commify(block.difficulty)}</Text>
                 <Text>Gas used:</Text>
-                <Text>{utils.commify(utils.formatUnits(block.gasUsed, 'wei'))}</Text>
+                <Text>
+                  {utils.commify(utils.formatUnits(block.gasUsed, "wei"))}
+                </Text>
                 <Text>Gas limit:</Text>
-                <Text>{utils.commify(utils.formatUnits(block.gasLimit, 'wei'))}</Text>
+                <Text>
+                  {utils.commify(utils.formatUnits(block.gasLimit, "wei"))}
+                </Text>
                 <Text>Extra data:</Text>
                 <Text isTruncated>{block.extraData}</Text>
               </Grid>
