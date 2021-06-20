@@ -9,6 +9,7 @@ import {
   Link,
   VStack,
   Icon,
+  Button,
 } from "@chakra-ui/react";
 import { BlockWithTransactions } from "@ethersproject/abstract-provider";
 import { utils } from "ethers";
@@ -72,23 +73,33 @@ export function EthBlockDetail() {
   }
 
   const onBeforeRender = state.onBeforeRender ? (
-    <Icon
-      userSelect="none"
-      as={VscChevronLeft}
-      onClick={() => history.push(`/block/${parseInt(id) - 1}`)}
-    />
+    <Button colorScheme="blackAlpha" variant="ghost">
+      <Icon
+        w="24px"
+        h="24px"
+        cursor="pointer"
+        userSelect="none"
+        as={VscChevronLeft}
+        onClick={() => history.push(`/block/${parseInt(id) - 1}`)}
+      />
+    </Button>
   ) : undefined;
 
   const onAfterRender = state.onAfterRender ? (
-    <Icon
-      userSelect="none"
-      as={VscChevronRight}
-      onClick={() => history.push(`/block/${parseInt(id) + 1}`)}
-    />
+    <Button colorScheme="blackAlpha" variant="ghost">
+      <Icon
+        w="24px"
+        h="24px"
+        cursor="pointer"
+        userSelect="none"
+        as={VscChevronRight}
+        onClick={() => history.push(`/block/${parseInt(id) + 1}`)}
+      />
+    </Button>
   ) : undefined;
 
   return (
-    <VStack overflow="hidden" m="4" mt="0" align="flex-start" h="100%">
+    <VStack overflow="hidden" m="4" mt="0" pt="1" pl="1" align="flex-start" h="100%">
       <PageTitle
         title="Block"
         subtitle={"#" + id}
