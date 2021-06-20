@@ -3,7 +3,6 @@ import {
   PopoverTrigger,
   Portal,
   PopoverContent,
-  PopoverArrow,
   PopoverHeader,
   PopoverCloseButton,
   PopoverBody,
@@ -35,7 +34,8 @@ export function Settings() {
   }, [settings, maxBlocks])
 
   const changeHandler = (value: number) => {
-    setMaxBlocks(value)
+    if (value > 0)
+      setMaxBlocks(value)
   }
 
   const debouncedChangeHandler = useMemo(() => debounce(changeHandler, 300), [])
@@ -57,11 +57,10 @@ export function Settings() {
       <Portal>
         <PopoverContent
           color="white"
-          bg="gray.700"
-          borderColor="white"
+          bg="brand.settings"
+          borderColor="brand.settingsOutline"
           boxShadow="lg"
         >
-          <PopoverArrow bg="gray.700" />
           <PopoverHeader pt={4} fontWeight="bold" border="0">
             Settings
           </PopoverHeader>

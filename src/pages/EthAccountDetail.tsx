@@ -1,13 +1,11 @@
-import {
-  Box,
-  Heading,
-  Text,
-} from "@chakra-ui/react";
+import { Heading, Text, VStack } from "@chakra-ui/react";
 import { utils } from "ethers";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { Card } from "../components/Card";
 import { Loader } from "../components/Loader";
+import { PageTitle } from "../components/PageTitle";
 import { useEthereum } from "../contexts/EthereumContext";
 
 export function EthAccountDetail() {
@@ -28,9 +26,12 @@ export function EthAccountDetail() {
   }
 
   return (
-    <Box p="10">
-      <Heading>Account {id}</Heading>
-      <Text>{balance} ETH</Text>
-    </Box>
+    <VStack overflow="hidden" m="4" mt="0" align="flex-start" h="100%">
+      <PageTitle title="Account" subtitle={id} />
+      <Card overflow="auto" w="100%">
+        <Heading size="sm">Balance:</Heading>
+        <Text>{balance} ETH</Text>
+      </Card>
+    </VStack>
   );
 }

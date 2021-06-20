@@ -9,8 +9,9 @@ import { formatWei } from '../utils/wei';
 import { useBlockExplorer, BurnedBlockTransaction } from '../contexts/BlockExplorerContext';
 import { Loader } from '../components/Loader';
 import { BlockProgress } from '../components/BlockProgress';
+import { Card } from '../components/Card';
 
-const responsiveColumn = { display: ['none', 'none', 'block'] }
+const responsiveColumn = { display: ['none', 'none', 'table-cell'] }
 
 interface EthBlockItemProps {
   block: BurnedBlockTransaction
@@ -67,30 +68,32 @@ export function EthBlockList() {
 
   const latestBlock = blocks[0]
   return (
-    <Table>
-      <Thead>
-        <Tr whiteSpace="nowrap">
-          <Th>Block</Th>
-          <Th>Age</Th>
-          <Th>Txn</Th>
-          <Th>Gas Used</Th>
-          <Th {...responsiveColumn}>Gas Limit</Th>
-          <Th>Rewards (ETH)</Th>
-          <Th>Base Fee ({formatBaseFeeInGwei ? 'Gwei' : 'Wei'})</Th>
-          <Th>Burned ({formatBurnInGwei ? 'Gwei' : 'Wei'})</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        <Tr whiteSpace="nowrap">
-          <Td>
-            <Link color="blue" to={`/block/${details.currentBlock + 1}`} as={ReactLink}>{details.currentBlock + 1}</Link>
-          </Td>
-          <Td colSpan={7}><BlockProgress totalSecondsPerBlock={30} block={latestBlock} /></Td>
-        </Tr>
-        {blocks.map((block, idx) => (
-          <EthBlockItem key={idx} block={block} formatBurnInGwei={formatBurnInGwei} formatBaseFeeInGwei={formatBaseFeeInGwei} />
-        ))}
-      </Tbody>
-    </Table>
+    <Card m={4} mt={0} flex="1" overflow="auto">
+      <Table>
+        <Thead>
+          <Tr whiteSpace="nowrap">
+            <Th>Block</Th>
+            <Th>Age</Th>
+            <Th>Txn</Th>
+            <Th>Gas Used</Th>
+            <Th {...responsiveColumn}>Gas Limit</Th>
+            <Th>Rewards (ETH)</Th>
+            <Th>Base Fee ({formatBaseFeeInGwei ? 'Gwei' : 'Wei'})</Th>
+            <Th>Burned ({formatBurnInGwei ? 'Gwei' : 'Wei'})</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          <Tr whiteSpace="nowrap">
+            <Td>
+              {details.currentBlock + 1}
+            </Td>
+            <Td colSpan={7}><BlockProgress totalSecondsPerBlock={30} block={latestBlock} /></Td>
+          </Tr>
+          {blocks.map((block, idx) => (
+            <EthBlockItem key={idx} block={block} formatBurnInGwei={formatBurnInGwei} formatBaseFeeInGwei={formatBaseFeeInGwei} />
+          ))}
+        </Tbody>
+      </Table>
+    </Card>
   )
 }

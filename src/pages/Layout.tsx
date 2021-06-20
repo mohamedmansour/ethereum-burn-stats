@@ -2,6 +2,7 @@ import { Flex, HStack, Text, Badge, Link, Spacer, Box } from "@chakra-ui/react";
 import * as CSS from "csstype";
 import { VscGithub, VscHeart, VscTwitter } from "react-icons/vsc";
 import { Link as ReactLink } from "react-router-dom";
+import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { Settings } from "./Settings";
@@ -18,32 +19,30 @@ function DetailSection() {
     return null
 
   return (
-    <Box>
-      <Flex h="100%" flex="1" justify="center" whiteSpace="nowrap">
-        <HStack>
-          <Text fontSize="md" fontWeight="bold">
-            Block
-          </Text>
-          <Badge variant="solid" colorScheme="green">
-            {details.currentBlock + 1}
-          </Badge>
-        </HStack>
-        <HStack>
+    <Box bg="brand.subheader">
+      <Flex h="100%" flex="1" justify="flex-start" whiteSpace="nowrap" gridGap={4} p={4} direction={['column', 'column', 'row']}>
+        <Card direction="row" gridGap={4} p={2} bg="brand.subheaderCard" color="brand.subheaderCardText">
           <Text fontSize="md" fontWeight="bold">
             Total Fees Burned
           </Text>
-          <Badge variant="solid" colorScheme="green">
+          <Text variant="solid" colorScheme="green">
             {details.totalBurned} ETH
-          </Badge>
-        </HStack>
-        <HStack>
+          </Text>
+        </Card>
+        <Card direction="row" gridGap={4} p={2} bg="brand.subheaderCard" color="brand.subheaderCardText">
+          <Text fontSize="md" fontWeight="bold">
+            Block
+          </Text>
+          <Text variant="solid" colorScheme="green">
+            {details.currentBlock + 1}
+          </Text>
           <Text fontSize="md" fontWeight="bold">
             Gas Price
           </Text>
-          <Badge variant="solid" colorScheme="green">
+          <Text variant="solid" colorScheme="green">
             {details.gasPrice} GWEI
-          </Badge>
-        </HStack>
+          </Text>
+        </Card>
       </Flex>
     </Box>
   );
@@ -57,9 +56,9 @@ export function Layout(props: LayoutProps) {
         align="center"
         justify="space-between"
         padding="0.5rem"
-        bg="blackAlpha.800"
+        bg="brand.header"
         color="white"
-        boxShadow="md"
+        shadow="lg"
         direction={["column", "row", "row"]}
       >
         <Flex cursor="pointer" align="center" justify="center" p="1">
@@ -67,7 +66,7 @@ export function Layout(props: LayoutProps) {
             <HStack cursor="pointer" align="center" justify="center" p="1">
               <FirePit sparkCount={12} size="20px" />
               <Text color="white">ETH Burn</Text>
-              <Badge>EIP-1559</Badge>
+              <Badge bg="brand.subheader">EIP-1559</Badge>
             </HStack>
           </Link>
         </Flex>
@@ -76,7 +75,7 @@ export function Layout(props: LayoutProps) {
         </Box>
       </Flex>
       <DetailSection />
-      <Flex flex={1} overflowY="auto" w="100%" flexDir={props.direction}>
+      <Flex flex={1} overflowY="auto" w="100%" flexDir={props.direction} bg="brand.background" pt="4">
         {props.children}
       </Flex>
       <Flex
