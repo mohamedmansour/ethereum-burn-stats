@@ -1,32 +1,21 @@
 import React, { useContext } from 'react';
+import { defaultSettings, Setting } from '../config';
 
-export enum Setting {
-  formatBurnInGwei = 'formatBurnInGwei',
-  formatBaseFeeInGwei = 'formatBaseFeeInGwei',
-  maxBlocksToRender = 'maxBlocksToRender'
-}
-
-interface Converter<T> {
+export interface Converter<T> {
   (value: string): T
 }
 
-function BooleanConverter(value: string): boolean {
+export function BooleanConverter(value: string): boolean {
   return value === "true"
 }
 
-function IntegerConverter(value: string): number {
+export function IntegerConverter(value: string): number {
   return parseInt(value)
 }
 
-interface DefaultSettingValue<T> {
+export interface DefaultSettingValue<T> {
   defaultValue: any
   convert: Converter<T>
-}
-
-const defaultSettings: {[key: string]: DefaultSettingValue<unknown>}  = {
-  [Setting.formatBurnInGwei]: { convert: BooleanConverter, defaultValue: true },
-  [Setting.formatBaseFeeInGwei]: { convert: BooleanConverter, defaultValue: false },
-  [Setting.maxBlocksToRender]: { convert: IntegerConverter, defaultValue: 15 },
 }
 
 type SettingsContextType = {

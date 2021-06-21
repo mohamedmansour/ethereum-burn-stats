@@ -9,7 +9,7 @@ import React from "react";
 
 interface PageTitleProps extends HTMLChakraProps<"header"> {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   beforeRender?: JSX.Element;
   afterRender?: JSX.Element;
 }
@@ -35,7 +35,7 @@ export const PageTitle = forwardRef<PageTitleProps, "div">(
       <HStack ref={ref} {...rest}>
         {styles.beforeRender && styles.beforeRender}
         <Heading size="md">{styles.title}</Heading>
-        <Text>{styles.subtitle}</Text>
+        {styles.subtitle && (<Text>{styles.subtitle}</Text>)}
         {styles.afterRender && styles.afterRender}
       </HStack>
     );

@@ -1,7 +1,6 @@
 import { Table, Thead, Tr, Th, Tbody, Td, Link } from '@chakra-ui/react';
 import { utils } from 'ethers'
 import { Link as ReactLink } from 'react-router-dom';
-import { Setting } from '../contexts/SettingsContext';
 import { useSetting } from '../hooks/useSetting';
 import { timeSince } from '../utils/time';
 import { GasUsed } from '../components/GasUsed';
@@ -10,6 +9,7 @@ import { useBlockExplorer, BurnedBlockTransaction } from '../contexts/BlockExplo
 import { Loader } from '../components/Loader';
 import { BlockProgress } from '../components/BlockProgress';
 import { Card } from '../components/Card';
+import { Setting } from '../config';
 
 const responsiveColumn = { display: ['none', 'none', 'table-cell'] }
 
@@ -53,7 +53,6 @@ function EthBlockItem(props: EthBlockItemProps) {
     </Tr>
   )
 }
-
 
 export function EthBlockList() {
   const { details, blocks } = useBlockExplorer()

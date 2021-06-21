@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Setting, useSettings } from "../contexts/SettingsContext";
+import { Setting } from "../config";
+import { useSettings } from "../contexts/SettingsContext";
 
 export function useSetting<T>(setting: Setting): T {
   const settings = useSettings()

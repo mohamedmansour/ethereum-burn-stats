@@ -26,7 +26,7 @@ export function EthAccountDetail() {
   }
 
   return (
-    <VStack overflow="hidden" m="4" mt="0" align="flex-start" h="100%">
+    <VStack m="4" mt="0" align="flex-start" h="100%">
       <PageTitle title="Account" subtitle={id} />
       <Card overflow="auto" w="100%">
         <Heading size="sm">Balance:</Heading>

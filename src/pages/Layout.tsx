@@ -1,11 +1,28 @@
-import { Flex, HStack, Text, Badge, Link, Spacer, Box } from "@chakra-ui/react";
+import {
+  Flex,
+  HStack,
+  Text,
+  Badge,
+  Link,
+  Spacer,
+  Box,
+  Icon,
+  Button,
+} from "@chakra-ui/react";
 import * as CSS from "csstype";
-import { VscGithub, VscHeart, VscTwitter } from "react-icons/vsc";
-import { Link as ReactLink } from "react-router-dom";
+import {
+  VscGithub,
+  VscHeart,
+  VscSettingsGear,
+  VscTwitter,
+} from "react-icons/vsc";
+import { SiEthereum } from "react-icons/si";
+import { Link as ReactLink, useHistory } from "react-router-dom";
 import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
-import { Settings } from "./Settings";
+import { useSetting } from "../hooks/useSetting";
+import { Setting } from "../config";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -67,6 +84,23 @@ function DetailSection() {
   );
 }
 
+function EthereumNetwork() {
+  const history = useHistory()
+  const network = useSetting<string>(Setting.network);
+  return (
+    <Button
+      colorScheme="pink"
+      variant="solid"
+      size="xs"
+      leftIcon={<Icon as={SiEthereum} />}
+      title="Change network"
+      onClick={() => history.push('/settings')}
+    >
+      {network}
+    </Button>
+  );
+}
+
 export function Layout(props: LayoutProps) {
   return (
     <Flex direction="column" overflow="hidden" height="inherit">
@@ -88,9 +122,9 @@ export function Layout(props: LayoutProps) {
               h="100%"
               whiteSpace="nowrap"
               textDecoration="none"
-              cursor="pointer" 
+              cursor="pointer"
             >
-               <HStack cursor="pointer">
+              <HStack cursor="pointer">
                 <FirePit sparkCount={12} size="20px" />
                 <Text color="white">ETH Burn</Text>
               </HStack>
@@ -98,11 +132,12 @@ export function Layout(props: LayoutProps) {
             <Badge bg="brand.subheader" color="white">
               EIP-1559
             </Badge>
+            <EthereumNetwork />
           </HStack>
         </Flex>
-        <Box display={["none", "block", "block"]}>
-          <Settings />
-        </Box>
+        <Link as={ReactLink} to="/settings">
+          <Icon as={VscSettingsGear} />
+        </Link>
       </Flex>
       <DetailSection />
       <Flex

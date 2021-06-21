@@ -26,7 +26,6 @@ import { VscChevronLeft, VscChevronRight } from "react-icons/vsc";
 import { useParams, Link as ReactLink, useHistory } from "react-router-dom";
 import { Loader } from "../components/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
-import { Setting } from "../contexts/SettingsContext";
 import { useSetting } from "../hooks/useSetting";
 import { Card } from "../components/Card";
 import { PageTitle } from "../components/PageTitle";
@@ -34,6 +33,7 @@ import {
   BlockExplorerApi,
   BurnedBlockTransaction,
 } from "../contexts/BlockExplorerContext";
+import { Setting } from "../config";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;
