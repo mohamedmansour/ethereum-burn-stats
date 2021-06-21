@@ -1,7 +1,7 @@
 import { Button, Icon } from "@chakra-ui/react";
 import { SiEthereum } from "react-icons/si";
 import { useHistory } from "react-router-dom";
-import { Setting } from "../config";
+import { Setting, EthereumNetworkOptions } from "../config";
 import { useSetting } from "../hooks/useSetting";
 
 export function EthereumNetwork() {
@@ -17,7 +17,7 @@ export function EthereumNetwork() {
       title="Change network"
       onClick={() => history.push('/settings')}
     >
-      {network}
+      {EthereumNetworkOptions[network].name}
     </Button>
   );
 }

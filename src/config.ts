@@ -27,3 +27,11 @@ export const defaultSettings: { [key: string]: DefaultSettingValue<unknown> } =
     },
     [Setting.network]: { convert: String, defaultValue: "calaveras" },
   };
+
+export const EthereumNetworkOptions: {[key: string]: {key: string, name: string}} = {
+  calaveras: { name: 'Calaveras (devnet)', key: 'calaveras' },
+  ropsten: { name: 'Ropsten (testnet)', key: 'ropsten' },
+  goerli: { name: 'Goerli (testnet)', key: 'goerli' },
+  rinkeby: { name: 'Rinkeby (testnet)', key: 'rinkeby' },
+  mainnet: { name: 'Mainnet', key: 'mainnet' },
+};

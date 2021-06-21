@@ -57,7 +57,7 @@ function BlockItem(props: BlockItemProps) {
         align="center"
       >
         <FirePit size="12px" />
-        <Box w="70px"><Tooltip hasArrow label={label} placement="right">{weiBurned}</Tooltip></Box>
+        <Box w="70px" whiteSpace="nowrap"><Tooltip hasArrow label={label} placement="right">{weiBurned}</Tooltip></Box>
       </HStack>
     </HStack>
   );

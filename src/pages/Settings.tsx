@@ -6,7 +6,6 @@ import {
   SliderThumb,
   SliderTrack,
   Heading,
-  HStack,
   Radio,
   RadioGroup,
   Breadcrumb,
@@ -18,7 +17,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link as ReactLink } from "react-router-dom";
 import { Card } from "../components/Card";
-import { Setting } from "../config";
+import { Setting, EthereumNetworkOptions } from "../config";
 import { useSettings } from "../contexts/SettingsContext";
 import { debounce } from "../utils/debounce";
 
@@ -64,21 +63,13 @@ export function Settings() {
             defaultValue={settings.get(Setting.network)}
             ref={firstFieldRef}
           >
-            <HStack>
-              <Radio value="calaveras">Calaveras (devnet)</Radio>
-              <Radio value="ropsten" isDisabled>
-                Ropsten (testnet)
-              </Radio>
-              <Radio value="goerli" isDisabled>
-                Goerli (testnet)
-              </Radio>
-              <Radio value="rinkeby" isDisabled>
-                Rinkeby (testnet)
-              </Radio>
-              <Radio value="mainnet" isDisabled>
-                Mainnet
-              </Radio>
-            </HStack>
+            <Flex direction={['column', 'column', 'row']} gridGap={4}>
+              <Radio value={EthereumNetworkOptions.calaveras.key}>{EthereumNetworkOptions.calaveras.name}</Radio>
+              <Radio value={EthereumNetworkOptions.ropsten.key} isDisabled>{EthereumNetworkOptions.ropsten.name}</Radio>
+              <Radio value={EthereumNetworkOptions.goerli.key} isDisabled>{EthereumNetworkOptions.goerli.name}</Radio>
+              <Radio value={EthereumNetworkOptions.rinkeby.key} isDisabled>{EthereumNetworkOptions.rinkeby.name}</Radio>
+              <Radio value={EthereumNetworkOptions.mainnet.key} isDisabled>{EthereumNetworkOptions.mainnet.name}</Radio>
+            </Flex>
           </RadioGroup>
         </Card>
       </Box>
@@ -87,7 +78,7 @@ export function Settings() {
         <Heading size="sm" color="brand.secondaryText">
           Gwei or Wei
         </Heading>
-        <Card mt="2">
+        <Card mt="2" gridGap={4}>
           <Checkbox
             colorScheme="red"
             defaultIsChecked={settings.get(Setting.formatBurnInGwei)}

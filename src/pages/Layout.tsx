@@ -47,8 +47,8 @@ function DetailSection() {
           bg="brand.subheaderCard"
           color="brand.primaryText"
         >
-          <Text fontSize="md" fontWeight="bold" color="brand.secondaryText">
-            Total Fees Burned
+          <Text fontSize="md" fontWeight="bold" color="brand.secondaryText" isTruncated>
+            Total Burned
           </Text>
           <Text variant="solid">
             {details.totalBurned} ETH
@@ -90,7 +90,7 @@ export function Layout(props: LayoutProps) {
         bg="brand.header"
         color="white"
         shadow="lg"
-        direction={["column", "row", "row"]}
+        direction="row"
       >
         <Flex p="1">
           <HStack p="1">
