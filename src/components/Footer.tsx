@@ -3,7 +3,7 @@ import { VscTwitter, VscGithub, VscHeart } from "react-icons/vsc";
 
 export function Footer() {
     return (
-      <Flex justifyContent="center" gridGap={[0, 0, 8]} pb="100" color="#666" direction={["column", "column", "row"]}>
+      <Flex justifyContent="center" gridGap={[0, 0, 8]} color="#666" direction={["column", "column", "row"]}>
         <HStack gridGap="8">
           <Link href="https://twitter.com/mohamedmansour">
             <HStack>

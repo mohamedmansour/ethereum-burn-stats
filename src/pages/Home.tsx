@@ -131,7 +131,7 @@ export function Home() {
       bg="brand.background"
       overflowY="auto"
     >
-      <VStack zIndex={2} color="brand.primaryText" w={["95%", "90%", "700px"]}>
+      <VStack zIndex={2} color="brand.primaryText" w={["95%", "90%", "700px"]} pb="100">
         <Box mb={"4"} textAlign="center">
           <Heading>Watch The Burn</Heading>
           <Text>Ethereum's EIP-1559</Text>
