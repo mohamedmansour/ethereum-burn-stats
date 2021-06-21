@@ -164,10 +164,6 @@ export function Home() {
               ETH
             </Text>
           </HStack>
-          <Divider
-            bg="brand.card"
-            borderColor="brand.card"
-          />
         </Card>
         <Card>
           <Heading size="sm" textAlign="center" color="brand.headerText">
