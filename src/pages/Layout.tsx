@@ -14,14 +14,27 @@ interface LayoutProps {
 
 function DetailSection() {
   const { details } = useBlockExplorer();
-  
-  if (!details)
-    return null
+
+  if (!details) return null;
 
   return (
     <Box bg="brand.subheader">
-      <Flex h="100%" flex="1" justify="flex-start" whiteSpace="nowrap" gridGap={4} p={4} direction={['column', 'column', 'row']}>
-        <Card direction="row" gridGap={4} p={2} bg="brand.subheaderCard" color="brand.subheaderCardText">
+      <Flex
+        h="100%"
+        flex="1"
+        justify="flex-start"
+        whiteSpace="nowrap"
+        gridGap={4}
+        p={4}
+        direction={["column", "column", "row"]}
+      >
+        <Card
+          direction="row"
+          gridGap={4}
+          p={2}
+          bg="brand.subheaderCard"
+          color="brand.subheaderCardText"
+        >
           <Text fontSize="md" fontWeight="bold">
             Total Fees Burned
           </Text>
@@ -29,7 +42,13 @@ function DetailSection() {
             {details.totalBurned} ETH
           </Text>
         </Card>
-        <Card direction="row" gridGap={4} p={2} bg="brand.subheaderCard" color="brand.subheaderCardText">
+        <Card
+          direction="row"
+          gridGap={4}
+          p={2}
+          bg="brand.subheaderCard"
+          color="brand.subheaderCardText"
+        >
           <Text fontSize="md" fontWeight="bold">
             Block
           </Text>
@@ -61,21 +80,39 @@ export function Layout(props: LayoutProps) {
         shadow="lg"
         direction={["column", "row", "row"]}
       >
-        <Flex cursor="pointer" align="center" justify="center" p="1">
-          <Link as={ReactLink} to="/" h="100%" whiteSpace="nowrap">
-            <HStack cursor="pointer" align="center" justify="center" p="1">
-              <FirePit sparkCount={12} size="20px" />
-              <Text color="white">ETH Burn</Text>
-              <Badge bg="brand.subheader">EIP-1559</Badge>
-            </HStack>
-          </Link>
+        <Flex p="1">
+          <HStack p="1">
+            <Link
+              as={ReactLink}
+              to="/"
+              h="100%"
+              whiteSpace="nowrap"
+              textDecoration="none"
+              cursor="pointer" 
+            >
+               <HStack cursor="pointer">
+                <FirePit sparkCount={12} size="20px" />
+                <Text color="white">ETH Burn</Text>
+              </HStack>
+            </Link>
+            <Badge bg="brand.subheader" color="white">
+              EIP-1559
+            </Badge>
+          </HStack>
         </Flex>
         <Box display={["none", "block", "block"]}>
           <Settings />
         </Box>
       </Flex>
       <DetailSection />
-      <Flex flex={1} overflowY="auto" w="100%" flexDir={props.direction} bg="brand.background" pt="4">
+      <Flex
+        flex={1}
+        overflowY="auto"
+        w="100%"
+        flexDir={props.direction}
+        bg="brand.background"
+        pt="4"
+      >
         {props.children}
       </Flex>
       <Flex
