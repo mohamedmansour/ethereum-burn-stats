@@ -6,22 +6,23 @@ $blue: rgb(0, 55, 255);
 
 .firepit {
   position: relative;
+  font-size: 12px;
 }
 .fire {
   position: relative;
   bottom: 0;
-  width: 100%;
-  height: 100%;
+  width: 1em;
+  height: 1em;
   .flame {
     position: absolute;
     bottom: 0;
     left: 0;
     opacity: .9;
-    width: 100%;
-    height: 100%;
-    border-bottom-right-radius: 70%;
-    border-bottom-left-radius: 70%;
-    border-top-left-radius: 70%;
+    width: 1em;
+    height: 1em;
+    border-bottom-right-radius: 0.7em;
+    border-bottom-left-radius: 0.7em;
+    border-top-left-radius: 0.7em;
     transform: rotate(-45deg)  skew(-10deg, -10deg);
     background-color: $red;
     background-image: linear-gradient(to top right, fade-out($red, .1), fade-out($orange, .3));
@@ -38,26 +39,26 @@ $blue: rgb(0, 55, 255);
     }
     
     &:nth-of-type(2) {
-      height: 80%;
-      width: 80%;
-      left: 10%;
+      height: 0.8em;
+      width: 0.8em;
+      left: 0.1em;
       background-color: $orange;
       background-image: linear-gradient(to top right, rgba($orange, .9), rgba($yellow, .9));
       z-index: 2;
     }
     
     &:nth-of-type(3) {
-      height: 50%;
-      width: 50%;
-      left: 25%;
+      height: 0.5em;
+      width: 0.5em;
+      left: 0.25em;
       background-image: linear-gradient(to top right, $yellow, white);
       z-index: 3;
     }
     
     &:nth-of-type(4) {
-      height: 30%;
-      width: 30%;
-      left: 35%;
+      height: 0.3em;
+      width: 0.3em;
+      left: 0.35em;
       background-color: white;
       background-image: linear-gradient(to top right, rgba(white, .7), rgba($blue,.1));
       opacity: 1;
@@ -68,12 +69,12 @@ $blue: rgb(0, 55, 255);
 
 .spark {
   position: absolute;
-  bottom: 46%;
-  left: 15%;
-  width: 3px;
-  height: 3px;
+  bottom: 0.46em;
+  left: 0.15em;
+  width: 4px;
+  height: 4px;
   background-color: fade-out($orange,.6);
-  box-shadow: 0 0 2px $orange;
+  box-shadow: 0 0 0.16em $orange;
   animation-name: fly-up-burnout-1;
   animation-duration: 6s;
   animation-timing-function: linear;
@@ -88,48 +89,48 @@ $blue: rgb(0, 55, 255);
   &:nth-of-type(3n) {
     animation-delay: 1.9s;
     animation-duration: 8s;
-    left: 55%;
+    left: 0.55em;
   }
   &:nth-of-type(4n) {
     animation-delay: 2.6s;
     animation-duration: 7s;
-    left: 88%;
+    left: 0.88em;
   }
   &:nth-of-type(5n) {
     animation-delay: 1.4s;
     animation-duration: 7s;
-    left: 22%;
+    left: 0.22em;
   }
   &:nth-of-type(6n) {
     animation-delay: 3.2s;
-    left: 61%;
+    left: 0.61em;;
   }
   &:nth-of-type(7n) {
     animation-delay: .8s;
     animation-duration: 5s;
-    left: 64%;
+    left: 0.64em;
   }
   &:nth-of-type(8n) {
     animation-delay: 5s;
-    left: 19%;
+    left: 0.19em;
   }
   &:nth-of-type(9n) {
     animation-delay: 4s;
     animation-duration: 6.8s;
-    left: 22%;
+    left: 0.22em;
   }
   &:nth-of-type(10n) {
     animation-delay: 5.2s;
-    left: 61%;
+    left: 0.61em;
   }
   &:nth-of-type(11n) {
     animation-delay: 3.5s;
     animation-duration: 8s;
-    left: 81%;
+    left: 0.81em;
   }
   &:nth-of-type(12n) {
     animation-delay: 2s;
-    left: 85%;
+    left: 0.85em;
   }
 }
 
@@ -150,16 +151,16 @@ $blue: rgb(0, 55, 255);
   }
   
   33%{
-    transform: translate(12px, -70px);
+    transform: translate(1em, -6em);
   }
   
   66% {
-    transform: translate(0, -140px);
+    transform: translate(0, -11em);
     opacity: .6;
   }
   
   100% {
-    transform: translate(6px, -200px);
+    transform: translate(0.5em, -16em);
     opacity: 0;
   }
 }
@@ -171,16 +172,16 @@ $blue: rgb(0, 55, 255);
   }
   
   50%{
-    transform: translate(-10px, -80px);
+    transform: translate(-0.8em, -6em);
   }
   
   80% {
-    transform: translate(-4px, -140px);
+    transform: translate(-0.25em, -11em);
     opacity: .6;
   }
   
   100% {
-    transform: translate(-6px, -160px);
+    transform: translate(-0.5em, -13em);
     opacity: 0;
   }
 }
