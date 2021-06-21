@@ -114,7 +114,7 @@ export function Settings() {
           >
             <SliderTrack bg="red.100">
               <Box position="relative" right={10} />
-              <SliderFilledTrack bg="orangered" />
+              <SliderFilledTrack bg="brand.orange" />
             </SliderTrack>
             <SliderThumb boxSize={6} />
           </Slider>

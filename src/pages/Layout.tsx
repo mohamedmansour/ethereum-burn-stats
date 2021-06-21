@@ -6,6 +6,7 @@ import {
   Link,
   Box,
   Icon,
+  Heading,
 } from "@chakra-ui/react";
 import * as CSS from "csstype";
 import {
@@ -93,7 +94,7 @@ export function Layout(props: LayoutProps) {
         direction="row"
       >
         <Flex p="1">
-          <HStack p="1">
+          <Flex p="1">
             <Link
               as={ReactLink}
               to="/"
@@ -104,14 +105,11 @@ export function Layout(props: LayoutProps) {
             >
               <HStack cursor="pointer">
                 <FirePit sparkCount={12} size="20px" />
-                <Text color="white">ETH Burn</Text>
+                <Heading size="sm">Watch The <Box display="inline" color="brand.orange">Burn</Box></Heading>
               </HStack>
             </Link>
-            <Badge bg="brand.subheader" color="white">
-              EIP-1559
-            </Badge>
-            <EthereumNetwork />
-          </HStack>
+            <EthereumNetwork ml="4"/>
+          </Flex>
         </Flex>
         <Link as={ReactLink} to="/settings">
           <Icon as={VscSettingsGear} />

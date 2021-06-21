@@ -6,6 +6,7 @@ import {
   Heading,
   HStack,
   Link,
+  Spacer,
   Text,
   Tooltip,
   VStack,
@@ -90,7 +91,7 @@ function CurrentBlock(props: CurrentBlockProps) {
           block={props.block}
           w="90px"
           h="24px"
-          colorScheme="red"
+          colorScheme="orange"
           bg="brand.background"
           isAnimated
           hasStripe={true}
@@ -132,11 +133,14 @@ export function Home() {
       overflowY="auto"
     >
       <VStack zIndex={2} color="brand.primaryText" w={["95%", "90%", "700px"]} pb="100">
-        <Box mb={"4"} textAlign="center">
-          <Heading>Watch The Burn</Heading>
-          <Text>Ethereum's EIP-1559</Text>
+        <HStack mb={"4"} textAlign="left" w="100%" align="flex-end">
+          <Box>
+            <Heading>Watch The <Box display="inline" color="brand.orange">Burn</Box></Heading>
+            <Text>Ethereum's EIP-1559</Text>
+          </Box>
+          <Spacer />
           <EthereumNetwork />
-        </Box>
+        </HStack>
         <Card
           bg="brand.card"
           zIndex={2}
@@ -160,7 +164,7 @@ export function Home() {
             <Text fontSize={["18px", "22px", "32px"]}>
               {totalBurnedDecimalNumber}
             </Text>
-            <Text fontSize={["18px", "22px", "32px"]} color="orangered">
+            <Text fontSize={["18px", "22px", "32px"]} color="brand.orange">
               ETH
             </Text>
           </HStack>
@@ -169,7 +173,7 @@ export function Home() {
           <Heading size="sm" textAlign="center" color="brand.headerText">
             Session Summary
           </Heading>
-          <Text color="brand.secondaryText" textAlign="center" mt="2">You've just experienced <strong>{utils.formatEther(session.burned)} ETH</strong> being burned by observing <strong>{session.blockCount} blocks</strong> that contain <strong>{session.transactionCount} transactions</strong> with <strong>{utils.formatEther(session.rewards)} ETH</strong> rewards!</Text>
+          <Text color="brand.primaryText" textAlign="left" mt="2" p="4">You've just experienced <strong>{utils.formatEther(session.burned)} ETH</strong> being burned by observing <strong>{session.blockCount} blocks</strong> that contain <strong>{session.transactionCount} transactions</strong> with <strong>{utils.formatEther(session.rewards)} ETH</strong> rewards!</Text>
         </Card>
         <Card bg="brand.card" zIndex={2} p="4" w="100%">
           <Heading size="sm" textAlign="center" color="brand.headerText">
@@ -183,20 +187,45 @@ export function Home() {
           {renderedBlocks.map((block, idx) => (
             <BlockItem key={idx} {...block} />
           ))}
+
+          <Divider
+            bg="brand.card"
+            borderColor="brand.card"
+          />
+          
+          <Link
+            as={ReactLink}
+            to="/blocks"
+            mt="4"
+            textAlign="center"
+            zIndex={2}
+            size="sm"
+          >
+            View all blocks
+          </Link>
         </Card>
-        <Link
-          as={ReactLink}
-          to="/blocks"
-          mt="4"
-          textAlign="center"
-          zIndex={2}
-        >
-          View all blocks
-        </Link>
         <Footer />
       </VStack>
+      
       <FirePit
         size="80px"
+        position="fixed"
+        bottom="0"
+        sparkCount={12}
+        zIndex={1}
+      />
+      <FirePit
+        size="40px"
+        position="fixed"
+        ml="-70px"
+        bottom="0"
+        sparkCount={12}
+        zIndex={1}
+      />
+      
+      <FirePit
+        size="40px"
+        ml="70px"
         position="fixed"
         bottom="0"
         sparkCount={12}

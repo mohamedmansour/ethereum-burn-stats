@@ -14,7 +14,8 @@ const theme = extendTheme({
       card: 'rgb(34, 34, 34, 0.6)',
       primaryText: 'white',
       secondaryText: '#7d7d7d',
-      linkColor: 'rgb(0, 108, 190)'
+      linkColor: 'rgb(0, 108, 190)',
+      orange: 'rgb(221, 107, 32)'
     },
   },
 })
