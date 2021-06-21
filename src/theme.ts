@@ -6,7 +6,7 @@ const theme = extendTheme({
       header: 'hsl(0deg 0% 0% / 50%)',
       headerText: '#666',
       subheader: '#333',
-      subheaderCard: 'rgb(34, 34, 34, 0.6)',
+      subheaderCard: 'rgb(12, 12, 12, 0.6)',
       subheaderCardText: 'white',
       background: '#333',
       settings: 'hsl(212deg 21% 32%)',

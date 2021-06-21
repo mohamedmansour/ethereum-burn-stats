@@ -10,13 +10,15 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react";
-import { utils } from "ethers";
+import { ethers, utils } from "ethers";
+import React from "react";
 import { Link as ReactLink } from "react-router-dom";
 import { BlockProgress } from "../components/BlockProgress";
 import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";
 import { Footer } from "../components/Footer";
 import { Loader } from "../components/Loader";
+import { EthereumNetwork } from "../components/Network";
 import {
   BurnedBlockTransaction,
   useBlockExplorer,
@@ -27,14 +29,20 @@ interface BlockItemProps {
   number: number;
   timestamp: number;
   weiBurned: string;
+  weiBaseFee: string;
+  gasLimit: ethers.BigNumber;
+  gasUsed: ethers.BigNumber;
 }
 
 function BlockItem(props: BlockItemProps) {
   const weiBurned = utils.formatUnits(props.weiBurned, "gwei");
+
+  const label = (<Text>Burned: {props.weiBurned} wei<br />Base Fee: {props.weiBaseFee} wei<br />Gas used: {(props.gasUsed.toNumber() / props.gasLimit.toNumber() * 100).toFixed(2)}%</Text>)
+
   return (
     <HStack m="2">
       <Flex flex="1" align="flex-start" direction="column">
-        <Box>Block {props.number}</Box>
+        <Box><Link as={ReactLink} to={`/block/${props.number}`}>Block {props.number}</Link></Box>
         <Box fontSize="14px" mt="0" color="brand.secondaryText">
           {timeSince(props.timestamp)}
         </Box>
@@ -49,7 +57,7 @@ function BlockItem(props: BlockItemProps) {
         align="center"
       >
         <FirePit size="12px" />
-        <Box w="70px"><Tooltip hasArrow label={<Text>Displayed in Gwei</Text>} placement="right">{weiBurned}</Tooltip></Box>
+        <Box w="70px"><Tooltip hasArrow label={label} placement="right">{weiBurned}</Tooltip></Box>
       </HStack>
     </HStack>
   );
@@ -94,11 +102,13 @@ function CurrentBlock(props: CurrentBlockProps) {
 }
 
 export function Home() {
-  const { details, blocks } = useBlockExplorer();
+  const { details, blocks, session } = useBlockExplorer();
 
   if (!details) return <Loader>Loading block details ...</Loader>;
 
   if (!blocks) return <Loader>Loading blocks ...</Loader>;
+
+  if (!session) return <Loader>Loading session ...</Loader>;
 
   const totalBurnedSplitter = details.totalBurned.indexOf(".");
   const totalBurnedWholeNumber = utils.commify(
@@ -109,6 +119,7 @@ export function Home() {
   );
 
   const latestBlock = blocks[0];
+  const renderedBlocks = blocks.slice(0, 5)
 
   return (
     <Center
@@ -124,6 +135,7 @@ export function Home() {
         <Box mb={"4"} textAlign="center">
           <Heading>Watch The Burn</Heading>
           <Text>Ethereum's EIP-1559</Text>
+          <EthereumNetwork />
         </Box>
         <Card
           bg="brand.card"
@@ -152,6 +164,16 @@ export function Home() {
               ETH
             </Text>
           </HStack>
+          <Divider
+            bg="brand.card"
+            borderColor="brand.card"
+          />
+        </Card>
+        <Card>
+          <Heading size="sm" textAlign="center" color="brand.headerText">
+            Session Summary
+          </Heading>
+          <Text color="brand.secondaryText" textAlign="center" mt="2">You've just experienced <strong>{utils.formatEther(session.burned)} ETH</strong> being burned by observing <strong>{session.blockCount} blocks</strong> that contain <strong>{session.transactionCount} transactions</strong> with <strong>{utils.formatEther(session.rewards)} ETH</strong> rewards!</Text>
         </Card>
         <Card bg="brand.card" zIndex={2} p="4" w="100%">
           <Heading size="sm" textAlign="center" color="brand.headerText">
@@ -162,7 +184,7 @@ export function Home() {
             bg="brand.card"
             borderColor="brand.card"
           />
-          {blocks.map((block, idx) => (
+          {renderedBlocks.map((block, idx) => (
             <BlockItem key={idx} {...block} />
           ))}
         </Card>

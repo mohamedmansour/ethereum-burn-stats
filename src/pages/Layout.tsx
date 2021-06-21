@@ -6,20 +6,17 @@ import {
   Link,
   Box,
   Icon,
-  Button,
 } from "@chakra-ui/react";
 import * as CSS from "csstype";
 import {
   VscSettingsGear,
 } from "react-icons/vsc";
-import { SiEthereum } from "react-icons/si";
-import { Link as ReactLink, useHistory } from "react-router-dom";
+import { Link as ReactLink } from "react-router-dom";
 import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
-import { useSetting } from "../hooks/useSetting";
-import { Setting } from "../config";
 import { Footer } from "../components/Footer";
+import { EthereumNetwork } from "../components/Network";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -50,10 +47,10 @@ function DetailSection() {
           bg="brand.subheaderCard"
           color="brand.primaryText"
         >
-          <Text fontSize="md" fontWeight="bold">
+          <Text fontSize="md" fontWeight="bold" color="brand.secondaryText">
             Total Fees Burned
           </Text>
-          <Text variant="solid" colorScheme="green">
+          <Text variant="solid">
             {details.totalBurned} ETH
           </Text>
         </Card>
@@ -64,38 +61,21 @@ function DetailSection() {
           bg="brand.subheaderCard"
           color="brand.primaryText"
         >
-          <Text fontSize="md" fontWeight="bold">
+          <Text fontSize="md" fontWeight="bold" color="brand.secondaryText">
             Block
           </Text>
-          <Text variant="solid" colorScheme="green">
+          <Text variant="solid">
             {details.currentBlock + 1}
           </Text>
-          <Text fontSize="md" fontWeight="bold">
+          <Text fontSize="md" fontWeight="bold" color="brand.secondaryText">
             Gas Price
           </Text>
-          <Text variant="solid" colorScheme="green">
+          <Text variant="solid">
             {details.gasPrice} GWEI
           </Text>
         </Card>
       </Flex>
     </Box>
-  );
-}
-
-function EthereumNetwork() {
-  const history = useHistory()
-  const network = useSetting<string>(Setting.network);
-  return (
-    <Button
-      colorScheme="pink"
-      variant="solid"
-      size="xs"
-      leftIcon={<Icon as={SiEthereum} />}
-      title="Change network"
-      onClick={() => history.push('/settings')}
-    >
-      {network}
-    </Button>
   );
 }
 

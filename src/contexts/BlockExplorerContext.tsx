@@ -12,6 +12,13 @@ export interface BurnedBlockTransaction extends ethers.providers.Block {
   weiBaseFee: string
 }
 
+interface BlockExplorerSession {
+  burned: ethers.BigNumber
+  blockCount: number
+  transactionCount: number
+  rewards: ethers.BigNumber
+}
+
 interface BlockExplorerDetails {
   totalBurned: string
   gasPrice: string
@@ -21,6 +28,7 @@ interface BlockExplorerDetails {
 type BlockExplorerContextType = {
   details?: BlockExplorerDetails,
   blocks?: BurnedBlockTransaction[]
+  session?: BlockExplorerSession
 }
 
 interface NewBlockAction {
@@ -81,30 +89,45 @@ const useBlockExplorer = () => useContext(BlockExplorerContext);
 const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionType): BlockExplorerContextType => {
   switch (action.type) {
     case 'NEW_BLOCK': {
-      if (!state.details || !action.block || !action.details)
+      if (!state.details || !action.block || !action.details || !state.session)
         return state
       
       let totalBurned = state.details.totalBurned
       if (action.block.weiBurned !== '0') {
-        if (totalBurned) {
-          const burnedInBN = ethers.BigNumber.from(action.block.weiBurned)
-          const totalInHex = utils.parseUnits(totalBurned, 'ether')
-          const totalInBN = ethers.BigNumber.from(totalInHex)
-          totalBurned = utils.formatUnits(burnedInBN.add(totalInBN).toHexString(), 'ether')
-        } else {
-          totalBurned = utils.formatUnits(action.block.weiBurned, 'ether')
-        }
+        const burnedInBN = ethers.BigNumber.from(action.block.weiBurned)
+        const totalInBN = utils.parseUnits(totalBurned, 'ether')
+        totalBurned = utils.formatUnits(burnedInBN.add(totalInBN).toHexString(), 'ether')
+        state.session.burned = state.session.burned.add(burnedInBN)
       }
+
+      state.session.rewards = state.session.rewards.add(utils.parseUnits(action.block.ethRewards, 'ether'))
+      state.session.blockCount = state.session.blockCount + 1
+      state.session.transactionCount = state.session.transactionCount + action.block.transactions.length
 
       const newState: BlockExplorerContextType  = {
         details: { ...action.details,  totalBurned },
-        blocks: [action.block, ...((state.blocks || []).slice(0, action.maxBlocksToRender - 1))]
+        blocks: [action.block, ...((state.blocks || []).slice(0, action.maxBlocksToRender - 1))],
+        session: state.session
       }
 
       return newState
     }
     case 'INIT': {
-      return { blocks: action.blocks, details: action.details }
+      const session: BlockExplorerSession = {
+        blockCount: action.blocks.length,
+        burned: ethers.BigNumber.from('0'),
+        rewards: ethers.BigNumber.from('0'),
+        transactionCount: 0
+      }
+
+      
+      action.blocks.forEach(block => {
+        session.transactionCount += block.transactions.length
+        session.burned = utils.parseUnits(block.weiBurned, 'wei').add(session.burned)
+        session.rewards = utils.parseUnits(block.ethRewards, 'ether').add(session.rewards)
+      })
+
+      return { blocks: action.blocks, details: action.details, session }
     }
     default:
       return state
