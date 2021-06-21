@@ -51,14 +51,14 @@ export function Settings() {
           >
             <HStack>
               <Radio value="calaveras">Calaveras (devnet)</Radio>
-              <Radio value="ropsten" disabled>Ropsten (testnet)</Radio>
-              <Radio value="goerli" disabled>
+              <Radio value="ropsten" isDisabled>Ropsten (testnet)</Radio>
+              <Radio value="goerli" isDisabled>
                 Goerli (testnet)
               </Radio>
-              <Radio value="rinkeby" disabled>
+              <Radio value="rinkeby" isDisabled>
                 Rinkeby (testnet)
               </Radio>
-              <Radio value="mainnet" disabled>
+              <Radio value="mainnet" isDisabled>
                 Mainnet
               </Radio>
             </HStack>
