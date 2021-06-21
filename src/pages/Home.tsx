@@ -91,11 +91,6 @@ function CurrentBlock(props: CurrentBlockProps) {
           block={props.block}
           w="90px"
           h="24px"
-          colorScheme="orange"
-          bg="brand.background"
-          isAnimated
-          hasStripe={true}
-          rounded="full"
         />
       </HStack>
     </HStack>

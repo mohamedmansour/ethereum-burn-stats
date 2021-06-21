@@ -119,15 +119,7 @@ export function EthBlockList() {
             <Tr whiteSpace="nowrap">
               <Td>{details.currentBlock + 1}</Td>
               <Td colSpan={7}>
-                <BlockProgress
-                  totalSecondsPerBlock={30}
-                  block={latestBlock}
-                  colorScheme="red"
-                  bg="brand.background"
-                  isAnimated
-                  hasStripe={true}
-                  rounded="full"
-                />
+                <BlockProgress totalSecondsPerBlock={30} block={latestBlock} />
               </Td>
             </Tr>
             {blocks.map((block, idx) => (

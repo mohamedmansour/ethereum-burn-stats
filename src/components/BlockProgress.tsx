@@ -12,26 +12,44 @@ interface ProgressOptions {
   isIndeterminate?: boolean;
 }
 
-export interface BlockProgressProps extends HTMLChakraProps<"header">, ProgressOptions {
-  totalSecondsPerBlock: number
-  block: BurnedBlockTransaction
+export interface BlockProgressProps
+  extends HTMLChakraProps<"header">,
+    ProgressOptions {
+  totalSecondsPerBlock: number;
+  block: BurnedBlockTransaction;
 }
 
 export const BlockProgress = forwardRef<BlockProgressProps, "div">(
-    (props: BlockProgressProps, ref: React.ForwardedRef<any>) => {
-  const [value, setValue] = useState(0);
-  const { block, totalSecondsPerBlock, ...rest } = props
+  (props: BlockProgressProps, ref: React.ForwardedRef<any>) => {
+    const [value, setValue] = useState(0);
+    const { block, totalSecondsPerBlock, ...rest } = props;
 
-  useEffect(() => {
-    const timeDiffInSeconds = Math.max(0, Math.floor(Date.now() / 1000) - block.timestamp)
-    setValue(timeDiffInSeconds)
+    useEffect(() => {
+      const timeDiffInSeconds = Math.max(
+        0,
+        Math.floor(Date.now() / 1000) - block.timestamp
+      );
+      setValue(timeDiffInSeconds);
 
-    const interval = window.setInterval(() => {
-      setValue((value) => value + 1);
-    }, 1000);
+      const interval = window.setInterval(() => {
+        setValue((value) => value + 1);
+      }, 1000);
 
-    return () => clearInterval(interval)
-  }, [block]);
+      return () => clearInterval(interval);
+    }, [block]);
 
-  return <Progress size="xs" value={value} max={totalSecondsPerBlock} {...rest} />;
-});
+    return (
+      <Progress
+        size="xs"
+        colorScheme="orange"
+        bg="brand.background"
+        isAnimated
+        hasStripe={true}
+        rounded="full"
+        value={value}
+        max={totalSecondsPerBlock}
+        {...rest}
+      />
+    );
+  }
+);

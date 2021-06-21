@@ -2,7 +2,6 @@ import {
   Flex,
   HStack,
   Text,
-  Badge,
   Link,
   Box,
   Icon,
