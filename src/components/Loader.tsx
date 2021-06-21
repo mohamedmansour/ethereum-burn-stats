@@ -8,7 +8,7 @@ interface LoaderProps {
 
 export function Loader(props: LoaderProps) {
   return (
-    <Center h="100vh" color="black">
+    <Center h="100vh" color="brand.primaryText">
       <VStack>
         <FirePit sparkCount={10} size="50px"/>
         <Text>{props.children}</Text>

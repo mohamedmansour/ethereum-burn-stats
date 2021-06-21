@@ -5,15 +5,19 @@ import {
   SliderFilledTrack,
   SliderThumb,
   SliderTrack,
-  VStack,
   Heading,
   HStack,
   Radio,
   RadioGroup,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  Text,
+  Flex,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link as ReactLink } from "react-router-dom";
 import { Card } from "../components/Card";
-import { PageTitle } from "../components/PageTitle";
 import { Setting } from "../config";
 import { useSettings } from "../contexts/SettingsContext";
 import { debounce } from "../utils/debounce";
@@ -39,10 +43,21 @@ export function Settings() {
   );
 
   return (
-    <VStack align="flex-start" p="4" gridGap="4">
-      <PageTitle title="Settings" />
+    <Flex flex="1" m={8} mt={0} direction="column" gridGap={8}>
+      <Breadcrumb>
+        <BreadcrumbItem fontSize="lg" fontWeight="bold">
+          <BreadcrumbLink as={ReactLink} to="/blocks">
+            Home
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <Text>Settings</Text>
+        </BreadcrumbItem>
+      </Breadcrumb>
       <Box w="100%">
-        <Heading size="sm">Ethereum Network</Heading>
+        <Heading size="sm" color="brand.secondaryText">
+          Ethereum Network
+        </Heading>
         <Card mt="2">
           <RadioGroup
             onChange={(e) => settings.set(Setting.network, e)}
@@ -51,7 +66,9 @@ export function Settings() {
           >
             <HStack>
               <Radio value="calaveras">Calaveras (devnet)</Radio>
-              <Radio value="ropsten" isDisabled>Ropsten (testnet)</Radio>
+              <Radio value="ropsten" isDisabled>
+                Ropsten (testnet)
+              </Radio>
               <Radio value="goerli" isDisabled>
                 Goerli (testnet)
               </Radio>
@@ -67,7 +84,9 @@ export function Settings() {
       </Box>
 
       <Box w="100%">
-        <Heading size="sm">Gwei or Wei</Heading>
+        <Heading size="sm" color="brand.secondaryText">
+          Gwei or Wei
+        </Heading>
         <Card mt="2">
           <Checkbox
             colorScheme="red"
@@ -91,7 +110,9 @@ export function Settings() {
       </Box>
 
       <Box w="100%">
-        <Heading size="sm">Max Blocks to Render ({maxBlocks} blocks)</Heading>
+        <Heading size="sm" color="brand.secondaryText">
+          Max Blocks to Render ({maxBlocks} blocks)
+        </Heading>
         <Card mt="2">
           <Slider
             min={0}
@@ -102,12 +123,12 @@ export function Settings() {
           >
             <SliderTrack bg="red.100">
               <Box position="relative" right={10} />
-              <SliderFilledTrack bg="tomato" />
+              <SliderFilledTrack bg="orangered" />
             </SliderTrack>
             <SliderThumb boxSize={6} />
           </Slider>
         </Card>
       </Box>
-    </VStack>
+    </Flex>
   );
 }

@@ -1,11 +1,10 @@
-import { Heading, Text, VStack } from "@chakra-ui/react";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Heading, Text, VStack } from "@chakra-ui/react";
 import { utils } from "ethers";
 import { useState } from "react";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link as ReactLink } from "react-router-dom";
 import { Card } from "../components/Card";
 import { Loader } from "../components/Loader";
-import { PageTitle } from "../components/PageTitle";
 import { useEthereum } from "../contexts/EthereumContext";
 
 export function EthAccountDetail() {
@@ -26,8 +25,17 @@ export function EthAccountDetail() {
   }
 
   return (
-    <VStack m="4" mt="0" align="flex-start" h="100%">
-      <PageTitle title="Account" subtitle={id} />
+    <VStack m="8" mt="0" align="flex-start" h="100%">
+      <Breadcrumb>
+        <BreadcrumbItem fontSize="lg" fontWeight="bold">
+          <BreadcrumbLink as={ReactLink} to="/blocks">
+            Home
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <Text>Account {id} </Text>
+        </BreadcrumbItem>
+      </Breadcrumb>
       <Card overflow="auto" w="100%">
         <Heading size="sm">Balance:</Heading>
         <Text>{balance} ETH</Text>

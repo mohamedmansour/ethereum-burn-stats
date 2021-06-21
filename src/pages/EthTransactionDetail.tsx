@@ -6,6 +6,10 @@ import {
   Link,
   Code,
   VStack,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  Text,
 } from "@chakra-ui/react";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { utils } from "ethers";
@@ -14,7 +18,6 @@ import { useEffect } from "react";
 import { Link as ReactLink, useParams } from "react-router-dom";
 import { Card } from "../components/Card";
 import { Loader } from "../components/Loader";
-import { PageTitle } from "../components/PageTitle";
 import { useEthereum } from "../contexts/EthereumContext";
 
 export function EthTransactionDetail() {
@@ -35,16 +38,25 @@ export function EthTransactionDetail() {
   }
 
   return (
-    <VStack overflow="hidden" m="4" mt="0" align="flex-start" h="100%">
-      <PageTitle title="Transaction" subtitle={id} />
+    <VStack overflow="hidden" m="8" mt="0" align="flex-start" h="100%">+
+      <Breadcrumb>
+        <BreadcrumbItem fontSize="lg" fontWeight="bold">
+          <BreadcrumbLink as={ReactLink} to="/blocks">
+            Home
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <Text>Transaction {id} </Text>
+        </BreadcrumbItem>
+      </Breadcrumb>
       <Card overflow="auto" flex="1" w="100%">
-        <Table>
+        <Table colorScheme="whiteAlpha">
           <Tbody>
             <Tr>
-              <Td>From</Td>
+              <Td color="brand.secondaryText">From</Td>
               <Td>
                 <Link
-                  color="blue"
+                  color="brand.linkColor"
                   to={`/account/${transaction.from}`}
                   as={ReactLink}
                 >
@@ -53,10 +65,10 @@ export function EthTransactionDetail() {
               </Td>
             </Tr>
             <Tr>
-              <Td>To</Td>
+              <Td color="brand.secondaryText">To</Td>
               <Td>
                 <Link
-                  color="blue"
+                  color="brand.linkColor"
                   to={`/account/${transaction.to}`}
                   as={ReactLink}
                 >
@@ -65,14 +77,14 @@ export function EthTransactionDetail() {
               </Td>
             </Tr>
             <Tr>
-              <Td>Confirmations</Td>
+              <Td color="brand.secondaryText">Confirmations</Td>
               <Td>{transaction.confirmations}</Td>
             </Tr>
             <Tr>
-              <Td>Block Number</Td>
+              <Td color="brand.secondaryText">Block Number</Td>
               <Td>
                 <Link
-                  color="blue"
+                  color="brand.linkColor"
                   to={`/block/${transaction.blockNumber}`}
                   as={ReactLink}
                 >
@@ -81,37 +93,37 @@ export function EthTransactionDetail() {
               </Td>
             </Tr>
             <Tr>
-              <Td>Gas Limit (Wei)</Td>
+              <Td color="brand.secondaryText">Gas Limit (Wei)</Td>
               <Td>{utils.formatUnits(transaction.gasLimit, "wei")}</Td>
             </Tr>
             <Tr>
-              <Td>Gas Price (Wei)</Td>
+              <Td color="brand.secondaryText">Gas Price (Wei)</Td>
               <Td>{utils.formatUnits(transaction.gasPrice, "wei")}</Td>
             </Tr>
             <Tr>
-              <Td>Value (Wei)</Td>
+              <Td color="brand.secondaryText">Value (Wei)</Td>
               <Td>{utils.formatUnits(transaction.value, "wei")}</Td>
             </Tr>
             <Tr>
-              <Td>Data</Td>
+              <Td color="brand.secondaryText">Data</Td>
               <Td>
                 <Code w="50vw">{transaction.data}</Code>
               </Td>
             </Tr>
             <Tr>
-              <Td>s</Td>
+              <Td color="brand.secondaryText">s</Td>
               <Td>{transaction.s}</Td>
             </Tr>
             <Tr>
-              <Td>r</Td>
+              <Td color="brand.secondaryText">r</Td>
               <Td>{transaction.r}</Td>
             </Tr>
             <Tr>
-              <Td>v</Td>
+              <Td color="brand.secondaryText">v</Td>
               <Td>{transaction.v}</Td>
             </Tr>
             <Tr>
-              <Td>Type</Td>
+              <Td color="brand.secondaryText">Type</Td>
               <Td>{transaction.type}</Td>
             </Tr>
           </Tbody>

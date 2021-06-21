@@ -18,6 +18,10 @@ import {
   TabPanels,
   TabPanel,
   HStack,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  Flex,
 } from "@chakra-ui/react";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { utils } from "ethers";
@@ -28,12 +32,12 @@ import { Loader } from "../components/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
 import { useSetting } from "../hooks/useSetting";
 import { Card } from "../components/Card";
-import { PageTitle } from "../components/PageTitle";
 import {
   BlockExplorerApi,
   BurnedBlockTransaction,
 } from "../contexts/BlockExplorerContext";
 import { Setting } from "../config";
+import { FirePit } from "../components/FirePit";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;
@@ -90,7 +94,7 @@ export function EthBlockDetail() {
 
   const onBeforeRender = state.onBeforeRender ? (
     <Button
-      colorScheme="blackAlpha"
+      colorScheme="whiteAlpha"
       variant="ghost"
       onClick={() => history.push(`/block/${parseInt(id) - 1}`)}
     >
@@ -106,7 +110,7 @@ export function EthBlockDetail() {
 
   const onAfterRender = state.onAfterRender ? (
     <Button
-      colorScheme="blackAlpha"
+      colorScheme="whiteAlpha"
       variant="ghost"
       onClick={() => history.push(`/block/${parseInt(id) + 1}`)}
     >
@@ -126,14 +130,19 @@ export function EthBlockDetail() {
   };
 
   return (
-    <VStack m="4" mt="0" pt="1" pl="1" align="flex-start" h="100%">
-      <PageTitle
-        title="Block"
-        subtitle={"#" + id}
-        beforeRender={onBeforeRender}
-        afterRender={onAfterRender}
-      />
-      <Tabs variant="soft-rounded" pl="4">
+    <Flex flex="1" m={8} mt={0} direction="column">
+      <Breadcrumb>
+        <BreadcrumbItem fontSize="lg" fontWeight="bold">
+          <BreadcrumbLink as={ReactLink} to="/blocks">
+            Home
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <Text>Block {onBeforeRender}{"#" + id}{onAfterRender}</Text>
+        </BreadcrumbItem>
+      </Breadcrumb>
+      
+      <Tabs variant="soft-rounded" colorScheme="whiteAlpha">
         <TabList mb="4">
           <Tab>Overview</Tab>
           <Tab>Transactions</Tab>
@@ -155,7 +164,7 @@ export function EthBlockDetail() {
               </Card>
               <Card {...infoCardStyle}>
                 <VStack>
-                  <Heading size="sm">Burned</Heading>
+                  <Heading size="sm"><HStack><Text>Burned</Text><FirePit size="12px" /></HStack></Heading>
                   <Text>{utils.commify(block.weiBurned)}</Text>
                 </VStack>
               </Card>
@@ -163,23 +172,23 @@ export function EthBlockDetail() {
             <Card mt="4">
               <Heading size="sm">Info</Heading>
               <Grid templateColumns="150px auto" gap={4} p="2">
-                <Text size="sm">Timestamp:</Text>
+                <Text color="brand.secondaryText">Timestamp:</Text>
                 <Text>{block.timestamp}</Text>
-                <Text>Mined by:</Text>
+                <Text color="brand.secondaryText">Mined by:</Text>
                 <Text>{block.miner}</Text>
-                <Text>Burned:</Text>
+                <Text color="brand.secondaryText">Burned:</Text>
                 <Text>{utils.commify(block.weiBurned)}</Text>
-                <Text>Difficulty:</Text>
+                <Text color="brand.secondaryText">Difficulty:</Text>
                 <Text>{utils.commify(block.difficulty)}</Text>
-                <Text>Gas used:</Text>
+                <Text color="brand.secondaryText">Gas used:</Text>
                 <Text>
                   {utils.commify(utils.formatUnits(block.gasUsed, "wei"))}
                 </Text>
-                <Text>Gas limit:</Text>
+                <Text color="brand.secondaryText">Gas limit:</Text>
                 <Text>
                   {utils.commify(utils.formatUnits(block.gasLimit, "wei"))}
                 </Text>
-                <Text>Extra data:</Text>
+                <Text color="brand.secondaryText">Extra data:</Text>
                 <Text isTruncated>{block.extraData}</Text>
               </Grid>
             </Card>
@@ -188,13 +197,13 @@ export function EthBlockDetail() {
             <Card>
               {transactions.length === 0 && <Text>No Transactions</Text>}
               {transactions.length !== 0 && (
-                <Table w="100%">
+                <Table w="100%" colorScheme="whiteAlpha">
                   <Thead>
                     <Tr whiteSpace="nowrap">
-                      <Th>Confirmations</Th>
-                      <Th>Tx</Th>
-                      <Th>Value</Th>
-                      <Th>Gas Price</Th>
+                      <Th color="brand.secondaryText">Confirmations</Th>
+                      <Th color="brand.secondaryText">Tx</Th>
+                      <Th color="brand.secondaryText">Value</Th>
+                      <Th color="brand.secondaryText">Gas Price</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
@@ -203,7 +212,7 @@ export function EthBlockDetail() {
                         <Td>{t.confirmations}</Td>
                         <Td>
                           <Link
-                            color="blue"
+                            color="brand.linkColor"
                             to={`/transaction/${t.hash}`}
                             as={ReactLink}
                           >
@@ -226,6 +235,6 @@ export function EthBlockDetail() {
           </TabPanel>
         </TabPanels>
       </Tabs>
-    </VStack>
+    </Flex>
   );
 }

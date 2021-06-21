@@ -15,29 +15,28 @@ interface PageTitleProps extends HTMLChakraProps<"header"> {
 }
 
 export const PageTitle = forwardRef<PageTitleProps, "div">(
-  (props: PageTitleProps, ref: React.ForwardedRef<any>) => {
-    const {
-      title,
-      subtitle,
-      beforeRender,
-      afterRender,
-      ...rest
-    } = props
+    (props: PageTitleProps, ref: React.ForwardedRef<any>) => {
+  const {
+    title,
+    subtitle,
+    beforeRender,
+    afterRender,
+    ...rest
+  } = props
 
-    const styles = {
-      title: props.title,
-      subtitle: props.subtitle,
-      beforeRender: props.beforeRender,
-      afterRender: props.afterRender
-    }
-
-    return (
-      <HStack ref={ref} {...rest}>
-        {styles.beforeRender && styles.beforeRender}
-        <Heading size="md">{styles.title}</Heading>
-        {styles.subtitle && (<Text>{styles.subtitle}</Text>)}
-        {styles.afterRender && styles.afterRender}
-      </HStack>
-    );
+  const styles = {
+    title: title,
+    subtitle: subtitle,
+    beforeRender: beforeRender,
+    afterRender: afterRender
   }
-);
+
+  return (
+    <HStack ref={ref} {...rest}>
+      <Heading size="md">{styles.title}</Heading>
+      {styles.beforeRender && styles.beforeRender}
+      {styles.subtitle && (<Text>{styles.subtitle}</Text>)}
+      {styles.afterRender && styles.afterRender}
+    </HStack>
+  );
+});

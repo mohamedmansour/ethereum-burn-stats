@@ -4,17 +4,13 @@ import {
   Text,
   Badge,
   Link,
-  Spacer,
   Box,
   Icon,
   Button,
 } from "@chakra-ui/react";
 import * as CSS from "csstype";
 import {
-  VscGithub,
-  VscHeart,
   VscSettingsGear,
-  VscTwitter,
 } from "react-icons/vsc";
 import { SiEthereum } from "react-icons/si";
 import { Link as ReactLink, useHistory } from "react-router-dom";
@@ -23,6 +19,7 @@ import { FirePit } from "../components/FirePit";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { useSetting } from "../hooks/useSetting";
 import { Setting } from "../config";
+import { Footer } from "../components/Footer";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -42,7 +39,8 @@ function DetailSection() {
         justify="flex-start"
         whiteSpace="nowrap"
         gridGap={4}
-        p={4}
+        p={8}
+        pb={2}
         direction={["column", "column", "row"]}
       >
         <Card
@@ -50,7 +48,7 @@ function DetailSection() {
           gridGap={4}
           p={2}
           bg="brand.subheaderCard"
-          color="brand.subheaderCardText"
+          color="brand.primaryText"
         >
           <Text fontSize="md" fontWeight="bold">
             Total Fees Burned
@@ -64,7 +62,7 @@ function DetailSection() {
           gridGap={4}
           p={2}
           bg="brand.subheaderCard"
-          color="brand.subheaderCardText"
+          color="brand.primaryText"
         >
           <Text fontSize="md" fontWeight="bold">
             Block
@@ -150,50 +148,7 @@ export function Layout(props: LayoutProps) {
       >
         {props.children}
       </Flex>
-      <Flex
-        alignItems="center"
-        justifyContent="center"
-        bg="gray.100"
-        boxShadow="md"
-        p="2"
-        gridGap={[0, 0, 8]}
-        whiteSpace="nowrap"
-        direction={["column", "column", "row"]}
-      >
-        <HStack gridGap="8">
-          <Link color="teal.500" href="https://twitter.com/mohamedmansour">
-            <HStack>
-              <VscTwitter title="Follow Mohamed Mansour on Twitter" />
-              <Text>@mohamedmansour</Text>
-            </HStack>
-          </Link>
-          <Link color="teal.500" href="https://twitter.com/vdWijden">
-            <HStack>
-              <VscTwitter title="Follow Marius Van Der Wijdenme on Twitter" />
-              <Text>@vdWijden</Text>
-            </HStack>
-          </Link>
-        </HStack>
-        <Link
-          color="teal.500"
-          href="https://github.com/mohamedmansour/eth-burn"
-        >
-          <HStack>
-            <VscGithub title="View source code on GitHub" />
-            <Text>Source code on GitHub, contribute!</Text>
-          </HStack>
-        </Link>
-        <Spacer />
-        <Link
-          color="teal.500"
-          href="https://github.com/mohamedmansour/eth-burn/blob/main/README.md"
-        >
-          <HStack>
-            <VscHeart />
-            <Text>Help support server costs</Text>
-          </HStack>
-        </Link>
-      </Flex>
+      <Footer />
     </Flex>
   );
 }
