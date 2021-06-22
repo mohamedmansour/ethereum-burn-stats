@@ -35,9 +35,11 @@ function DetailSection() {
         flex="1"
         justify="flex-start"
         whiteSpace="nowrap"
-        gridGap={4}
-        p={8}
-        pb={2}
+        gridGap={[2, 3, 4]}
+        pl={[2, 3, 8]}
+        pr={[2, 4, 8]}
+        pt={[2, 3, 4]}
+        pb={[2, 3, 4]}
         direction={["column", "column", "row"]}
       >
         <Card
@@ -121,7 +123,8 @@ export function Layout(props: LayoutProps) {
         w="100%"
         flexDir={props.direction}
         bg="brand.background"
-        pt="4"
+        pl={[2, 3, 8]}
+        pr={[2, 3, 8]}
       >
         {props.children}
       </Flex>

@@ -5,8 +5,9 @@ import { ImHeart } from "react-icons/im";
 export function Footer() {
   return (
     <Flex
-      justifyContent="center"
+      align="center" justify="center"
       gridGap={[0, 0, 8]}
+      mb="4"
       color="#666"
       direction={["column", "column", "row"]}
     >

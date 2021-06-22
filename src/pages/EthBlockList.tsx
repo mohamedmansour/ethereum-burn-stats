@@ -81,7 +81,7 @@ export function EthBlockList() {
 
   const latestBlock = blocks[0];
   return (
-    <Flex flex="1" m={8} mt={0} direction="column" overflow="auto">
+    <Flex flex="1" direction="column" overflow="auto">
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">

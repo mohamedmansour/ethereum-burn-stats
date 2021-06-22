@@ -38,7 +38,7 @@ export function EthTransactionDetail() {
   }
 
   return (
-    <VStack overflow="hidden" m="8" mt="0" align="flex-start" h="100%">+
+    <VStack overflow="hidden" align="flex-start" h="100%">+
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">
@@ -54,7 +54,7 @@ export function EthTransactionDetail() {
           <Tbody>
             <Tr>
               <Td color="brand.secondaryText">From</Td>
-              <Td>
+              <Td isTruncated>
                 <Link
                   color="brand.linkColor"
                   to={`/account/${transaction.from}`}
@@ -77,7 +77,7 @@ export function EthTransactionDetail() {
               </Td>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Confirmations</Td>
+              <Td color="brand.secondaryText">Confs</Td>
               <Td>{transaction.confirmations}</Td>
             </Tr>
             <Tr>
@@ -112,7 +112,7 @@ export function EthTransactionDetail() {
             </Tr>
             <Tr>
               <Td color="brand.secondaryText">s</Td>
-              <Td>{transaction.s}</Td>
+              <Td  wordBreak="break-all">{transaction.s}</Td>
             </Tr>
             <Tr>
               <Td color="brand.secondaryText">r</Td>

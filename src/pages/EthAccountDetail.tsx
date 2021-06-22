@@ -25,7 +25,7 @@ export function EthAccountDetail() {
   }
 
   return (
-    <VStack m="8" mt="0" align="flex-start" h="100%">
+    <VStack align="flex-start" h="100%">
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">

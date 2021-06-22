@@ -128,13 +128,13 @@ export function Home() {
       overflowY="auto"
     >
       <VStack zIndex={2} color="brand.primaryText" w={["95%", "90%", "700px"]} pb="100">
-        <HStack mb={"4"} textAlign="left" w="100%" align="flex-end">
+        <HStack mt="2" mb="2" textAlign="left" w="100%" position="relative">
           <Box>
             <Heading>Watch The <Box display="inline" color="brand.orange">Burn</Box></Heading>
             <Text>Ethereum's EIP-1559</Text>
           </Box>
           <Spacer />
-          <EthereumNetwork />
+          <EthereumNetwork position="absolute" bottom="0" right="0" />
         </HStack>
         <Card
           bg="brand.card"

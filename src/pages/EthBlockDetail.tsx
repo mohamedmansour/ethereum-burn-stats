@@ -22,6 +22,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   Flex,
+  GridItem,
 } from "@chakra-ui/react";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { utils } from "ethers";
@@ -124,13 +125,8 @@ export function EthBlockDetail() {
     </Button>
   ) : undefined;
 
-  const infoCardStyle = {
-    h: "100%",
-    minW: "200px",
-  };
-
   return (
-    <Flex flex="1" m={8} mt={0} direction="column">
+    <Flex flex="1" direction="column">
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">
@@ -138,10 +134,14 @@ export function EthBlockDetail() {
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbItem isCurrentPage>
-          <Text>Block {onBeforeRender}{"#" + id}{onAfterRender}</Text>
+          <Text>
+            Block {onBeforeRender}
+            {"#" + id}
+            {onAfterRender}
+          </Text>
         </BreadcrumbItem>
       </Breadcrumb>
-      
+
       <Tabs variant="soft-rounded" colorScheme="whiteAlpha">
         <TabList mb="4">
           <Tab>Overview</Tab>
@@ -149,33 +149,47 @@ export function EthBlockDetail() {
         </TabList>
         <TabPanels>
           <TabPanel p="0">
-            <HStack h="100%">
-              <Card {...infoCardStyle}>
-                <VStack>
-                  <Heading size="sm">Block Reward</Heading>
-                  <Text>{block.ethRewards} ETH</Text>
-                </VStack>
-              </Card>
-              <Card {...infoCardStyle}>
-                <VStack>
-                  <Heading size="sm">Base Fee</Heading>
-                  <Text>{utils.commify(block.weiBaseFee)}</Text>
-                </VStack>
-              </Card>
-              <Card {...infoCardStyle}>
-                <VStack>
-                  <Heading size="sm"><HStack><Text>Burned</Text><FirePit size="12px" /></HStack></Heading>
-                  <Text>{utils.commify(block.weiBurned)}</Text>
-                </VStack>
-              </Card>
-            </HStack>
+            <Grid
+              templateColumns={["repeat(2, 1fr)", "repeat(3, 1fr)"]}
+              gridGap="4"
+            >
+              <GridItem colSpan={1}>
+                <Card>
+                  <VStack>
+                    <Heading size="sm">Block Reward</Heading>
+                    <Text>{block.ethRewards} ETH</Text>
+                  </VStack>
+                </Card>
+              </GridItem>
+              <GridItem colSpan={1}>
+                <Card>
+                  <VStack>
+                    <Heading size="sm">Base Fee</Heading>
+                    <Text>{utils.commify(block.weiBaseFee)}</Text>
+                  </VStack>
+                </Card>
+              </GridItem>
+              <GridItem colSpan={[2, 1]}>
+                <Card>
+                  <VStack>
+                    <Heading size="sm">
+                      <HStack>
+                        <Text>Burned</Text>
+                        <FirePit size="12px" />
+                      </HStack>
+                    </Heading>
+                    <Text>{utils.commify(block.weiBurned)}</Text>
+                  </VStack>
+                </Card>
+              </GridItem>
+            </Grid>
             <Card mt="4">
               <Heading size="sm">Info</Heading>
-              <Grid templateColumns="150px auto" gap={4} p="2">
+              <Grid templateColumns={["auto", "150px auto"]} gap={4} p="2">
                 <Text color="brand.secondaryText">Timestamp:</Text>
                 <Text>{block.timestamp}</Text>
                 <Text color="brand.secondaryText">Mined by:</Text>
-                <Text>{block.miner}</Text>
+                <Text isTruncated>{block.miner}</Text>
                 <Text color="brand.secondaryText">Burned:</Text>
                 <Text>{utils.commify(block.weiBurned)}</Text>
                 <Text color="brand.secondaryText">Difficulty:</Text>
@@ -189,18 +203,18 @@ export function EthBlockDetail() {
                   {utils.commify(utils.formatUnits(block.gasLimit, "wei"))}
                 </Text>
                 <Text color="brand.secondaryText">Extra data:</Text>
-                <Text isTruncated>{block.extraData}</Text>
+                <Text wordBreak="break-all">{block.extraData}</Text>
               </Grid>
             </Card>
           </TabPanel>
           <TabPanel p="0">
-            <Card>
+            <Card overflow="hidden">
               {transactions.length === 0 && <Text>No Transactions</Text>}
               {transactions.length !== 0 && (
                 <Table w="100%" colorScheme="whiteAlpha">
                   <Thead>
                     <Tr whiteSpace="nowrap">
-                      <Th color="brand.secondaryText">Confirmations</Th>
+                      <Th color="brand.secondaryText">Confs</Th>
                       <Th color="brand.secondaryText">Tx</Th>
                       <Th color="brand.secondaryText">Value</Th>
                       <Th color="brand.secondaryText">Gas Price</Th>
@@ -208,19 +222,31 @@ export function EthBlockDetail() {
                   </Thead>
                   <Tbody>
                     {transactions.map((t, idx) => (
-                      <Tr whiteSpace="nowrap" key={idx}>
-                        <Td>{t.confirmations}</Td>
-                        <Td>
+                      <Tr key={idx}>
+                        <Td width="10%">{t.confirmations}</Td>
+                        <Td
+                          width="100%"
+                          position="relative"
+                          display="flex"
+                          align="center"
+                        >
                           <Link
                             color="brand.linkColor"
                             to={`/transaction/${t.hash}`}
                             as={ReactLink}
+                            overflow="hidden"
+                            isTruncated
+                            position="absolute"
+                            left="0"
+                            right="0"
                           >
                             {t.hash}
                           </Link>
                         </Td>
-                        <Td>{utils.formatEther(t.value)} Ether</Td>
-                        <Td>
+                        <Td whiteSpace="nowrap" width="10%">
+                          {utils.formatEther(t.value)} Eth
+                        </Td>
+                        <Td width="10%">
                           {utils.formatUnits(
                             t.gasPrice,
                             formatBurnInGwei ? "gwei" : "wei"

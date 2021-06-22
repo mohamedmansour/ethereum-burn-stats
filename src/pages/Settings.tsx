@@ -42,7 +42,7 @@ export function Settings() {
   );
 
   return (
-    <Flex flex="1" m={8} mt={0} direction="column" gridGap={8}>
+    <Flex flex="1" direction="column" gridGap={4}>
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">
