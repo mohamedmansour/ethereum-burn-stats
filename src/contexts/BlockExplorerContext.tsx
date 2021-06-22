@@ -173,7 +173,7 @@ const BlockExplorerProvider = ({
     }
 
     (async () => {
-      const blocks = await prefetchBlockHeaders(maxBlocksToRender)
+      const blocks = await prefetchBlockHeaders(5 /* Ease the server a bit so only 5 initial */)
       if (blocks.length) {
         const details = await BlockExplorerApi.fetchDetails(eth, blocks[0].number)
         dispatch({ type: 'INIT', details, blocks })
@@ -187,7 +187,7 @@ const BlockExplorerProvider = ({
   return (
     <BlockExplorerContext.Provider
       value={state}>
-      {state.blocks ? children : <Loader>Retrieving {maxBlocksToRender} blocks</Loader>}
+      {state.blocks ? children : <Loader>Retrieving blocks</Loader>}
     </BlockExplorerContext.Provider>
   )
 }

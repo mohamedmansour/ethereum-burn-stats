@@ -106,7 +106,7 @@ export function Settings() {
         </Heading>
         <Card mt="2">
           <Slider
-            min={0}
+            min={5}
             defaultValue={maxBlocks}
             max={50}
             step={5}
