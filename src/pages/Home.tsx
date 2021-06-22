@@ -201,31 +201,28 @@ export function Home() {
         </Card>
         <Footer />
       </VStack>
-      
-      <FirePit
-        size="80px"
-        position="fixed"
-        bottom="0"
-        sparkCount={12}
-        zIndex={1}
-      />
-      <FirePit
-        size="40px"
-        position="fixed"
-        ml="-70px"
-        bottom="0"
-        sparkCount={12}
-        zIndex={1}
-      />
-      
-      <FirePit
-        size="40px"
-        ml="70px"
-        position="fixed"
-        bottom="0"
-        sparkCount={12}
-        zIndex={1}
-      />
+      <Center position="fixed" bottom="0" fontSize={["50px", "80px","100px"]}>
+        <FirePit
+          size="0.8em"
+          sparkCount={12}
+          zIndex={1}
+          position="absolute" bottom="0"
+        />
+        <FirePit
+          size="0.4em"
+          ml="-1.8em"
+          sparkCount={12}
+          zIndex={1}
+          position="absolute" bottom="0"
+        />
+        <FirePit
+          size="0.4em"
+          ml="1.8em"
+          sparkCount={12}
+          zIndex={1}
+          position="absolute" bottom="0"
+        />
+      </Center>
     </Center>
   );
 }
