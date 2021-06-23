@@ -59,9 +59,8 @@ export const BlockExplorerApi = {
     }
   },
   fetchBlock: async (eth:  EthereumApi, blockNumber: number): Promise<BurnedBlockTransaction | undefined> => {
-    const blockNumberInHex = utils.hexlify(blockNumber)
+    const blockNumberInHex = `0x${blockNumber.toString(16)}` // utils.hexlify adds padded 0's for some strange reason.
     const block = await eth.getBlock(blockNumber)
-
     if (block) {
       const rewards = ethers.BigNumber.from(await eth.getBlockReward(blockNumberInHex))
       const basefee = ethers.BigNumber.from(await eth.getBaseFeePerGas(blockNumberInHex))
