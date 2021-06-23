@@ -80,6 +80,7 @@ export function EthBlockDetail() {
       const latestBlockNumber = await eth.getBlockNumber();
       const blockTransactions = await eth.getBlockWithTransactions(blockNumber);
       const block = await BlockExplorerApi.fetchBlock(eth, blockNumber);
+      
       dispatch({
         type: "UPDATE",
         block: block,
@@ -160,7 +161,7 @@ export function EthBlockDetail() {
                 <Card>
                   <VStack>
                     <Heading size="sm">Block Reward</Heading>
-                    <Text>{utils.commify(utils.formatUnits(block.burned, 'ether'))} ETH</Text>
+                    <Text>{utils.commify(utils.formatUnits(block.rewards, 'ether'))} ETH</Text>
                   </VStack>
                 </Card>
               </GridItem>
