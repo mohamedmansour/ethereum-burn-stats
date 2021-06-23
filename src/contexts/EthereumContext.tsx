@@ -10,13 +10,13 @@ declare global {
 }
 
 export class EthereumApi extends ethers.providers.WebSocketProvider {
-  public burned(start?: string, end?: string): Promise<string> {
+  public burned(start?: string, end?: string): Promise<ethers.BigNumberish> {
     return this.send('debug_burned', [start, end])
   }
-  public getBlockReward(blockNumberInHex: string): Promise<string> {
+  public getBlockReward(blockNumberInHex: string): Promise<ethers.BigNumberish> {
     return this.send('debug_getBlockReward', [blockNumberInHex])
   }
-  public async getBaseFeePerGas(blockNumberInHex: string): Promise<string> {
+  public async getBaseFeePerGas(blockNumberInHex: string): Promise<ethers.BigNumberish> {
     return (await this.send('eth_getHeaderByNumber', [blockNumberInHex])).baseFeePerGas
   }
 } 

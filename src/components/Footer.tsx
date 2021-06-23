@@ -8,6 +8,7 @@ export function Footer() {
       align="center" justify="center"
       gridGap={[0, 0, 8]}
       mb="4"
+      mt="2"
       color="#666"
       direction={["column", "column", "row"]}
     >

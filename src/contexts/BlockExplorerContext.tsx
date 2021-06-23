@@ -7,9 +7,9 @@ import { useReducer } from "react";
 import { Setting } from "../config";
 
 export interface BurnedBlockTransaction extends ethers.providers.Block {
-  weiBurned: string
-  ethRewards: string
-  weiBaseFee: string
+  burned: ethers.BigNumber
+  rewards: ethers.BigNumber
+  basefee: ethers.BigNumber
 }
 
 interface BlockExplorerSession {
@@ -20,8 +20,8 @@ interface BlockExplorerSession {
 }
 
 interface BlockExplorerDetails {
-  totalBurned: string
-  gasPrice: string
+  totalBurned: ethers.BigNumber
+  gasPrice: ethers.BigNumber
   currentBlock: number
 }
 
@@ -50,8 +50,8 @@ type ActionType =
 
 export const BlockExplorerApi = {
   fetchDetails: async (eth:  EthereumApi, blockNumber: number, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
-    const totalBurned = skipTotalBurned ? '0' : utils.formatUnits(await eth.burned(), 'ether')
-    const gasPrice = utils.formatUnits(await eth.getGasPrice(), 'gwei')
+    const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : ethers.BigNumber.from(await eth.burned())
+    const gasPrice = await eth.getGasPrice()
     return {
       currentBlock: blockNumber,
       totalBurned,
@@ -63,15 +63,15 @@ export const BlockExplorerApi = {
     const block = await eth.getBlock(blockNumber)
 
     if (block) {
-      const ethRewards = utils.formatUnits(await eth.getBlockReward(blockNumberInHex), 'ether')
-      const weiBaseFee = utils.formatUnits(await eth.getBaseFeePerGas(blockNumberInHex), 'wei')
-      const weiBurned = utils.formatUnits(await eth.burned(blockNumberInHex, blockNumberInHex), 'wei')
+      const rewards = ethers.BigNumber.from(await eth.getBlockReward(blockNumberInHex))
+      const basefee = ethers.BigNumber.from(await eth.getBaseFeePerGas(blockNumberInHex))
+      const burned = ethers.BigNumber.from(await eth.burned(blockNumberInHex, blockNumberInHex))
 
       return {
         ...block,
-        weiBurned,
-        ethRewards,
-        weiBaseFee
+        burned,
+        rewards,
+        basefee
       }
     }
 
@@ -93,14 +93,12 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
         return state
       
       let totalBurned = state.details.totalBurned
-      if (action.block.weiBurned !== '0') {
-        const burnedInBN = ethers.BigNumber.from(action.block.weiBurned)
-        const totalInBN = utils.parseUnits(totalBurned, 'ether')
-        totalBurned = utils.formatUnits(burnedInBN.add(totalInBN).toHexString(), 'ether')
-        state.session.burned = state.session.burned.add(burnedInBN)
+      if (!action.block.burned.isZero()) {
+        totalBurned = action.block.burned.add(totalBurned)
+        state.session.burned = state.session.burned.add(action.block.burned)
       }
 
-      state.session.rewards = state.session.rewards.add(utils.parseUnits(action.block.ethRewards, 'ether'))
+      state.session.rewards = state.session.rewards.add(action.block.rewards)
       state.session.blockCount = state.session.blockCount + 1
       state.session.transactionCount = state.session.transactionCount + action.block.transactions.length
 
@@ -115,16 +113,15 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
     case 'INIT': {
       const session: BlockExplorerSession = {
         blockCount: action.blocks.length,
-        burned: ethers.BigNumber.from('0'),
-        rewards: ethers.BigNumber.from('0'),
+        burned: ethers.BigNumber.from(0),
+        rewards: ethers.BigNumber.from(0),
         transactionCount: 0
       }
-
       
       action.blocks.forEach(block => {
         session.transactionCount += block.transactions.length
-        session.burned = utils.parseUnits(block.weiBurned, 'wei').add(session.burned)
-        session.rewards = utils.parseUnits(block.ethRewards, 'ether').add(session.rewards)
+        session.burned = block.burned.add(session.burned)
+        session.rewards = block.rewards.add(session.rewards)
       })
 
       return { blocks: action.blocks, details: action.details, session }
@@ -172,15 +169,17 @@ const BlockExplorerProvider = ({
       return processedBlocks
     }
 
-    (async () => {
+    const init = async () => {
       const blocks = await prefetchBlockHeaders(5 /* Ease the server a bit so only 5 initial */)
       if (blocks.length) {
         const details = await BlockExplorerApi.fetchDetails(eth, blocks[0].number)
         dispatch({ type: 'INIT', details, blocks })
       }
       eth.on('block', onNewBlockHeader)
-    })()
+    }
 
+    init()
+    
     return () => { eth.off('block', onNewBlockHeader) }
   }, [eth, maxBlocksToRender])
 

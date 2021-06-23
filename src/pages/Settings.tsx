@@ -97,6 +97,15 @@ export function Settings() {
           >
             Format Base Fee in Gwei
           </Checkbox>
+          <Checkbox
+            colorScheme="red"
+            defaultIsChecked={settings.get(Setting.formatGasInGwei)}
+            onChange={(e) =>
+              settings.set(Setting.formatGasInGwei, e.target.checked)
+            }
+          >
+            Format Gas in Gwei
+          </Checkbox>
         </Card>
       </Box>
 

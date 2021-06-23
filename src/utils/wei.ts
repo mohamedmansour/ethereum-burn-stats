@@ -1,19 +1,31 @@
-import { utils } from "ethers"
+import { ethers, utils } from "ethers";
 
-export function formatWei(wei: string, autoFormat: boolean): string {
-  if (wei === '0')
-    return wei
+export const OneGwei = utils.parseUnits("1", "gwei");
+export const OneEther = utils.parseUnits("1", "ether");
 
-  if (!autoFormat)
-    return utils.commify(wei)
+export function formatCurrency(useGwei: boolean): string {
+  return useGwei ? "gwei" : "wei";
+}
 
-  const gwei = parseFloat(utils.formatUnits(wei, 'gwei'))
+export function formatBigNumber(
+  number: ethers.BigNumber,
+  useGwei: boolean
+): string {
+  if (number.isZero()) {
+    return "0";
+  }
+
+  if (!useGwei) {
+    return utils.commify(utils.formatUnits(number, "wei"));
+  }
+
+  const gwei = parseFloat(utils.formatUnits(number, 'gwei'))
   if (gwei > 1)
     return gwei.toFixed(2)
 
   if (gwei > 0.1)
     return gwei.toFixed(3)
-    
+
   if (gwei > 0.01)
     return gwei.toFixed(4)
 
