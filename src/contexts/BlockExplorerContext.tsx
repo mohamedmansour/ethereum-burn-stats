@@ -1,6 +1,6 @@
 import { useContext, createContext, useEffect } from "react"
 import { EthereumApi, useEthereum } from "./EthereumContext"
-import { ethers, utils } from 'ethers'
+import { ethers } from 'ethers'
 import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../components/Loader";
 import { useReducer } from "react";
