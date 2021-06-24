@@ -192,7 +192,15 @@ export function EthBlockDetail() {
                 <Text color="brand.secondaryText">Timestamp:</Text>
                 <Text>{block.timestamp}</Text>
                 <Text color="brand.secondaryText">Mined by:</Text>
-                <Text isTruncated>{block.miner}</Text>
+                <Text isTruncated color="brand.linkColor" position="relative">
+                  <Link
+                    to={`/account/${block.miner}`}
+                    as={ReactLink}
+                    overflow="hidden"
+                  >
+                    {block.miner}
+                  </Link>
+                </Text>
                 <Text color="brand.secondaryText">Difficulty:</Text>
                 <Text>{utils.commify(block.difficulty)}</Text>
                 <Text color="brand.secondaryText">Gas used:</Text>

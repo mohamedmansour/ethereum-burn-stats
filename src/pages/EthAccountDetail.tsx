@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Heading, Text, VStack } from "@chakra-ui/react";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Grid, GridItem, Heading, Text, VStack } from "@chakra-ui/react";
 import { utils } from "ethers";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -33,13 +33,30 @@ export function EthAccountDetail() {
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbItem isCurrentPage>
-          <Text>Account {id} </Text>
+          <Text>Account</Text>
         </BreadcrumbItem>
       </Breadcrumb>
-      <Card overflow="auto" w="100%">
-        <Heading size="sm">Balance:</Heading>
-        <Text>{balance} ETH</Text>
-      </Card>
+      <Grid
+        templateColumns="repeat(2, 1fr)"
+        gridGap="4"
+          >
+          <GridItem colSpan={1}>
+            <Card>
+              <VStack>
+                <Heading size="sm">Address</Heading>
+                <Text>{id}</Text>
+              </VStack>
+            </Card>
+          </GridItem>
+          <GridItem colSpan={1}>
+            <Card>
+              <VStack>
+                <Heading size="sm">Balance</Heading>
+                <Text>{balance} ETH</Text>
+              </VStack>
+            </Card>
+          </GridItem>
+        </Grid>
     </VStack>
   );
 }
