@@ -76,7 +76,7 @@ const CurrencyProvider = ({
     const refreshConversion = async () => {
       const resp = await fetch('/price.json')
       const results: Price = await resp.json()
-      dispatch({ type: 'UPDATE_ETH_CONVERSION', value: parseFloat(results.data.amount) })
+      dispatch({ type: 'UPDATE_ETH_CONVERSION', value: parseInt(results.data.amount) })
     }
 
     const interval = setInterval(refreshConversion, REFRESH_TIME)

@@ -1,6 +1,6 @@
 const createProxyMiddleware = require('http-proxy-middleware').createProxyMiddleware;
 
-let price = 2000
+let price = 900.12
 
 module.exports = function(app) {
   const socketProxy = createProxyMiddleware('/ws', {
