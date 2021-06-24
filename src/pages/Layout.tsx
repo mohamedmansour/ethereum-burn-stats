@@ -16,7 +16,7 @@ import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { Footer } from "../components/Footer";
-import { EthereumNetwork } from "../components/Network";
+import { EthereumNetworkBadge } from "../components/Network";
 import { formatBigNumber } from "../utils/wei";
 
 interface LayoutProps {
@@ -110,7 +110,7 @@ export function Layout(props: LayoutProps) {
                 <Heading size="sm">Watch The <Box display="inline" color="brand.orange">Burn</Box></Heading>
               </HStack>
             </Link>
-            <EthereumNetwork ml="4"/>
+            <EthereumNetworkBadge ml="4"/>
           </Flex>
         </Flex>
         <Link as={ReactLink} to="/settings">

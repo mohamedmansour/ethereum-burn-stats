@@ -15,11 +15,17 @@ export const IntegerSetting: SettingConfig = {
 
 const EthereumNetworkSetting : SettingConfig  = {
   verify: (value: any): boolean => (!!EthereumNetworkOptions[value]),
-  convert: (value: string): string => (String(value))
+  convert: (value: string): EthereumNetwork => (EthereumNetworkOptions[value])
+}
+
+export interface EthereumNetwork {
+  name: string
+  key: string
+  genesis: number
 }
 
 export const EthereumNetworkOptions: {
-  [key: string]: { key: string; name: string, genesis: number };
+  [key: string]: EthereumNetwork
 } = {
   ropsten: { name: "Ropsten (testnet)", key: "ropsten", genesis: 10499401 },
   goerli: { name: "Goerli (testnet)", key: "goerli", genesis: 5062605 },
@@ -50,6 +56,6 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
     },
     [Setting.network]: {
       config: EthereumNetworkSetting,
-      defaultValue: EthereumNetworkOptions.ropsten.key,
+      defaultValue: EthereumNetworkOptions.ropsten,
     },
   };

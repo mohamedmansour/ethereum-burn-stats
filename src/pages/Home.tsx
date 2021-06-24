@@ -21,7 +21,7 @@ import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";
 import { Footer } from "../components/Footer";
 import { Loader } from "../components/Loader";
-import { EthereumNetwork } from "../components/Network";
+import { EthereumNetworkBadge } from "../components/Network";
 import {
   BlockExplorerSession,
   BurnedBlockTransaction,
@@ -318,7 +318,7 @@ function Header() {
         </Heading>
         <Text>Ethereum's EIP-1559</Text>
       </Box>
-      <EthereumNetwork position="absolute" bottom="0" right="0" />
+      <EthereumNetworkBadge position="absolute" bottom="0" right="0" />
     </Box>
   )
 }

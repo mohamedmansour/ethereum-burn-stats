@@ -1,10 +1,10 @@
 import { useContext, createContext, useEffect } from "react"
 import { EthereumApi, useEthereum } from "./EthereumContext"
-import { ethers } from 'ethers'
+import { ethers, utils } from 'ethers'
 import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../components/Loader";
 import { useReducer } from "react";
-import { Setting } from "../config";
+import { EthereumNetwork, Setting } from "../config";
 
 export interface BurnedBlockTransaction extends ethers.providers.Block {
   burned: ethers.BigNumber
@@ -49,8 +49,8 @@ type ActionType =
   | InitAction
 
 export const BlockExplorerApi = {
-  fetchDetails: async (eth:  EthereumApi, blockNumber: number, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
-    const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : ethers.BigNumber.from(await eth.burned('0xa03549'))
+  fetchDetails: async (eth:  EthereumApi, blockNumber: number, genesisHex: string, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
+    const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : ethers.BigNumber.from(await eth.burned(genesisHex))
     const gasPrice = await eth.getGasPrice()
     return {
       currentBlock: blockNumber,
@@ -59,7 +59,7 @@ export const BlockExplorerApi = {
     }
   },
   fetchBlock: async (eth:  EthereumApi, blockNumber: number): Promise<BurnedBlockTransaction | undefined> => {
-    const blockNumberInHex = `0x${blockNumber.toString(16)}` // utils.hexlify adds padded 0's for some strange reason.
+    const blockNumberInHex = utils.hexValue(blockNumber)
     const block = await eth.getBlock(blockNumber)
     if (block) {
       const rewards = ethers.BigNumber.from(await eth.getBlockReward(blockNumberInHex))
@@ -138,6 +138,8 @@ const BlockExplorerProvider = ({
   const { eth } = useEthereum()
   const [state, dispatch] = useReducer(blockExplorerReducer, {})
   const maxBlocksToRender = useSetting<number>(Setting.maxBlocksToRender)
+  const network = useSetting<EthereumNetwork>(Setting.network)
+  const genesis = utils.hexValue(network.genesis)
 
   useEffect(() => {
     if (!eth)
@@ -148,7 +150,7 @@ const BlockExplorerProvider = ({
       if (!block)
         return
 
-      const details = await BlockExplorerApi.fetchDetails(eth, blockNumber, true)
+      const details = await BlockExplorerApi.fetchDetails(eth, blockNumber, genesis, true)
 
       dispatch({ type: 'NEW_BLOCK', details, block, maxBlocksToRender })
     }
@@ -171,7 +173,7 @@ const BlockExplorerProvider = ({
     const init = async () => {
       const blocks = await prefetchBlockHeaders(5 /* Ease the server a bit so only 5 initial */)
       if (blocks.length) {
-        const details = await BlockExplorerApi.fetchDetails(eth, blocks[0].number)
+        const details = await BlockExplorerApi.fetchDetails(eth, blocks[0].number, genesis)
         dispatch({ type: 'INIT', details, blocks })
       }
       eth.on('block', onNewBlockHeader)
@@ -180,7 +182,7 @@ const BlockExplorerProvider = ({
     init()
     
     return () => { eth.off('block', onNewBlockHeader) }
-  }, [eth, maxBlocksToRender])
+  }, [eth, maxBlocksToRender, genesis])
 
   return (
     <BlockExplorerContext.Provider

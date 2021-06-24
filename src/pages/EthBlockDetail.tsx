@@ -23,7 +23,6 @@ import {
   BreadcrumbLink,
   Flex,
   GridItem,
-  Box,
 } from "@chakra-ui/react";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { utils } from "ethers";
