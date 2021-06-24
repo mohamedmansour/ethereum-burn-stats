@@ -168,8 +168,8 @@ function SessionSummaryCard(props: SessionSummaryProps) {
     return null
 
   const symbol = currency === 'ETH' ? '' : '$'
-  const sessionTotalBurned = symbol + utils.commify(utils.formatEther(props.session.burned.mul(amount))) + ' ' + currency
-  const sessionTotalRewards = symbol + utils.commify(utils.formatEther(props.session.rewards.mul(amount))) + ' ' + currency
+  const sessionTotalBurned = symbol + formatBigNumber(props.session.burned.mul(amount), 'ether') + ' ' + currency
+  const sessionTotalRewards = symbol + formatBigNumber(props.session.rewards.mul(amount), 'ether') + ' ' + currency
 
   return (
     <Card>
@@ -236,7 +236,7 @@ function TotalFeesCard(props: TotalFeesCardProps) {
   const totalBurnedInEth = utils.formatEther(props.totalBurned.mul(state.amount));
   const totalBurnedSplitter = totalBurnedInEth.indexOf(".");
   const totalBurnedWholeNumber = symbol + utils.commify(totalBurnedInEth.substr(0, totalBurnedSplitter));
-  const totalBurnedDecimalNumber = totalBurnedInEth.substr(totalBurnedSplitter + 1, isEthereumCurrency ? totalBurnedInEth.length : 2);
+  const totalBurnedDecimalNumber = totalBurnedInEth.substr(totalBurnedSplitter + 1, isEthereumCurrency ? 6 : 2);
 
   return (
     <Card bg="brand.card" zIndex={2} p="4" w="100%" textAlign="center">
@@ -250,10 +250,10 @@ function TotalFeesCard(props: TotalFeesCardProps) {
         whiteSpace="nowrap"
         justify="center"
       >
-        <Text fontSize={["32px", "50px", "90px"]} fontWeight="bold">
+        <Text fontSize={["48px", "64px", "90px"]} fontWeight="bold">
           {totalBurnedWholeNumber}.
         </Text>
-        <Text fontSize={["18px", "22px", "32px"]}>
+        <Text fontSize={["24px", "32px", "48px"]}>
           {totalBurnedDecimalNumber}
         </Text>
         <Text fontSize={["18px", "22px", "32px"]} color="brand.orange">
