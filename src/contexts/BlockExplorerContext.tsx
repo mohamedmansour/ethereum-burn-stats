@@ -12,7 +12,7 @@ export interface BurnedBlockTransaction extends ethers.providers.Block {
   basefee: ethers.BigNumber
 }
 
-interface BlockExplorerSession {
+export interface BlockExplorerSession {
   burned: ethers.BigNumber
   blockCount: number
   transactionCount: number

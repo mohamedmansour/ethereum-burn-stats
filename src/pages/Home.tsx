@@ -23,9 +23,11 @@ import { Footer } from "../components/Footer";
 import { Loader } from "../components/Loader";
 import { EthereumNetwork } from "../components/Network";
 import {
+  BlockExplorerSession,
   BurnedBlockTransaction,
   useBlockExplorer,
 } from "../contexts/BlockExplorerContext";
+import { Currency, CurrencyProvider, useCurrency } from "../contexts/CurrencyContext";
 import { timeSince } from "../utils/time";
 import { formatBigNumber } from "../utils/wei";
 
@@ -120,8 +122,12 @@ interface LatestBlocksProps {
 }
 
 function LatestBlocksCard(props: LatestBlocksProps) {
+  const { currency, amount } = useCurrency()
   const { latestBlock, renderedBlocks } = props
 
+  if (!currency || !amount)
+    return null
+    
   return (
     <Card bg="brand.card" zIndex={2} p="4" w="100%">
       <Heading size="sm" textAlign="center" color="brand.headerText">
@@ -150,21 +156,26 @@ function LatestBlocksCard(props: LatestBlocksProps) {
 }
 
 interface SessionSummaryProps {
-  totalBurned: string
-  blockCount: number
-  transactionCount: number
-  totalRewards: string
+  session: BlockExplorerSession
 }
 
 function SessionSummaryCard(props: SessionSummaryProps) {
+  const { currency, amount } = useCurrency()
+  if (!currency || !amount)
+    return null
+
+  const symbol = currency === 'ETH' ? '' : '$'
+  const sessionTotalBurned = symbol + utils.commify(utils.formatEther(props.session.burned.mul(amount))) + ' ' + currency
+  const sessionTotalRewards = symbol + utils.commify(utils.formatEther(props.session.rewards.mul(amount))) + ' ' + currency
+
   return (
     <Card>
       <Heading size="sm" textAlign="center" color="brand.headerText">
         Session Summary
       </Heading>
       <Text color="brand.primaryText" textAlign="left" mt="2" p="4">
-        You've just experienced <strong>{props.totalBurned}</strong> being burned by observing <strong>{props.blockCount} blocks</strong>
-        that contain <strong>{props.transactionCount} transactions</strong> with <strong>{props.totalRewards}</strong> rewards!
+        You've just experienced <strong>{sessionTotalBurned}</strong> being burned by observing <strong>{props.session.blockCount} blocks</strong>
+        {" "}that contain <strong>{props.session.transactionCount} transactions</strong> with <strong>{sessionTotalRewards}</strong> rewards!
       </Text>
     </Card>
   )
@@ -196,6 +207,67 @@ function CurrencySelectorCard(props: CurrencySelectorCardProps) {
         {props.children}
       </Box>
     </Box>
+  )
+}
+
+interface TotalFeesCardProps {
+  totalBurned: ethers.BigNumber
+}
+
+function TotalFeesCard(props: TotalFeesCardProps) {
+  const state = useCurrency()
+  const { getRootProps, getRadioProps } = useRadioGroup({
+    name: "currency",
+    defaultValue: "ETH",
+    onChange: (e: Currency) => state.setCurrency(e)
+  })
+
+  if (!state.currency || !state.amount)
+    return null
+
+  const group = getRootProps()
+  const options = ["ETH", "USD"]
+
+  const isEthereumCurrency = state.currency === 'ETH'
+  const symbol = isEthereumCurrency ? '' : '$'
+  const totalBurnedInEth = utils.formatEther(props.totalBurned.mul(state.amount));
+  const totalBurnedSplitter = totalBurnedInEth.indexOf(".");
+  const totalBurnedWholeNumber = symbol + utils.commify(totalBurnedInEth.substr(0, totalBurnedSplitter));
+  const totalBurnedDecimalNumber = totalBurnedInEth.substr(totalBurnedSplitter + 1, isEthereumCurrency ? totalBurnedInEth.length : 2);
+
+  return (
+    <Card bg="brand.card" zIndex={2} p="4" w="100%" textAlign="center">
+      <Heading size="sm" color="brand.headerText">
+        Total Fees Burned
+      </Heading>
+      <HStack
+        alignItems="baseline"
+        overflow="hidden"
+        wordBreak="break-all"
+        whiteSpace="nowrap"
+        justify="center"
+      >
+        <Text fontSize={["32px", "50px", "90px"]} fontWeight="bold">
+          {totalBurnedWholeNumber}.
+        </Text>
+        <Text fontSize={["18px", "22px", "32px"]}>
+          {totalBurnedDecimalNumber}
+        </Text>
+        <Text fontSize={["18px", "22px", "32px"]} color="brand.orange">
+          {state.currency}
+        </Text>
+      </HStack>
+      <HStack {...group} justify="center">
+        {options.map((value) => {
+          const radio = getRadioProps({ value })
+          return (
+            <CurrencySelectorCard key={value} {...radio}>
+              {value}
+            </CurrencySelectorCard>
+          )
+        })}
+      </HStack>
+    </Card>
   )
 }
 
@@ -257,64 +329,34 @@ export function Home() {
 
   if (!session) return <Loader>Loading session ...</Loader>;
 
-  // Total Burned
-  const currency = 'ETH';
-  const totalBurned = utils.formatEther(details.totalBurned);
-  const totalBurnedSplitter = totalBurned.indexOf(".");
-  const totalBurnedWholeNumber = utils.commify(totalBurned.substr(0, totalBurnedSplitter));
-  const totalBurnedDecimalNumber = totalBurned.substr(totalBurnedSplitter + 1);
-
-  // Stats
-  const sessionTotalBurned = utils.commify(utils.formatEther(session.burned))
-  const sessionTotalRewards = utils.commify(utils.formatEther(session.rewards))
-
   const latestBlock = blocks[0];
   const renderedBlocks = blocks.slice(0, 5);
 
   return (
-    <Center
-      display="fixed"
-      t="0"
-      l="0"
-      w="100%"
-      h="100%"
-      bg="brand.background"
-      overflowY="auto"
-    >
-      <VStack
-        zIndex={2}
-        color="brand.primaryText"
-        w={["95%", "90%", "700px"]}
-        pb="100"
+    <CurrencyProvider>
+      <Center
+        display="fixed"
+        t="0"
+        l="0"
+        w="100%"
+        h="100%"
+        bg="brand.background"
+        overflowY="auto"
       >
-        <Header />
-        <Card bg="brand.card" zIndex={2} p="4" w="100%" textAlign="center">
-          <Heading size="sm" color="brand.headerText">
-            Total Fees Burned
-          </Heading>
-          <HStack
-            alignItems="baseline"
-            overflow="hidden"
-            wordBreak="break-all"
-            whiteSpace="nowrap"
-            justify="center"
-          >
-            <Text fontSize={["32px", "50px", "90px"]} fontWeight="bold">
-              {totalBurnedWholeNumber}.
-            </Text>
-            <Text fontSize={["18px", "22px", "32px"]}>
-              {totalBurnedDecimalNumber}
-            </Text>
-            <Text fontSize={["18px", "22px", "32px"]} color="brand.orange">
-              {currency}
-            </Text>
-          </HStack>
-        </Card>
-        <SessionSummaryCard totalBurned={sessionTotalBurned} totalRewards={sessionTotalRewards} transactionCount={session.transactionCount} blockCount={session.blockCount} />
-        <LatestBlocksCard latestBlock={latestBlock} renderedBlocks={renderedBlocks} />
-        <Footer />
-      </VStack>
-      <FireAnimation />
-    </Center>
+        <VStack
+          zIndex={2}
+          color="brand.primaryText"
+          w={["95%", "90%", "700px"]}
+          pb="100"
+        >
+          <Header />
+          <TotalFeesCard totalBurned={details.totalBurned} />
+          <SessionSummaryCard session={session} />
+          <LatestBlocksCard latestBlock={latestBlock} renderedBlocks={renderedBlocks} />
+          <Footer />
+        </VStack>
+        <FireAnimation />
+      </Center>
+    </CurrencyProvider>
   );
 }
