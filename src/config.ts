@@ -1,8 +1,22 @@
 import {
   DefaultSettingValue,
-  BooleanConverter,
-  IntegerConverter,
+  SettingConfig,
 } from "./contexts/SettingsContext";
+
+export const BooleanSetting: SettingConfig = {
+  verify: (value: any): boolean => (value === "true" || value === "false" || value === true || value === false),
+  convert: (value: string): boolean => (value === "true")
+}
+
+export const IntegerSetting: SettingConfig = {
+  verify: (value: any): boolean => !isNaN(value),
+  convert: (value: string): number => parseInt(value)
+}
+
+const EthereumNetworkSetting : SettingConfig  = {
+  verify: (value: any): boolean => (!!EthereumNetworkOptions[value]),
+  convert: (value: string): string => (String(value))
+}
 
 export const EthereumNetworkOptions: {
   [key: string]: { key: string; name: string, genesis: number };
@@ -20,26 +34,22 @@ export enum Setting {
   network = "network",
 }
 
-export const defaultSettings: { [key: string]: DefaultSettingValue<unknown> } =
+export const defaultSettings: { [key: string]: DefaultSettingValue } =
   {
     [Setting.formatBurnInGwei]: {
-      convert: BooleanConverter,
+      config: BooleanSetting,
       defaultValue: true,
-      verify: (v) => typeof(v) === "boolean"
     },
     [Setting.formatBaseFeeInGwei]: {
-      convert: BooleanConverter,
+      config: BooleanSetting,
       defaultValue: false,
-      verify: (v) => typeof(v) === "boolean"
     },
     [Setting.maxBlocksToRender]: {
-      convert: IntegerConverter,
+      config: IntegerSetting,
       defaultValue: 50,
-      verify: (v) => !isNaN(v)
     },
     [Setting.network]: {
-      convert: String,
+      config: EthereumNetworkSetting,
       defaultValue: EthereumNetworkOptions.ropsten.key,
-      verify: (v) => !!EthereumNetworkOptions[v]
     },
   };

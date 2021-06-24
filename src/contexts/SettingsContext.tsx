@@ -1,22 +1,14 @@
 import React, { useContext } from 'react';
 import { defaultSettings, Setting } from '../config';
 
-export interface Converter<T> {
-  (value: string): T
+export interface SettingConfig {
+  verify: (value: any) => boolean,
+  convert: (value: string) => any
 }
 
-export function BooleanConverter(value: string): boolean {
-  return value === "true"
-}
-
-export function IntegerConverter(value: string): number {
-  return parseInt(value)
-}
-
-export interface DefaultSettingValue<T> {
+export interface DefaultSettingValue {
   defaultValue: any
-  convert: Converter<T>
-  verify: (value: any) => boolean
+  config: SettingConfig
 }
 
 type SettingsContextType = {
@@ -71,7 +63,7 @@ const SettingsProvider = ({
 }) => {
   const get = (key: Setting): any => {
     const converter = defaultSettings[key]
-    return localStorage[key] === undefined ? converter.defaultValue : converter.convert(localStorage[key])
+    return localStorage[key] === undefined ? converter.defaultValue : converter.config.convert(localStorage[key])
   }
   
   const set = (key: Setting, value: any): void => {
@@ -83,7 +75,7 @@ const SettingsProvider = ({
   for (let key in localStorage) {
     if (localStorage.hasOwnProperty(key)) {
       const setting = defaultSettings[key];
-      if (!setting || !setting.verify(localStorage[key])) {
+      if (!setting || !setting.config.verify(localStorage[key])) {
         localStorage.removeItem(key)
       }
     }
