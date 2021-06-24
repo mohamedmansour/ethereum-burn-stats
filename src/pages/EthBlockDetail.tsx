@@ -23,6 +23,7 @@ import {
   BreadcrumbLink,
   Flex,
   GridItem,
+  Box,
 } from "@chakra-ui/react";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { utils } from "ethers";
@@ -99,7 +100,8 @@ export function EthBlockDetail() {
   const onBeforeRender = state.onBeforeRender ? (
     <Button
       colorScheme="whiteAlpha"
-      variant="ghost"
+      variant="outline"
+      size="sm"
       onClick={() => history.push(`/block/${parseInt(id) - 1}`)}
     >
       <Icon
@@ -115,7 +117,8 @@ export function EthBlockDetail() {
   const onAfterRender = state.onAfterRender ? (
     <Button
       colorScheme="whiteAlpha"
-      variant="ghost"
+      variant="outline"
+      size="sm"
       onClick={() => history.push(`/block/${parseInt(id) + 1}`)}
     >
       <Icon
@@ -137,11 +140,13 @@ export function EthBlockDetail() {
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbItem isCurrentPage>
-          <Text>
-            Block {onBeforeRender}
-            {"#" + id}
-            {onAfterRender}
-          </Text>
+          <HStack gridGap="4">
+            <Text>Block {id}</Text>
+            <HStack>
+              {onBeforeRender}
+              {onAfterRender}
+            </HStack>
+          </HStack>
         </BreadcrumbItem>
       </Breadcrumb>
 
