@@ -5,19 +5,17 @@ import {
 } from "./contexts/SettingsContext";
 
 export const EthereumNetworkOptions: {
-  [key: string]: { key: string; name: string };
+  [key: string]: { key: string; name: string, genesis: number };
 } = {
-  calaveras: { name: "Calaveras (devnet)", key: "calaveras" },
-  ropsten: { name: "Ropsten (testnet)", key: "ropsten" },
-  goerli: { name: "Goerli (testnet)", key: "goerli" },
-  rinkeby: { name: "Rinkeby (testnet)", key: "rinkeby" },
-  mainnet: { name: "Mainnet", key: "mainnet" },
+  ropsten: { name: "Ropsten (testnet)", key: "ropsten", genesis: 10499401 },
+  goerli: { name: "Goerli (testnet)", key: "goerli", genesis: 5062605 },
+  rinkeby: { name: "Rinkeby (testnet)", key: "rinkeby", genesis: 8897988 },
+  mainnet: { name: "Mainnet", key: "mainnet", genesis: Number.POSITIVE_INFINITY },
 };
 
 export enum Setting {
   formatBurnInGwei = "formatBurnInGwei",
   formatBaseFeeInGwei = "formatBaseFeeInGwei",
-  formatGasInGwei = "formatGasInGwei",
   maxBlocksToRender = "maxBlocksToRender",
   network = "network",
 }
@@ -27,21 +25,21 @@ export const defaultSettings: { [key: string]: DefaultSettingValue<unknown> } =
     [Setting.formatBurnInGwei]: {
       convert: BooleanConverter,
       defaultValue: true,
+      verify: (v) => typeof(v) === "boolean"
     },
     [Setting.formatBaseFeeInGwei]: {
       convert: BooleanConverter,
       defaultValue: false,
-    },
-    [Setting.formatGasInGwei]: {
-      convert: BooleanConverter,
-      defaultValue: false,
+      verify: (v) => typeof(v) === "boolean"
     },
     [Setting.maxBlocksToRender]: {
       convert: IntegerConverter,
       defaultValue: 15,
+      verify: (v) => typeof(v) === "number"
     },
     [Setting.network]: {
       convert: String,
-      defaultValue: EthereumNetworkOptions.calaveras.key,
+      defaultValue: EthereumNetworkOptions.ropsten.key,
+      verify: (v) => !!EthereumNetworkOptions[v]
     },
   };

@@ -39,7 +39,7 @@ import {
 } from "../contexts/BlockExplorerContext";
 import { Setting } from "../config";
 import { FirePit } from "../components/FirePit";
-import { formatBigNumber, formatCurrency } from "../utils/wei";
+import { formatBigNumber } from "../utils/wei";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;
@@ -69,7 +69,6 @@ export function EthBlockDetail() {
   let { id } = useParams<{ id: string }>();
   const { eth } = useEthereum();
   const formatBurnInGwei = useSetting<boolean>(Setting.formatBurnInGwei);
-  const formatGasInGwei = useSetting<boolean>(Setting.formatGasInGwei);
   const formatBaseFeeInGwei = useSetting<boolean>(Setting.formatBaseFeeInGwei);
   const [state, dispatch] = useReducer(blockDetailReducer, {});
 
@@ -169,7 +168,7 @@ export function EthBlockDetail() {
                 <Card>
                   <VStack>
                     <Heading size="sm">Base Fee</Heading>
-                    <Text>{formatBigNumber(block.basefee, formatBaseFeeInGwei)} {formatCurrency(formatBaseFeeInGwei)}</Text>
+                    <Text>{formatBigNumber(block.basefee, formatBaseFeeInGwei ? 'gwei' : 'wei')} {formatBaseFeeInGwei ? 'gwei' : 'wei'}</Text>
                   </VStack>
                 </Card>
               </GridItem>
@@ -182,7 +181,7 @@ export function EthBlockDetail() {
                         <FirePit size="12px" />
                       </HStack>
                     </Heading>
-                    <Text>{formatBigNumber(block.burned, formatBurnInGwei)} {formatCurrency(formatBurnInGwei)}</Text>
+                    <Text>{formatBigNumber(block.burned, formatBurnInGwei ? 'gwei' : 'ether')} {formatBurnInGwei ? 'gwei' : 'ether'}</Text>
                   </VStack>
                 </Card>
               </GridItem>
@@ -198,11 +197,11 @@ export function EthBlockDetail() {
                 <Text>{utils.commify(block.difficulty)}</Text>
                 <Text color="brand.secondaryText">Gas used:</Text>
                 <Text>
-                  {formatBigNumber(block.gasUsed, formatGasInGwei)} {formatCurrency(formatGasInGwei)}
+                  {formatBigNumber(block.gasUsed, 'wei')} wei
                 </Text>
                 <Text color="brand.secondaryText">Gas limit:</Text>
                 <Text>
-                  {formatBigNumber(block.gasLimit, formatGasInGwei)} {formatCurrency(formatGasInGwei)}
+                  {formatBigNumber(block.gasLimit, 'wei')} wei
                 </Text>
                 <Text color="brand.secondaryText">Extra data:</Text>
                 <Text wordBreak="break-all">{block.extraData}</Text>
@@ -219,7 +218,7 @@ export function EthBlockDetail() {
                       <Th color="brand.secondaryText">Confs</Th>
                       <Th color="brand.secondaryText">Tx</Th>
                       <Th color="brand.secondaryText">Value</Th>
-                      <Th color="brand.secondaryText">Gas Price ({formatCurrency(formatGasInGwei)})</Th>
+                      <Th color="brand.secondaryText">Gas Price (wei)</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
@@ -249,7 +248,7 @@ export function EthBlockDetail() {
                           {utils.formatEther(t.value)} Eth
                         </Td>
                         <Td width="10%">
-                          {formatBigNumber(t.gasPrice, formatBurnInGwei)}
+                          {formatBigNumber(t.gasPrice, formatBurnInGwei ? 'gwei' : 'wei')}
                         </Td>
                       </Tr>
                     ))}

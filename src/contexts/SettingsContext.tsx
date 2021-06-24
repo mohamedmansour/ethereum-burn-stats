@@ -16,6 +16,7 @@ export function IntegerConverter(value: string): number {
 export interface DefaultSettingValue<T> {
   defaultValue: any
   convert: Converter<T>
+  verify: (value: any) => boolean
 }
 
 type SettingsContextType = {
@@ -76,6 +77,16 @@ const SettingsProvider = ({
   const set = (key: Setting, value: any): void => {
     localStorage[key] = value
     event.emit(key, value)
+  }
+
+  // Verify settings are correct.
+  for (let key in localStorage) {
+    if (localStorage.hasOwnProperty(key)) {
+      const setting = defaultSettings[key];
+      if (!setting || !setting.verify(localStorage[key])) {
+        localStorage.removeItem(key)
+      }
+    }
   }
 
   return (

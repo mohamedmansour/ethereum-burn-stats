@@ -13,12 +13,11 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
 } from "@chakra-ui/react";
-import { utils } from "ethers";
 import { Link as ReactLink } from "react-router-dom";
 import { useSetting } from "../hooks/useSetting";
 import { timeSince } from "../utils/time";
 import { GasUsed } from "../components/GasUsed";
-import { formatBigNumber, formatCurrency } from "../utils/wei";
+import { formatBigNumber } from "../utils/wei";
 import {
   useBlockExplorer,
   BurnedBlockTransaction,
@@ -35,11 +34,10 @@ interface EthBlockItemProps {
   block: BurnedBlockTransaction;
   formatBurnInGwei: boolean;
   formatBaseFeeInGwei: boolean;
-  formatGasInGwei: boolean;
 }
 
 function EthBlockItem(props: EthBlockItemProps) {
-  const { block, formatBurnInGwei, formatBaseFeeInGwei, formatGasInGwei } = props;
+  const { block, formatBurnInGwei, formatBaseFeeInGwei } = props;
   return (
     <Tr>
       <Td>
@@ -56,13 +54,13 @@ function EthBlockItem(props: EthBlockItemProps) {
       <Td>
         <GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} />
       </Td>
-      <Td {...responsiveColumn}>{formatBigNumber(block.gasLimit, formatGasInGwei)}</Td>
-      <Td>{utils.formatUnits(block.rewards, 'ether')}</Td>
+      <Td {...responsiveColumn}>{formatBigNumber(block.gasLimit, 'wei')}</Td>
+      <Td>{formatBigNumber(block.rewards, 'ether')}</Td>
       <Td>
-        {formatBigNumber(block.basefee, formatBaseFeeInGwei)}
+        {formatBigNumber(block.basefee, formatBaseFeeInGwei ? 'gwei' : 'wei')}
       </Td>
       <Td>
-        {formatBigNumber(block.burned, formatBurnInGwei)}
+        {formatBigNumber(block.burned, formatBurnInGwei ? 'gwei' : 'ether')}
       </Td>
     </Tr>
   );
@@ -72,13 +70,11 @@ export function EthBlockList() {
   const { details, blocks } = useBlockExplorer();
   const formatBurnInGwei = useSetting<boolean>(Setting.formatBurnInGwei);
   const formatBaseFeeInGwei = useSetting<boolean>(Setting.formatBaseFeeInGwei);
-  const formatGasInGwei = useSetting<boolean>(Setting.formatGasInGwei);
 
   if (!details) return <Loader>Loading block details ...</Loader>;
 
   if (!blocks) return <Loader>Loading blocks ...</Loader>;
 
-  const latestBlock = blocks[0];
   return (
     <Flex flex="1" direction="column" overflow="auto">
       <Breadcrumb>
@@ -100,16 +96,16 @@ export function EthBlockList() {
               <Th color="brand.secondaryText">Txn</Th>
               <Th color="brand.secondaryText">Gas Used</Th>
               <Th color="brand.secondaryText" {...responsiveColumn}>
-                Gas Limit ({formatCurrency(formatGasInGwei)})
+                Gas Limit (wei)
               </Th>
               <Th color="brand.secondaryText">Rewards (eth)</Th>
               <Th color="brand.secondaryText">
-                Base Fee ({formatCurrency(formatBaseFeeInGwei)})
+                Base Fee ({formatBaseFeeInGwei ? "gwei" : "wei"})
               </Th>
               <Th color="brand.secondaryText">
                 <HStack>
                   <FirePit size="12px" />
-                  <Text>Burned ({formatCurrency(formatBurnInGwei)})</Text>
+                  <Text>Burned ({formatBurnInGwei ? "gwei" : "ether"})</Text>
                 </HStack>
               </Th>
             </Tr>
@@ -118,7 +114,7 @@ export function EthBlockList() {
             <Tr whiteSpace="nowrap">
               <Td>{details.currentBlock + 1}</Td>
               <Td colSpan={7}>
-                <BlockProgress totalSecondsPerBlock={30} block={latestBlock} />
+                <BlockProgress />
               </Td>
             </Tr>
             {blocks.map((block, idx) => (
@@ -127,7 +123,6 @@ export function EthBlockList() {
                 block={block}
                 formatBurnInGwei={formatBurnInGwei}
                 formatBaseFeeInGwei={formatBaseFeeInGwei}
-                formatGasInGwei={formatGasInGwei}
               />
             ))}
           </Tbody>

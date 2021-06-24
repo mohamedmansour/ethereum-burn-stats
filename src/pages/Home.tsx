@@ -38,14 +38,19 @@ interface BlockItemProps {
   basefee: ethers.BigNumber;
   gasLimit: ethers.BigNumber;
   gasUsed: ethers.BigNumber;
+  currency: Currency;
+  amount: number
 }
 
 function BlockItem(props: BlockItemProps) {
+  const symbol = props.currency === 'ETH' ? '' : '$'
+  const totalBurned = symbol + utils.commify(utils.formatEther(props.burned.mul(props.amount)).substr(0, 8))
+
   const label = (
     <Text>
-      Burned: {formatBigNumber(props.burned, false)} wei
+      Burned: {formatBigNumber(props.burned, 'ether')} ETH
       <br />
-      Base Fee: {formatBigNumber(props.basefee, false)} wei
+      Base Fee: {formatBigNumber(props.basefee, 'wei')} wei
       <br />
       Gas used: {((props.gasUsed.toNumber() / props.gasLimit.toNumber()) * 100).toFixed(2)}%
     </Text>
@@ -75,7 +80,7 @@ function BlockItem(props: BlockItemProps) {
         <FirePit size="12px" />
         <Box w="70px" whiteSpace="nowrap">
           <Tooltip hasArrow label={label} placement="right">
-            {formatBigNumber(props.burned, true)}
+            {totalBurned}
           </Tooltip>
         </Box>
       </HStack>
@@ -106,8 +111,6 @@ function CurrentBlock(props: CurrentBlockProps) {
         align="center"
       >
         <BlockProgress
-          totalSecondsPerBlock={30}
-          block={props.block}
           w="90px"
           h="24px"
         />
@@ -136,7 +139,7 @@ function LatestBlocksCard(props: LatestBlocksProps) {
       <CurrentBlock block={latestBlock} />
       <Divider bg="brand.card" borderColor="brand.card" />
       {renderedBlocks.map((block, idx) => (
-        <BlockItem key={idx} {...block} />
+        <BlockItem key={idx} {...block} currency={currency} amount={amount}/>
       ))}
 
       <Divider bg="brand.card" borderColor="brand.card" />

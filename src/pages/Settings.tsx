@@ -64,8 +64,7 @@ export function Settings() {
             ref={firstFieldRef}
           >
             <Flex direction={['column', 'column', 'row']} gridGap={4}>
-              <Radio value={EthereumNetworkOptions.calaveras.key}>{EthereumNetworkOptions.calaveras.name}</Radio>
-              <Radio value={EthereumNetworkOptions.ropsten.key} isDisabled>{EthereumNetworkOptions.ropsten.name}</Radio>
+              <Radio value={EthereumNetworkOptions.ropsten.key}>{EthereumNetworkOptions.ropsten.name}</Radio>
               <Radio value={EthereumNetworkOptions.goerli.key} isDisabled>{EthereumNetworkOptions.goerli.name}</Radio>
               <Radio value={EthereumNetworkOptions.rinkeby.key} isDisabled>{EthereumNetworkOptions.rinkeby.name}</Radio>
               <Radio value={EthereumNetworkOptions.mainnet.key} isDisabled>{EthereumNetworkOptions.mainnet.name}</Radio>
@@ -76,7 +75,7 @@ export function Settings() {
 
       <Box w="100%">
         <Heading size="sm" color="brand.secondaryText">
-          Gwei or Wei
+          Formatters
         </Heading>
         <Card mt="2" gridGap={4}>
           <Checkbox
@@ -86,7 +85,7 @@ export function Settings() {
               settings.set(Setting.formatBurnInGwei, e.target.checked)
             }
           >
-            Format Burned in Gwei
+            Format Burned in Gwei (default Ether)
           </Checkbox>
           <Checkbox
             colorScheme="red"
@@ -95,16 +94,7 @@ export function Settings() {
               settings.set(Setting.formatBaseFeeInGwei, e.target.checked)
             }
           >
-            Format Base Fee in Gwei
-          </Checkbox>
-          <Checkbox
-            colorScheme="red"
-            defaultIsChecked={settings.get(Setting.formatGasInGwei)}
-            onChange={(e) =>
-              settings.set(Setting.formatGasInGwei, e.target.checked)
-            }
-          >
-            Format Gas in Gwei
+            Format Base Fee in Gwei (default Wei)
           </Checkbox>
         </Card>
       </Box>

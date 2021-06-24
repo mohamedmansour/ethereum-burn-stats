@@ -50,7 +50,7 @@ type ActionType =
 
 export const BlockExplorerApi = {
   fetchDetails: async (eth:  EthereumApi, blockNumber: number, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
-    const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : ethers.BigNumber.from(await eth.burned())
+    const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : ethers.BigNumber.from(await eth.burned('0xa03549'))
     const gasPrice = await eth.getGasPrice()
     return {
       currentBlock: blockNumber,
