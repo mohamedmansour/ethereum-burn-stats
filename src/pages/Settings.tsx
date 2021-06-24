@@ -107,7 +107,7 @@ export function Settings() {
           <Slider
             min={5}
             defaultValue={maxBlocks}
-            max={50}
+            max={100}
             step={5}
             onChangeEnd={debouncedChangeHandler}
           >

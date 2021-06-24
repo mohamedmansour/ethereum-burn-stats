@@ -34,8 +34,8 @@ export const defaultSettings: { [key: string]: DefaultSettingValue<unknown> } =
     },
     [Setting.maxBlocksToRender]: {
       convert: IntegerConverter,
-      defaultValue: 15,
-      verify: (v) => typeof(v) === "number"
+      defaultValue: 50,
+      verify: (v) => !isNaN(v)
     },
     [Setting.network]: {
       convert: String,
