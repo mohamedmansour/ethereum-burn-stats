@@ -267,6 +267,9 @@ function TotalFeesCard(props: TotalFeesCardProps) {
           )
         })}
       </HStack>
+      <Box fontSize="14px" mt="0" color="brand.secondaryText">
+          since {timeSince(1624500217)}
+      </Box>
     </Card>
   )
 }
