@@ -44,7 +44,7 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
   {
     [Setting.formatBurnInGwei]: {
       config: BooleanSetting,
-      defaultValue: true,
+      defaultValue: false,
     },
     [Setting.formatBaseFeeInGwei]: {
       config: BooleanSetting,
