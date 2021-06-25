@@ -1,8 +1,9 @@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Grid, GridItem, Heading, Text, VStack } from "@chakra-ui/react";
-import { utils } from "ethers";
+import { ethers } from "ethers";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useParams, Link as ReactLink } from "react-router-dom";
+import { BigNumberText } from "../components/BigNumberFormat";
 import { Card } from "../components/Card";
 import { Loader } from "../components/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
@@ -10,13 +11,13 @@ import { useEthereum } from "../contexts/EthereumContext";
 export function EthAccountDetail() {
   let { id } = useParams<{ id: string }>();
   const { eth } = useEthereum();
-  const [balance, setBalance] = useState<string>();
+  const [balance, setBalance] = useState<ethers.BigNumber>();
 
   useEffect(() => {
     if (!eth) return;
 
     (async () => {
-      setBalance(utils.formatEther(await eth.getBalance(id)));
+      setBalance(await eth.getBalance(id));
     })();
   }, [eth, id]);
 
@@ -52,7 +53,7 @@ export function EthAccountDetail() {
             <Card>
               <VStack>
                 <Heading size="sm">Balance</Heading>
-                <Text>{balance} ETH</Text>
+                <BigNumberText number={balance || ethers.BigNumber.from(0)} />
               </VStack>
             </Card>
           </GridItem>

@@ -17,7 +17,7 @@ import { FirePit } from "../components/FirePit";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { Footer } from "../components/Footer";
 import { EthereumNetworkBadge } from "../components/Network";
-import { formatBigNumber } from "../utils/wei";
+import { BigNumberText } from "../components/BigNumberFormat";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -53,9 +53,7 @@ function DetailSection() {
           <Text fontSize="md" fontWeight="bold" color="brand.secondaryText" isTruncated>
             Total Burned
           </Text>
-          <Text variant="solid">
-            {formatBigNumber(details.totalBurned, 'ether')} ETH
-          </Text>
+          <BigNumberText number={details.totalBurned} />
         </Card>
         <Card
           direction="row"
@@ -73,9 +71,7 @@ function DetailSection() {
           <Text fontSize="md" fontWeight="bold" color="brand.secondaryText">
             Gas Price
           </Text>
-          <Text variant="solid">
-            {formatBigNumber(details.gasPrice, 'gwei')} GWEI
-          </Text>
+          <BigNumberText number={details.gasPrice} />
         </Card>
       </Flex>
     </Box>

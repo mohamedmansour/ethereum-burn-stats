@@ -12,10 +12,10 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { utils } from "ethers";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Link as ReactLink, useParams } from "react-router-dom";
+import { BigNumberText } from "../components/BigNumberFormat";
 import { Card } from "../components/Card";
 import { Loader } from "../components/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
@@ -93,16 +93,16 @@ export function EthTransactionDetail() {
               </Td>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Gas Limit (Wei)</Td>
-              <Td>{utils.formatUnits(transaction.gasLimit, "wei")}</Td>
+              <Td color="brand.secondaryText">Gas Limit</Td>
+              <Td><BigNumberText number={transaction.gasLimit} /></Td>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Gas Price (Wei)</Td>
-              <Td>{utils.formatUnits(transaction.gasPrice, "wei")}</Td>
+              <Td color="brand.secondaryText">Gas Price</Td>
+              <Td><BigNumberText number={transaction.gasPrice} /></Td>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Value (Wei)</Td>
-              <Td>{utils.formatUnits(transaction.value, "wei")}</Td>
+              <Td color="brand.secondaryText">Value</Td>
+              <Td><BigNumberText number={transaction.value} /></Td>
             </Tr>
             <Tr>
               <Td color="brand.secondaryText">Data</Td>

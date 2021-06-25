@@ -31,15 +31,13 @@ import { VscChevronLeft, VscChevronRight } from "react-icons/vsc";
 import { useParams, Link as ReactLink, useHistory } from "react-router-dom";
 import { Loader } from "../components/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
-import { useSetting } from "../hooks/useSetting";
 import { Card } from "../components/Card";
 import {
   BlockExplorerApi,
   BurnedBlockTransaction,
 } from "../contexts/BlockExplorerContext";
-import { Setting } from "../config";
 import { FirePit } from "../components/FirePit";
-import { formatBigNumber } from "../utils/wei";
+import { BigNumberText } from "../components/BigNumberFormat";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;
@@ -68,8 +66,6 @@ export function EthBlockDetail() {
   let history = useHistory();
   let { id } = useParams<{ id: string }>();
   const { eth } = useEthereum();
-  const formatBurnInGwei = useSetting<boolean>(Setting.formatBurnInGwei);
-  const formatBaseFeeInGwei = useSetting<boolean>(Setting.formatBaseFeeInGwei);
   const [state, dispatch] = useReducer(blockDetailReducer, {});
 
   useEffect(() => {
@@ -130,6 +126,9 @@ export function EthBlockDetail() {
     </Button>
   ) : undefined;
 
+  
+  
+
   return (
     <Flex flex="1" direction="column">
       <Breadcrumb>
@@ -164,7 +163,7 @@ export function EthBlockDetail() {
                 <Card>
                   <VStack>
                     <Heading size="sm">Block Reward</Heading>
-                    <Text>{utils.commify(utils.formatUnits(block.rewards, 'ether'))} ETH</Text>
+                    <BigNumberText number={block.rewards} />
                   </VStack>
                 </Card>
               </GridItem>
@@ -172,7 +171,7 @@ export function EthBlockDetail() {
                 <Card>
                   <VStack>
                     <Heading size="sm">Base Fee</Heading>
-                    <Text>{formatBigNumber(block.basefee, formatBaseFeeInGwei ? 'gwei' : 'wei')} {formatBaseFeeInGwei ? 'gwei' : 'wei'}</Text>
+                    <BigNumberText number={block.basefee} />
                   </VStack>
                 </Card>
               </GridItem>
@@ -185,7 +184,7 @@ export function EthBlockDetail() {
                         <FirePit size="12px" />
                       </HStack>
                     </Heading>
-                    <Text>{formatBigNumber(block.burned, formatBurnInGwei ? 'gwei' : 'ether')} {formatBurnInGwei ? 'gwei' : 'ether'}</Text>
+                    <BigNumberText number={block.burned} />
                   </VStack>
                 </Card>
               </GridItem>
@@ -208,13 +207,9 @@ export function EthBlockDetail() {
                 <Text color="brand.secondaryText">Difficulty:</Text>
                 <Text>{utils.commify(block.difficulty)}</Text>
                 <Text color="brand.secondaryText">Gas used:</Text>
-                <Text>
-                  {formatBigNumber(block.gasUsed, 'wei')} wei
-                </Text>
+                <BigNumberText number={block.gasUsed} />
                 <Text color="brand.secondaryText">Gas limit:</Text>
-                <Text>
-                  {formatBigNumber(block.gasLimit, 'wei')} wei
-                </Text>
+                <BigNumberText number={block.gasLimit} />
                 <Text color="brand.secondaryText">Extra data:</Text>
                 <Text wordBreak="break-all">{block.extraData}</Text>
               </Grid>
@@ -260,7 +255,7 @@ export function EthBlockDetail() {
                           {utils.formatEther(t.value)} Eth
                         </Td>
                         <Td width="10%">
-                          {formatBigNumber(t.gasPrice, formatBurnInGwei ? 'gwei' : 'wei')}
+                          <BigNumberText number={t.gasPrice} />
                         </Td>
                       </Tr>
                     ))}

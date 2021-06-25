@@ -7,7 +7,6 @@ import {
   HStack,
   Link,
   Text,
-  Tooltip,
   useRadio,
   useRadioGroup,
   UseRadioProps,
@@ -16,6 +15,7 @@ import {
 import { ethers, utils } from "ethers";
 import React from "react";
 import { Link as ReactLink } from "react-router-dom";
+import { BigNumberText } from "../components/BigNumberFormat";
 import { BlockProgress } from "../components/BlockProgress";
 import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";
@@ -29,7 +29,6 @@ import {
 } from "../contexts/BlockExplorerContext";
 import { Currency, CurrencyProvider, useCurrency } from "../contexts/CurrencyContext";
 import { timeSince } from "../utils/time";
-import { formatBigNumber } from "../utils/wei";
 
 interface BlockItemProps {
   number: number;
@@ -43,17 +42,14 @@ interface BlockItemProps {
 }
 
 function BlockItem(props: BlockItemProps) {
-  const symbol = props.currency === 'ETH' ? '' : '$'
-  const totalBurned = symbol + utils.commify(utils.formatEther(props.burned.mul(props.amount)).substr(0, 8))
-
   const label = (
-    <Text>
-      Burned: {formatBigNumber(props.burned, 'ether')} ETH
+    <Box>
+      Burned: <BigNumberText number={props.burned} disableTooltip doNotShortenDecimals />
       <br />
-      Base Fee: {formatBigNumber(props.basefee, 'wei')} wei
+      Base Fee: <BigNumberText number={props.basefee} />
       <br />
       Gas used: {((props.gasUsed.toNumber() / props.gasLimit.toNumber()) * 100).toFixed(2)}%
-    </Text>
+    </Box>
   );
 
   return (
@@ -78,11 +74,7 @@ function BlockItem(props: BlockItemProps) {
         align="center"
       >
         <FirePit size="12px" />
-        <Box w="70px" whiteSpace="nowrap">
-          <Tooltip hasArrow label={label} placement="right">
-            {totalBurned}
-          </Tooltip>
-        </Box>
+        <BigNumberText number={props.burned} label={label} usdConversion={props.amount} w="110px" />
       </HStack>
     </HStack>
   );
@@ -111,7 +103,7 @@ function CurrentBlock(props: CurrentBlockProps) {
         align="center"
       >
         <BlockProgress
-          w="90px"
+          w="130px"
           h="24px"
         />
       </HStack>
@@ -167,19 +159,15 @@ function SessionSummaryCard(props: SessionSummaryProps) {
   if (!currency || !amount)
     return null
 
-  const symbol = currency === 'ETH' ? '' : '$'
-  const sessionTotalBurned = symbol + formatBigNumber(props.session.burned.mul(amount), 'ether') + ' ' + currency
-  const sessionTotalRewards = symbol + formatBigNumber(props.session.rewards.mul(amount), 'ether') + ' ' + currency
-
   return (
     <Card>
       <Heading size="sm" textAlign="center" color="brand.headerText">
         Session Summary
       </Heading>
-      <Text color="brand.primaryText" textAlign="left" mt="2" p="4">
-        You've just experienced <strong>{sessionTotalBurned}</strong> being burned by observing <strong>{props.session.blockCount} blocks</strong>
-        {" "}that contain <strong>{props.session.transactionCount} transactions</strong> with <strong>{sessionTotalRewards}</strong> rewards!
-      </Text>
+      <Box color="brand.primaryText" textAlign="left" mt="2" p="4">
+        You've just experienced <BigNumberText number={props.session.burned} usdConversion={amount} fontWeight="bold" removeCurrencyColor /> being burned by observing <strong>{props.session.blockCount} blocks</strong>
+        {" "}that contain <strong>{props.session.transactionCount} transactions</strong> with <BigNumberText number={props.session.rewards} usdConversion={amount}  fontWeight="bold" removeCurrencyColor /> rewards!
+      </Box>
     </Card>
   )
 }

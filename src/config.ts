@@ -34,22 +34,12 @@ export const EthereumNetworkOptions: {
 };
 
 export enum Setting {
-  formatBurnInGwei = "formatBurnInGwei",
-  formatBaseFeeInGwei = "formatBaseFeeInGwei",
   maxBlocksToRender = "maxBlocksToRender",
   network = "network",
 }
 
 export const defaultSettings: { [key: string]: DefaultSettingValue } =
   {
-    [Setting.formatBurnInGwei]: {
-      config: BooleanSetting,
-      defaultValue: false,
-    },
-    [Setting.formatBaseFeeInGwei]: {
-      config: BooleanSetting,
-      defaultValue: false,
-    },
     [Setting.maxBlocksToRender]: {
       config: IntegerSetting,
       defaultValue: 50,

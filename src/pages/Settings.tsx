@@ -1,5 +1,4 @@
 import {
-  Checkbox,
   Box,
   Slider,
   SliderFilledTrack,
@@ -70,32 +69,6 @@ export function Settings() {
               <Radio value={EthereumNetworkOptions.mainnet.key} isDisabled>{EthereumNetworkOptions.mainnet.name}</Radio>
             </Flex>
           </RadioGroup>
-        </Card>
-      </Box>
-
-      <Box w="100%">
-        <Heading size="sm" color="brand.secondaryText">
-          Formatters
-        </Heading>
-        <Card mt="2" gridGap={4}>
-          <Checkbox
-            colorScheme="red"
-            defaultIsChecked={settings.get(Setting.formatBurnInGwei)}
-            onChange={(e) =>
-              settings.set(Setting.formatBurnInGwei, e.target.checked)
-            }
-          >
-            Format Burned in Gwei (default Ether)
-          </Checkbox>
-          <Checkbox
-            colorScheme="red"
-            defaultIsChecked={settings.get(Setting.formatBaseFeeInGwei)}
-            onChange={(e) =>
-              settings.set(Setting.formatBaseFeeInGwei, e.target.checked)
-            }
-          >
-            Format Base Fee in Gwei (default Wei)
-          </Checkbox>
         </Card>
       </Box>
 

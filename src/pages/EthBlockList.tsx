@@ -14,10 +14,8 @@ import {
   BreadcrumbLink,
 } from "@chakra-ui/react";
 import { Link as ReactLink } from "react-router-dom";
-import { useSetting } from "../hooks/useSetting";
 import { timeSince } from "../utils/time";
 import { GasUsed } from "../components/GasUsed";
-import { formatBigNumber } from "../utils/wei";
 import {
   useBlockExplorer,
   BurnedBlockTransaction,
@@ -25,19 +23,17 @@ import {
 import { Loader } from "../components/Loader";
 import { BlockProgress } from "../components/BlockProgress";
 import { Card } from "../components/Card";
-import { Setting } from "../config";
 import { FirePit } from "../components/FirePit";
+import { BigNumberText } from "../components/BigNumberFormat";
 
 const responsiveColumn = { display: ["none", "none", "table-cell"] };
 
 interface EthBlockItemProps {
   block: BurnedBlockTransaction;
-  formatBurnInGwei: boolean;
-  formatBaseFeeInGwei: boolean;
 }
 
 function EthBlockItem(props: EthBlockItemProps) {
-  const { block, formatBurnInGwei, formatBaseFeeInGwei } = props;
+  const { block } = props;
   return (
     <Tr>
       <Td>
@@ -54,13 +50,13 @@ function EthBlockItem(props: EthBlockItemProps) {
       <Td>
         <GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} />
       </Td>
-      <Td {...responsiveColumn}>{formatBigNumber(block.gasLimit, 'wei')}</Td>
-      <Td>{formatBigNumber(block.rewards, 'ether')}</Td>
+      <Td {...responsiveColumn}><BigNumberText number={block.gasLimit} /></Td>
+      <Td><BigNumberText number={block.rewards} /></Td>
       <Td>
-        {formatBigNumber(block.basefee, formatBaseFeeInGwei ? 'gwei' : 'wei')}
+        <BigNumberText number={block.basefee} />
       </Td>
       <Td>
-        {formatBigNumber(block.burned, formatBurnInGwei ? 'gwei' : 'ether')}
+        <BigNumberText number={block.burned} />
       </Td>
     </Tr>
   );
@@ -68,8 +64,6 @@ function EthBlockItem(props: EthBlockItemProps) {
 
 export function EthBlockList() {
   const { details, blocks } = useBlockExplorer();
-  const formatBurnInGwei = useSetting<boolean>(Setting.formatBurnInGwei);
-  const formatBaseFeeInGwei = useSetting<boolean>(Setting.formatBaseFeeInGwei);
 
   if (!details) return <Loader>Loading block details ...</Loader>;
 
@@ -96,16 +90,16 @@ export function EthBlockList() {
               <Th color="brand.secondaryText">Txn</Th>
               <Th color="brand.secondaryText">Gas Used</Th>
               <Th color="brand.secondaryText" {...responsiveColumn}>
-                Gas Limit (wei)
+                Gas Limit
               </Th>
-              <Th color="brand.secondaryText">Rewards (eth)</Th>
+              <Th color="brand.secondaryText">Rewards</Th>
               <Th color="brand.secondaryText">
-                Base Fee ({formatBaseFeeInGwei ? "gwei" : "wei"})
+                Base Fee
               </Th>
               <Th color="brand.secondaryText">
                 <HStack>
                   <FirePit size="12px" />
-                  <Text>Burned ({formatBurnInGwei ? "gwei" : "ether"})</Text>
+                  <Text>Burned</Text>
                 </HStack>
               </Th>
             </Tr>
@@ -121,8 +115,6 @@ export function EthBlockList() {
               <EthBlockItem
                 key={idx}
                 block={block}
-                formatBurnInGwei={formatBurnInGwei}
-                formatBaseFeeInGwei={formatBaseFeeInGwei}
               />
             ))}
           </Tbody>
