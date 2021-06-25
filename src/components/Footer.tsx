@@ -36,8 +36,8 @@ export function Footer() {
         <Link href="https://gitcoin.co/grants/1709/ethereum-2-educational-grant">
           <HStack>
             <Icon as={ImHeart} color="brand.orange" />
-            <Tooltip label="Please help support the server costs, hosting Geth is not cheap 🖤"  bg="brand.orange" textAlign="center" hasArrow placement="top">
-              <Text>Gitcoin Grant</Text>
+            <Tooltip label="Please help support the server costs, hosting Geth is not cheap 🖤 You can donate through Gitcon Grant, or directly to my ENS mansour.eth"  bg="brand.orange" textAlign="center" hasArrow placement="top">
+              <Text>Donate</Text>
             </Tooltip>
           </HStack>
         </Link>
