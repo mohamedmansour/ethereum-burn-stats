@@ -243,23 +243,20 @@ function TotalFeesCard(props: TotalFeesCardProps) {
       <Heading size="sm" color="brand.headerText">
         Total Fees Burned
       </Heading>
-      <HStack
+      <Flex
         alignItems="baseline"
         overflow="hidden"
         wordBreak="break-all"
         whiteSpace="nowrap"
         justify="center"
       >
-        <Text fontSize={["48px", "64px", "90px"]} fontWeight="bold">
+        <Text fontSize={["4vh", "5vh", "6vh"]} fontWeight="bold">
           {totalBurnedWholeNumber}.
         </Text>
-        <Text fontSize={["24px", "32px", "48px"]}>
+        <Text fontSize={["2vh", "2vh", "3vh"]}>
           {totalBurnedDecimalNumber}
         </Text>
-        <Text fontSize={["18px", "22px", "32px"]} color="brand.orange">
-          {state.currency}
-        </Text>
-      </HStack>
+      </Flex>
       <HStack {...group} justify="center">
         {options.map((value) => {
           const radio = getRadioProps({ value })
