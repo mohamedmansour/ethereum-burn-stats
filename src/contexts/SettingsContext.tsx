@@ -68,7 +68,7 @@ const SettingsProvider = ({
   
   const set = (key: Setting, value: any): void => {
     localStorage[key] = value
-    event.emit(key, value)
+    event.emit(key, defaultSettings[key].config.convert(value))
   }
 
   // Verify settings are correct.
