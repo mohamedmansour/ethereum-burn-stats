@@ -348,7 +348,7 @@ export function ActivationCountdown(props: ActivationCountdownProps) {
   return (
   <Card bg="brand.card" zIndex={2} p="4" w="100%" textAlign="center">
     <Heading size="sm" color="brand.headerText">
-      Countdown till Activation
+       Activation Countdown
     </Heading>
     <VStack align="center" justify="center" p="10">
       <Box>
