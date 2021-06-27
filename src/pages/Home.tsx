@@ -14,6 +14,8 @@ import {
 } from "@chakra-ui/react";
 import { ethers, utils } from "ethers";
 import React from "react";
+import { useEffect } from "react";
+import { useState } from "react";
 import { Link as ReactLink } from "react-router-dom";
 import { BigNumberText } from "../components/BigNumberFormat";
 import { BlockProgress } from "../components/BlockProgress";
@@ -28,6 +30,7 @@ import {
   useBlockExplorer,
 } from "../contexts/BlockExplorerContext";
 import { Currency, CurrencyProvider, useCurrency } from "../contexts/CurrencyContext";
+import { useEthereum } from "../contexts/EthereumContext";
 import { timeSince } from "../utils/time";
 
 interface BlockItemProps {
@@ -205,7 +208,7 @@ interface TotalFeesCardProps {
   totalBurned: ethers.BigNumber
 }
 
-function TotalFeesCard(props: TotalFeesCardProps) {
+function CurrencySwitcher() {
   const state = useCurrency()
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: "currency",
@@ -219,12 +222,32 @@ function TotalFeesCard(props: TotalFeesCardProps) {
   const group = getRootProps()
   const options = ["ETH", "USD"]
 
+  return (
+    <HStack {...group} justify="center">
+    {options.map((value) => {
+      const radio = getRadioProps({ value })
+      return (
+        <CurrencySelectorCard key={value} {...radio}>
+          {value}
+        </CurrencySelectorCard>
+      )
+    })}
+    </HStack>
+  )
+}
+  
+function TotalFeesCard(props: TotalFeesCardProps) {
+  const state = useCurrency()
+  if (!state.currency || !state.amount)
+    return null
+
   const isEthereumCurrency = state.currency === 'ETH'
   const symbol = isEthereumCurrency ? '' : '$'
   const totalBurnedInEth = utils.formatEther(props.totalBurned.mul(state.amount));
   const totalBurnedSplitter = totalBurnedInEth.indexOf(".");
   const totalBurnedWholeNumber = symbol + utils.commify(totalBurnedInEth.substr(0, totalBurnedSplitter));
   const totalBurnedDecimalNumber = totalBurnedInEth.substr(totalBurnedSplitter + 1, isEthereumCurrency ? 6 : 2);
+
 
   return (
     <Card bg="brand.card" zIndex={2} p="4" w="100%" textAlign="center">
@@ -245,16 +268,7 @@ function TotalFeesCard(props: TotalFeesCardProps) {
           {totalBurnedDecimalNumber}
         </Text>
       </Flex>
-      <HStack {...group} justify="center">
-        {options.map((value) => {
-          const radio = getRadioProps({ value })
-          return (
-            <CurrencySelectorCard key={value} {...radio}>
-              {value}
-            </CurrencySelectorCard>
-          )
-        })}
-      </HStack>
+      <CurrencySwitcher />
     </Card>
   )
 }
@@ -308,8 +322,71 @@ function Header() {
   )
 }
 
+interface ActivationCountdownProps {
+  blocksRemaining: number
+  lastFiveBlocks: BurnedBlockTransaction[]
+}
+export function ActivationCountdown(props: ActivationCountdownProps) {
+  const [estimatedTime, setEstimatedTime] = useState<string>()
+
+  useEffect(() => {
+    const averageBlockSpeed = props.lastFiveBlocks.slice(1, 5).reduce((prev, curr, currentIndex, array) => {
+      if (currentIndex > 0) {
+        const currentDiff = curr.timestamp - array[currentIndex - 1].timestamp
+        return (prev + currentDiff) / 2
+      }
+      return curr.timestamp - prev
+    }, props.lastFiveBlocks[0].timestamp)
+  
+    const activationDate = new Date(Date.now() + Math.abs(averageBlockSpeed) * props.blocksRemaining * 1000)
+    
+    const dtf = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'long', timeStyle: 'medium' });
+    setEstimatedTime(dtf.format(activationDate))
+  }, [props.blocksRemaining, props.lastFiveBlocks])
+
+  
+  return (
+  <Card bg="brand.card" zIndex={2} p="4" w="100%" textAlign="center">
+    <Heading size="sm" color="brand.headerText">
+      Countdown till Activation
+    </Heading>
+    <VStack align="center" justify="center" p="10">
+      <Box>
+        <Text fontSize="100px" lineHeight="100px">{props.blocksRemaining}</Text>
+        <Text color="brand.secondaryText">Blocks Remaining</Text>
+      </Box>
+      <Box pt="10" pb="10">
+        {!estimatedTime && (<Text>Please wait, calculating approximate time...</Text>) }
+        {estimatedTime !== undefined && (
+          <>
+            <Text fontSize="30px" lineHeight="30px">{estimatedTime}</Text>
+            <Text color="brand.secondaryText">Estimated Activation</Text>
+          </>
+        )}
+      </Box>
+      <Divider bg="brand.card" borderColor="brand.card" />
+      <BlockProgress w="100%" h="10px"/> 
+    </VStack>
+    <Divider bg="brand.card" borderColor="brand.card" />
+    <Link
+      as={ReactLink}
+      to="/blocks"
+      mt="4"
+      textAlign="center"
+      zIndex={2}
+      size="sm"
+    >
+      View all blocks
+    </Link>
+  </Card>
+  )
+}
+
 export function Home() {
   const { details, blocks, session } = useBlockExplorer();
+  const { eth } = useEthereum();
+
+  if (!eth) return <Loader>Connecting to network ...</Loader>;
 
   if (!details) return <Loader>Loading block details ...</Loader>;
 
@@ -319,6 +396,8 @@ export function Home() {
 
   const latestBlock = blocks[0];
   const renderedBlocks = blocks.slice(0, 5);
+
+  const activated = latestBlock.number > eth.connectedNetwork.genesis
 
   return (
     <CurrencyProvider>
@@ -338,9 +417,14 @@ export function Home() {
           pb="100"
         >
           <Header />
-          <TotalFeesCard totalBurned={details.totalBurned} />
-          <SessionSummaryCard session={session} />
-          <LatestBlocksCard latestBlock={latestBlock} renderedBlocks={renderedBlocks} />
+          {!activated && (<ActivationCountdown blocksRemaining={eth.connectedNetwork.genesis - latestBlock.number} lastFiveBlocks={renderedBlocks}/>)}
+          {activated && (
+            <>
+              <TotalFeesCard totalBurned={details.totalBurned} /> 
+              <SessionSummaryCard session={session} />
+              <LatestBlocksCard latestBlock={latestBlock} renderedBlocks={renderedBlocks} />
+            </>
+          )}
           <Footer />
         </VStack>
         <FireAnimation />
