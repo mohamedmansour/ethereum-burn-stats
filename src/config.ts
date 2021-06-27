@@ -13,11 +13,6 @@ export const IntegerSetting: SettingConfig = {
   convert: (value: string): number => parseInt(value)
 }
 
-const EthereumNetworkSetting : SettingConfig  = {
-  verify: (value: any): boolean => (!!EthereumNetworkOptions[value]),
-  convert: (value: string): EthereumNetwork => (EthereumNetworkOptions[value])
-}
-
 export interface EthereumNetwork {
   name: string
   key: string
@@ -36,18 +31,14 @@ export const EthereumNetworkOptions: {
 };
 
 export enum Setting {
-  maxBlocksToRender = "maxBlocksToRender",
-  network = "network",
+  maxBlocksToRender = "maxBlocksToRender"
 }
 
+export const defaultNetwork = EthereumNetworkOptions['ropsten']
 export const defaultSettings: { [key: string]: DefaultSettingValue } =
   {
     [Setting.maxBlocksToRender]: {
       config: IntegerSetting,
       defaultValue: 50,
-    },
-    [Setting.network]: {
-      config: EthereumNetworkSetting,
-      defaultValue: EthereumNetworkOptions.ropsten,
     },
   };

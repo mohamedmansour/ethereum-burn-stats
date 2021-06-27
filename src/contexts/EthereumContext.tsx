@@ -2,8 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Loader } from '../components/Loader';
 import { ethers } from "ethers";
 import { Ethereumish } from '../react-app-env';
-import { useSetting } from '../hooks/useSetting';
-import { EthereumNetwork, Setting } from '../config';
+import { defaultNetwork, EthereumNetwork } from '../config';
+import { getNetworkFromSubdomain } from '../utils/subdomain';
 
 declare global {
   interface Window {
@@ -50,17 +50,15 @@ const EthereumProvider = ({
   url?: string | undefined
 }) => {
   const [eth, setEth] = useState<EthereumApi | undefined>()
-  const network = useSetting<EthereumNetwork>(Setting.network)
 
   useEffect(() => {
     if (!url)
       return;
 
-    setEth(undefined)
+    const network = getNetworkFromSubdomain() || defaultNetwork
     setEth(new EthereumApi(network, `${url}:${network.port}`))
-
     return () => {}
-  }, [url, network])
+  }, [url])
 
   const connect = async () => {
     if (!window.ethereum)

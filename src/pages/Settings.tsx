@@ -17,10 +17,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link as ReactLink } from "react-router-dom";
 import { Card } from "../components/Card";
 import { Setting, EthereumNetworkOptions } from "../config";
+import { useEthereum } from "../contexts/EthereumContext";
 import { useSettings } from "../contexts/SettingsContext";
 import { debounce } from "../utils/debounce";
+import { navigateToSubdomain } from "../utils/subdomain";
 
 export function Settings() {
+  const { eth } = useEthereum()
   const firstFieldRef = useRef(null);
   const settings = useSettings();
   const [maxBlocks, setMaxBlocks] = useState<number>(
@@ -40,6 +43,10 @@ export function Settings() {
     []
   );
 
+  const changeNetwork = (network: string) => {
+    navigateToSubdomain(network)
+  }
+
   return (
     <Flex flex="1" direction="column" gridGap={4}>
       <Breadcrumb>
@@ -58,8 +65,8 @@ export function Settings() {
         </Heading>
         <Card mt="2">
           <RadioGroup
-            onChange={(e) => settings.set(Setting.network, e)}
-            defaultValue={settings.get(Setting.network).key}
+            onChange={changeNetwork}
+            defaultValue={eth?.connectedNetwork.key}
             ref={firstFieldRef}
           >
             <Flex direction={['column', 'column', 'row']} gridGap={4}>
