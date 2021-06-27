@@ -12,7 +12,7 @@ interface AutoFormatType {
 export function autoFormatBigNumber(
   number: ethers.BigNumber
 ): AutoFormatType {
-  let formatted: AutoFormatType = { value: '0', currency: ''};
+  let formatted: AutoFormatType = { value: '0', currency: 'WEI'};
 
   if (number.isZero()) {
     return formatted
