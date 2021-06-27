@@ -1,10 +1,10 @@
 import { defaultNetwork, EthereumNetwork, EthereumNetworkOptions } from "../config"
 
 function extractSubdomain(): [string, string] | undefined {
-  const subdomainSeparator = window.location.host.indexOf('.')
-  if (subdomainSeparator !== -1) {
+  const tokens = window.location.host.split('.')
+  if (tokens.length > 1) {
     // Subdomain found
-    return [window.location.host.substr(0, subdomainSeparator), window.location.host.substr(subdomainSeparator + 1, window.location.host.length)]
+    return [tokens[0], tokens[1]]
   }
 
   return undefined
