@@ -59,12 +59,12 @@ export function Settings() {
         <Card mt="2">
           <RadioGroup
             onChange={(e) => settings.set(Setting.network, e)}
-            defaultValue={settings.get(Setting.network)}
+            defaultValue={settings.get(Setting.network).key}
             ref={firstFieldRef}
           >
             <Flex direction={['column', 'column', 'row']} gridGap={4}>
               <Radio value={EthereumNetworkOptions.ropsten.key}>{EthereumNetworkOptions.ropsten.name}</Radio>
-              <Radio value={EthereumNetworkOptions.goerli.key} isDisabled>{EthereumNetworkOptions.goerli.name}</Radio>
+              <Radio value={EthereumNetworkOptions.goerli.key}>{EthereumNetworkOptions.goerli.name}</Radio>
               <Radio value={EthereumNetworkOptions.rinkeby.key} isDisabled>{EthereumNetworkOptions.rinkeby.name}</Radio>
               <Radio value={EthereumNetworkOptions.mainnet.key} isDisabled>{EthereumNetworkOptions.mainnet.name}</Radio>
             </Flex>

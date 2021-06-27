@@ -4,7 +4,7 @@ import { ethers, utils } from 'ethers'
 import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../components/Loader";
 import { useReducer } from "react";
-import { EthereumNetwork, Setting } from "../config";
+import { Setting } from "../config";
 
 export interface BurnedBlockTransaction extends ethers.providers.Block {
   burned: ethers.BigNumber
@@ -48,9 +48,25 @@ type ActionType =
   | NewBlockAction
   | InitAction
 
+const getDefaultBigNumber = (hex: ethers.BigNumberish) => ethers.BigNumber.from(!hex ? '0' : hex)
+const safeBurned = async (eth: EthereumApi, blockNumber: number, fetchTotal: boolean = false) => {
+  if (eth.connectedNetwork.genesis > blockNumber) {
+    return ethers.BigNumber.from(0)
+  }
+
+  if (fetchTotal) {
+    return getDefaultBigNumber(await eth.burned(utils.hexValue(eth.connectedNetwork.genesis)))
+  }
+
+  const blockNumberInHex = utils.hexValue(blockNumber)
+  return getDefaultBigNumber(await eth.burned(blockNumberInHex, blockNumberInHex))
+}
+
+const safeTotalBurned = (eth: EthereumApi, blockNumber: number) => safeBurned(eth, blockNumber, true)
+
 export const BlockExplorerApi = {
-  fetchDetails: async (eth:  EthereumApi, blockNumber: number, genesisHex: string, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
-    const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : ethers.BigNumber.from(await eth.burned(genesisHex))
+  fetchDetails: async (eth:  EthereumApi, blockNumber: number, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
+    const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : await safeTotalBurned(eth, blockNumber)
     const gasPrice = await eth.getGasPrice()
     return {
       currentBlock: blockNumber,
@@ -62,9 +78,9 @@ export const BlockExplorerApi = {
     const blockNumberInHex = utils.hexValue(blockNumber)
     const block = await eth.getBlock(blockNumber)
     if (block) {
-      const rewards = ethers.BigNumber.from(await eth.getBlockReward(blockNumberInHex))
-      const basefee = ethers.BigNumber.from(await eth.getBaseFeePerGas(blockNumberInHex))
-      const burned = ethers.BigNumber.from(await eth.burned(blockNumberInHex, blockNumberInHex))
+      const rewards = getDefaultBigNumber(await eth.getBlockReward(blockNumberInHex))
+      const basefee = getDefaultBigNumber(await eth.getBaseFeePerGas(blockNumberInHex))
+      const burned =  await safeBurned(eth, blockNumber)
 
       return {
         ...block,
@@ -138,8 +154,6 @@ const BlockExplorerProvider = ({
   const { eth } = useEthereum()
   const [state, dispatch] = useReducer(blockExplorerReducer, {})
   const maxBlocksToRender = useSetting<number>(Setting.maxBlocksToRender)
-  const network = useSetting<EthereumNetwork>(Setting.network)
-  const genesis = utils.hexValue(network.genesis)
 
   useEffect(() => {
     if (!eth)
@@ -150,7 +164,7 @@ const BlockExplorerProvider = ({
       if (!block)
         return
 
-      const details = await BlockExplorerApi.fetchDetails(eth, blockNumber, genesis, true)
+      const details = await BlockExplorerApi.fetchDetails(eth, blockNumber, true)
 
       dispatch({ type: 'NEW_BLOCK', details, block, maxBlocksToRender })
     }
@@ -173,7 +187,7 @@ const BlockExplorerProvider = ({
     const init = async () => {
       const blocks = await prefetchBlockHeaders(5 /* Ease the server a bit so only 5 initial */)
       if (blocks.length) {
-        const details = await BlockExplorerApi.fetchDetails(eth, blocks[0].number, genesis)
+        const details = await BlockExplorerApi.fetchDetails(eth, blocks[0].number)
         dispatch({ type: 'INIT', details, blocks })
       }
       eth.on('block', onNewBlockHeader)
@@ -182,7 +196,7 @@ const BlockExplorerProvider = ({
     init()
     
     return () => { eth.off('block', onNewBlockHeader) }
-  }, [eth, maxBlocksToRender, genesis])
+  }, [eth, maxBlocksToRender])
 
   return (
     <BlockExplorerContext.Provider

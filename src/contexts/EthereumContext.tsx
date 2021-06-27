@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Loader } from '../components/Loader';
 import { ethers } from "ethers";
 import { Ethereumish } from '../react-app-env';
+import { useSetting } from '../hooks/useSetting';
+import { EthereumNetwork, Setting } from '../config';
 
 declare global {
   interface Window {
@@ -10,6 +12,10 @@ declare global {
 }
 
 export class EthereumApi extends ethers.providers.WebSocketProvider {
+  constructor(public connectedNetwork: EthereumNetwork, url: string) {
+    super(url)
+  }
+
   public burned(start?: string, end?: string): Promise<ethers.BigNumberish> {
     return this.send('debug_burned', [start, end])
   }
@@ -18,6 +24,9 @@ export class EthereumApi extends ethers.providers.WebSocketProvider {
   }
   public async getBaseFeePerGas(blockNumberInHex: string): Promise<ethers.BigNumberish> {
     return (await this.send('eth_getHeaderByNumber', [blockNumberInHex])).baseFeePerGas
+  }
+  public async getChainId(): Promise<number> {
+    return parseInt((await this.send('eth_chainId', [])))
   }
 } 
 
@@ -41,14 +50,17 @@ const EthereumProvider = ({
   url?: string | undefined
 }) => {
   const [eth, setEth] = useState<EthereumApi | undefined>()
+  const network = useSetting<EthereumNetwork>(Setting.network)
+
   useEffect(() => {
     if (!url)
       return;
 
-    setEth(new EthereumApi(url))
+    setEth(undefined)
+    setEth(new EthereumApi(network, `${url}:${network.port}`))
 
     return () => {}
-  }, [url])
+  }, [url, network])
 
   const connect = async () => {
     if (!window.ethereum)
