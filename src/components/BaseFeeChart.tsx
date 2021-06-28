@@ -76,7 +76,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
 
   useEffect(() => {
     const newData = []
-    
+
     for (let i = props.data.length-1; i >= 0; i--) {
       const block = props.data[i]
       const chartData: {[key: string]: any} = {
@@ -84,6 +84,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
         block: block.number,
         burnedFormatted: autoFormatBigNumberToString(block.burned),
         basefeeFormatted: autoFormatBigNumberToString(block.basefee),
+        transactions: block.transactions.length
       }
 
       if (chartType === 'burned') {
@@ -92,10 +93,6 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
       
       if (chartType === 'basefee') {
         chartData.basefee = parseInt(utils.formatUnits(block.basefee, 'gwei'))
-      }
-
-      if (chartType === 'transactions') {
-        chartData.transactions = block.transactions.length
       }
 
       newData.push(chartData)
