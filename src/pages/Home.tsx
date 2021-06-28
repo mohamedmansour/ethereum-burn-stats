@@ -259,11 +259,11 @@ function TotalFeesCard(props: TotalFeesCardProps) {
         whiteSpace="nowrap"
         justify="center"
       >
-        <Text fontSize={["4vh", "5vh", "6vh"]} fontWeight="bold">
-          {totalBurnedWholeNumber}.
+        <Text fontSize={["4vh", "4vh", "2.5vh"]} fontWeight="bold">
+          {totalBurnedWholeNumber}
         </Text>
-        <Text fontSize={["2vh", "2vh", "3vh"]}>
-          {totalBurnedDecimalNumber}
+        <Text fontSize={["2vh", "2vh", "1vh"]}>
+        .{totalBurnedDecimalNumber}
         </Text>
       </Flex>
       <CurrencySwitcher />
