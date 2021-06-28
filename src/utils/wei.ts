@@ -1,7 +1,7 @@
 import { ethers, utils } from "ethers";
 
 
-const MinBoundEther = utils.parseUnits("0.009", "ether");
+const MinBoundEther = utils.parseUnits("0.00009", "ether");
 const MinBoundGwei = utils.parseUnits("0.01", "gwei");
 
 interface AutoFormatType {
