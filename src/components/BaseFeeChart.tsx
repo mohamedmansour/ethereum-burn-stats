@@ -70,7 +70,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
   const [ chartType, setChartType ] = useState(props.activated ? 'basefee' : 'transactions')
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: "chart",
-    defaultValue: "basefee",
+    defaultValue: chartType,
     onChange: setChartType,
   })
   const [data, setData] = useState<any[]>([])
