@@ -92,7 +92,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
       }
       
       if (chartType === 'basefee') {
-        chartData.basefee = parseInt(utils.formatUnits(block.basefee, 'gwei'))
+        chartData.basefee = parseFloat(utils.formatUnits(block.basefee, 'gwei'))
       }
 
       newData.push(chartData)
