@@ -10,30 +10,28 @@ import { Home } from './Home';
 export function DashboardPage() {
   return (
     <BrowserRouter>
-      <Switch>
-        <Route exact path="/">
-          <Home />
-        </Route>
-        <Layout direction="column">
-          <Switch>
-            <Route path="/blocks">
-              <EthBlockList />
-            </Route>
-            <Route path="/account/:id">
-              <EthAccountDetail />
-            </Route>
-            <Route path="/block/:id">
-              <EthBlockDetail />
-            </Route>
-            <Route path="/transaction/:id">
-              <EthTransactionDetail />
-            </Route>
-            <Route path="/settings">
-              <Settings />
-            </Route>
-          </Switch>
-        </Layout>
-      </Switch>
+      <Layout direction="column">
+        <Switch>
+          <Route exact path="/">
+            <Home />
+          </Route>
+          <Route path="/blocks">
+            <EthBlockList />
+          </Route>
+          <Route path="/account/:id">
+            <EthAccountDetail />
+          </Route>
+          <Route path="/block/:id">
+            <EthBlockDetail />
+          </Route>
+          <Route path="/transaction/:id">
+            <EthTransactionDetail />
+          </Route>
+          <Route path="/settings">
+            <Settings />
+          </Route>
+        </Switch>
+      </Layout>
     </BrowserRouter>
   )
 }

@@ -11,7 +11,7 @@ import * as CSS from "csstype";
 import {
   VscSettingsGear,
 } from "react-icons/vsc";
-import { Link as ReactLink } from "react-router-dom";
+import { Link as ReactLink, useLocation } from "react-router-dom";
 import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
@@ -79,6 +79,8 @@ function DetailSection() {
 }
 
 export function Layout(props: LayoutProps) {
+  const location = useLocation()
+  
   return (
     <Flex direction="column" overflow="hidden" height="inherit">
       <Flex
@@ -113,7 +115,7 @@ export function Layout(props: LayoutProps) {
           <Icon as={VscSettingsGear} />
         </Link>
       </Flex>
-      <DetailSection />
+      { location.pathname !== '/' && <DetailSection /> }
       <Flex
         flex={1}
         overflowY="auto"

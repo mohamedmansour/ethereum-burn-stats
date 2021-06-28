@@ -1,6 +1,5 @@
 import {
   Box,
-  Center,
   Divider,
   Flex,
   Heading,
@@ -17,13 +16,12 @@ import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link as ReactLink } from "react-router-dom";
+import { BaseFeeChart } from "../components/BaseFeeChart";
 import { BigNumberText } from "../components/BigNumberFormat";
 import { BlockProgress } from "../components/BlockProgress";
 import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";
-import { Footer } from "../components/Footer";
 import { Loader } from "../components/Loader";
-import { EthereumNetworkBadge } from "../components/Network";
 import {
   BlockExplorerSession,
   BurnedBlockTransaction,
@@ -273,55 +271,6 @@ function TotalFeesCard(props: TotalFeesCardProps) {
   )
 }
 
-function FireAnimation() {
-  return (
-    <Center position="fixed" bottom="0" fontSize={["50px", "80px", "100px"]}>
-      <FirePit
-        size="0.8em"
-        sparkCount={12}
-        zIndex={1}
-        position="absolute"
-        bottom="0"
-      />
-      <FirePit
-        size="0.4em"
-        ml="-1.8em"
-        sparkCount={12}
-        zIndex={1}
-        position="absolute"
-        bottom="0"
-      />
-      <FirePit
-        size="0.4em"
-        ml="1.8em"
-        sparkCount={12}
-        zIndex={1}
-        position="absolute"
-        bottom="0"
-      />
-    </Center>
-  )
-}
-
-function Header() {
-  return (
-    <Box mt="2" mb="2" textAlign="left" w="100%" position="relative">
-      <Box>
-        <Heading>
-          <HStack>
-            <Text>Watch The</Text>
-            <Box display="inline" color="brand.orange">
-              Burn
-            </Box>
-          </HStack>
-        </Heading>
-        <Text>Ethereum's EIP-1559</Text>
-      </Box>
-      <EthereumNetworkBadge position="absolute" bottom="0" right="0" />
-    </Box>
-  )
-}
-
 interface ActivationCountdownProps {
   blocksRemaining: number
   lastFiveBlocks: BurnedBlockTransaction[]
@@ -364,7 +313,6 @@ export function ActivationCountdown(props: ActivationCountdownProps) {
           </>
         )}
       </Box>
-      <Divider bg="brand.card" borderColor="brand.card" />
       <BlockProgress w="100%" h="10px"/> 
     </VStack>
     <Divider bg="brand.card" borderColor="brand.card" />
@@ -401,22 +349,12 @@ export function Home() {
 
   return (
     <CurrencyProvider>
-      <Center
-        display="fixed"
-        t="0"
-        l="0"
-        w="100%"
-        h="100%"
-        bg="brand.background"
-        overflowY="auto"
-      >
+      <Flex mt={["4", "4", "8"]} gridGap={["4", "4", "8"]} direction={["column", "column", "row"]}>
         <VStack
+          align="flex-start"
           zIndex={2}
           color="brand.primaryText"
-          w={["95%", "90%", "700px"]}
-          pb="100"
         >
-          <Header />
           {!activated && (<ActivationCountdown blocksRemaining={eth.connectedNetwork.genesis - latestBlock.number} lastFiveBlocks={renderedBlocks}/>)}
           {activated && (
             <>
@@ -425,10 +363,14 @@ export function Home() {
               <LatestBlocksCard latestBlock={latestBlock} renderedBlocks={renderedBlocks} />
             </>
           )}
-          <Footer />
         </VStack>
-        <FireAnimation />
-      </Center>
+        <Card bg="brand.card" zIndex={2} p="4" flex="1" align="center">
+          <Heading size="sm" color="brand.headerText" textAlign="center">
+            Historical Trends
+          </Heading>
+          <BaseFeeChart flex="1" h="500px" w="100%" mt="4" data={blocks} align="center" activated={activated ? 1 : 0} />
+        </Card>
+      </Flex>
     </CurrencyProvider>
   );
 }
