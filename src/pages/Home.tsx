@@ -354,6 +354,8 @@ export function Home() {
           align="flex-start"
           zIndex={2}
           color="brand.primaryText"
+          maxW={["100%", "100%", "30%"]}
+          minW={["100%", "100%", "350px"]}
         >
           {!activated && (<ActivationCountdown blocksRemaining={eth.connectedNetwork.genesis - latestBlock.number} lastFiveBlocks={renderedBlocks}/>)}
           {activated && (

@@ -1,10 +1,9 @@
 import { Box, Flex, FlexOptions, forwardRef, HStack, HTMLChakraProps, useRadio, useRadioGroup, UseRadioProps, Text } from "@chakra-ui/react";
-import { LineChart, Line, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { utils } from "ethers";
+import { useEffect, useState } from "react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { BurnedBlockTransaction } from "../contexts/BlockExplorerContext";
-import { useState } from "react";
 import { autoFormatBigNumberToString } from "../utils/wei";
-import { useEffect } from "react";
 
 interface BaseFeeChartProps extends HTMLChakraProps<"div">, FlexOptions  {
   data: BurnedBlockTransaction[]
@@ -75,6 +74,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
     onChange: setChartType,
   })
   const [data, setData] = useState<any[]>([])
+
   useEffect(() => {
     const newData = []
     for (let i = props.data.length-1; i >= 0; i--) {
@@ -111,7 +111,9 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
       <ResponsiveContainer width="100%" height="100%" minHeight="400px">
         <LineChart data={data} 
           margin={isMobileLayout ? {} : { bottom: 20, right: 50, top: 50, left: 50}}>
-          <Tooltip content={<CustomTooltip />} />
+          {!isMobileLayout && <YAxis domain={['auto', 'auto']} /> }
+          {!isMobileLayout && <XAxis dataKey="block" angle={30}  dx={20} dy={10} /> }
+          <Tooltip content={<CustomTooltip />}/>
           <Line type="monotone" dataKey={chartType} stroke="rgb(221, 107, 32)" strokeWidth={2} />
         </LineChart>
       </ResponsiveContainer>
