@@ -76,20 +76,33 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
 
   useEffect(() => {
     const newData = []
+    
     for (let i = props.data.length-1; i >= 0; i--) {
       const block = props.data[i]
-      newData.push({
+      const chartData: {[key: string]: any} = {
         index: i,
         block: block.number,
-        burned: utils.formatUnits(block.burned, 'wei'),
         burnedFormatted: autoFormatBigNumberToString(block.burned),
-        basefee: utils.formatUnits(block.basefee, 'wei'),
         basefeeFormatted: autoFormatBigNumberToString(block.basefee),
-        transactions: block.transactions.length
-      })
+      }
+
+      if (chartType === 'burned') {
+        chartData['burned'] = parseFloat(utils.formatUnits(block.burned, 'ether'))
+      }
+      
+      if (chartType === 'basefee') {
+        chartData.basefee = parseInt(utils.formatUnits(block.basefee, 'gwei'))
+      }
+
+      if (chartType === 'transactions') {
+        chartData.transactions = block.transactions.length
+      }
+
+      newData.push(chartData)
     }
+
     setData(newData)
-  }, [props.data])
+  }, [chartType, props.data])
 
   const group = getRootProps()
   const isMobileLayout = window.innerWidth < 500
@@ -109,7 +122,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
 
       <ResponsiveContainer width="100%" height="100%" minHeight="400px">
         <LineChart data={data} 
-          margin={isMobileLayout ? {} : { bottom: 20, right: 50, top: 50, left: 50}}>
+          margin={isMobileLayout ? {} : { bottom: 20, right: 50, top: 50, left: 10}}>
           {!isMobileLayout && <YAxis domain={['auto', 'auto']} /> }
           {!isMobileLayout && <XAxis dataKey="block" angle={30}  dx={20} dy={10} /> }
           <Tooltip content={<CustomTooltip />}/>
