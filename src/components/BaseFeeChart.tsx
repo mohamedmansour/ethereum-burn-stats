@@ -23,25 +23,23 @@ function RadioCard(props: RadioCardProps) {
   return (
     <Box as="label">
       <input {...input} />
-      <Box
+      <Flex
         {...checkbox}
         cursor="pointer"
-        borderWidth="1px"
-        borderRadius="md"
-        boxShadow="md"
+        borderRadius="full"
+        bg="brand.subheaderCard"
         _checked={{
           bg: "brand.orange",
-          color: "white",
           borderColor: "brand.orange",
         }}
-        _focus={{
-          boxShadow: "outline",
-        }}
-        px={2}
-        py={1}
+        pl="4"
+        pr="4"
+        h="35px"
+        align="center"
+        fontSize="14px"
       >
         {props.children}
-      </Box>
+      </Flex>
     </Box>
   )
 }
@@ -49,6 +47,7 @@ function RadioCard(props: RadioCardProps) {
 interface CustomTooltipProps extends TooltipProps<string, string> {
 
 }
+
 function CustomTooltip(props: CustomTooltipProps)  {
   if (props.active && props.payload && props.payload.length) {
     const payload = props.payload[0].payload
