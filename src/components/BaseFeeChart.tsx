@@ -53,7 +53,7 @@ function CustomTooltip(props: CustomTooltipProps)  {
     const payload = props.payload[0].payload
     return (
       <Box bg="brand.subheader" p="4">
-        <HStack><Text color="brand.secondaryText">Block:</Text><Text>{props.label}</Text></HStack>
+        <HStack><Text color="brand.secondaryText">Block:</Text><Text>{payload.block}</Text></HStack>
         <HStack><Text color="brand.secondaryText">Burned:</Text><Text>{payload.burnedFormatted}</Text></HStack>
         <HStack><Text color="brand.secondaryText">Basefee:</Text><Text>{payload.basefeeFormatted}</Text></HStack>
         <HStack><Text color="brand.secondaryText">Txs:</Text><Text>{payload.transactions}</Text></HStack>
