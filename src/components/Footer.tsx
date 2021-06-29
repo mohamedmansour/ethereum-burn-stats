@@ -27,7 +27,7 @@ export function Footer() {
         </Link>
       </HStack>
       <HStack gridGap="8">
-        <Link href="https://github.com/mohamedmansour/eth-burn">
+        <Link href="https://github.com/mohamedmansour/ethereum-burn-stats">
           <HStack>
             <Icon as={VscGithub} title="View source code on GitHub" />
             <Text>Source code</Text>
