@@ -71,7 +71,10 @@ export function EthBlockList() {
 
   return (
     <Flex flex="1" direction="column" overflow="auto">
-      <Breadcrumb>
+      <Breadcrumb
+          mb="4"
+          ml={["4", "4", "8"]}
+          mr={["4", "4", "8"]}>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">
             Home
@@ -81,7 +84,11 @@ export function EthBlockList() {
           <Text>Blocks</Text>
         </BreadcrumbItem>
       </Breadcrumb>
-      <Card mt={4} flex="1" overflow="auto">
+      <Card 
+          ml={["4", "4", "8"]}
+          mr={["4", "4", "8"]}
+          mb={["4", "4", "12"]}
+          flex="1" overflow="auto">
         <Table colorScheme="whiteAlpha">
           <Thead>
             <Tr whiteSpace="nowrap">

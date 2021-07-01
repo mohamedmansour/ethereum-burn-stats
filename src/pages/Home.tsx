@@ -125,15 +125,17 @@ function LatestBlocksCard(props: LatestBlocksProps) {
     return null
     
   return (
-    <Card bg="brand.card" zIndex={2} p="4" w="100%">
+    <Card bg="brand.card" zIndex={2} p="4" w="100%" mb={["0", "0", "12"]}>
       <Heading size="sm" textAlign="center" color="brand.headerText">
         Latest Blocks
       </Heading>
       <CurrentBlock block={latestBlock} />
       <Divider bg="brand.card" borderColor="brand.card" />
+      <Box overflowY="auto">
       {renderedBlocks.map((block, idx) => (
         <BlockItem key={idx} {...block} currency={currency} amount={amount}/>
       ))}
+      </Box>
 
       <Divider bg="brand.card" borderColor="brand.card" />
 
@@ -165,7 +167,7 @@ function SessionSummaryCard(props: SessionSummaryProps) {
       <Heading size="sm" textAlign="center" color="brand.headerText">
         Session Summary
       </Heading>
-      <Box color="brand.primaryText" textAlign="left" mt="2" p="4">
+      <Box color="brand.primaryText" textAlign="left" mt="2" p="4" fontSize="sm">
         You've just experienced <BigNumberText number={props.session.burned} usdConversion={amount} fontWeight="bold" removeCurrencyColor /> being burned by observing <strong>{props.session.blockCount} blocks</strong>
         {" "}that contain <strong>{props.session.transactionCount} transactions</strong> with <BigNumberText number={props.session.rewards} usdConversion={amount}  fontWeight="bold" removeCurrencyColor /> rewards!
       </Box>
@@ -259,10 +261,10 @@ function TotalFeesCard(props: TotalFeesCardProps) {
         whiteSpace="nowrap"
         justify="center"
       >
-        <Text fontSize={["4vh", "4vh", "2.5vh"]} fontWeight="bold">
+        <Text fontSize="32px" fontWeight="bold">
           {totalBurnedWholeNumber}
         </Text>
-        <Text fontSize={["2vh", "2vh", "1vh"]}>
+        <Text fontSize="16">
         .{totalBurnedDecimalNumber}
         </Text>
       </Flex>
@@ -349,13 +351,18 @@ export function Home() {
 
   return (
     <CurrencyProvider>
-      <Flex mt={["4", "4", "8"]} gridGap={["4", "4", "8"]} direction={["column", "column", "row"]}>
-        <VStack
+      <Flex gridGap={["4", "4", "8"]} direction={["column", "column", "row"]} flex="1" overflowY="auto" overflowX="hidden">
+        <Box
+          display="flex"
+          flexDirection="column"
           align="flex-start"
           zIndex={2}
           color="brand.primaryText"
-          maxW={["100%", "100%", "30%"]}
-          minW={["100%", "100%", "350px"]}
+          gridGap={["4", "4", "8"]}
+          mt={["4", "4", "6"]}
+          ml={["4", "4", "8"]}
+          mb={["0", "0", "12"]}
+          width={["90%", "90%", "350px"]}
         >
           {!activated && (<ActivationCountdown blocksRemaining={eth.connectedNetwork.genesis - latestBlock.number} lastFiveBlocks={renderedBlocks}/>)}
           {activated && (
@@ -365,12 +372,22 @@ export function Home() {
               <LatestBlocksCard latestBlock={latestBlock} renderedBlocks={renderedBlocks} />
             </>
           )}
-        </VStack>
-        <Card bg="brand.card" zIndex={2} p="4" flex="1" align="center">
-          <Heading size="sm" color="brand.headerText" textAlign="center">
+        </Box>
+        <Card bg="brand.card"
+          zIndex={2}
+          p="4"
+          flex="1"
+          align="center"
+          ml={["4", "4", "0"]}
+          mt={["0", "0", "6"]}
+          mr={["4", "4", "8"]}
+          mb={["4", "4", "12"]}
+          minH={["450px", "250px", "756px"]} 
+        >
+          <Heading size="sm" color="brand.headerText" textAlign="center" mb="4">
             Historical Trends
           </Heading>
-          <BaseFeeChart flex="1" h="500px" w="100%" mt="4" data={blocks} align="center" activated={activated ? 1 : 0} />
+          <BaseFeeChart flex="1" h="100%" w="100%" data={blocks} align="center" activated={activated ? 1 : 0} />
         </Card>
       </Flex>
     </CurrencyProvider>

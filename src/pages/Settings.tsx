@@ -48,7 +48,11 @@ export function Settings() {
   }
 
   return (
-    <Flex flex="1" direction="column" gridGap={4}>
+    <Flex flex="1" direction="column"
+        pt={["4", "4", "0"]}
+        pl={["4", "4", "8"]}
+        pr={["4", "4", "8"]}
+        pb={["8", "8", "12"]} gridGap={4}>
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">

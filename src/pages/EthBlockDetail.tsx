@@ -130,7 +130,11 @@ export function EthBlockDetail() {
   
 
   return (
-    <Flex flex="1" direction="column">
+    <Flex flex="1" direction="column"
+        pt={["4", "4", "0"]}
+        pl={["4", "4", "8"]}
+        pr={["4", "4", "8"]}
+        pb={["8", "8", "12"]}>
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">
@@ -148,7 +152,7 @@ export function EthBlockDetail() {
         </BreadcrumbItem>
       </Breadcrumb>
 
-      <Tabs variant="soft-rounded" colorScheme="whiteAlpha">
+      <Tabs variant="soft-rounded" colorScheme="whiteAlpha" mt={["4", "4", "6"]}>
         <TabList mb="4">
           <Tab>Overview</Tab>
           <Tab>Transactions</Tab>
@@ -216,7 +220,7 @@ export function EthBlockDetail() {
             </Card>
           </TabPanel>
           <TabPanel p="0">
-            <Card overflow="hidden">
+            <Card overflowX="auto" overflowY="hidden">
               {transactions.length === 0 && <Text>No Transactions</Text>}
               {transactions.length !== 0 && (
                 <Table w="100%" colorScheme="whiteAlpha">
@@ -235,8 +239,6 @@ export function EthBlockDetail() {
                         <Td
                           width="100%"
                           position="relative"
-                          display="flex"
-                          align="center"
                         >
                           <Link
                             color="brand.linkColor"
@@ -245,6 +247,7 @@ export function EthBlockDetail() {
                             overflow="hidden"
                             isTruncated
                             position="absolute"
+                            top="30%"
                             left="0"
                             right="0"
                           >
@@ -252,7 +255,7 @@ export function EthBlockDetail() {
                           </Link>
                         </Td>
                         <Td whiteSpace="nowrap" width="10%">
-                          {utils.formatEther(t.value)} Eth
+                          <BigNumberText number={t.value} />
                         </Td>
                         <Td width="10%">
                           <BigNumberText number={t.gasPrice} />

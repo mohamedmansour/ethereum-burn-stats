@@ -116,16 +116,17 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
           )
         })}
       </HStack>
-
-      <ResponsiveContainer width="100%" height="100%" minHeight="400px">
-        <LineChart data={data} 
-          margin={isMobileLayout ? {} : { bottom: 20, right: 50, top: 50, left: 10}}>
-          {!isMobileLayout && <YAxis domain={['auto', 'auto']} /> }
-          {!isMobileLayout && <XAxis dataKey="block" angle={30}  dx={20} dy={10} /> }
-          <Tooltip content={<CustomTooltip />}/>
-          <Line type="monotone" dataKey={chartType} stroke="rgb(221, 107, 32)" strokeWidth={2} />
-        </LineChart>
-      </ResponsiveContainer>
+      <Box flex="1" w="99%" overflow="hidden">
+        <ResponsiveContainer>
+          <LineChart data={data} 
+            margin={isMobileLayout ? {} : { bottom: 20, right: 50, top: 50, left: 10}}>
+            {!isMobileLayout && <YAxis domain={['auto', 'auto']} /> }
+            {!isMobileLayout && <XAxis dataKey="block" angle={30}  dx={20} dy={10} /> }
+            <Tooltip content={<CustomTooltip />}/>
+            <Line type="monotone" dataKey={chartType} stroke="rgb(221, 107, 32)" strokeWidth={2} />
+          </LineChart>
+        </ResponsiveContainer>
+      </Box>
     </Flex>
   )
 })

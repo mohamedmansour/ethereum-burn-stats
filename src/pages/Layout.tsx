@@ -30,13 +30,15 @@ function DetailSection() {
   if (!details) return null;
 
   return (
-    <Box bg="brand.subheader">
+    <Box bg="brand.subheader" 
+        mt="2"
+        mr={["0", "0", "8"]}>
       <Flex
         h="100%"
         flex="1"
         justify="flex-start"
         whiteSpace="nowrap"
-        gridGap={[2, 3, 4]}
+        gridGap={[4, 4, 4]}
         pl={[2, 3, 8]}
         pr={[2, 4, 8]}
         pt={[2, 3, 4]}
@@ -87,14 +89,14 @@ export function Layout(props: LayoutProps) {
         as="nav"
         align="center"
         justify="space-between"
-        padding="0.5rem"
-        bg="brand.header"
         color="white"
-        shadow="lg"
         direction="row"
+        pt={["4", "4", "8"]}
+        pl={["4", "4", "8"]}
+        pr={["4", "4", "8"]}
       >
-        <Flex p="1">
-          <Flex p="1">
+        <Flex>
+          <Flex>
             <Link
               as={ReactLink}
               to="/"
@@ -122,8 +124,6 @@ export function Layout(props: LayoutProps) {
         w="100%"
         flexDir={props.direction}
         bg="brand.background"
-        pl={[2, 3, 8]}
-        pr={[2, 3, 8]}
       >
         {props.children}
       </Flex>

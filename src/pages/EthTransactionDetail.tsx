@@ -10,6 +10,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   Text,
+  Flex,
 } from "@chakra-ui/react";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { useState } from "react";
@@ -38,7 +39,11 @@ export function EthTransactionDetail() {
   }
 
   return (
-    <VStack overflow="hidden" align="flex-start" h="100%">+
+    <Flex flex="1" direction="column"
+        pt={["4", "4", "0"]}
+        pl={["4", "4", "8"]}
+        pr={["4", "4", "8"]}
+        pb={["8", "8", "12"]}>
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">
@@ -46,12 +51,16 @@ export function EthTransactionDetail() {
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbItem isCurrentPage>
-          <Text>Transaction {id} </Text>
+          <Text>Transaction</Text>
         </BreadcrumbItem>
       </Breadcrumb>
-      <Card overflow="auto" flex="1" w="100%">
+      <Card flex="1" w="100%" mt={["4", "4", "6"]}>
         <Table colorScheme="whiteAlpha">
           <Tbody>
+            <Tr>
+              <Td color="brand.secondaryText">Id:</Td>
+              <Td>{id}</Td>
+            </Tr>
             <Tr>
               <Td color="brand.secondaryText">From</Td>
               <Td isTruncated>
@@ -129,6 +138,6 @@ export function EthTransactionDetail() {
           </Tbody>
         </Table>
       </Card>
-    </VStack>
+    </Flex>
   );
 }

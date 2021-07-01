@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Grid, GridItem, Heading, Text, VStack } from "@chakra-ui/react";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Flex, Grid, GridItem, Heading, Text, VStack } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -26,7 +26,11 @@ export function EthAccountDetail() {
   }
 
   return (
-    <VStack align="flex-start" h="100%">
+    <Flex flex="1" direction="column"
+        pt={["4", "4", "0"]}
+        pl={["4", "4", "8"]}
+        pr={["4", "4", "8"]}
+        pb={["8", "8", "12"]}>
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">
@@ -38,14 +42,15 @@ export function EthAccountDetail() {
         </BreadcrumbItem>
       </Breadcrumb>
       <Grid
-        templateColumns="repeat(2, 1fr)"
+        templateColumns="repeat(1, 1fr)"
+        mt="4"
         gridGap="4"
           >
           <GridItem colSpan={1}>
             <Card>
               <VStack>
                 <Heading size="sm">Address</Heading>
-                <Text>{id}</Text>
+                <Text wordBreak="break-all">{id}</Text>
               </VStack>
             </Card>
           </GridItem>
@@ -58,6 +63,6 @@ export function EthAccountDetail() {
             </Card>
           </GridItem>
         </Grid>
-    </VStack>
+    </Flex>
   );
 }
