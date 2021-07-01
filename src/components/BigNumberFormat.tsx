@@ -43,8 +43,11 @@ export const BigNumberText = forwardRef<BigNumberProps, "div">(
           prettyValue = '< 0.0000'
           skipCommify = true
       } else if (doNotShortenDecimals === undefined || !doNotShortenDecimals) {
-        if (numberOfDecimals > 4) {
+        // Only decimals.
+        if (decimalPosition === 1 && numberOfDecimals > 4) {
           prettyValue = value.substr(0, decimalPosition + 5);
+        } else if (numberOfDecimals > 2) {
+          prettyValue = value.substr(0, decimalPosition + 3);
         }
       }
     }
