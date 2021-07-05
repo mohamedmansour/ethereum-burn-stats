@@ -75,7 +75,7 @@ export const BigNumberText = forwardRef<BigNumberProps, "div">(
         value,
         currency
       })
-    }, [number, usdConversion]);
+    }, [number, usdConversion, doNotShortenDecimals]);
  
     if (!state) {
       return (

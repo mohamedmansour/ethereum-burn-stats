@@ -26,7 +26,7 @@ import {
 } from "@chakra-ui/react";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { utils } from "ethers";
-import { useReducer, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { VscChevronLeft, VscChevronRight } from "react-icons/vsc";
 import { useParams, Link as ReactLink, useHistory } from "react-router-dom";
 import { Loader } from "../components/Loader";
@@ -46,27 +46,11 @@ interface BlockDetailState {
   onAfterRender?: boolean;
 }
 
-interface UpdateAction extends BlockDetailState {
-  type: "UPDATE";
-}
-
-type BlockDetailAction = UpdateAction;
-
-const blockDetailReducer = (
-  state: BlockDetailState,
-  action: BlockDetailAction
-): BlockDetailState => {
-  switch (action.type) {
-    case "UPDATE":
-      return action;
-  }
-};
-
 export function EthBlockDetail() {
   let history = useHistory();
   let { id } = useParams<{ id: string }>();
   const { eth } = useEthereum();
-  const [state, dispatch] = useReducer(blockDetailReducer, {});
+  const [state, setState] = useState<BlockDetailState>();
 
   useEffect(() => {
     (async () => {
@@ -76,8 +60,7 @@ export function EthBlockDetail() {
       const blockTransactions = await eth.getBlockWithTransactions(blockNumber);
       const block = await BlockExplorerApi.fetchBlock(eth, blockNumber);
       
-      dispatch({
-        type: "UPDATE",
+      setState({
         block: block,
         transactions: blockTransactions.transactions,
         onBeforeRender: blockNumber > 0,
@@ -86,11 +69,11 @@ export function EthBlockDetail() {
     })();
   }, [eth, id]);
 
-  const { block, transactions } = state;
-
-  if (!block || !eth || !transactions) {
+  if (!state || !state.block || !state.transactions || !eth) {
     return <Loader>loading transactions for block</Loader>;
   }
+
+  const { block, transactions } = state;
 
   const onBeforeRender = state.onBeforeRender ? (
     <Button
