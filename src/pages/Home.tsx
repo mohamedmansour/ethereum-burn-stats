@@ -17,7 +17,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { Link as ReactLink } from "react-router-dom";
 import { BaseFeeChart } from "../components/BaseFeeChart";
-import { BigNumberText } from "../components/BigNumberFormat";
+import { BigNumberText } from "../components/BigNumberText";
 import { BlockProgress } from "../components/BlockProgress";
 import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";

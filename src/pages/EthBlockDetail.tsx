@@ -37,7 +37,7 @@ import {
   BurnedBlockTransaction,
 } from "../contexts/BlockExplorerContext";
 import { FirePit } from "../components/FirePit";
-import { BigNumberText } from "../components/BigNumberFormat";
+import { BigNumberText } from "../components/BigNumberText";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;

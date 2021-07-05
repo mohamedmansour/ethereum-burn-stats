@@ -17,7 +17,7 @@ import { FirePit } from "../components/FirePit";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { Footer } from "../components/Footer";
 import { EthereumNetworkBadge } from "../components/Network";
-import { BigNumberText } from "../components/BigNumberFormat";
+import { BigNumberText } from "../components/BigNumberText";
 
 interface LayoutProps {
   children: React.ReactNode;

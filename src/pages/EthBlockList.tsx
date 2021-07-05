@@ -24,7 +24,7 @@ import { Loader } from "../components/Loader";
 import { BlockProgress } from "../components/BlockProgress";
 import { Card } from "../components/Card";
 import { FirePit } from "../components/FirePit";
-import { BigNumberText } from "../components/BigNumberFormat";
+import { BigNumberText } from "../components/BigNumberText";
 
 const responsiveColumn = { display: ["none", "none", "table-cell"] };
 

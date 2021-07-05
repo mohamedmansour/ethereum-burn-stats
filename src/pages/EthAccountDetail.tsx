@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useParams, Link as ReactLink } from "react-router-dom";
-import { BigNumberText } from "../components/BigNumberFormat";
+import { BigNumberText } from "../components/BigNumberText";
 import { Card } from "../components/Card";
 import { Loader } from "../components/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
