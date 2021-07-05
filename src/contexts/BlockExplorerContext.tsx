@@ -201,7 +201,7 @@ const BlockExplorerProvider = ({
   return (
     <BlockExplorerContext.Provider
       value={state}>
-      {state.blocks ? children : <Loader>Retrieving blocks</Loader>}
+      {state.blocks ? children : <Loader>retrieving latest blocks on {eth?.network.name}</Loader>}
     </BlockExplorerContext.Provider>
   )
 }

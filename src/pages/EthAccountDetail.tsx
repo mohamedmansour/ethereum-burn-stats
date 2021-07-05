@@ -22,7 +22,7 @@ export function EthAccountDetail() {
   }, [eth, id]);
 
   if (!balance === undefined) {
-    return <Loader>Loading balance...</Loader>;
+    return <Loader>loading balance...</Loader>;
   }
 
   return (

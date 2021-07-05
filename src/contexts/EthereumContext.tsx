@@ -28,6 +28,9 @@ export class EthereumApi extends ethers.providers.WebSocketProvider {
   public async getChainId(): Promise<number> {
     return parseInt((await this.send('eth_chainId', [])))
   }
+  public async isSyncing(): Promise<boolean> {
+    return await this.send('eth_syncing', []) !==  false
+  }
 } 
 
 type EthereumContextType = {
@@ -50,19 +53,30 @@ const EthereumProvider = ({
   url?: string | undefined
 }) => {
   const [eth, setEth] = useState<EthereumApi | undefined>()
+  const [message, setMessage] = useState<string>('connecting to eth node')
 
   useEffect(() => {
     if (!url)
       return;
 
     const network = getNetworkFromSubdomain() || defaultNetwork
-    setEth(new EthereumApi(network, `${url}:${network.port}`))
+    const ethereum = new EthereumApi(network, `${url}:${network.port}`)
+    setMessage(`connecting to ${network.key}, please wait`)
+
+    ethereum.ready.then(async (details) => {
+      if (await ethereum.isSyncing()) {
+        setMessage(`${details.name} is not ready, node is syncing`)
+      } else {
+        setEth(ethereum)
+      }
+    })
     return () => {}
   }, [url])
 
   const connect = async () => {
-    if (!window.ethereum)
+    if (!window.ethereum) {
       return
+    }
     await window.ethereum.enable()
   }
 
@@ -73,7 +87,7 @@ const EthereumProvider = ({
         connect
       }}
     >
-      {eth ? children : <Loader>connecting to eth node</Loader>}
+      {eth ? children : <Loader>{message}</Loader>}
     </EthereumContext.Provider>
   )
 }

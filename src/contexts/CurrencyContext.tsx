@@ -94,7 +94,7 @@ const CurrencyProvider = ({
       ...state,
       setCurrency
     }}>
-      {state.ethConversion ? children : <Loader>Fetching currency</Loader>}
+      {state.ethConversion ? children : <Loader>fetching currency</Loader>}
     </CurrencyContext.Provider>
   )
 }

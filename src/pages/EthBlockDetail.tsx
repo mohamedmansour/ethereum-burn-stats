@@ -89,7 +89,7 @@ export function EthBlockDetail() {
   const { block, transactions } = state;
 
   if (!block || !eth || !transactions) {
-    return <Loader>Loading transactions for block</Loader>;
+    return <Loader>loading transactions for block</Loader>;
   }
 
   const onBeforeRender = state.onBeforeRender ? (

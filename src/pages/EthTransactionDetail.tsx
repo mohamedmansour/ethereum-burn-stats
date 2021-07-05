@@ -34,7 +34,7 @@ export function EthTransactionDetail() {
   }, [eth, id]);
 
   if (!transaction) {
-    return <Loader>Loading transaction</Loader>;
+    return <Loader>loading transaction</Loader>;
   }
 
   return (

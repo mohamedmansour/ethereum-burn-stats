@@ -65,9 +65,9 @@ function EthBlockItem(props: EthBlockItemProps) {
 export function EthBlockList() {
   const { details, blocks } = useBlockExplorer();
 
-  if (!details) return <Loader>Loading block details ...</Loader>;
+  if (!details) return <Loader>loading block details ...</Loader>;
 
-  if (!blocks) return <Loader>Loading blocks ...</Loader>;
+  if (!blocks) return <Loader>loading blocks ...</Loader>;
 
   return (
     <Flex flex="1" direction="column" overflow="auto">

@@ -336,13 +336,13 @@ export function Home() {
   const { details, blocks, session } = useBlockExplorer();
   const { eth } = useEthereum();
 
-  if (!eth) return <Loader>Connecting to network ...</Loader>;
+  if (!eth) return <Loader>connecting to network ...</Loader>;
 
-  if (!details) return <Loader>Loading block details ...</Loader>;
+  if (!details) return <Loader>loading block details ...</Loader>;
 
-  if (!blocks) return <Loader>Loading blocks ...</Loader>;
+  if (!blocks) return <Loader>loading blocks ...</Loader>;
 
-  if (!session) return <Loader>Loading session ...</Loader>;
+  if (!session) return <Loader>loading session ...</Loader>;
 
   const latestBlock = blocks[0];
   const renderedBlocks = blocks.slice(0, 5);
