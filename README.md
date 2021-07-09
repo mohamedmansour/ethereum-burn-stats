@@ -11,7 +11,7 @@ Currently it is running on Ethereum Dev Net, code named `Calaveras`, it is getti
 | Goerli  | `5062605`  | June 30, 2021 | `0xB8C6299D` | 
 | Rinkeby | `8897988`  | July 7, 2021  | `0x8E29F2F3` | 
 | Kovan   | TBA        | TBA           | TBA          | 
-| Mainnet | TBA        | TBA           | TBA          | 
+| Mainnet | `12965000` | August 4, 2021 | `0xB715077D` | 
 
 ## Donate towards Server Costs 💰
 The costs of running this experiment is pretty high since it requires a dev version of Geth to be up and running which requires lots of memory and cpu. The VM and SSD storage currently costs exactly $150/month USD. If you would like to help out with the costs, please reach out to me. 
