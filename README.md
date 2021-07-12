@@ -8,10 +8,8 @@ Currently it is running on Ethereum Dev Net, code named `Calaveras`, it is getti
 | Network | Block      | Expected Date | Fork ID      | 
 |---------|------------|---------------|--------------|
 | Ropsten | `10499401` | June 24, 2021 | `0x7119B6B3` | 
-| Goerli  | `5062605`  | June 30, 2021 | `0xB8C6299D` | 
-| Rinkeby | `8897988`  | July 7, 2021  | `0x8E29F2F3` | 
-| Kovan   | TBA        | TBA           | TBA          | 
-| Mainnet | `12965000` | August 4, 2021 | `0xB715077D` | 
+| Goerli  | `5062605`  | June 30, 2021 | `0xB8C6299D` |
+| Mainnet | `12965000` | Aug 4, 2021   | `0xB715077D` | 
 
 ## Donate towards Server Costs 💰
 The costs of running this experiment is pretty high since it requires a dev version of Geth to be up and running which requires lots of memory and cpu. The VM and SSD storage currently costs exactly $150/month USD. If you would like to help out with the costs, please reach out to me. 
@@ -40,10 +38,6 @@ Setting up the environment requires a geth instance cloned below and web app to 
    *  Goerli
       ```
        docker run -p 8566:8546 -p 8567:8545 -p 30503:30303 --name=geth-goerli -dti -v /data:/data ethereum-node --datadir=/data/goerli --goerli --port=3030 --http --http.addr="0.0.0.0" --http.port=8545 --http.api="net,web3,eth,debug" --http.corsdomain="localhost"  --ws --ws.addr="0.0.0.0" --ws.port=8546 --ws.api="net,web3,eth,debug" --ws.origins="*" --maxpeers=5
-      ```
-   *  Ropsten
-      ```
-       docker run -p 8576:8546 -p 8577:8545 -p 30603:30303 --name=geth-rinkeby -dti -v /data:/data ethereum-node --datadir=/data/rinkeby --rinkeby --port=3030 --http --http.addr="0.0.0.0" --http.port=8545 --http.api="net,web3,eth,debug" --http.corsdomain="localhost"  --ws --ws.addr="0.0.0.0" --ws.port=8546 --ws.api="net,web3,eth,debug" --ws.origins="*" --maxpeers=5
       ```
       
 ### Setup web dev environment

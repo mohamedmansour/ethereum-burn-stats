@@ -26,8 +26,7 @@ export const EthereumNetworkOptions: {
 } = {
   ropsten: { name: "Ropsten (testnet)", key: "ropsten", genesis: 10499401, chainId: 3, port: 8556 },
   goerli: { name: "Goerli (testnet)", key: "goerli", genesis: 5062605, chainId: 5, port: 8566 },
-  rinkeby: { name: "Rinkeby (testnet)", key: "rinkeby", genesis: 8897988, chainId: 4, port: 8576 },
-  mainnet: { name: "Mainnet", key: "mainnet", genesis: Number.POSITIVE_INFINITY, chainId: 1, port: Number.POSITIVE_INFINITY},
+  mainnet: { name: "Mainnet", key: "mainnet", genesis: 12965000, chainId: 1, port: 8576},
 };
 
 export enum Setting {
