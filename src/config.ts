@@ -24,7 +24,6 @@ export interface EthereumNetwork {
 export const EthereumNetworkOptions: {
   [key: string]: EthereumNetwork
 } = {
-  ropsten: { name: "Ropsten (testnet)", key: "ropsten", genesis: 10499401, chainId: 3, port: 8556 },
   goerli: { name: "Goerli (testnet)", key: "goerli", genesis: 5062605, chainId: 5, port: 8566 },
   mainnet: { name: "Mainnet", key: "mainnet", genesis: 12965000, chainId: 1, port: 8576},
 };
@@ -33,7 +32,7 @@ export enum Setting {
   maxBlocksToRender = "maxBlocksToRender"
 }
 
-export const defaultNetwork = EthereumNetworkOptions['ropsten']
+export const defaultNetwork = EthereumNetworkOptions['goerli']
 export const defaultSettings: { [key: string]: DefaultSettingValue } =
   {
     [Setting.maxBlocksToRender]: {
