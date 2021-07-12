@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Loader } from '../components/Loader';
-import { ethers } from "ethers";
+import { ethers, utils } from "ethers";
 import { Ethereumish } from '../react-app-env';
 import { defaultNetwork, EthereumNetwork } from '../config';
 import { getNetworkFromSubdomain } from '../utils/subdomain';
@@ -9,6 +9,14 @@ declare global {
   interface Window {
     ethereum: Ethereumish
   }
+}
+
+interface EthereumSyncing {
+  currentBlock: ethers.BigNumberish
+  highestBlock: ethers.BigNumberish
+  startingBlock: ethers.BigNumberish
+  knownStates: number
+  pulledStates: number
 }
 
 export class EthereumApi extends ethers.providers.WebSocketProvider {
@@ -28,8 +36,8 @@ export class EthereumApi extends ethers.providers.WebSocketProvider {
   public async getChainId(): Promise<number> {
     return parseInt((await this.send('eth_chainId', [])))
   }
-  public async isSyncing(): Promise<boolean> {
-    return await this.send('eth_syncing', []) !==  false
+  public async isSyncing(): Promise<EthereumSyncing | boolean> {
+    return await this.send('eth_syncing', [])
   }
 } 
 
@@ -63,14 +71,32 @@ const EthereumProvider = ({
     const ethereum = new EthereumApi(network, `${url}:${network.port}`)
     setMessage(`connecting to ${network.key}, please wait`)
 
-    ethereum.ready.then(async (details) => {
-      if (await ethereum.isSyncing()) {
-        setMessage(`${details.name} is not ready, node is syncing`)
-      } else {
-        setEth(ethereum)
+    const checkStatus = async () => {
+      const syncStatus = await ethereum.isSyncing()
+      if (syncStatus !==  false) {
+        const currentBlock = ethers.BigNumber.from((syncStatus as EthereumSyncing).currentBlock).toNumber()
+        const highestBlock = ethers.BigNumber.from((syncStatus as EthereumSyncing).highestBlock).toNumber()
+        const percentage = Math.floor((currentBlock / highestBlock) * 100)
+        setMessage(`${network.name} is not ready, node is syncing. ${percentage}% synced.`)
+        return false
+      }
+    
+      setEth(ethereum)
+      return true
+    }
+
+    let timer: number;
+    ethereum.ready.then(async () => {
+      if (!(await checkStatus())) {
+        timer = window.setInterval(async () => {
+          const status = await checkStatus()
+          if (status) {
+            clearInterval(timer)
+          }
+        }, 12000)
       }
     })
-    return () => {}
+    return () => { clearInterval(timer)}
   }, [url])
 
   const connect = async () => {
