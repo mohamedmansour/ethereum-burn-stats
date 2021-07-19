@@ -71,6 +71,7 @@ export function Settings() {
             ref={firstFieldRef}
           >
             <Flex direction={['column', 'column', 'row']} gridGap={4}>
+              <Radio value={EthereumNetworkOptions.ropsten.key}>{EthereumNetworkOptions.ropsten.name}</Radio>
               <Radio value={EthereumNetworkOptions.goerli.key}>{EthereumNetworkOptions.goerli.name}</Radio>
               <Radio value={EthereumNetworkOptions.mainnet.key}>{EthereumNetworkOptions.mainnet.name}</Radio>
             </Flex>
