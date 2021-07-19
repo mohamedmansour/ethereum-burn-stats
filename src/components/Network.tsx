@@ -1,5 +1,6 @@
 import { Button, forwardRef, HTMLChakraProps, Icon } from "@chakra-ui/react";
 import { SiEthereum } from "react-icons/si";
+import { VscSettingsGear } from "react-icons/vsc";
 import { useHistory } from "react-router-dom";
 import { useEthereum } from "../contexts/EthereumContext";
 
@@ -15,6 +16,7 @@ export const EthereumNetworkBadge = forwardRef<HTMLChakraProps<"button">, "butto
       variant="solid"
       size="xs"
       leftIcon={<Icon as={SiEthereum} />}
+      rightIcon={<Icon as={VscSettingsGear} />}
       title="Change network"
       onClick={() => history.push('/settings')}
       {...props}

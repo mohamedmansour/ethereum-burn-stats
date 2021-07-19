@@ -19,7 +19,7 @@ export interface BlockExplorerSession {
   rewards: ethers.BigNumber
 }
 
-interface BlockExplorerDetails {
+export interface BlockExplorerDetails {
   totalBurned: ethers.BigNumber
   gasPrice: ethers.BigNumber
   currentBlock: number
@@ -169,7 +169,6 @@ const BlockExplorerProvider = ({
       dispatch({ type: 'NEW_BLOCK', details, block, maxBlocksToRender })
     }
 
-
     const prefetchBlockHeaders = async (blockHeaderCount: number) => {
       const latestBlockNumber = (process.env.REACT_APP_START_BLOCK ? parseInt(process.env.REACT_APP_START_BLOCK) : await eth.getBlockNumber())
 
@@ -201,7 +200,7 @@ const BlockExplorerProvider = ({
   return (
     <BlockExplorerContext.Provider
       value={state}>
-      {state.blocks ? children : <Loader>retrieving latest blocks on {eth?.network.name}</Loader>}
+      {state.blocks ? children : <Loader>retrieving latest blocks on {eth?.connectedNetwork.name}</Loader>}
     </BlockExplorerContext.Provider>
   )
 }

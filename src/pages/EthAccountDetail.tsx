@@ -7,6 +7,7 @@ import { BigNumberText } from "../components/BigNumberText";
 import { Card } from "../components/Card";
 import { Loader } from "../components/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
+import { layoutConfig } from "../layoutConfig";
 
 export function EthAccountDetail() {
   let { id } = useParams<{ id: string }>();
@@ -26,11 +27,7 @@ export function EthAccountDetail() {
   }
 
   return (
-    <Flex flex="1" direction="column"
-        pt={["4", "4", "0"]}
-        pl={["4", "4", "8"]}
-        pr={["4", "4", "8"]}
-        pb={["8", "8", "12"]}>
+    <Flex flex="1" direction="column" m={layoutConfig.gap} gridGap={layoutConfig.gap}>
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">
@@ -43,26 +40,25 @@ export function EthAccountDetail() {
       </Breadcrumb>
       <Grid
         templateColumns="repeat(1, 1fr)"
-        mt="4"
         gridGap="4"
-          >
-          <GridItem colSpan={1}>
-            <Card>
-              <VStack>
-                <Heading size="sm">Address</Heading>
-                <Text wordBreak="break-all">{id}</Text>
-              </VStack>
-            </Card>
-          </GridItem>
-          <GridItem colSpan={1}>
-            <Card>
-              <VStack>
-                <Heading size="sm">Balance</Heading>
-                <BigNumberText number={balance || ethers.BigNumber.from(0)} />
-              </VStack>
-            </Card>
-          </GridItem>
-        </Grid>
+      >
+        <GridItem colSpan={1}>
+          <Card>
+            <VStack>
+              <Heading size="sm">Address</Heading>
+              <Text wordBreak="break-all">{id}</Text>
+            </VStack>
+          </Card>
+        </GridItem>
+        <GridItem colSpan={1}>
+          <Card>
+            <VStack>
+              <Heading size="sm">Balance</Heading>
+              <BigNumberText number={balance || ethers.BigNumber.from(0)} />
+            </VStack>
+          </Card>
+        </GridItem>
+      </Grid>
     </Flex>
   );
 }

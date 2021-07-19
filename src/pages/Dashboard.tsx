@@ -1,35 +1,32 @@
-import { EthBlockList } from './EthBlockList';
+import { Home } from './Home';
 import { Layout } from './Layout';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { EthBlockDetail } from './EthBlockDetail';
 import { EthTransactionDetail } from './EthTransactionDetail';
 import { EthAccountDetail } from './EthAccountDetail';
 import { Settings } from './Settings';
-import { Home } from './Home';
 
 export function DashboardPage() {
   return (
     <BrowserRouter>
       <Layout direction="column">
         <Switch>
+          <Route exact path="/account/:id">
+            <EthAccountDetail />
+          </Route>
+          <Route exact path="/block/:id">
+            <EthBlockDetail />
+          </Route>
+          <Route exact path="/transaction/:id">
+            <EthTransactionDetail />
+          </Route>
+          <Route exact path="/settings">
+            <Settings />
+          </Route>
           <Route exact path="/">
             <Home />
           </Route>
-          <Route path="/blocks">
-            <EthBlockList />
-          </Route>
-          <Route path="/account/:id">
-            <EthAccountDetail />
-          </Route>
-          <Route path="/block/:id">
-            <EthBlockDetail />
-          </Route>
-          <Route path="/transaction/:id">
-            <EthTransactionDetail />
-          </Route>
-          <Route path="/settings">
-            <Settings />
-          </Route>
+          <Redirect to="/" />
         </Switch>
       </Layout>
     </BrowserRouter>

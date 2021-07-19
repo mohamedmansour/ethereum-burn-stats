@@ -6,6 +6,7 @@ import { ChakraProvider, CSSReset } from '@chakra-ui/react';
 import customTheme from './theme';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { BlockExplorerProvider } from './contexts/BlockExplorerContext';
+import { CurrencyProvider } from './contexts/CurrencyContext';
 
 function App() {
   const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:'
@@ -17,7 +18,9 @@ function App() {
       <SettingsProvider>
         <EthereumProvider url={url}>
           <BlockExplorerProvider>
-            <DashboardPage />
+            <CurrencyProvider>
+              <DashboardPage />
+            </CurrencyProvider>
           </BlockExplorerProvider>
         </EthereumProvider>
       </SettingsProvider>

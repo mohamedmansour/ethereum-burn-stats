@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Loader } from '../components/Loader';
-import { ethers, utils } from "ethers";
+import { ethers } from "ethers";
 import { Ethereumish } from '../react-app-env';
 import { defaultNetwork, EthereumNetwork } from '../config';
 import { getNetworkFromSubdomain } from '../utils/subdomain';
@@ -77,7 +77,11 @@ const EthereumProvider = ({
         const currentBlock = ethers.BigNumber.from((syncStatus as EthereumSyncing).currentBlock).toNumber()
         const highestBlock = ethers.BigNumber.from((syncStatus as EthereumSyncing).highestBlock).toNumber()
         const percentage = Math.floor((currentBlock / highestBlock) * 100)
-        setMessage(`${network.name} is not ready, node is syncing. ${percentage}% synced.`)
+        if (percentage === 99) {
+          setMessage(`${network.name} is not ready, state healing in progress.`)
+        } else {
+          setMessage(`${network.name} is not ready, node is syncing. ${percentage}% synced.`)
+        }
         return false
       }
     

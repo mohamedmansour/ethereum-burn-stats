@@ -38,6 +38,7 @@ import {
 } from "../contexts/BlockExplorerContext";
 import { FirePit } from "../components/FirePit";
 import { BigNumberText } from "../components/BigNumberText";
+import { layoutConfig } from "../layoutConfig";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;
@@ -59,7 +60,7 @@ export function EthBlockDetail() {
       const latestBlockNumber = await eth.getBlockNumber();
       const blockTransactions = await eth.getBlockWithTransactions(blockNumber);
       const block = await BlockExplorerApi.fetchBlock(eth, blockNumber);
-      
+
       setState({
         block: block,
         transactions: blockTransactions.transactions,
@@ -109,15 +110,8 @@ export function EthBlockDetail() {
     </Button>
   ) : undefined;
 
-  
-  
-
   return (
-    <Flex flex="1" direction="column"
-        pt={["4", "4", "0"]}
-        pl={["4", "4", "8"]}
-        pr={["4", "4", "8"]}
-        pb={["8", "8", "12"]}>
+    <Flex flex="1" direction="column" m={layoutConfig.gap} gridGap={layoutConfig.gap}>
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">
@@ -135,7 +129,7 @@ export function EthBlockDetail() {
         </BreadcrumbItem>
       </Breadcrumb>
 
-      <Tabs variant="soft-rounded" colorScheme="whiteAlpha" mt={["4", "4", "6"]}>
+      <Tabs variant="soft-rounded" colorScheme="whiteAlpha">
         <TabList mb="4">
           <Tab>Overview</Tab>
           <Tab>Transactions</Tab>
@@ -182,7 +176,7 @@ export function EthBlockDetail() {
                 <Text color="brand.secondaryText">Timestamp:</Text>
                 <Text>{block.timestamp}</Text>
                 <Text color="brand.secondaryText">Mined by:</Text>
-                <Text isTruncated color="brand.linkColor" position="relative">
+                <Text isTruncated color="orange" position="relative">
                   <Link
                     to={`/account/${block.miner}`}
                     as={ReactLink}
@@ -218,13 +212,13 @@ export function EthBlockDetail() {
                   <Tbody>
                     {transactions.map((t, idx) => (
                       <Tr key={idx}>
-                        <Td width="10%">{t.confirmations}</Td>
+                        <Td w="10%">{t.confirmations}</Td>
                         <Td
-                          width="100%"
+                          w="100%"
                           position="relative"
                         >
                           <Link
-                            color="brand.linkColor"
+                            color="orange"
                             to={`/transaction/${t.hash}`}
                             as={ReactLink}
                             overflow="hidden"
@@ -237,10 +231,10 @@ export function EthBlockDetail() {
                             {t.hash}
                           </Link>
                         </Td>
-                        <Td whiteSpace="nowrap" width="10%">
+                        <Td whiteSpace="nowrap" w="10%">
                           <BigNumberText number={t.value} />
                         </Td>
-                        <Td width="10%">
+                        <Td w="10%">
                           <BigNumberText number={t.gasPrice} />
                         </Td>
                       </Tr>

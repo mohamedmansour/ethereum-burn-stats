@@ -1,6 +1,7 @@
 import { Flex, HStack, Text, Icon, Link, Tooltip } from "@chakra-ui/react";
 import { VscTwitter, VscGithub } from "react-icons/vsc";
 import { ImHeart } from "react-icons/im";
+import { layoutConfig } from "../layoutConfig";
 
 export function Footer() {
   return (
@@ -10,7 +11,7 @@ export function Footer() {
       mb="4"
       mt="2"
       color="#666"
-      direction={["column", "column", "row"]}
+      direction={layoutConfig.flexRow}
     >
       <HStack gridGap="8">
         <Link href="https://twitter.com/mohamedmansour">

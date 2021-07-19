@@ -19,6 +19,7 @@ import { Card } from "../components/Card";
 import { Setting, EthereumNetworkOptions } from "../config";
 import { useEthereum } from "../contexts/EthereumContext";
 import { useSettings } from "../contexts/SettingsContext";
+import { layoutConfig } from "../layoutConfig";
 import { debounce } from "../utils/debounce";
 import { navigateToSubdomain } from "../utils/subdomain";
 
@@ -48,11 +49,7 @@ export function Settings() {
   }
 
   return (
-    <Flex flex="1" direction="column"
-        pt={["4", "4", "0"]}
-        pl={["4", "4", "8"]}
-        pr={["4", "4", "8"]}
-        pb={["8", "8", "12"]} gridGap={4}>
+    <Flex flex="1" direction="column" m={layoutConfig.gap} gridGap={layoutConfig.gap}>
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">

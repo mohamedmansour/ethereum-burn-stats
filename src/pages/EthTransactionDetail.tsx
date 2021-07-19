@@ -19,6 +19,7 @@ import { BigNumberText } from "../components/BigNumberText";
 import { Card } from "../components/Card";
 import { Loader } from "../components/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
+import { layoutConfig } from "../layoutConfig";
 
 export function EthTransactionDetail() {
   let { id } = useParams<{ id: string }>();
@@ -38,11 +39,7 @@ export function EthTransactionDetail() {
   }
 
   return (
-    <Flex flex="1" direction="column"
-        pt={["4", "4", "0"]}
-        pl={["4", "4", "8"]}
-        pr={["4", "4", "8"]}
-        pb={["8", "8", "12"]}>
+    <Flex flex="1" direction="column" m={layoutConfig.gap} gridGap={layoutConfig.gap}>
       <Breadcrumb>
         <BreadcrumbItem fontSize="lg" fontWeight="bold">
           <BreadcrumbLink as={ReactLink} to="/blocks">
@@ -53,7 +50,7 @@ export function EthTransactionDetail() {
           <Text>Transaction</Text>
         </BreadcrumbItem>
       </Breadcrumb>
-      <Card flex="1" w="100%" mt={["4", "4", "6"]}>
+      <Card flex="1" w="100%">
         <Table colorScheme="whiteAlpha">
           <Tbody>
             <Tr>
@@ -64,7 +61,7 @@ export function EthTransactionDetail() {
               <Td color="brand.secondaryText">From</Td>
               <Td isTruncated>
                 <Link
-                  color="brand.linkColor"
+                  color="orange"
                   to={`/account/${transaction.from}`}
                   as={ReactLink}
                 >
@@ -76,7 +73,7 @@ export function EthTransactionDetail() {
               <Td color="brand.secondaryText">To</Td>
               <Td>
                 <Link
-                  color="brand.linkColor"
+                  color="orange"
                   to={`/account/${transaction.to}`}
                   as={ReactLink}
                 >
@@ -92,7 +89,7 @@ export function EthTransactionDetail() {
               <Td color="brand.secondaryText">Block Number</Td>
               <Td>
                 <Link
-                  color="brand.linkColor"
+                  color="orange"
                   to={`/block/${transaction.blockNumber}`}
                   as={ReactLink}
                 >
@@ -120,7 +117,7 @@ export function EthTransactionDetail() {
             </Tr>
             <Tr>
               <Td color="brand.secondaryText">s</Td>
-              <Td  wordBreak="break-all">{transaction.s}</Td>
+              <Td wordBreak="break-all">{transaction.s}</Td>
             </Tr>
             <Tr>
               <Td color="brand.secondaryText">r</Td>
