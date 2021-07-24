@@ -10,7 +10,7 @@ import (
 var log = logrus.WithField("prefix", "main")
 
 func RunEthereumGateway(wg *sync.WaitGroup) {
-	service, err := NewService(context.Background())
+	service, err := NewEthereumService(context.Background())
 	if err != nil {
 		log.Errorln("Cannot initialize Service")
 	} else {
@@ -19,9 +19,16 @@ func RunEthereumGateway(wg *sync.WaitGroup) {
 	wg.Done()
 }
 
+func RunWebSocketServer(wg *sync.WaitGroup) {
+	NewWebSocketService()
+	wg.Done()
+}
+	
+
 func main() {
 	var wg sync.WaitGroup
-	wg.Add(1)
+	wg.Add(2)
 	go RunEthereumGateway(&wg)
+	go RunWebSocketServer(&wg)
 	wg.Wait()
 }

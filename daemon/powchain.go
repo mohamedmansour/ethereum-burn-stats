@@ -43,7 +43,7 @@ type Web3ServiceConfig struct {
 	Eth1HeaderReqLimit uint64
 }
 
-func NewService(ctx context.Context) (*Service, error) {
+func NewEthereumService(ctx context.Context) (*Service, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	_ = cancel // govet fix for lost cancel. Cancel is handled in service.Stop()
 	s := &Service{
