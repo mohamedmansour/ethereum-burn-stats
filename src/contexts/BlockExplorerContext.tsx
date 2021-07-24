@@ -174,7 +174,7 @@ const BlockExplorerProvider = ({
 
       const processedBlocks: BurnedBlockTransaction[] = []
       for (var i = 0; i < blockHeaderCount; i++) {
-        const blockNumber = latestBlockNumber - i
+        const blockNumber = Math.max(0, latestBlockNumber - i)
         const block = await BlockExplorerApi.fetchBlock(eth, blockNumber)
         if (block)
           processedBlocks.push(block)
