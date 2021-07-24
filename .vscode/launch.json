@@ -5,11 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug Frontend",
             "type": "pwa-msedge",
             "request": "launch",
-            "name": "Launch Edge against localhost",
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}"
+        }
+        {
+            "name": "Debug Daemon",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}"
         }
     ]
 }
