@@ -25,7 +25,7 @@ import {
   GridItem,
 } from "@chakra-ui/react";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { utils } from "ethers";
+import { ethers, utils } from "ethers";
 import { useState, useEffect } from "react";
 import { VscChevronLeft, VscChevronRight } from "react-icons/vsc";
 import { useParams, Link as ReactLink, useHistory } from "react-router-dom";
@@ -192,7 +192,9 @@ export function EthBlockDetail() {
                 <Text color="brand.secondaryText">Gas limit:</Text>
                 <BigNumberText number={block.gasLimit} />
                 <Text color="brand.secondaryText">Extra data:</Text>
-                <Text wordBreak="break-all">{block.extraData}</Text>
+                <Text wordBreak="break-all" title={'data: ' + block.extraData}>
+                  {block.extraData}
+                </Text>
               </Grid>
             </Card>
           </TabPanel>
