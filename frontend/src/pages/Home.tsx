@@ -101,7 +101,10 @@ function BlockItem(props: BlockItemProps) {
         </Link>
       </Td>
       <Td>
-        <BigNumberText number={block.burned} />
+        <HStack>
+          <FirePit size="12px" />
+          <BigNumberText number={block.burned} />
+        </HStack>
       </Td>
       <Td>
         <BigNumberText number={block.basefee} />
@@ -130,12 +133,7 @@ function BlockList() {
         <Thead>
           <Tr>
             <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Block</Th>
-            <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>
-              <HStack>
-                <FirePit size="12px" />
-                <Text>Burned</Text>
-              </HStack>
-            </Th>
+            <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Burned</Th>
             <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Base Fee</Th>
             <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Gas Used</Th>
             <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Gas Limit</Th>
