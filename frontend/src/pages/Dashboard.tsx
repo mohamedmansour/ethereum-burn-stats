@@ -38,26 +38,26 @@ import { TablePlus, ThPlus } from "../atoms/TablePlus";
 
 interface ActivationCountdownProps {
   blocksRemaining: number
-  lastFiveBlocks: BurnedBlockTransaction[]
+  blocks: BurnedBlockTransaction[]
 }
 export function ActivationCountdown(props: ActivationCountdownProps) {
   const { eth } = useEthereum();
   const [estimatedTime, setEstimatedTime] = useState<string>()
 
   useEffect(() => {
-    const averageBlockSpeed = props.lastFiveBlocks.slice(1, 5).reduce((prev, curr, currentIndex, array) => {
+    const averageBlockSpeed = props.blocks.reduce((prev, curr, currentIndex, array) => {
       if (currentIndex > 0) {
         const currentDiff = curr.timestamp - array[currentIndex - 1].timestamp
         return (prev + currentDiff) / 2
       }
       return curr.timestamp - prev
-    }, props.lastFiveBlocks[0].timestamp)
+    }, props.blocks[0].timestamp)
 
     const activationDate = new Date(Date.now() + Math.abs(averageBlockSpeed) * props.blocksRemaining * 1000)
 
     const dtf = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'long', timeStyle: 'long' });
     setEstimatedTime(dtf.format(activationDate))
-  }, [props.blocksRemaining, props.lastFiveBlocks])
+  }, [props.blocksRemaining, props.blocks])
 
 
   return (
@@ -190,7 +190,7 @@ export function Home() {
       </Breadcrumb>
       {!activated && (
         <Flex direction={layoutConfig.flexRow} gridGap={layoutConfig.gap} flexShrink={0}>
-          <ActivationCountdown blocksRemaining={eth.connectedNetwork.genesis - latestBlock.number} lastFiveBlocks={blocks} />
+          <ActivationCountdown blocksRemaining={eth.connectedNetwork.genesis - latestBlock.number} blocks={blocks} />
         </Flex>
       )}
       {activated && (
