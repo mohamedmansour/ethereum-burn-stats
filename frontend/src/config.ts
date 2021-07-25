@@ -33,7 +33,7 @@ export enum Setting {
   maxBlocksToRender = "maxBlocksToRender"
 }
 
-export const defaultNetwork = EthereumNetworkOptions['goerli']
+export const defaultNetwork = EthereumNetworkOptions['mainnet']
 export const defaultSettings: { [key: string]: DefaultSettingValue } =
   {
     [Setting.maxBlocksToRender]: {
