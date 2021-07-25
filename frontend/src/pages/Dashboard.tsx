@@ -55,7 +55,7 @@ export function ActivationCountdown(props: ActivationCountdownProps) {
 
     const activationDate = new Date(Date.now() + Math.abs(averageBlockSpeed) * props.blocksRemaining * 1000)
 
-    const dtf = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'long', timeStyle: 'medium' });
+    const dtf = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'long', timeStyle: 'long' });
     setEstimatedTime(dtf.format(activationDate))
   }, [props.blocksRemaining, props.lastFiveBlocks])
 
