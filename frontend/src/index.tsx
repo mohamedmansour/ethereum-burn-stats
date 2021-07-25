@@ -10,7 +10,7 @@ import { CurrencyProvider } from './contexts/CurrencyContext';
 
 function App() {
   const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:'
-  const url = `${protocol}//${process.env.REACT_APP_WEB3_URL}`
+  const url = `${protocol}//${window.location.host}/ws`
 
   return (
     <React.StrictMode>
