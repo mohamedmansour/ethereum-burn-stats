@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Loader } from '../components/Loader';
+import { Loader } from '../organisms/Loader';
 import { ethers } from "ethers";
 import { Ethereumish } from '../react-app-env';
 import { defaultNetwork, EthereumNetwork } from '../config';

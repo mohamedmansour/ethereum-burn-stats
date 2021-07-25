@@ -1,6 +1,6 @@
 import { Center, VStack, Text } from '@chakra-ui/react';
 import React from 'react';
-import { FirePit } from './FirePit';
+import { FirePit } from '../atoms/FirePit';
 
 interface LoaderProps {
   children: React.ReactNode;

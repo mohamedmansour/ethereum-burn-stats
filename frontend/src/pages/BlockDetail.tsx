@@ -27,17 +27,17 @@ import { utils } from "ethers";
 import { useState, useEffect } from "react";
 import { VscChevronLeft, VscChevronRight } from "react-icons/vsc";
 import { useParams, Link as ReactLink, useHistory } from "react-router-dom";
-import { Loader } from "../components/Loader";
+import { Loader } from "../organisms/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
-import { Card } from "../components/Card";
+import { Card } from "../atoms/Card";
 import {
   BlockExplorerApi,
   BurnedBlockTransaction,
 } from "../contexts/BlockExplorerContext";
-import { FirePit } from "../components/FirePit";
-import { BigNumberText } from "../components/BigNumberText";
+import { FirePit } from "../atoms/FirePit";
+import { BigNumberText } from "../organisms/BigNumberText";
 import { layoutConfig } from "../layoutConfig";
-import { TablePlus, ThPlus } from "../components/TablePlus";
+import { TablePlus, ThPlus } from "../atoms/TablePlus";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;

@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link as ReactLink } from "react-router-dom";
-import { Card } from "../components/Card";
+import { Card } from "../atoms/Card";
 import { Setting, EthereumNetworkOptions } from "../config";
 import { useEthereum } from "../contexts/EthereumContext";
 import { useSettings } from "../contexts/SettingsContext";

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { EthereumProvider } from './contexts/EthereumContext';
-import { DashboardPage } from './pages/Dashboard';
+import { Routing } from './templates/Routing';
 import { ChakraProvider, ColorModeScript, CSSReset } from '@chakra-ui/react';
 import customTheme from './theme';
 import { SettingsProvider } from './contexts/SettingsContext';
@@ -21,7 +21,7 @@ function App() {
           <EthereumProvider url={url}>
             <BlockExplorerProvider>
               <CurrencyProvider>
-                <DashboardPage />
+                <Routing />
               </CurrencyProvider>
             </BlockExplorerProvider>
           </EthereumProvider>

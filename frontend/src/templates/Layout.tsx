@@ -7,9 +7,9 @@ import {
 } from "@chakra-ui/react";
 import * as CSS from "csstype";
 import { Link as ReactLink } from "react-router-dom";
-import { FirePit } from "../components/FirePit";
-import { Footer } from "../components/Footer";
-import { EthereumNetworkBadge } from "../components/Network";
+import { FirePit } from "../atoms/FirePit";
+import { Footer } from "../organisms/Footer";
+import { EthereumNetworkBadge } from "../organisms/Network";
 import { layoutConfig } from "../layoutConfig";
 
 interface LayoutProps {

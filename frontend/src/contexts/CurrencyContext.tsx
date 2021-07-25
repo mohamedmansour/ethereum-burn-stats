@@ -2,7 +2,7 @@ import { createContext } from "react"
 import { useReducer } from "react"
 import { useEffect } from "react"
 import { useContext } from "react"
-import { Loader } from "../components/Loader"
+import { Loader } from "../organisms/Loader"
 
 const REFRESH_TIME = 300000 // 5min
 

@@ -15,9 +15,9 @@ import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Link as ReactLink, useParams } from "react-router-dom";
-import { BigNumberText } from "../components/BigNumberText";
-import { Card } from "../components/Card";
-import { Loader } from "../components/Loader";
+import { BigNumberText } from "../organisms/BigNumberText";
+import { Card } from "../atoms/Card";
+import { Loader } from "../organisms/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
 import { layoutConfig } from "../layoutConfig";
 
