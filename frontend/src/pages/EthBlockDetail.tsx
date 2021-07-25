@@ -25,7 +25,7 @@ import {
   GridItem,
 } from "@chakra-ui/react";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { ethers, utils } from "ethers";
+import { utils } from "ethers";
 import { useState, useEffect } from "react";
 import { VscChevronLeft, VscChevronRight } from "react-icons/vsc";
 import { useParams, Link as ReactLink, useHistory } from "react-router-dom";

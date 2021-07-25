@@ -112,7 +112,7 @@ function BlockItem(props: BlockItemProps) {
       <Td>
         <GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} />
       </Td>
-      <Td><BigNumberText number={block.gasLimit} /></Td>
+      <Td><BigNumberText number={block.gasLimit} forced='wei' /></Td>
       <Td><BigNumberText number={block.rewards} /></Td>
       <Td>{block.transactions.length}</Td>
       <Td>{timeSince(block.timestamp as number)}</Td>
@@ -201,10 +201,13 @@ export function Home() {
             <HStack pr={10}>
               <Icon as={FaBurn} />
               <Text fontSize="md" fontWeight="bold">
-                Total Burned
+                Statistics
               </Text>
             </HStack>
+            <HStack>
+            <Text>Tota  </Text>
             <BigNumberText number={details.totalBurned} fontSize={24} />
+            </HStack>
           </Card>
           <Card
             gridGap={4}

@@ -18,6 +18,7 @@ export interface BigNumberProps extends HTMLChakraProps<"div"> {
   disableTooltip?: boolean
   doNotShortenDecimals?: boolean
   removeCurrencyColor?: boolean
+  forced?: 'ether' | 'gwei' | 'wei' | 'auto'
 }
 
 interface BigNumberState {
@@ -28,7 +29,7 @@ interface BigNumberState {
 
 export const BigNumberText = forwardRef<BigNumberProps, "div">(
   (props: BigNumberProps, ref: React.ForwardedRef<any>) => {
-    const { number, usdConversion, label, disableTooltip, doNotShortenDecimals, removeCurrencyColor, ...rest } = props;
+    const { number, usdConversion, label, disableTooltip, doNotShortenDecimals, removeCurrencyColor, forced, ...rest } = props;
     const [state, setState] = useState<BigNumberState | undefined>()
 
     useEffect(() => {
@@ -39,7 +40,10 @@ export const BigNumberText = forwardRef<BigNumberProps, "div">(
       let value = '';
       let currency = ''
   
-      if (usdConversion && usdConversion > 1)  {
+      if (forced && forced !== 'auto') {
+        value = utils.formatUnits(number, forced)
+        currency = forced === 'ether' ? 'ETH' : forced.toUpperCase()
+      } else if (usdConversion && usdConversion > 1)  {
         value = utils.formatEther(number.mul(usdConversion).toString())
         currency = 'USD'
       } else {
@@ -75,7 +79,7 @@ export const BigNumberText = forwardRef<BigNumberProps, "div">(
         value,
         currency
       })
-    }, [number, usdConversion, doNotShortenDecimals]);
+    }, [number, forced, usdConversion, doNotShortenDecimals]);
  
     if (!state) {
       return (
