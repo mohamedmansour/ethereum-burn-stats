@@ -192,7 +192,7 @@ export function EthBlockDetail() {
                 <BigNumberText number={block.gasLimit} />
                 <Text color="brand.secondaryText">Extra data:</Text>
                 <Text wordBreak="break-all" title={'data: ' + block.extraData}>
-                  {block.extraData}
+                  {utils.toUtf8String(block.extraData, () => 0)}
                 </Text>
               </Grid>
             </Card>
