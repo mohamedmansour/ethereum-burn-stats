@@ -68,7 +68,7 @@ const EthereumProvider = ({
       return;
 
     const network = getNetworkFromSubdomain() || defaultNetwork
-    const ethereum = new EthereumApi(network, `${url}:${network.port}`)
+    const ethereum = new EthereumApi(network, `${url}/ws/${network.key}`)
     setMessage(`connecting to ${network.key}, please wait`)
 
     const checkStatus = async () => {
