@@ -1,9 +1,7 @@
 import {
-  Table,
   Text,
   Thead,
   Tr,
-  Th,
   Tbody,
   Td,
   Link,
@@ -14,9 +12,11 @@ import {
   BreadcrumbLink,
   Box,
   Icon,
+  ListItem,
+  UnorderedList,
 } from "@chakra-ui/react";
 import { Link as ReactLink } from "react-router-dom";
-import { FaBurn, FaClock, FaCubes, FaEdit, FaGasPump } from 'react-icons/fa';
+import { FaBurn, FaClock, FaCubes, FaGasPump } from 'react-icons/fa';
 import { timeSince } from "../utils/time";
 import { GasUsed } from "../components/GasUsed";
 import {
@@ -33,6 +33,8 @@ import { BaseFeeChart } from "../components/BaseFeeChart";
 import { useEffect, useState } from "react";
 import { useEthereum } from "../contexts/EthereumContext";
 import { layoutConfig } from "../layoutConfig";
+import { ImHeart } from "react-icons/im";
+import { TablePlus, ThPlus } from "../components/TablePlus";
 
 interface ActivationCountdownProps {
   blocksRemaining: number
@@ -63,22 +65,22 @@ export function ActivationCountdown(props: ActivationCountdownProps) {
       <HStack>
         <Icon as={FaClock} />
         <Text fontSize="md" fontWeight="bold">
-        {eth?.connectedNetwork.name} Countdown
+          {eth?.connectedNetwork.name} Countdown
         </Text>
       </HStack>
-        <Box>
-          <Text fontSize="100px" lineHeight="100px">{props.blocksRemaining}</Text>
-          <Text color="brand.secondaryText">Blocks Remaining</Text>
-        </Box>
-        <Box pt="10">
-          {!estimatedTime && (<Text>Please wait, calculating approximate time...</Text>)}
-          {estimatedTime !== undefined && (
-            <>
-              <Text fontSize={[22, 22, 32]} lineHeight="30px">{estimatedTime}</Text>
-              <Text color="brand.secondaryText">Estimated Activation</Text>
-            </>
-          )}
-        </Box>
+      <Box>
+        <Text fontSize="100px" lineHeight="100px">{props.blocksRemaining}</Text>
+        <Text color="brand.secondaryText">Blocks Remaining</Text>
+      </Box>
+      <Box pt="10">
+        {!estimatedTime && (<Text>Please wait, calculating approximate time...</Text>)}
+        {estimatedTime !== undefined && (
+          <>
+            <Text fontSize={[22, 22, 32]} lineHeight="30px">{estimatedTime}</Text>
+            <Text color="brand.secondaryText">Estimated Activation</Text>
+          </>
+        )}
+      </Box>
     </Card>
   )
 }
@@ -93,7 +95,6 @@ function BlockItem(props: BlockItemProps) {
     <Tr>
       <Td>
         <Link
-          color="orange"
           to={`/block/${block.number}`}
           as={ReactLink}
         >
@@ -129,17 +130,17 @@ function BlockList() {
 
   return (
     <Box position="relative" w="100%" h="100%" flex={1} overflow="auto" whiteSpace="nowrap">
-      <Table colorScheme="whiteAlpha" position="absolute" top={0} bottom={0} left={0} right={0}>
+      <TablePlus colorScheme="whiteAlpha">
         <Thead>
           <Tr>
-            <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Block</Th>
-            <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Burned</Th>
-            <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Base Fee</Th>
-            <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Gas Used</Th>
-            <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Gas Limit</Th>
-            <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Rewards</Th>
-            <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Txn</Th>
-            <Th position="sticky" bg="brand.card" top={0} color="brand.secondaryText" zIndex={1}>Age</Th>
+            <ThPlus>Block</ThPlus>
+            <ThPlus>Burned</ThPlus>
+            <ThPlus>Base Fee</ThPlus>
+            <ThPlus>Gas Used</ThPlus>
+            <ThPlus>Gas Limit</ThPlus>
+            <ThPlus>Rewards</ThPlus>
+            <ThPlus>Txn</ThPlus>
+            <ThPlus>Age</ThPlus>
           </Tr>
         </Thead>
         <Tbody>
@@ -156,7 +157,7 @@ function BlockList() {
             />
           ))}
         </Tbody>
-      </Table>
+      </TablePlus>
     </Box>
   );
 }
@@ -194,21 +195,43 @@ export function Home() {
       )}
       {activated && (
         <Flex direction={layoutConfig.flexRow} gridGap={layoutConfig.gap} h={["auto", "auto", 300]} flexShrink={0}>
-          <Card
-            gridGap={4}
-            w={["100%", "100%", 300]}
-          >
-            <HStack pr={10}>
-              <Icon as={FaBurn} />
-              <Text fontSize="md" fontWeight="bold">
-                Statistics
-              </Text>
-            </HStack>
-            <HStack>
-            <Text>Tota  </Text>
-            <BigNumberText number={details.totalBurned} fontSize={24} />
-            </HStack>
-          </Card>
+          <Flex direction="column" gridGap={layoutConfig.gap}>
+            <Card
+              gridGap={2}
+              w={["100%", "100%", 300]}
+            >
+              <HStack pr={10}>
+                <Icon as={FaBurn} />
+                <Text fontSize="md" fontWeight="bold">
+                  Total Burned
+                </Text>
+              </HStack>
+              <BigNumberText number={details.totalBurned} usdConversion={amount} fontSize={24} textAlign="right" />
+            </Card>
+            <Card
+              gridGap={2} flex="1"
+              w={["100%", "100%", 300]}
+            >
+              <HStack pr={10}>
+                <Icon as={FaBurn} />
+                <Text fontSize="md" fontWeight="bold">
+                  Current Session
+                </Text>
+              </HStack>
+              <HStack>
+                <Text flex={1}>Burned</Text>
+                <BigNumberText number={session.burned} usdConversion={amount} fontSize={18} />
+              </HStack>
+              <HStack>
+                <Text flex={1}>Rewards</Text>
+                <BigNumberText number={session.rewards} usdConversion={amount} fontSize={18} />
+              </HStack>
+              <HStack>
+                <Text flex={1}>Blocks</Text>
+                <Text fontSize={18}>{session.blockCount}</Text>
+              </HStack>
+            </Card>
+          </Flex>
           <Card
             gridGap={4}
             flex={1}
@@ -226,33 +249,29 @@ export function Home() {
       )}
       <Flex flex={1} direction={layoutConfig.flexRow} gridGap={layoutConfig.gap}>
         <Flex direction="column" w={["100%", "100%", 300]} flexShrink={0} gridGap={layoutConfig.gap}>
-          {activated && (
-            <Card
-              gridGap={4}
-            >
-              <HStack>
-                <Icon as={FaEdit} />
-                <Text fontSize="md" fontWeight="bold">
-                  Session Summary
-                </Text>
-              </HStack>
-              <Box textAlign="left" mt="2" fontSize="sm">
-                You've just experienced <BigNumberText number={session.burned} usdConversion={amount} fontWeight="bold" removeCurrencyColor /> being burned by observing <strong>{session.blockCount} blocks</strong>
-                {" "}that contain <strong>{session.transactionCount} transactions</strong> with <BigNumberText number={session.rewards} usdConversion={amount} fontWeight="bold" removeCurrencyColor /> rewards!
-              </Box>
-            </Card>
-          )}
-
-          <Card
-            gridGap={4}
-          >
+          <Card gridGap={4}>
             <HStack pr={10}>
               <Icon as={FaGasPump} />
               <Text fontSize="md" fontWeight="bold">
                 Gas Price
               </Text>
             </HStack>
-            <BigNumberText number={details.gasPrice} fontSize={24} />
+            <BigNumberText number={details.gasPrice} fontSize={24} textAlign="right" />
+          </Card>
+          <Card gridGap={4}>
+            <HStack pr={10}>
+              <Icon as={ImHeart} color="brand.orange" />
+              <Text fontSize="md" fontWeight="bold">
+                Donate
+              </Text>
+            </HStack>
+            <Box pl={4} pr={4} pb={4}>
+              <Text>It's expensive hosting multiple geth instances on the cloud. Any help would be appreciated:</Text>
+              <UnorderedList mt={4}>
+                <ListItem>Through our <Link href="https://gitcoin.co/grants/1709/ethereum-tools-and-educational-grant">Gitcoin Grant</Link></ListItem>
+                <ListItem>Monthly sponsorships, in a card like this. Contact us on <Link href="https://twitter.com/mohamedmansour">Twitter</Link></ListItem>
+              </UnorderedList>
+            </Box>
           </Card>
         </Flex>
         <Flex direction="column" flex={1}>

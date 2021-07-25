@@ -61,7 +61,6 @@ export function EthTransactionDetail() {
               <Td color="brand.secondaryText">From</Td>
               <Td isTruncated>
                 <Link
-                  color="orange"
                   to={`/account/${transaction.from}`}
                   as={ReactLink}
                 >
@@ -73,7 +72,6 @@ export function EthTransactionDetail() {
               <Td color="brand.secondaryText">To</Td>
               <Td>
                 <Link
-                  color="orange"
                   to={`/account/${transaction.to}`}
                   as={ReactLink}
                 >
@@ -89,7 +87,6 @@ export function EthTransactionDetail() {
               <Td color="brand.secondaryText">Block Number</Td>
               <Td>
                 <Link
-                  color="orange"
                   to={`/block/${transaction.blockNumber}`}
                   as={ReactLink}
                 >

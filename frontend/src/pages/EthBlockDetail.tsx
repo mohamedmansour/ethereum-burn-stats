@@ -1,10 +1,8 @@
 import {
-  Table,
   Text,
   Tbody,
   Thead,
   Tr,
-  Th,
   Td,
   Link,
   VStack,
@@ -39,6 +37,7 @@ import {
 import { FirePit } from "../components/FirePit";
 import { BigNumberText } from "../components/BigNumberText";
 import { layoutConfig } from "../layoutConfig";
+import { TablePlus, ThPlus } from "../components/TablePlus";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;
@@ -129,13 +128,13 @@ export function EthBlockDetail() {
         </BreadcrumbItem>
       </Breadcrumb>
 
-      <Tabs variant="soft-rounded" colorScheme="whiteAlpha">
+      <Tabs variant="soft-rounded" colorScheme="whiteAlpha" flex={1} display="flex" flexDirection="column">
         <TabList mb="4">
-          <Tab>Overview</Tab>
-          <Tab>Transactions</Tab>
+          <Tab color="gray">Overview</Tab>
+          <Tab color="gray">Transactions</Tab>
         </TabList>
-        <TabPanels>
-          <TabPanel p="0">
+        <TabPanels height="100%" flex={1}>
+          <TabPanel p="0" height="inherit">
             <Grid
               templateColumns={["repeat(2, 1fr)", "repeat(3, 1fr)"]}
               gridGap="4"
@@ -198,17 +197,17 @@ export function EthBlockDetail() {
               </Grid>
             </Card>
           </TabPanel>
-          <TabPanel p="0">
-            <Card overflowX="auto" overflowY="hidden">
+          <TabPanel p="0" height="inherit">
+            <Card position="relative" w="100%" h="100%" overflow="auto" >
               {transactions.length === 0 && <Text>No Transactions</Text>}
               {transactions.length !== 0 && (
-                <Table w="100%" colorScheme="whiteAlpha">
+                <TablePlus w="100%" colorScheme="whiteAlpha">
                   <Thead>
                     <Tr whiteSpace="nowrap">
-                      <Th color="brand.secondaryText">Confs</Th>
-                      <Th color="brand.secondaryText">Tx</Th>
-                      <Th color="brand.secondaryText">Value</Th>
-                      <Th color="brand.secondaryText">Gas Price (wei)</Th>
+                      <ThPlus>Confs</ThPlus>
+                      <ThPlus>Tx</ThPlus>
+                      <ThPlus>Value</ThPlus>
+                      <ThPlus>Gas Price (wei)</ThPlus>
                     </Tr>
                   </Thead>
                   <Tbody>
@@ -220,7 +219,6 @@ export function EthBlockDetail() {
                           position="relative"
                         >
                           <Link
-                            color="orange"
                             to={`/transaction/${t.hash}`}
                             as={ReactLink}
                             overflow="hidden"
@@ -242,7 +240,7 @@ export function EthBlockDetail() {
                       </Tr>
                     ))}
                   </Tbody>
-                </Table>
+                </TablePlus>
               )}
             </Card>
           </TabPanel>

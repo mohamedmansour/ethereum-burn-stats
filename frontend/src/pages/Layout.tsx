@@ -38,10 +38,13 @@ export function Layout(props: LayoutProps) {
             whiteSpace="nowrap"
             textDecoration="none"
             cursor="pointer"
+            _hover={{
+              textDecoration: "none",
+            }}
           >
             <HStack cursor="pointer">
               <FirePit sparkCount={12} size="24px" />
-              <Heading size="lg">Watch The <Box display="inline" color="brand.orange">Burn</Box></Heading>
+              <Heading size="lg" color="white">Watch The <Box display="inline" color="brand.orange">Burn</Box></Heading>
             </HStack>
           </Link>
         </HStack>
