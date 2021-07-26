@@ -52,7 +52,7 @@ const theme = extendTheme({
           top: "-12px",
           bg: "brand.card",
           color: "brand.secondaryText",
-          zIndex: 1
+          zIndex: 5
         }
       },
       defaultProps: {
