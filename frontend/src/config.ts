@@ -18,15 +18,14 @@ export interface EthereumNetwork {
   key: string
   genesis: number
   chainId: number
-  port: number
 }
 
 export const EthereumNetworkOptions: {
   [key: string]: EthereumNetwork
 } = {
-  ropsten: { name: "Ropsten (testnet)", key: "ropsten", genesis: 10499401, chainId: 3, port: 8556 },
-  goerli: { name: "Goerli (testnet)", key: "goerli", genesis: 5062605, chainId: 5, port: 8566 },
-  mainnet: { name: "Mainnet", key: "mainnet", genesis: 12965000, chainId: 1, port: 8576},
+  ropsten: { name: "Ropsten (testnet)", key: "ropsten", genesis: 10499401, chainId: 3},
+  goerli: { name: "Goerli (testnet)", key: "goerli", genesis: 5062605, chainId: 5 },
+  mainnet: { name: "Mainnet", key: "mainnet", genesis: 12965000, chainId: 1},
 };
 
 export enum Setting {
