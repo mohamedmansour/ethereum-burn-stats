@@ -79,7 +79,7 @@ export const BlockExplorerApi = {
     const block = await eth.getBlock(blockNumber)
     if (block) {
       const rewards = getDefaultBigNumber(await eth.getBlockReward(blockNumberInHex))
-      const basefee = getDefaultBigNumber(await eth.getBaseFeePerGas(blockNumberInHex))
+      const basefee = block.baseFeePerGas ? block.baseFeePerGas : ethers.BigNumber.from(0)
       const burned =  await safeBurned(eth, blockNumber)
 
       return {

@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Loader } from '../organisms/Loader';
+import LRU from 'lru-cache';
 import { ethers } from "ethers";
+import { BlockWithTransactions } from "@ethersproject/abstract-provider"
 import { Ethereumish } from '../react-app-env';
 import { defaultNetwork, EthereumNetwork } from '../config';
 import { getNetworkFromSubdomain } from '../utils/subdomain';
+import { Loader } from '../organisms/Loader';
 
 declare global {
   interface Window {
@@ -20,24 +22,56 @@ interface EthereumSyncing {
 }
 
 export class EthereumApi extends ethers.providers.WebSocketProvider {
+  private cache = new LRU({
+    max: 10000,
+    maxAge: 1000 * 60 * 60  // 1 hour
+  });
+
   constructor(public connectedNetwork: EthereumNetwork, url: string) {
     super(url)
   }
 
-  public burned(start?: string, end?: string): Promise<ethers.BigNumberish> {
-    return this.send('debug_burned', [start, end])
+  public async burned(start?: string, end?: string): Promise<ethers.BigNumberish> {
+    const key = `${this.connectedNetwork.chainId}burned(${start},${end})`
+    return this.cachedExecutor(key, () => this.send('debug_burned', [start, end]))
   }
-  public getBlockReward(blockNumberInHex: string): Promise<ethers.BigNumberish> {
-    return this.send('debug_getBlockReward', [blockNumberInHex])
+
+  public async getBlockReward(blockNumberInHex: string): Promise<ethers.BigNumberish> {
+    const key = `${this.connectedNetwork.chainId}getBlockReward(${blockNumberInHex})`
+    return this.cachedExecutor(key, () => this.send('debug_getBlockReward', [blockNumberInHex]))
   }
-  public async getBaseFeePerGas(blockNumberInHex: string): Promise<ethers.BigNumberish> {
-    return (await this.send('eth_getHeaderByNumber', [blockNumberInHex])).baseFeePerGas
-  }
-  public async getChainId(): Promise<number> {
-    return parseInt((await this.send('eth_chainId', [])))
-  }
+
   public async isSyncing(): Promise<EthereumSyncing | boolean> {
     return await this.send('eth_syncing', [])
+  }
+
+  public async getBlock(blockNumber: number): Promise<ethers.providers.Block> {
+    const key = `${this.connectedNetwork.chainId}_getBlock(${blockNumber})`
+    return this.cachedExecutor(key, () => super.getBlock(blockNumber))
+  }
+
+  public async getBlockWithTransactions(blockNumber: number): Promise<BlockWithTransactions> {
+    const key = `${this.connectedNetwork.chainId}getBlockWithTransactions(${blockNumber})`
+    return this.cachedExecutor(key, () => super.getBlockWithTransactions(blockNumber))
+  }
+
+  public async getTransaction(hash: string): Promise<ethers.providers.TransactionResponse> {
+    const key = `${this.connectedNetwork.chainId}getTransaction(${hash})`
+    return this.cachedExecutor(key, () => super.getTransaction(hash))
+  }
+
+  public async getGasPrice(): Promise<ethers.BigNumber> {
+    const key = `${this.connectedNetwork.chainId}getGasPrice()`
+    return this.cachedExecutor(key, () => super.getGasPrice(), 10000 /* throttle user every 10s */)
+  }
+
+  private async cachedExecutor<T>(key: string, callback: () => T, maxAge?: number): Promise<T> {
+    if (this.cache.has(key)) {
+      return this.cache.get(key) as T
+    }
+    const result = await callback()
+    this.cache.set(key, result, maxAge)
+    return result
   }
 } 
 

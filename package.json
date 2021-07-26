@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "lru-cache": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/lru-cache": "^5.1.1"
+  }
+}
