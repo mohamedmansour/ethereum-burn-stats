@@ -229,11 +229,11 @@ export function Home() {
             </HStack>
             <HStack>
               <Text flex={1}>Rewards</Text>
-              <Text fontSize={18}>{session.blockCount}</Text>
+              <BigNumberText number={session.rewards} usdConversion={amount} fontSize={16} />
             </HStack>
             <HStack>
-              <Text flex={1}>Blocks ({session.blockCount} blocks seen)</Text>
-              <BigNumberText number={session.rewards} usdConversion={amount} fontSize={16} />
+              <Text flex={1}>Blocks</Text>
+              <Text fontSize={18}>{session.blockCount}</Text>
             </HStack>
             <HStack>
               <Text flex={1}>Lowest Base Fee</Text>
