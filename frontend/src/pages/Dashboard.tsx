@@ -37,28 +37,47 @@ import { ImHeart } from "react-icons/im";
 import { TablePlus, ThPlus } from "../atoms/TablePlus";
 
 interface ActivationCountdownProps {
+  genesisBlock: number
+  currentBlock: number
+}
+
+interface ActivationObj {
   blocksRemaining: number
-  blocks: BurnedBlockTransaction[]
+  estimatedTime: string
 }
 export function ActivationCountdown(props: ActivationCountdownProps) {
   const { eth } = useEthereum();
-  const [estimatedTime, setEstimatedTime] = useState<string>()
+  const [timePerBlockInMs, setTimePerBlockInMs] = useState(0);
+  const [activation, setActivation] = useState<ActivationObj>();
+  const numberOfBlocksToLookback = 400; // ~400 blocks in a day
 
+  // To save on number of calls to geth, just cache the seconds per block.
   useEffect(() => {
-    const averageBlockSpeed = props.blocks.reduce((prev, curr, currentIndex, array) => {
-      if (currentIndex > 0) {
-        const currentDiff = curr.timestamp - array[currentIndex - 1].timestamp
-        return (prev + currentDiff) / 2
-      }
-      return curr.timestamp - prev
-    }, props.blocks[0].timestamp)
+    if (!eth) return;
+    const run = async () => {
+      const currentBlock = await eth.getBlock(props.currentBlock);
+      const previousBlock = await eth.getBlock(props.currentBlock - numberOfBlocksToLookback);
+      setTimePerBlockInMs(((currentBlock.timestamp - previousBlock.timestamp) * 1000) / numberOfBlocksToLookback);
+    }
 
-    const activationDate = new Date(Date.now() + Math.abs(averageBlockSpeed) * props.blocksRemaining * 1000)
-
+    run();
+  // eslint-disable-next-line
+  }, []);
+  
+  useEffect(() => {
+    const blocksRemaining = props.genesisBlock - props.currentBlock;
+    const activationDate = new Date(Date.now() + timePerBlockInMs * blocksRemaining)
     const dtf = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'long', timeStyle: 'long' });
-    setEstimatedTime(dtf.format(activationDate))
-  }, [props.blocksRemaining, props.blocks])
+    const estimatedTime = dtf.format(activationDate);
+    setActivation({
+      blocksRemaining,
+      estimatedTime
+    })
+  }, [props.genesisBlock, props.currentBlock, timePerBlockInMs])
 
+  if (!activation) {
+    return <Text>Please wait, calculating approximate time...</Text>
+  }
 
   return (
     <Card gridGap={4} w="100%" textAlign="center">
@@ -69,17 +88,12 @@ export function ActivationCountdown(props: ActivationCountdownProps) {
         </Text>
       </HStack>
       <Box>
-        <Text fontSize="100px" lineHeight="100px">{props.blocksRemaining}</Text>
+        <Text fontSize="100px" lineHeight="100px">{activation.blocksRemaining}</Text>
         <Text color="brand.secondaryText">Blocks Remaining</Text>
       </Box>
       <Box pt="10">
-        {!estimatedTime && (<Text>Please wait, calculating approximate time...</Text>)}
-        {estimatedTime !== undefined && (
-          <>
-            <Text fontSize={[22, 22, 32]} lineHeight="30px">{estimatedTime}</Text>
-            <Text color="brand.secondaryText">Estimated Activation</Text>
-          </>
-        )}
+        <Text fontSize={[22, 22, 32]} lineHeight="30px">{activation.estimatedTime}</Text>
+        <Text color="brand.secondaryText">Estimated Activation</Text>
       </Box>
     </Card>
   )
@@ -190,7 +204,7 @@ export function Home() {
       </Breadcrumb>
       {!activated && (
         <Flex direction={layoutConfig.flexRow} gridGap={layoutConfig.gap} flexShrink={0}>
-          <ActivationCountdown blocksRemaining={eth.connectedNetwork.genesis - latestBlock.number} blocks={blocks} />
+          <ActivationCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock.number} />
         </Flex>
       )}
       {activated && (
