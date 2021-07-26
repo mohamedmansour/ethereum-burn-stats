@@ -18,7 +18,7 @@ import {
   Heading,
 } from "@chakra-ui/react";
 import { Link as ReactLink } from "react-router-dom";
-import { FaBurn, FaClock, FaCubes, FaGasPump } from 'react-icons/fa';
+import { FaBurn, FaChartLine, FaClock, FaCubes, FaGasPump, FaWaveSquare } from 'react-icons/fa';
 import { timeSince } from "../utils/time";
 import { GasUsed } from "../organisms/GasUsed";
 import {
@@ -235,7 +235,7 @@ export function Home() {
           </Card>
           <Card gridGap={4}>
             <HStack pr={10}>
-              <Icon as={FaBurn} />
+              <Icon as={FaWaveSquare} />
               <Text fontSize="md" fontWeight="bold">
                 Current Session
               </Text>
@@ -296,7 +296,7 @@ export function Home() {
               h={["auto", "auto", 300]} flexShrink={0}
             >
               <HStack>
-                <Icon as={FaGasPump} />
+                <Icon as={FaChartLine} />
                 <Text fontSize="md" fontWeight="bold">
                   Live Burn Chart
                 </Text>
