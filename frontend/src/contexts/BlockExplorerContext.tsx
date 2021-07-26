@@ -11,6 +11,7 @@ export interface BurnedBlockTransaction extends ethers.providers.Block {
   burned: ethers.BigNumber
   rewards: ethers.BigNumber
   basefee: ethers.BigNumber
+  gasTarget: ethers.BigNumber
 }
 
 export interface BlockExplorerSession {
@@ -84,12 +85,14 @@ export const BlockExplorerApi = {
       const rewards = getDefaultBigNumber(await eth.getBlockReward(blockNumberInHex))
       const basefee = BigNumberNormalize(block.baseFeePerGas)
       const burned =  await safeBurned(eth, blockNumber)
-
+      const gasTarget = block.gasLimit.div(2)
+      
       return {
         ...block,
         burned,
         rewards,
-        basefee
+        basefee,
+        gasTarget
       }
     }
 

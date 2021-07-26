@@ -14,6 +14,8 @@ import {
   Icon,
   ListItem,
   UnorderedList,
+  Tooltip,
+  Heading,
 } from "@chakra-ui/react";
 import { Link as ReactLink } from "react-router-dom";
 import { FaBurn, FaClock, FaCubes, FaGasPump } from 'react-icons/fa';
@@ -35,6 +37,7 @@ import { useEthereum } from "../contexts/EthereumContext";
 import { layoutConfig } from "../layoutConfig";
 import { ImHeart } from "react-icons/im";
 import { TablePlus, ThPlus } from "../atoms/TablePlus";
+import { VscInfo } from "react-icons/vsc";
 
 interface ActivationCountdownProps {
   genesisBlock: number
@@ -125,14 +128,27 @@ function BlockItem(props: BlockItemProps) {
         <BigNumberText number={block.basefee} />
       </Td>
       <Td>
-        <GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} />
+        <GasUsed gasUsed={block.gasUsed} gasLimit={block.gasTarget} />
       </Td>
-      <Td><BigNumberText number={block.gasLimit} forced='wei' /></Td>
+      <Td><BigNumberText number={block.gasTarget} forced='wei' hideCurrency /></Td>
       <Td><BigNumberText number={block.rewards} /></Td>
       <Td>{block.transactions.length}</Td>
       <Td>{timeSince(block.timestamp as number)}</Td>
     </Tr>
   );
+}
+
+function GasUsedInfo() {
+  return (
+    <Box p={4}>
+      <Heading size="sm">Gas Used is % of Gas Target</Heading>
+      <UnorderedList mt={4}>
+        <ListItem>100% == no change in base fee</ListItem>
+        <ListItem>200% == 12.5% increase in base fee</ListItem>
+        <ListItem>0% == 12.5% decrease in base fee</ListItem>
+      </UnorderedList>
+    </Box>
+  )
 }
 
 function BlockList() {
@@ -142,6 +158,7 @@ function BlockList() {
 
   if (!blocks) return <Loader>loading blocks ...</Loader>;
 
+
   return (
     <Box position="relative" w="100%" h="100%" flex={1} overflow="auto" whiteSpace="nowrap">
       <TablePlus colorScheme="whiteAlpha">
@@ -150,8 +167,8 @@ function BlockList() {
             <ThPlus>Block</ThPlus>
             <ThPlus>Burned</ThPlus>
             <ThPlus>Base Fee</ThPlus>
-            <ThPlus>Gas Used</ThPlus>
-            <ThPlus>Gas Limit</ThPlus>
+            <ThPlus><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16}/></Box></Tooltip></HStack></ThPlus>
+            <ThPlus>Gas Target</ThPlus>
             <ThPlus>Rewards</ThPlus>
             <ThPlus>Txn</ThPlus>
             <ThPlus>Age</ThPlus>

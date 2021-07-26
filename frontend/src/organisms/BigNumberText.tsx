@@ -17,6 +17,7 @@ export interface BigNumberProps extends HTMLChakraProps<"div"> {
   label?: JSX.Element;
   disableTooltip?: boolean
   doNotShortenDecimals?: boolean
+  hideCurrency?: boolean;
   removeCurrencyColor?: boolean
   forced?: 'ether' | 'gwei' | 'wei' | 'auto'
 }
@@ -29,7 +30,7 @@ interface BigNumberState {
 
 export const BigNumberText = forwardRef<BigNumberProps, "div">(
   (props: BigNumberProps, ref: React.ForwardedRef<any>) => {
-    const { number, usdConversion, label, disableTooltip, doNotShortenDecimals, removeCurrencyColor, forced, ...rest } = props;
+    const { number, usdConversion, label, disableTooltip, doNotShortenDecimals, removeCurrencyColor, forced, hideCurrency, ...rest } = props;
     const [state, setState] = useState<BigNumberState | undefined>()
 
     useEffect(() => {
@@ -92,7 +93,7 @@ export const BigNumberText = forwardRef<BigNumberProps, "div">(
       return (
         <HStack display="inline-flex" {...rest} ref={ref}>
           <Text>{state.prettyValue}</Text>
-          <Text color={currencyColor}>{state.currency}</Text>
+          {!hideCurrency && <Text color={currencyColor}>{state.currency}</Text>}
         </HStack>
       )
     }
@@ -108,7 +109,7 @@ export const BigNumberText = forwardRef<BigNumberProps, "div">(
         <Tooltip label={tooltipLabel}>
           <HStack display="inline-flex">
             <Text>{state.prettyValue}</Text>
-            <Text color={currencyColor}>{state.currency}</Text>
+            {!hideCurrency && <Text color={currencyColor}>{state.currency}</Text>}
           </HStack>
         </Tooltip>
       </Box>

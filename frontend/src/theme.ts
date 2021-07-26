@@ -15,6 +15,11 @@ const theme = extendTheme({
     },
   },
   components: {
+    Tooltip: {
+      baseStyle: {
+        bg: '#111'
+      }
+    },
     Link: {
       baseStyle: {
         color: "orange",
