@@ -250,7 +250,7 @@ export function Home() {
             </HStack>
             <HStack>
               <Text flex={1}>Blocks</Text>
-              <Text fontSize={18}>{session.blockCount}</Text>
+              <Text fontSize={16}>{session.blockCount}</Text>
             </HStack>
             <HStack>
               <Text flex={1}>Lowest Base Fee</Text>
