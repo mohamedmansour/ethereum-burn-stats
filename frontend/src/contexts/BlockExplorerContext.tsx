@@ -5,6 +5,7 @@ import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../organisms/Loader";
 import { useReducer } from "react";
 import { Setting } from "../config";
+import { BigNumberMax, BigNumberMin, BigNumberNormalize } from "../utils/bignumber";
 
 export interface BurnedBlockTransaction extends ethers.providers.Block {
   burned: ethers.BigNumber
@@ -17,6 +18,8 @@ export interface BlockExplorerSession {
   blockCount: number
   transactionCount: number
   rewards: ethers.BigNumber
+  minBaseFee: ethers.BigNumber
+  maxBaseFee: ethers.BigNumber
 }
 
 export interface BlockExplorerDetails {
@@ -79,7 +82,7 @@ export const BlockExplorerApi = {
     const block = await eth.getBlock(blockNumber)
     if (block) {
       const rewards = getDefaultBigNumber(await eth.getBlockReward(blockNumberInHex))
-      const basefee = block.baseFeePerGas ? block.baseFeePerGas : ethers.BigNumber.from(0)
+      const basefee = BigNumberNormalize(block.baseFeePerGas)
       const burned =  await safeBurned(eth, blockNumber)
 
       return {
@@ -130,13 +133,18 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
         blockCount: action.blocks.length,
         burned: ethers.BigNumber.from(0),
         rewards: ethers.BigNumber.from(0),
-        transactionCount: 0
+        transactionCount: 0,
+        minBaseFee: ethers.BigNumber.from(Number.MAX_SAFE_INTEGER.toString()),
+        maxBaseFee: ethers.BigNumber.from(Number.MIN_SAFE_INTEGER.toString()),
       }
       
       action.blocks.forEach(block => {
+        const basefee = BigNumberNormalize(block.baseFeePerGas)
         session.transactionCount += block.transactions.length
         session.burned = block.burned.add(session.burned)
         session.rewards = block.rewards.add(session.rewards)
+        session.minBaseFee = BigNumberMin(basefee, session.minBaseFee)
+        session.maxBaseFee = BigNumberMax(basefee, session.maxBaseFee)
       })
 
       return { blocks: action.blocks, details: action.details, session }
