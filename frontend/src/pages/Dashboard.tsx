@@ -61,9 +61,9 @@ export function ActivationCountdown(props: ActivationCountdownProps) {
     }
 
     run();
-  // eslint-disable-next-line
+    // eslint-disable-next-line
   }, []);
-  
+
   useEffect(() => {
     const blocksRemaining = props.genesisBlock - props.currentBlock;
     const activationDate = new Date(Date.now() + timePerBlockInMs * blocksRemaining)
@@ -202,75 +202,48 @@ export function Home() {
           <Text>Dashboard</Text>
         </BreadcrumbItem>
       </Breadcrumb>
-      {!activated && (
-        <Flex direction={layoutConfig.flexRow} gridGap={layoutConfig.gap} flexShrink={0}>
-          <ActivationCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock.number} />
-        </Flex>
-      )}
-      {activated && (
-        <Flex direction={layoutConfig.flexRow} gridGap={layoutConfig.gap} h={["auto", "auto", 300]} flexShrink={0}>
-          <Flex direction="column" gridGap={layoutConfig.gap}>
-            <Card
-              gridGap={2}
-              w={["100%", "100%", 300]}
-            >
-              <HStack pr={10}>
-                <Icon as={FaBurn} />
-                <Text fontSize="md" fontWeight="bold">
-                  Total Burned
-                </Text>
-              </HStack>
-              <BigNumberText number={details.totalBurned} usdConversion={amount} fontSize={24} textAlign="right" />
-            </Card>
-            <Card
-              gridGap={2} flex="1"
-              w={["100%", "100%", 300]}
-            >
-              <HStack pr={10}>
-                <Icon as={FaBurn} />
-                <Text fontSize="md" fontWeight="bold">
-                  Current Session
-                </Text>
-              </HStack>
-              <HStack>
-                <Text flex={1}>Burned</Text>
-                <BigNumberText number={session.burned} usdConversion={amount} fontSize={16} />
-              </HStack>
-              <HStack>
-                <Text flex={1}>Rewards</Text>
-                <Text fontSize={18}>{session.blockCount}</Text>
-              </HStack>
-              <HStack>
-                <Text flex={1}>Blocks ({session.blockCount} blocks seen)</Text>
-                <BigNumberText number={session.rewards} usdConversion={amount} fontSize={16} />
-              </HStack>
-              <HStack>
-                <Text flex={1}>Lowest Base Fee</Text>
-                <BigNumberText number={session.minBaseFee} fontSize={16} />
-              </HStack>
-              <HStack>
-                <Text flex={1}>Highest Base Fee</Text>
-                <BigNumberText number={session.maxBaseFee} fontSize={16} />
-              </HStack>
-            </Card>
-          </Flex>
-          <Card
-            gridGap={4}
-            flex={1}
-            h={[300, 300, "auto"]}
-          >
-            <HStack>
-              <Icon as={FaGasPump} />
-              <Text fontSize="md" fontWeight="bold">
-                Live Burn Chart
-              </Text>
-            </HStack>
-            <BaseFeeChart data={blocks} activated={activated ? 1 : 0} />
-          </Card>
-        </Flex>
-      )}
       <Flex flex={1} direction={layoutConfig.flexRow} gridGap={layoutConfig.gap}>
         <Flex direction="column" w={["100%", "100%", 300]} flexShrink={0} gridGap={layoutConfig.gap}>
+          <Card
+            gridGap={2}
+            w={["100%", "100%", 300]}
+          >
+            <HStack pr={10}>
+              <Icon as={FaBurn} />
+              <Text fontSize="md" fontWeight="bold">
+                Total Burned
+              </Text>
+            </HStack>
+            <BigNumberText number={details.totalBurned} usdConversion={amount} fontSize={24} textAlign="right" />
+          </Card>
+          <Card gridGap={4}>
+            <HStack pr={10}>
+              <Icon as={FaBurn} />
+              <Text fontSize="md" fontWeight="bold">
+                Current Session
+              </Text>
+            </HStack>
+            <HStack>
+              <Text flex={1}>Burned</Text>
+              <BigNumberText number={session.burned} usdConversion={amount} fontSize={16} />
+            </HStack>
+            <HStack>
+              <Text flex={1}>Rewards</Text>
+              <Text fontSize={18}>{session.blockCount}</Text>
+            </HStack>
+            <HStack>
+              <Text flex={1}>Blocks ({session.blockCount} blocks seen)</Text>
+              <BigNumberText number={session.rewards} usdConversion={amount} fontSize={16} />
+            </HStack>
+            <HStack>
+              <Text flex={1}>Lowest Base Fee</Text>
+              <BigNumberText number={session.minBaseFee} fontSize={16} />
+            </HStack>
+            <HStack>
+              <Text flex={1}>Highest Base Fee</Text>
+              <BigNumberText number={session.maxBaseFee} fontSize={16} />
+            </HStack>
+          </Card>
           <Card gridGap={4}>
             <HStack pr={10}>
               <Icon as={FaGasPump} />
@@ -296,7 +269,24 @@ export function Home() {
             </Box>
           </Card>
         </Flex>
-        <Flex direction="column" flex={1}>
+        <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>
+          {!activated && (
+            <ActivationCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock.number} />
+          )}
+          {activated && (
+            <Card
+              gridGap={4}
+              h={["auto", "auto", 300]} flexShrink={0}
+            >
+              <HStack>
+                <Icon as={FaGasPump} />
+                <Text fontSize="md" fontWeight="bold">
+                  Live Burn Chart
+                </Text>
+              </HStack>
+              <BaseFeeChart data={blocks} activated={activated ? 1 : 0} />
+            </Card>
+          )}
           <Card
             gridGap={4}
             flex={['auto', 'auto', 1]}
