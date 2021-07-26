@@ -298,7 +298,7 @@ export function Home() {
               <HStack>
                 <Icon as={FaChartLine} />
                 <Text fontSize="md" fontWeight="bold">
-                  Live Burn Chart
+                  Live Chart
                 </Text>
               </HStack>
               <BaseFeeChart data={blocks} activated={activated ? 1 : 0} />

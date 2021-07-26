@@ -36,7 +36,6 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
   useEffect(() => {
     const newData = []
 
-    
     for (let i = props.data.length-1; i >= 0; i--) {
       const block = props.data[i]
       const chartData: {[key: string]: any} = {
