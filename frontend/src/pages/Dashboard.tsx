@@ -20,7 +20,7 @@ import {
 import { Link as ReactLink } from "react-router-dom";
 import { FaBurn, FaChartLine, FaClock, FaCubes, FaGasPump, FaWaveSquare } from 'react-icons/fa';
 import { timeSince } from "../utils/time";
-import { GasUsed } from "../organisms/GasUsed";
+import { GasUsed, GasUsedPercent, GasTarget } from "../organisms/GasUsed";
 import {
   useBlockExplorer,
   BurnedBlockTransaction,
@@ -124,13 +124,10 @@ function BlockItem(props: BlockItemProps) {
           <BigNumberText number={block.burned} />
         </HStack>
       </Td>
-      <Td>
-        <BigNumberText number={block.basefee} />
-      </Td>
-      <Td>
-        <GasUsed gasUsed={block.gasUsed} gasLimit={block.gasTarget} />
-      </Td>
-      <Td><BigNumberText number={block.gasTarget} forced='wei' hideCurrency /></Td>
+      <Td><BigNumberText number={block.basefee} /></Td>
+      <Td><GasTarget gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
+      <Td><GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
+      <Td><GasUsedPercent gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
       <Td><BigNumberText number={block.rewards} /></Td>
       <Td>{block.transactions.length}</Td>
       <Td>{timeSince(block.timestamp as number)}</Td>
@@ -141,7 +138,7 @@ function BlockItem(props: BlockItemProps) {
 function GasUsedInfo() {
   return (
     <Box p={4}>
-      <Heading size="sm">Gas Used is % of Gas Target</Heading>
+      <Heading size="sm">Gas used is % of gas target</Heading>
       <UnorderedList mt={4}>
         <ListItem>100% == no change in base fee</ListItem>
         <ListItem>200% == 12.5% increase in base fee</ListItem>
@@ -167,8 +164,9 @@ function BlockList() {
             <ThPlus>Block</ThPlus>
             <ThPlus>Burned</ThPlus>
             <ThPlus>Base Fee</ThPlus>
-            <ThPlus><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16}/></Box></Tooltip></HStack></ThPlus>
             <ThPlus>Gas Target</ThPlus>
+            <ThPlus><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16}/></Box></Tooltip></HStack></ThPlus>
+            <ThPlus>% Full</ThPlus>
             <ThPlus>Rewards</ThPlus>
             <ThPlus>Txn</ThPlus>
             <ThPlus>Age</ThPlus>
@@ -177,7 +175,7 @@ function BlockList() {
         <Tbody>
           <Tr>
             <Td>{details.currentBlock + 1}</Td>
-            <Td colSpan={7}>
+            <Td colSpan={8}>
               <BlockProgress />
             </Td>
           </Tr>

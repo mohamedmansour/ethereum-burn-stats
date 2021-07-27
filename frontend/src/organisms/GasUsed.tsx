@@ -6,17 +6,39 @@ export interface GasUsedProps {
   gasLimit: ethers.BigNumber
 }
 
-export function GasUsed(props: GasUsedProps) {
-  const gasUsed = props.gasUsed.toNumber()
-  const percentage = gasUsed / props.gasLimit.toNumber() * 100
-  if (percentage === 0)
-    return <Text>0</Text>
+export function GasTarget(props: GasUsedProps) {
+  const gasTarget = props.gasLimit.toNumber() / 2
 
   return (
     <VStack alignItems="flex-start">
       <HStack>
-        <Text size="sm">{gasUsed.toLocaleString()}</Text>
-        <Text size="sm">({percentage.toFixed(2)}%)</Text>
+        <Text size="sm">{gasTarget.toLocaleString(undefined, {'minimumFractionDigits': 0, 'maximumFractionDigits': 0})}</Text>
+      </HStack>
+    </VStack>
+  )
+}
+
+export function GasUsed(props: GasUsedProps) {
+  const gasUsed = props.gasUsed.toNumber()
+
+  return (
+    <VStack alignItems="flex-start">
+      <HStack>
+        <Text size="sm">{gasUsed.toLocaleString(undefined, {'minimumFractionDigits': 0, 'maximumFractionDigits': 0})}</Text>
+      </HStack>
+    </VStack>
+  )
+}
+
+export function GasUsedPercent(props: GasUsedProps) {
+  const gasUsed = props.gasUsed.toNumber()
+  const gasTarget = props.gasLimit.toNumber() / 2
+  const percentage = gasUsed / gasTarget * 100
+
+  return (
+    <VStack alignItems="flex-start">
+      <HStack>
+        <Text size="sm">{percentage.toFixed(0)}%</Text>
       </HStack>
     </VStack>
   )
