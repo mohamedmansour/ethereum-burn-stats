@@ -27,6 +27,7 @@ export interface BlockExplorerDetails {
   totalBurned: ethers.BigNumber
   gasPrice: ethers.BigNumber
   currentBlock: number
+  currentBaseFee: ethers.BigNumber
 }
 
 type BlockExplorerContextType = {
@@ -69,13 +70,14 @@ const safeBurned = async (eth: EthereumApi, blockNumber: number, fetchTotal: boo
 const safeTotalBurned = (eth: EthereumApi, blockNumber: number) => safeBurned(eth, blockNumber, true)
 
 export const BlockExplorerApi = {
-  fetchDetails: async (eth:  EthereumApi, blockNumber: number, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
-    const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : await safeTotalBurned(eth, blockNumber)
+  fetchDetails: async (eth:  EthereumApi, block: BurnedBlockTransaction, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
+    const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : await safeTotalBurned(eth, block.number)
     const gasPrice = await eth.getGasPrice()
     return {
-      currentBlock: blockNumber,
+      currentBlock: block.number,
       totalBurned,
-      gasPrice
+      gasPrice,
+      currentBaseFee: block.basefee
     }
   },
   fetchBlock: async (eth:  EthereumApi, blockNumber: number): Promise<BurnedBlockTransaction | undefined> => {
@@ -175,7 +177,7 @@ const BlockExplorerProvider = ({
       if (!block)
         return
 
-      const details = await BlockExplorerApi.fetchDetails(eth, blockNumber, true)
+      const details = await BlockExplorerApi.fetchDetails(eth, block, true)
 
       dispatch({ type: 'NEW_BLOCK', details, block, maxBlocksToRender })
     }
@@ -197,7 +199,7 @@ const BlockExplorerProvider = ({
     const init = async () => {
       const blocks = await prefetchBlockHeaders(5 /* Ease the server a bit so only 5 initial */)
       if (blocks.length) {
-        const details = await BlockExplorerApi.fetchDetails(eth, blocks[0].number)
+        const details = await BlockExplorerApi.fetchDetails(eth, blocks[0])
         dispatch({ type: 'INIT', details, blocks })
       }
       eth.on('block', onNewBlockHeader)

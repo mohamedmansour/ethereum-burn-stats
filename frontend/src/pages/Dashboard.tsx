@@ -155,7 +155,6 @@ function BlockList() {
 
   if (!blocks) return <Loader>loading blocks ...</Loader>;
 
-
   return (
     <Box position="relative" w="100%" h="100%" flex={1} overflow="auto" whiteSpace="nowrap">
       <TablePlus colorScheme="whiteAlpha">
@@ -263,10 +262,17 @@ export function Home() {
             <HStack pr={10}>
               <Icon as={FaGasPump} />
               <Text fontSize="md" fontWeight="bold">
-                Gas Price
+                Latest Stats
               </Text>
             </HStack>
-            <BigNumberText number={details.gasPrice} fontSize={24} textAlign="right" />
+            <HStack>
+              <Text flex={1}>Base Fee</Text>
+              <BigNumberText number={details.currentBaseFee} fontSize={16} textAlign="right" />
+            </HStack>
+            <HStack>
+              <Text flex={1}>Gas Price</Text>
+              <BigNumberText number={details.gasPrice} fontSize={16} textAlign="right" />
+            </HStack>
           </Card>
           <Card gridGap={4}>
             <HStack pr={10}>
