@@ -104,11 +104,13 @@ export function ActivationCountdown(props: ActivationCountdownProps) {
 }
 
 interface BlockItemProps {
+  activated: boolean;
   block: BurnedBlockTransaction;
 }
 
 function BlockItem(props: BlockItemProps) {
-  const { block } = props;
+  const { activated, block } = props;
+
   return (
     <Tr>
       <Td>
@@ -121,9 +123,9 @@ function BlockItem(props: BlockItemProps) {
       </Td>
       <Td><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></Td>
       <Td textAlign="right"><BigNumberText number={block.basefee} /></Td>
-      <Td textAlign="right"><GasTarget gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
-      <Td textAlign="right"><GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
-      <Td textAlign="right"><GasUsedPercent gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
+      <Td textAlign="right"><GasTarget gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></Td>
+      <Td textAlign="right"><GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></Td>
+      <Td textAlign="right"><GasUsedPercent gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></Td>
       <Td textAlign="right"><BigNumberText number={block.rewards} /></Td>
       <Td textAlign="right">{block.transactions.length}</Td>
       <Td textAlign="right">{timeSince(block.timestamp as number)}</Td>
@@ -144,7 +146,11 @@ function GasUsedInfo() {
   )
 }
 
-function BlockList() {
+interface BlockListProps {
+  activated: boolean;
+}
+
+function BlockList(props: BlockListProps) {
   const { details, blocks } = useBlockExplorer();
 
   if (!details) return <Loader>loading block details ...</Loader>;
@@ -178,6 +184,7 @@ function BlockList() {
             <BlockItem
               key={idx}
               block={block}
+              activated={props.activated}
             />
           ))}
         </Tbody>
@@ -315,7 +322,7 @@ export function Home() {
                 Blocks
               </Text>
             </HStack>
-            <BlockList />
+            <BlockList activated={activated} />
           </Card>
         </Flex>
       </Flex>
