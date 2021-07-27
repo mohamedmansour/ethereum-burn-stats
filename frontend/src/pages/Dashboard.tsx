@@ -157,14 +157,14 @@ function BlockList() {
         <Thead>
           <Tr>
             <ThPlus>Block</ThPlus>
-            <ThPlus textAlign="right">Burned</ThPlus>
-            <ThPlus textAlign="right">Base Fee</ThPlus>
-            <ThPlus textAlign="right">Gas Target</ThPlus>
-            <ThPlus textAlign="right"><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16}/></Box></Tooltip></HStack></VStack></ThPlus>
-            <ThPlus textAlign="right">% Target</ThPlus>
-            <ThPlus textAlign="right">Rewards</ThPlus>
-            <ThPlus textAlign="right">Txn</ThPlus>
-            <ThPlus textAlign="right">Age</ThPlus>
+            <ThPlus>Burned</ThPlus>
+            <ThPlus>Base Fee</ThPlus>
+            <ThPlus>Gas Target</ThPlus>
+            <ThPlus><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16}/></Box></Tooltip></HStack></VStack></ThPlus>
+            <ThPlus>% Target</ThPlus>
+            <ThPlus>Rewards</ThPlus>
+            <ThPlus>Txn</ThPlus>
+            <ThPlus>Age</ThPlus>
           </Tr>
         </Thead>
         <Tbody>

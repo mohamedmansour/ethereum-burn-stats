@@ -54,10 +54,13 @@ const theme = extendTheme({
       variants: {
         sticky: {
           position: "sticky",
-          top: "-12px",
+          top: 0,
           bg: "brand.card",
           color: "brand.secondaryText",
-          zIndex: 5
+          zIndex: 5,
+          textAlign: "right",
+          paddingTop: 0,
+          paddingLeft: 0
         }
       },
       defaultProps: {
