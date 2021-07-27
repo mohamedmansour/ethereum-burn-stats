@@ -197,7 +197,7 @@ const BlockExplorerProvider = ({
     }
 
     const init = async () => {
-      const blocks = await prefetchBlockHeaders(5 /* Ease the server a bit so only 5 initial */)
+      const blocks = await prefetchBlockHeaders(10 /* Ease the server a bit so only 5 initial */)
       if (blocks.length) {
         const details = await BlockExplorerApi.fetchDetails(eth, blocks[0])
         dispatch({ type: 'INIT', details, blocks })

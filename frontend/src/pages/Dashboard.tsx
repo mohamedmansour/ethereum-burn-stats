@@ -161,7 +161,7 @@ function BlockList() {
             <ThPlus textAlign="right">Base Fee</ThPlus>
             <ThPlus textAlign="right">Gas Target</ThPlus>
             <ThPlus textAlign="right"><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16}/></Box></Tooltip></HStack></VStack></ThPlus>
-            <ThPlus textAlign="right">% Full</ThPlus>
+            <ThPlus textAlign="right">% Target</ThPlus>
             <ThPlus textAlign="right">Rewards</ThPlus>
             <ThPlus textAlign="right">Txn</ThPlus>
             <ThPlus textAlign="right">Age</ThPlus>
