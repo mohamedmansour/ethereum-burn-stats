@@ -6,6 +6,7 @@ import {
   Td,
   Link,
   HStack,
+  VStack,
   Flex,
   Breadcrumb,
   BreadcrumbItem,
@@ -118,19 +119,14 @@ function BlockItem(props: BlockItemProps) {
           {block.number}
         </Link>
       </Td>
-      <Td>
-        <HStack>
-          <FirePit size="12px" />
-          <BigNumberText number={block.burned} />
-        </HStack>
-      </Td>
-      <Td><BigNumberText number={block.basefee} /></Td>
-      <Td><GasTarget gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
-      <Td><GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
-      <Td><GasUsedPercent gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
-      <Td><BigNumberText number={block.rewards} /></Td>
-      <Td>{block.transactions.length}</Td>
-      <Td>{timeSince(block.timestamp as number)}</Td>
+      <Td><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></Td>
+      <Td textAlign="right"><BigNumberText number={block.basefee} /></Td>
+      <Td textAlign="right"><GasTarget gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
+      <Td textAlign="right"><GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
+      <Td textAlign="right"><GasUsedPercent gasUsed={block.gasUsed} gasLimit={block.gasLimit} /></Td>
+      <Td textAlign="right"><BigNumberText number={block.rewards} /></Td>
+      <Td textAlign="right">{block.transactions.length}</Td>
+      <Td textAlign="right">{timeSince(block.timestamp as number)}</Td>
     </Tr>
   );
 }
@@ -161,14 +157,14 @@ function BlockList() {
         <Thead>
           <Tr>
             <ThPlus>Block</ThPlus>
-            <ThPlus>Burned</ThPlus>
-            <ThPlus>Base Fee</ThPlus>
-            <ThPlus>Gas Target</ThPlus>
-            <ThPlus><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16}/></Box></Tooltip></HStack></ThPlus>
-            <ThPlus>% Full</ThPlus>
-            <ThPlus>Rewards</ThPlus>
-            <ThPlus>Txn</ThPlus>
-            <ThPlus>Age</ThPlus>
+            <ThPlus textAlign="right">Burned</ThPlus>
+            <ThPlus textAlign="right">Base Fee</ThPlus>
+            <ThPlus textAlign="right">Gas Target</ThPlus>
+            <ThPlus textAlign="right"><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16}/></Box></Tooltip></HStack></VStack></ThPlus>
+            <ThPlus textAlign="right">% Full</ThPlus>
+            <ThPlus textAlign="right">Rewards</ThPlus>
+            <ThPlus textAlign="right">Txn</ThPlus>
+            <ThPlus textAlign="right">Age</ThPlus>
           </Tr>
         </Thead>
         <Tbody>

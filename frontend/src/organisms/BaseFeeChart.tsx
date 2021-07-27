@@ -60,7 +60,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
       <ResponsiveContainer>
         <LineChart data={data} 
           margin={isMobileLayout ? {} : { bottom: 20, right: 50, top: 50}}>
-          {!isMobileLayout && <YAxis type="number" domain={['0', 'auto']} fontSize={10} tickLine={false} /> }
+          {!isMobileLayout && <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} /> }
           {!isMobileLayout && <XAxis hide dataKey="block" angle={30} dx={20} dy={10} fontSize={10} /> }
           <Tooltip content={<CustomTooltip />}/>
           <Line type="monotone" dataKey="basefee" stroke="rgb(221, 107, 32)" strokeWidth={2} dot={false} />
