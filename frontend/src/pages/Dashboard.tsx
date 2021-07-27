@@ -302,7 +302,7 @@ export function Home() {
               <HStack>
                 <Icon as={FaChartLine} />
                 <Text fontSize="md" fontWeight="bold">
-                  Live Chart
+                  Live Base Fee Chart
                 </Text>
               </HStack>
               <BaseFeeChart data={blocks} activated={activated ? 1 : 0} />
