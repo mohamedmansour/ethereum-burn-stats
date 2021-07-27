@@ -17,7 +17,7 @@ const theme = extendTheme({
   components: {
     Tooltip: {
       baseStyle: {
-        bg: 'brand.orange'
+        bg: 'brand.subheader'
       }
     },
     Link: {
