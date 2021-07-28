@@ -24,7 +24,6 @@ export const EthereumNetworkOptions: {
   [key: string]: EthereumNetwork
 } = {
   ropsten: { name: "Ropsten (testnet)", key: "ropsten", genesis: 10499401, chainId: 3},
-  goerli: { name: "Goerli (testnet)", key: "goerli", genesis: 5062605, chainId: 5 },
   mainnet: { name: "Mainnet", key: "mainnet", genesis: 12965000, chainId: 1},
 };
 

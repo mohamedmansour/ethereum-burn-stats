@@ -47,13 +47,14 @@ interface ActivationCountdownProps {
 
 interface ActivationObj {
   blocksRemaining: number
+  blockTimeInSec: string
   estimatedTime: string
 }
 export function ActivationCountdown(props: ActivationCountdownProps) {
   const { eth } = useEthereum();
   const [timePerBlockInMs, setTimePerBlockInMs] = useState(0);
   const [activation, setActivation] = useState<ActivationObj>();
-  const numberOfBlocksToLookback = 400; // ~400 blocks in a day
+  const numberOfBlocksToLookback = 6500; // ~6500 blocks in 24 hours
 
   // To save on number of calls to geth, just cache the seconds per block.
   useEffect(() => {
@@ -69,12 +70,14 @@ export function ActivationCountdown(props: ActivationCountdownProps) {
   }, []);
 
   useEffect(() => {
+    const blockTimeInSec = (timePerBlockInMs / 1000).toLocaleString(undefined, {'minimumFractionDigits': 2, 'maximumFractionDigits': 2});
     const blocksRemaining = props.genesisBlock - props.currentBlock;
     const activationDate = new Date(Date.now() + timePerBlockInMs * blocksRemaining)
     const dtf = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'long', timeStyle: 'long' });
     const estimatedTime = dtf.format(activationDate);
     setActivation({
       blocksRemaining,
+      blockTimeInSec,
       estimatedTime
     })
   }, [props.genesisBlock, props.currentBlock, timePerBlockInMs])
@@ -92,12 +95,12 @@ export function ActivationCountdown(props: ActivationCountdownProps) {
         </Text>
       </HStack>
       <Box>
-        <Text fontSize="100px" lineHeight="100px">{activation.blocksRemaining}</Text>
-        <Text color="brand.secondaryText">Blocks Remaining</Text>
+        <Text fontSize={[60, 60, 80]} lineHeight={['60px', '60px', '80px']}>{activation.blocksRemaining}</Text>
+        <Text fontSize={[10, 10, 12]} color="brand.secondaryText">Blocks Remaining</Text>
       </Box>
-      <Box pt="10">
-        <Text fontSize={[22, 22, 32]} lineHeight="30px">{activation.estimatedTime}</Text>
-        <Text color="brand.secondaryText">Estimated Activation</Text>
+      <Box pt={[2, 2, 4]}>
+        <Text fontSize={[16, 16, 24]} lineHeight={['16px', '16px', '24px']}>{activation.estimatedTime}</Text>
+        <Text fontSize={[10, 10, 12]} mt={1} color="brand.secondaryText">Estimated Activation @ {activation.blockTimeInSec} sec/block</Text>
       </Box>
     </Card>
   )
