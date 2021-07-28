@@ -60,7 +60,9 @@ const theme = extendTheme({
           zIndex: 5,
           textAlign: "right",
           paddingTop: 0,
-          paddingLeft: 0
+          _notFirst: {
+            paddingLeft: 0,
+          }
         }
       },
       defaultProps: {

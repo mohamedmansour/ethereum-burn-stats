@@ -162,7 +162,7 @@ function BlockList(props: BlockListProps) {
       <TablePlus colorScheme="whiteAlpha">
         <Thead>
           <Tr>
-            <ThPlus>Block</ThPlus>
+            <ThPlus textAlign="left" width="0.1%">Block</ThPlus>
             <ThPlus>Burned</ThPlus>
             <ThPlus>Base Fee</ThPlus>
             <ThPlus>Gas Target</ThPlus>
@@ -175,7 +175,7 @@ function BlockList(props: BlockListProps) {
         </Thead>
         <Tbody>
           <Tr>
-            <Td>{details.currentBlock + 1}</Td>
+            <Td textAlign="left">{details.currentBlock + 1}</Td>
             <Td colSpan={8}>
               <BlockProgress />
             </Td>
