@@ -7,6 +7,7 @@ import customTheme from './theme';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { BlockExplorerProvider } from './contexts/BlockExplorerContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
+import { MobileDetectorProvider } from './contexts/MobileDetectorContext';
 
 function App() {
   const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:'
@@ -23,7 +24,9 @@ function App() {
           <EthereumProvider url={url}>
             <BlockExplorerProvider>
               <CurrencyProvider>
-                <Routing />
+                <MobileDetectorProvider>
+                  <Routing />
+                </MobileDetectorProvider>
               </CurrencyProvider>
             </BlockExplorerProvider>
           </EthereumProvider>

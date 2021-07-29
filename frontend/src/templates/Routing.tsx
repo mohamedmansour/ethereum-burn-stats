@@ -1,4 +1,4 @@
-import { Home } from '../pages/Dashboard';
+import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { Layout } from './Layout';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { EthBlockDetail } from '../pages/BlockDetail';
@@ -24,7 +24,7 @@ export function Routing() {
             <Settings />
           </Route>
           <Route exact path="/">
-            <Home />
+            <Dashboard />
           </Route>
           <Redirect to="/" />
         </Switch>

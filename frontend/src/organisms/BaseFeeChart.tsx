@@ -7,7 +7,6 @@ import { autoFormatBigNumberToString } from "../utils/wei";
 
 interface BaseFeeChartProps extends HTMLChakraProps<"div">, FlexOptions  {
   data: BurnedBlockTransaction[]
-  activated: number
 }
 
 interface CustomTooltipProps extends TooltipProps<string, string> {
