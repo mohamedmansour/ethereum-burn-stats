@@ -27,7 +27,7 @@ type RPCClient interface {
 }
 
 type Service struct {
-	connected  bool
+	hub  	   *Hub
 	isRunning  bool
 	cfg        *ServiceConfig
 	ctx        context.Context
@@ -42,13 +42,14 @@ type ServiceConfig struct {
 	GethEndpoint      string
 }
 
-func NewEthereumService(ctx context.Context, cfg *ServiceConfig) (*Service, error) {
+func NewEthereumService(ctx context.Context, hub *Hub, cfg *ServiceConfig) (*Service, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	_ = cancel // govet fix for lost cancel. Cancel is handled in service.Stop()
 	s := &Service{
-		ctx:    ctx,
-		cancel: cancel,
-		cfg: cfg,
+		hub:        hub,
+		ctx:    	ctx,
+		cancel:		cancel,
+		cfg:		cfg,
 	}
 	return s, nil
 }
@@ -91,6 +92,9 @@ func (s *Service) run(done <-chan struct{}) {
 			log.Errorln("Error: ", err)
 		case header := <-headers:
 			log.Infoln("Block Number: ", header.Number.String())
+
+			// TODO: Send a []byte to the websocket 
+
 		}
 	}
 }
