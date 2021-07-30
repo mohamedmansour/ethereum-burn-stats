@@ -57,16 +57,20 @@ export const BigNumberText = forwardRef<BigNumberProps, "div">(
       let skipCommify = false
       const decimalPosition = value.indexOf(".");
       if (decimalPosition !== -1) {
-        const numberOfDecimals = value.length - decimalPosition;
+        const numberOfDecimals = value.length - decimalPosition - 1 /* remove dot */;
+        const decimalValue = value.substr(decimalPosition + 1);
         if (usdConversion && usdConversion > 1 && value.startsWith('0.0000')) {
             prettyValue = '< 0.0000'
             skipCommify = true
-        } else if (doNotShortenDecimals === undefined || !doNotShortenDecimals) {
-          // Only decimals.
-          if (decimalPosition === 1 && numberOfDecimals > 4) {
+        } else if (doNotShortenDecimals === undefined || !doNotShortenDecimals) { 
+          if (parseInt(decimalValue) === 0) {
+            prettyValue = value.substr(0, decimalPosition);
+          } else if (decimalPosition === 1 && numberOfDecimals > 4) {
             prettyValue = value.substr(0, decimalPosition + 5);
           } else if (numberOfDecimals > 2) {
             prettyValue = value.substr(0, decimalPosition + 3);
+          } else if (numberOfDecimals > 1) {
+            prettyValue = value.substr(0, decimalPosition + 2);
           }
         }
       }

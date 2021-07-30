@@ -16,7 +16,7 @@ export function CardTotalBurned({ totalBurned, amount }: { totalBurned: ethers.B
           Total Burned
         </Text>
       </HStack>
-      <BigNumberText number={totalBurned} usdConversion={amount} fontSize={24} textAlign="right" />
+      <BigNumberText number={totalBurned} usdConversion={amount} fontSize={24} textAlign="right" forced="ether" />
     </Card>
   );
 }
