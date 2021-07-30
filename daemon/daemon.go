@@ -2,15 +2,23 @@ package main
 
 import (
 	"context"
+	"flag"
 	"sync"
 
 	"github.com/sirupsen/logrus"
 )
 
+
+var (
+	GethEndpoint = flag.String("geth-endpoint", "", "Endpoint to geth, can be rpc or http")
+)
+
 var log = logrus.WithField("prefix", "main")
 
 func RunEthereumGateway(wg *sync.WaitGroup) {
-	service, err := NewEthereumService(context.Background())
+	service, err := NewEthereumService(context.Background(), &ServiceConfig{
+		GethEndpoint: *GethEndpoint,
+	})
 	if err != nil {
 		log.Errorln("Cannot initialize Service")
 	} else {
@@ -26,6 +34,8 @@ func RunWebSocketServer(wg *sync.WaitGroup) {
 	
 
 func main() {
+	flag.Parse()
+
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go RunEthereumGateway(&wg)

@@ -29,7 +29,7 @@ type RPCClient interface {
 type Service struct {
 	connected  bool
 	isRunning  bool
-	cfg        *Web3ServiceConfig
+	cfg        *ServiceConfig
 	ctx        context.Context
 	cancel     context.CancelFunc
 	httpClient RPCDataFetcher
@@ -38,17 +38,17 @@ type Service struct {
 }
 
 // Web3ServiceConfig defines a config struct for web3 service to use through its life cycle.
-type Web3ServiceConfig struct {
-	HttpEndpoints      string
-	Eth1HeaderReqLimit uint64
+type ServiceConfig struct {
+	GethEndpoint      string
 }
 
-func NewEthereumService(ctx context.Context) (*Service, error) {
+func NewEthereumService(ctx context.Context, cfg *ServiceConfig) (*Service, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	_ = cancel // govet fix for lost cancel. Cancel is handled in service.Stop()
 	s := &Service{
 		ctx:    ctx,
 		cancel: cancel,
+		cfg: cfg,
 	}
 	return s, nil
 }
@@ -127,7 +127,7 @@ func (s *Service) waitForConnection() {
 }
 
 func (s *Service) connectToPowChain() error {
-	httpClient, rpcClient, err := s.dialETH1Nodes("ws://localhost:8576")
+	httpClient, rpcClient, err := s.dialETH1Nodes(s.cfg.GethEndpoint)
 	if err != nil {
 		return errors.Wrap(err, "could not dial eth1 nodes")
 	}
