@@ -38,9 +38,9 @@ function BlockItem({ activated, block }: { activated: boolean, block: BurnedBloc
       </Td>
       <Td><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></Td>
       <Td textAlign="right"><BigNumberText number={block.basefee} /></Td>
-      <Td textAlign="right"><GasTarget gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></Td>
-      <Td textAlign="right"><GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></Td>
-      <Td textAlign="right"><GasUsedPercent gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></Td>
+      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasTarget gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></HStack></VStack></Td>
+      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></HStack></VStack></Td>
+      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsedPercent gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></HStack></VStack></Td>
       <Td textAlign="right"><BigNumberText number={block.rewards} /></Td>
       <Td textAlign="right">{block.transactions.length}</Td>
       <Td textAlign="right">{timeSince(block.timestamp as number)}</Td>

@@ -38,6 +38,7 @@ import {
 } from "../contexts/BlockExplorerContext";
 import { FirePit } from "../atoms/FirePit";
 import { BigNumberText } from "../organisms/BigNumberText";
+import { GasTarget, GasUsed, GasUsedPercent } from "../organisms/GasUsed";
 import { layoutConfig } from "../layoutConfig";
 import { TablePlus, ThPlus } from "../atoms/TablePlus";
 
@@ -119,6 +120,8 @@ export function EthBlockDetail() {
     </Button>
   ) : undefined;
 
+  const dtf = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'long', timeStyle: 'long' });
+  const activated = Number(id) > eth.connectedNetwork.genesis
   
   return (
     <Flex flex="1" direction="column" m={layoutConfig.gap} gridGap={layoutConfig.gap}>
@@ -192,7 +195,7 @@ export function EthBlockDetail() {
                 <Heading size="sm">Info</Heading>
                 <Grid templateColumns={["auto", "150px auto"]} gap={4} p="2">
                   <Text color="brand.secondaryText">Timestamp:</Text>
-                  <Text>{state.block.timestamp}</Text>
+                  <Text>{dtf.format(state.block.timestamp * 1000)}</Text>
                   <Text color="brand.secondaryText">Mined by:</Text>
                   <Text isTruncated color="orange" position="relative">
                     <Link
@@ -206,9 +209,9 @@ export function EthBlockDetail() {
                   <Text color="brand.secondaryText">Difficulty:</Text>
                   <Text>{utils.commify(state.block.difficulty)}</Text>
                   <Text color="brand.secondaryText">Gas used:</Text>
-                  <BigNumberText number={state.block.gasUsed} />
-                  <Text color="brand.secondaryText">Gas limit:</Text>
-                  <BigNumberText number={state.block.gasLimit} />
+                  <HStack><GasUsed gasUsed={state.block.gasUsed} gasLimit={state.block.gasLimit} activated={activated} /><Text>/</Text><GasUsedPercent gasUsed={state.block.gasUsed} gasLimit={state.block.gasLimit} activated={activated} /></HStack>
+                  <Text color="brand.secondaryText">Gas target:</Text>
+                  <GasTarget gasUsed={state.block.gasUsed} gasLimit={state.block.gasLimit} activated={activated} />
                   <Text color="brand.secondaryText">Extra data:</Text>
                   <Text wordBreak="break-all" title={'data: ' + state.block.extraData}>
                     {utils.toUtf8String(state.block.extraData, () => 0)}

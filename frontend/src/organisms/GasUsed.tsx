@@ -1,4 +1,4 @@
-import { HStack, VStack, Text } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
 import { ethers } from "ethers";
 
 export interface GasUsedProps {
@@ -14,11 +14,7 @@ export function GasTarget(props: GasUsedProps) {
   }
 
   return (
-    <VStack alignItems="flex-end">
-      <HStack>
         <Text size="sm">{gasTarget.toLocaleString(undefined, {'minimumFractionDigits': 0, 'maximumFractionDigits': 0})}</Text>
-      </HStack>
-    </VStack>
   )
 }
 
@@ -26,11 +22,7 @@ export function GasUsed(props: GasUsedProps) {
   const gasUsed = props.gasUsed.toNumber()
 
   return (
-    <VStack alignItems="flex-end">
-      <HStack>
         <Text size="sm">{gasUsed.toLocaleString(undefined, {'minimumFractionDigits': 0, 'maximumFractionDigits': 0})}</Text>
-      </HStack>
-    </VStack>
   )
 }
 
@@ -43,10 +35,6 @@ export function GasUsedPercent(props: GasUsedProps) {
   const percentage = gasUsed / gasTarget * 100
 
   return (
-    <VStack alignItems="flex-end">
-      <HStack>
         <Text size="sm">{percentage.toFixed(0)}%</Text>
-      </HStack>
-    </VStack>
   )
 }
