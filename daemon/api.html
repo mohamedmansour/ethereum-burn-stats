@@ -23,7 +23,12 @@ window.onload = function () {
         if (!msg.value) {
             return false;
         }
-        conn.send(msg.value);
+        conn.send(JSON.stringify({
+            type: 'message',
+            value: {
+                message: msg.value
+            }
+        }));
         msg.value = "";
         return false;
     };

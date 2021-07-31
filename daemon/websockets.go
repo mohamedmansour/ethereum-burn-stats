@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bytes"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -43,9 +43,22 @@ type Client struct {
 	send chan []byte
 }
 
-type TestResponse struct {
-	Message   string `json:"message"`
-	Note      string  `json:"note"`
+type CommandPayload struct {
+	Type string `json:"type"`
+	Value interface{} `json:"value"`
+}
+
+type MessageCommand struct {
+	Message string `json:"message"`
+}
+
+func (c *Client) unmarshal(raw interface{}, data interface{}) error {
+	jsonString, err := json.Marshal(raw)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(jsonString, &data)
+	return err
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -62,15 +75,26 @@ func (c *Client) readPump() {
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		_, message, err := c.conn.ReadMessage()
+		payload := CommandPayload {}
+		err := c.conn.ReadJSON(&payload)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
 			}
 			break
 		}
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.hub.broadcast <- message
+		
+		switch payload.Type {
+		case "message":
+			message := MessageCommand{}
+			err := c.unmarshal(payload.Value, &message)
+			if err != nil {
+				log.Printf("error: %v", err)
+				break;
+			}
+			log.Println(message.Message)
+		}
+		
 	}
 }
 
