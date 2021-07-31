@@ -92,9 +92,7 @@ func (s *Service) run(done <-chan struct{}) {
 			log.Errorln("Error: ", err)
 		case header := <-headers:
 			log.Infoln("Block Number: ", header.Number.String())
-
-			// TODO: Send a []byte to the websocket 
-
+			s.hub.broadcast <- []byte(header.Number.String())
 		}
 	}
 }
