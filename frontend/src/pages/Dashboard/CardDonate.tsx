@@ -1,15 +1,40 @@
 import {
   Text,
   Link,
+  Image,
   HStack, Box,
   Icon,
   ListItem,
-  UnorderedList
+  UnorderedList,
+  LinkOverlay,
+  LinkBox
 } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
 import { ImHeart } from "react-icons/im";
+import { VscHeart } from "react-icons/vsc";
 
 export function CardDonate() {
+  console.log(process.env.REACT_APP_SHOW_SERVER_SPONSOR)
+  if (process.env.REACT_APP_SHOW_SERVER_SPONSOR === "true") {
+    return (
+      <Card gridGap={4}>
+        <HStack pr={10}>
+          <Icon as={VscHeart} />
+          <Text fontSize="md" fontWeight="bold">
+            Server Sponsor
+          </Text>
+        </HStack>
+        <Box>
+          <LinkBox>
+            <LinkOverlay href="https://indexed.finance" target="_blank">
+              <Image src="/sponsor_indexed-financed.png" />
+            </LinkOverlay>
+            <Text fontSize={12} mt={4}>Thanks to <Link href="https://indexed.finance" target="_blank">https://indexed.finance</Link> who has offered to help support the server costs, so please check them out!</Text>
+          </LinkBox>
+        </Box>
+      </Card>
+    )
+  }
   return (
     <Card gridGap={4}>
       <HStack pr={10}>
