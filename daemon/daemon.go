@@ -9,7 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-
 var (
 	GethEndpoint = flag.String("geth-endpoint", "", "Endpoint to geth, can be rpc or http")
 	HttpAddress = flag.String("addr", ":8080", "HTTP service address")
@@ -30,7 +29,6 @@ func RunEthereumGateway(wg *sync.WaitGroup, hub *Hub) {
 }
 
 func RunWebSocketServer(wg *sync.WaitGroup, hub *Hub) {
-	http.HandleFunc("/", ServeHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		ServeWebSocket(hub, w, r)
 	})
@@ -41,20 +39,6 @@ func RunWebSocketServer(wg *sync.WaitGroup, hub *Hub) {
 	wg.Done()
 }
 	
-
-func ServeHome(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
-	if r.URL.Path != "/" {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	http.ServeFile(w, r, "api.html")
-}
-
 func main() {
 	flag.Parse()
 
