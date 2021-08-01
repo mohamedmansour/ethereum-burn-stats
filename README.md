@@ -1,14 +1,7 @@
 # Watch the Burn 🔥
 When EIP-1559 gets deployed, ETH will be burned in every block if transactions exist. This website will show you how much ETH got burned in total and per block.
 
-Currently it is running on Ethereum Dev Net, code named `Calaveras`, it is getting ready for London fork when EIP-1559 will be deployed. Regular testnets (Goerli) coming in a few weeks, target dates here: https://github.com/ethereum/eth1.0-specs/blob/master/network-upgrades/mainnet-upgrades/london.md
-
-### Upgrade Schedule
-
-| Network | Block      | Expected Date | Fork ID      | 
-|---------|------------|---------------|--------------|
-| Goerli  | `5062605`  | June 30, 2021 | `0xB8C6299D` |
-| Mainnet | `12965000` | Aug 4, 2021   | `0xB715077D` | 
+If you have a local Ethereum (we use geth) instance, you can update `REACT_APP_WEB3_URL` in  `.env.production.local` to your local ETH instance and run this offline! The instructions below show how to deploy it to a remote website under nginx.
 
 ## Donate towards Server Costs 💰
 The costs of running this experiment is pretty high since it requires a dev version of Geth to be up and running which requires lots of memory and cpu. The VM and SSD storage currently costs exactly $150/month USD. If you would like to help out with the costs, please reach out to me. 
