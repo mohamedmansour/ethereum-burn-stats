@@ -14,7 +14,6 @@ import { ImHeart } from "react-icons/im";
 import { VscHeart } from "react-icons/vsc";
 
 export function CardDonate() {
-  console.log(process.env.REACT_APP_SHOW_SERVER_SPONSOR)
   if (process.env.REACT_APP_SHOW_SERVER_SPONSOR === "true") {
     return (
       <Card gridGap={4}>

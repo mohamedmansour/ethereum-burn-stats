@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Flex, Heading, HStack, Input, propNames, useToast, } from "@chakra-ui/react";
+import { Badge, Box, Button, Flex, Heading, HStack, Input, useToast, } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Card } from "../atoms/Card";
 import { FirePit } from "../atoms/FirePit";

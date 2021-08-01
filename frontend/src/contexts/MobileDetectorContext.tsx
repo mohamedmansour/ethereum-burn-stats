@@ -24,7 +24,6 @@ const MobileDetectorProvider = ({
   useEffect(() => {
     const onResize = debounce(() => {
       setIsMobile(isMobileWidth())
-      console.log('mobile', isMobileWidth())
     }, 200)
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
