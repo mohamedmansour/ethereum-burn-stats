@@ -45,10 +45,15 @@ type Client struct {
 
 type CommandPayload struct {
 	Type string `json:"type"`
-	Value interface{} `json:"value"`
+	Data interface{} `json:"data"`
 }
 
 type MessageCommand struct {
+	Message string `json:"message"`
+}
+
+type MessageResponse struct {
+	Command string `json:"command"`
 	Message string `json:"message"`
 }
 
@@ -87,12 +92,21 @@ func (c *Client) readPump() {
 		switch payload.Type {
 		case "message":
 			message := MessageCommand{}
-			err := c.unmarshal(payload.Value, &message)
+			err := c.unmarshal(payload.Data, &message)
 			if err != nil {
 				log.Printf("error: %v", err)
 				break;
 			}
 			log.Println(message.Message)
+			bytes, err := json.Marshal(MessageResponse{
+				Command: "message",
+				Message: message.Message,
+			})
+			if err != nil {
+				log.Printf("error: %v", err)
+				break;
+			}
+			c.hub.broadcast <- bytes
 		}
 		
 	}

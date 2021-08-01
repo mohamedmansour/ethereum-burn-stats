@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
@@ -73,6 +74,11 @@ func (s *Service) Stop() error {
 	return nil
 }
 
+type NewHeadResponse struct {
+	Command string `json:"command"`
+	Number *big.Int `json:"number"`
+}
+
 // run subscribes to all the services for the ETH1.0 chain.
 func (s *Service) run(done <-chan struct{}) {
 	s.runError = nil
@@ -92,7 +98,15 @@ func (s *Service) run(done <-chan struct{}) {
 			log.Errorln("Error: ", err)
 		case header := <-headers:
 			log.Infoln("Block Number: ", header.Number.String())
-			s.hub.broadcast <- []byte(header.Number.String())
+			bytes, err := json.Marshal(NewHeadResponse{
+				Command: "newhead",
+				Number: header.Number,
+			})
+			if err != nil {
+				log.Printf("error: %v", err)
+				break;
+			}
+			s.hub.broadcast <- bytes
 		}
 	}
 }
