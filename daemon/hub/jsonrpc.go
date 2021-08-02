@@ -14,8 +14,9 @@ type jsonrpcMessage struct {
 	Version string          `json:"jsonrpc,omitempty"`
 	ID      json.RawMessage `json:"id,omitempty"`
 	Method  string          `json:"method,omitempty"`
-	Params  json.RawMessage `json:"params,omitempty"`
-	Error   *jsonError      `json:"error,omitempty"`
-	Result  interface{}     `json:"result,omitempty"`
+	// Params  interface{}     `json:"params,omitempty"`
+	Params json.RawMessage `json:"params,omitempty"`
+	Error  *jsonError      `json:"error,omitempty"`
+	Result interface{}     `json:"result,omitempty"`
 	// Result  json.RawMessage `json:"result,omitempty"`
 }

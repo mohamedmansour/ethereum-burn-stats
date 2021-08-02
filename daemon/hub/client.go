@@ -1,13 +1,11 @@
 package hub
 
 import (
-	"context"
+	"crypto/rand"
 	"encoding/json"
 	"math/big"
-	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/gorilla/websocket"
 )
 
@@ -30,11 +28,6 @@ var (
 	space   = []byte{' '}
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
 // Client is a middleman between the websocket connection and the hub.
 type client struct {
 	hub *hub
@@ -44,18 +37,39 @@ type client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+
+	subscriptions map[string]*big.Int
 }
 
 func NewClient(
 	hub *hub,
 	conn *websocket.Conn,
-	send chan []byte,
 ) *client {
 	return &client{
-		hub:  hub,
-		conn: conn,
-		send: send,
+		hub:           hub,
+		conn:          conn,
+		send:          make(chan []byte, 256),
+		subscriptions: map[string]*big.Int{},
 	}
+}
+
+func (c *client) isSubscribedTo(subscription string) *big.Int {
+	return c.subscriptions[subscription]
+}
+
+func (c *client) subscribeTo(subscription string) (*big.Int, error) {
+	max := new(big.Int)
+	max.Exp(big.NewInt(2), big.NewInt(130), nil).Sub(max, big.NewInt(1))
+
+	//Generate cryptographically strong pseudo-random between 0 - max
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return nil, err
+	}
+
+	c.subscriptions[subscription] = n
+
+	return n, nil
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -75,248 +89,53 @@ func (c *client) readPump() {
 	for {
 		message := jsonrpcMessage{}
 		err := c.conn.ReadJSON(&message)
-		log.Println(message)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v\n", err)
+				log.Errorf("error: %v\n", err)
 			}
 			break
 		}
 
-		log.Println(message.Method)
-		switch message.Method {
-		case "eth_chainId":
-			chainID, err := c.hub.ethClientHTTP.ChainID(context.Background())
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			hexChainID := toBlockNumArg(chainID)
-			log.Println(hexChainID)
-
-			// log.Println(log.Sprintf("0x%x", c.hub.chainID))
-			b, err := json.Marshal(jsonrpcMessage{
-				Version: message.Version,
-				ID:      message.ID,
-				Result:  &hexChainID,
-			})
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			select {
-			case c.send <- b:
-			default:
-				close(c.send)
-				delete(c.hub.clients, c)
-			}
-
-		case "eth_syncing":
-			// TODO: context should be passed through?
-			_, err := c.hub.ethClientHTTP.SyncProgress(context.Background())
-
-			syncing := err != nil
-
-			b, err := json.Marshal(jsonrpcMessage{
-				Version: message.Version,
-				ID:      message.ID,
-				Result:  &syncing,
-			})
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			select {
-			case c.send <- b:
-			default:
-				close(c.send)
-				delete(c.hub.clients, c)
-			}
-		case "eth_blockNumber":
-			// TODO: context should be passed through?
-			blockNumber, err := c.hub.ethClientHTTP.BlockNumber(context.Background())
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			blockNumberString := hexutil.EncodeUint64(blockNumber)
-
-			b, err := json.Marshal(jsonrpcMessage{
-				Version: message.Version,
-				ID:      message.ID,
-				Result:  &blockNumberString,
-			})
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			select {
-			case c.send <- b:
-			default:
-				close(c.send)
-				delete(c.hub.clients, c)
-			}
-		case "eth_getBlockByNumber":
-			b, err := message.Params.MarshalJSON()
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			type getBlockByNumberParams []interface{}
-			var params getBlockByNumberParams
-			err = json.Unmarshal(b, &params)
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			log.Println(params)
-			blockNumberInterface := params[0]
-			blockNumberString, ok := blockNumberInterface.(string)
-			if !ok {
-				log.Printf("could not cast: 'blockNumberInterface' %t to string\n", blockNumberInterface)
-				break
-			}
-			blockNumber := new(big.Int)
-			blockNumber, ok = blockNumber.SetString(strings.Replace(blockNumberString, "0x", "", -1), 16)
-			if !ok {
-				log.Println("SetString: error")
-				break
-			}
-			log.Println(blockNumber)
-
-			// block, err := c.hub.ethClientHTTP.BlockByNumber(context.Background(), blockNumber)
-			// if err != nil {
-			// 	log.Printf("error: %v\n", err)
-			// 	break
-			// }
-
-			var raw json.RawMessage
-			err = c.hub.gethRPCClientHTTP.CallContext(context.Background(), &raw, "eth_getBlockByNumber", toBlockNumArg(blockNumber), true)
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			var m map[string]interface{}
-			if err := json.Unmarshal(raw, &m); err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			transactions := []interface{}{}
-
-			transactionsBefore := m["transactions"].([]interface{})
-			for _, transactionBefore := range transactionsBefore {
-				transactionBeforeMap := transactionBefore.(map[string]interface{})
-
-				// log.Println(transactionBeforeMap)
-				// log.Println(reflect.TypeOf(transactionsBefore))
-				transactions = append(transactions, transactionBeforeMap["hash"])
-			}
-
-			m["transactions"] = transactions
-
-			b, err = json.Marshal(jsonrpcMessage{
-				Version: message.Version,
-				ID:      message.ID,
-				Result:  m,
-			})
-
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			select {
-			case c.send <- b:
-			default:
-				close(c.send)
-				delete(c.hub.clients, c)
-			}
-		case "debug_getBlockReward":
-			b, err := message.Params.MarshalJSON()
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			type getBlockByNumberParams []interface{}
-			var params getBlockByNumberParams
-			err = json.Unmarshal(b, &params)
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			// log.Println(params)
-			blockNumberInterface := params[0]
-			blockNumberString, ok := blockNumberInterface.(string)
-			if !ok {
-				log.Printf("could not cast: 'blockNumberInterface' %t to string\n", blockNumberInterface)
-				break
-			}
-			blockNumber := new(big.Int)
-			blockNumber, ok = blockNumber.SetString(strings.Replace(blockNumberString, "0x", "", -1), 16)
-			if !ok {
-				log.Println("SetString: error")
-				break
-			}
-			// log.Println(blockNumber)
-
-			// TODO: where do we get this from?
-			blockReward := "0x1bc16d674ec80000"
-
-			b, err = json.Marshal(jsonrpcMessage{
-				Version: message.Version,
-				ID:      message.ID,
-				Result:  &blockReward,
-			})
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			select {
-			case c.send <- b:
-			default:
-				close(c.send)
-				delete(c.hub.clients, c)
-			}
-		case "eth_gasPrice":
-			// TODO: is this the correct API?
-			suggestGasPrice, err := c.hub.ethClientHTTP.SuggestGasPrice(context.Background())
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-			log.Println(suggestGasPrice)
-
-			suggestGasPriceHex := "0x0" // log.Sprintf("0x%x", suggestGasPrice)
-
-			b, err := json.Marshal(jsonrpcMessage{
-				Version: message.Version,
-				ID:      message.ID,
-				Result:  &suggestGasPriceHex,
-			})
-			if err != nil {
-				log.Printf("error: %v\n", err)
-				break
-			}
-
-			select {
-			case c.send <- b:
-			default:
-				close(c.send)
-				delete(c.hub.clients, c)
-			}
+		b, err := json.Marshal(message)
+		if err != nil {
+			log.Error(err)
+			continue
 		}
+
+		log.Printf(string(b))
+
+		function, ok := c.hub.handlers[message.Method]
+		if !ok {
+			log.Errorf("Could not find handler for '%s'", message.Method)
+			continue
+		}
+
+		result, err := function(c, message)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		b, err = json.Marshal(
+			jsonrpcMessage{
+				Version: message.Version,
+				ID:      message.ID,
+				Result:  result,
+			},
+		)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		select {
+		case c.send <- b:
+		default:
+			close(c.send)
+			delete(c.hub.clients, c)
+		}
+
+		continue
 	}
 }
 
@@ -357,6 +176,8 @@ func (c *client) writePump() {
 			if err := w.Close(); err != nil {
 				return
 			}
+
+			log.Print(string(message))
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
@@ -364,17 +185,4 @@ func (c *client) writePump() {
 			}
 		}
 	}
-}
-
-func toBlockNumArg(number *big.Int) string {
-	if number == nil {
-		return "latest"
-	}
-
-	pending := big.NewInt(-1)
-	if number.Cmp(pending) == 0 {
-		return "pending"
-	}
-
-	return hexutil.EncodeBig(number)
 }

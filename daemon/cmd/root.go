@@ -9,6 +9,7 @@ import (
 
 func newRootCmd() *cobra.Command {
 	var addr string
+	var development bool
 	var gethEndpointHTTP string
 	var gethEndpointWebsocket string
 
@@ -29,19 +30,34 @@ func newRootCmd() *cobra.Command {
 				return fmt.Errorf("--geth-endpoint-websocket is required")
 			}
 
-			return root(addr, gethEndpointHTTP, gethEndpointWebsocket)
+			return root(
+				addr,
+				development,
+				gethEndpointHTTP,
+				gethEndpointWebsocket,
+			)
 		},
 	}
 
 	rootCmd.Flags().StringVar(&addr, "addr", ":8080", "HTTP service address")
+	rootCmd.Flags().BoolVar(&development, "development", false, "enable for development mode")
 	rootCmd.Flags().StringVar(&gethEndpointHTTP, "geth-endpoint-http", "", "Endpoint to geth for http")
 	rootCmd.Flags().StringVar(&gethEndpointWebsocket, "geth-endpoint-websocket", "", "Endpoint to geth for websocket")
 
 	return rootCmd
 }
 
-func root(addr string, gethEndpointHTTP string, gethEndpointWebsocket string) error {
-	hub, err := hub.New(gethEndpointHTTP, gethEndpointWebsocket)
+func root(
+	addr string,
+	development bool,
+	gethEndpointHTTP string,
+	gethEndpointWebsocket string,
+) error {
+	hub, err := hub.New(
+		development,
+		gethEndpointHTTP,
+		gethEndpointWebsocket,
+	)
 	if err != nil {
 		return err
 	}
