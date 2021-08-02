@@ -81,6 +81,20 @@ func (c *client) subscribeTo(subscription string) (*big.Int, error) {
 	return n, nil
 }
 
+func (c *client) unsubscribeTo(subscriptionID *big.Int) (*big.Int, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	for subscription, n := range c.subscriptions {
+		if n.Cmp(subscriptionID) == 0 {
+			delete(c.subscriptions, subscription)
+			break
+		}
+	}
+
+	return big.NewInt(0), nil
+}
+
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application

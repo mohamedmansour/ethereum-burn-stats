@@ -108,13 +108,15 @@ func New(
 	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
 		"debug_getBlockReward": handleFunc(rpcClient),
 
-		"eth_blockNumber":      handleFunc(rpcClient),
-		"eth_chainId":          handleFunc(rpcClient),
-		"eth_gasPrice":         handleFunc(rpcClient),
-		"eth_getBlockByNumber": handleFunc(rpcClient),
-		"eth_syncing":          handleFunc(rpcClient),
+		"eth_blockNumber":          handleFunc(rpcClient),
+		"eth_chainId":              handleFunc(rpcClient),
+		"eth_gasPrice":             handleFunc(rpcClient),
+		"eth_getBlockByNumber":     handleFunc(rpcClient),
+		"eth_getTransactionByHash": handleFunc(rpcClient),
+		"eth_syncing":              handleFunc(rpcClient),
 
-		"eth_subscribe": ethSubscribe(),
+		"eth_subscribe":   ethSubscribe(),
+		"eth_unsubscribe": ethUnsubscribe(),
 	}
 
 	return &hub{
@@ -282,6 +284,41 @@ func ethSubscribe() func(c *client, message jsonrpcMessage) (json.RawMessage, er
 		}
 
 		subscrptionID, err := c.subscribeTo(subscription)
+		if err != nil {
+			return nil, err
+		}
+
+		return json.RawMessage(fmt.Sprintf("\"%s\"", toBlockNumArg(subscrptionID))), nil
+	}
+}
+
+func ethUnsubscribe() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+		b, err := message.Params.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+
+		var params []interface{}
+		err = json.Unmarshal(b, &params)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(params) == 0 {
+			return nil, fmt.Errorf("no parameters provided %s", message.Method)
+		}
+
+		hexSubscriptionID, ok := params[0].(string)
+		if !ok {
+			return nil, fmt.Errorf("subscription name is not a string - %s", params[0])
+		}
+
+		subscriptionID, err := hexutil.DecodeBig(hexSubscriptionID)
+		if err != nil {
+			return nil, fmt.Errorf("subscription id was not a hex - %s", hexSubscriptionID)
+		}
+		subscrptionID, err := c.unsubscribeTo(subscriptionID)
 		if err != nil {
 			return nil, err
 		}
