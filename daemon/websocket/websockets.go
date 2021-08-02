@@ -1,11 +1,15 @@
 package websocket
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"log"
-	"net/http"
+	"math/big"
+	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/gorilla/websocket"
 )
 
@@ -44,20 +48,6 @@ type Client struct {
 	send chan []byte
 }
 
-type CommandPayload struct {
-	Type  string      `json:"type"`
-	Value interface{} `json:"value"`
-}
-
-type MessageCommand struct {
-	Message string `json:"message"`
-}
-
-type MessageResponse struct {
-	Command string `json:"command"`
-	Message string `json:"message"`
-}
-
 func (c *Client) unmarshal(raw interface{}, data interface{}) error {
 	jsonString, err := json.Marshal(raw)
 	if err != nil {
@@ -81,34 +71,339 @@ func (c *Client) readPump() {
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		payload := CommandPayload{}
-		err := c.conn.ReadJSON(&payload)
+		message := jsonrpcMessage{}
+		err := c.conn.ReadJSON(&message)
+		fmt.Println(message)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				log.Printf("error: %v\n", err)
 			}
 			break
 		}
 
-		switch payload.Type {
-		case "message":
-			message := MessageCommand{}
-			err := c.unmarshal(payload.Data, &message)
-			if err != nil {
-				log.Printf("error: %v", err)
-				break
-			}
-			log.Println(message.Message)
-			bytes, err := json.Marshal(MessageResponse{
-				Command: "message",
-				Message: message.Message,
+		fmt.Println(message.Method)
+		switch message.Method {
+		case "eth_chainId":
+			chainID := toBlockNumArg(&c.hub.chainID)
+			fmt.Println(chainID)
+
+			// fmt.Println(fmt.Sprintf("0x%x", c.hub.chainID))
+			b, err := json.Marshal(jsonrpcMessage{
+				Version: message.Version,
+				ID:      message.ID,
+				Result:  &chainID,
 			})
 			if err != nil {
-				log.Printf("error: %v", err)
+				log.Printf("error: %v\n", err)
 				break
 			}
-			c.hub.broadcast <- bytes
+
+			select {
+			case c.send <- b:
+			default:
+				close(c.send)
+				delete(c.hub.clients, c)
+			}
+
+		case "eth_syncing":
+			// TODO: context should be passed through?
+			_, err := c.hub.ethClient.SyncProgress(context.Background())
+
+			syncing := err != nil
+
+			b, err := json.Marshal(jsonrpcMessage{
+				Version: message.Version,
+				ID:      message.ID,
+				Result:  &syncing,
+			})
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			select {
+			case c.send <- b:
+			default:
+				close(c.send)
+				delete(c.hub.clients, c)
+			}
+		case "eth_blockNumber":
+			// TODO: context should be passed through?
+			blockNumber, err := c.hub.ethClient.BlockNumber(context.Background())
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			blockNumberString := hexutil.EncodeUint64(blockNumber)
+
+			b, err := json.Marshal(jsonrpcMessage{
+				Version: message.Version,
+				ID:      message.ID,
+				Result:  &blockNumberString,
+			})
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			select {
+			case c.send <- b:
+			default:
+				close(c.send)
+				delete(c.hub.clients, c)
+			}
+		case "eth_getBlockByNumber":
+			b, err := message.Params.MarshalJSON()
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			type getBlockByNumberParams []interface{}
+			var params getBlockByNumberParams
+			err = json.Unmarshal(b, &params)
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			fmt.Println(params)
+			blockNumberInterface := params[0]
+			blockNumberString, ok := blockNumberInterface.(string)
+			if !ok {
+				log.Printf("could not cast: 'blockNumberInterface' %t to string\n", blockNumberInterface)
+				break
+			}
+			blockNumber := new(big.Int)
+			blockNumber, ok = blockNumber.SetString(strings.Replace(blockNumberString, "0x", "", -1), 16)
+			if !ok {
+				fmt.Println("SetString: error")
+				break
+			}
+			fmt.Println(blockNumber)
+
+			// block, err := c.hub.ethClient.BlockByNumber(context.Background(), blockNumber)
+			// if err != nil {
+			// 	log.Printf("error: %v\n", err)
+			// 	break
+			// }
+
+			var raw json.RawMessage
+			err = c.hub.gethRPCClient.CallContext(context.Background(), &raw, "eth_getBlockByNumber", toBlockNumArg(blockNumber), true)
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			var m map[string]interface{}
+			if err := json.Unmarshal(raw, &m); err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			transactions := []interface{}{}
+
+			transactionsBefore := m["transactions"].([]interface{})
+			for _, transactionBefore := range transactionsBefore {
+				transactionBeforeMap := transactionBefore.(map[string]interface{})
+
+				// fmt.Println(transactionBeforeMap)
+				// fmt.Println(reflect.TypeOf(transactionsBefore))
+				transactions = append(transactions, transactionBeforeMap["hash"])
+			}
+
+			m["transactions"] = transactions
+
+			// b, err = json.Marshal(m)
+			// if err != nil {
+			// 	log.Printf("error: %v\n", err)
+			// 	break
+			// }
+
+			// type blockStruct struct {
+			// 	ParentHash  common.Hash      `json:"parentHash"       gencodec:"required"`
+			// 	UncleHash   common.Hash      `json:"sha3Uncles"       gencodec:"required"`
+			// 	Coinbase    common.Address   `json:"miner"            gencodec:"required"`
+			// 	Root        common.Hash      `json:"stateRoot"        gencodec:"required"`
+			// 	TxHash      common.Hash      `json:"transactionsRoot" gencodec:"required"`
+			// 	ReceiptHash common.Hash      `json:"receiptsRoot"     gencodec:"required"`
+			// 	Bloom       types.Bloom      `json:"logsBloom"        gencodec:"required"`
+			// 	Difficulty  common.Hash      `json:"difficulty"       gencodec:"required"`
+			// 	Number      common.Hash      `json:"number"           gencodec:"required"`
+			// 	GasLimit    string           `json:"gasLimit"         gencodec:"required"`
+			// 	GasUsed     string           `json:"gasUsed"          gencodec:"required"`
+			// 	Time        string           `json:"timestamp"        gencodec:"required"`
+			// 	Extra       []byte           `json:"extraData"        gencodec:"required"`
+			// 	MixDigest   common.Hash      `json:"mixHash"`
+			// 	Nonce       types.BlockNonce `json:"nonce"`
+
+			// 	Size            common.Hash   `json:"size"`
+			// 	TotalDifficulty common.Hash   `json:"totalDifficulty"`
+			// 	Transactions    []common.Hash `json:"transactions"`
+			// 	Uncles          []common.Hash `json:"uncles"`
+			// }
+
+			// header := block.Header()
+
+			// transactions := []common.Hash{}
+			// for _, t := range block.Transactions() {
+			// 	fmt.Println(t.Hash())
+			// 	transactions = append(transactions, t.Hash())
+			// }
+
+			// // var buf []byte
+			// // var tmp float64
+			// // tmp = block.Size()
+			// // n := math.Float64bits(tmp.(float64))
+			// // buf[0] = byte(n >> 56)
+			// // buf[1] = byte(n >> 48)
+			// // buf[2] = byte(n >> 40)
+			// // buf[3] = byte(n >> 32)
+			// // buf[4] = byte(n >> 24)
+			// // buf[5] = byte(n >> 16)
+			// // buf[6] = byte(n >> 8)
+			// // buf[7] = byte(n)
+
+			// // size := common.BytesToHash(buf)
+			// difficulty := common.BigToHash(block.Difficulty())
+
+			// type extHeader struct {
+			// 	types.Header
+			// 	Transactions []common.Hash `json:"transactions"`
+			// }
+
+			// bl := extHeader{
+			// 	types.Header{
+			// 		ParentHash:  header.ParentHash,
+			// 		UncleHash:   header.UncleHash,
+			// 		Coinbase:    header.Coinbase,
+			// 		Root:        header.Root,
+			// 		TxHash:      header.TxHash,
+			// 		ReceiptHash: header.ReceiptHash,
+			// 		Bloom:       header.Bloom,
+			// 		Difficulty:  header.Difficulty,
+			// 		Number:      header.Number,
+			// 		GasLimit:    header.GasLimit,
+			// 		GasUsed:     header.GasUsed,
+			// 		Time:        header.Time,
+			// 		Extra:       header.Extra,
+			// 		MixDigest:   header.MixDigest,
+			// 		Nonce:       header.Nonce,
+			// 	},
+
+			// 	// Size:            size,
+			// 	// TODO: wrong value
+			// 	// TotalDifficulty: difficulty,
+			// 	// Uncles:          []common.Hash{},
+			// }
+			// fmt.Println(bl)
+
+			b, err = json.Marshal(jsonrpcMessage{
+				Version: message.Version,
+				ID:      message.ID,
+				Result:  m,
+			})
+
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			select {
+			case c.send <- b:
+			default:
+				close(c.send)
+				delete(c.hub.clients, c)
+			}
+		case "debug_getBlockReward":
+			b, err := message.Params.MarshalJSON()
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			type getBlockByNumberParams []interface{}
+			var params getBlockByNumberParams
+			err = json.Unmarshal(b, &params)
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			// fmt.Println(params)
+			blockNumberInterface := params[0]
+			blockNumberString, ok := blockNumberInterface.(string)
+			if !ok {
+				log.Printf("could not cast: 'blockNumberInterface' %t to string\n", blockNumberInterface)
+				break
+			}
+			blockNumber := new(big.Int)
+			blockNumber, ok = blockNumber.SetString(strings.Replace(blockNumberString, "0x", "", -1), 16)
+			if !ok {
+				fmt.Println("SetString: error")
+				break
+			}
+			// fmt.Println(blockNumber)
+
+			// TODO: where do we get this from?
+			blockReward := "0x1bc16d674ec80000"
+
+			b, err = json.Marshal(jsonrpcMessage{
+				Version: message.Version,
+				ID:      message.ID,
+				Result:  &blockReward,
+			})
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			select {
+			case c.send <- b:
+			default:
+				close(c.send)
+				delete(c.hub.clients, c)
+			}
+		case "eth_gasPrice":
+			// TODO: is this the correct API?
+			suggestGasPrice, err := c.hub.ethClient.SuggestGasPrice(context.Background())
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+			fmt.Println(suggestGasPrice)
+
+			suggestGasPriceHex := "0x0" // fmt.Sprintf("0x%x", suggestGasPrice)
+
+			b, err := json.Marshal(jsonrpcMessage{
+				Version: message.Version,
+				ID:      message.ID,
+				Result:  &suggestGasPriceHex,
+			})
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
+
+			select {
+			case c.send <- b:
+			default:
+				close(c.send)
+				delete(c.hub.clients, c)
+			}
 		}
+
+		// switch payload.Type {
+		// case "message":
+		// 	message := MessageCommand{}
+		// 	err := c.unmarshal(payload.Value, &message)
+		// 	if err != nil {
+		// 		log.Printf("error: %v", err)
+		// 		break
+		// 	}
+		// 	log.Println(message.Message)
+		// }
 
 	}
 }
@@ -159,28 +454,13 @@ func (c *Client) writePump() {
 	}
 }
 
-func New(httpAddress string, hub *Hub) {
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		ServeWebSocket(hub, w, r)
-	})
-	err := http.ListenAndServe(httpAddress, nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+func toBlockNumArg(number *big.Int) string {
+	if number == nil {
+		return "latest"
 	}
-}
-
-// ServeWebSocket handles websocket requests from the peer.
-func ServeWebSocket(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
+	pending := big.NewInt(-1)
+	if number.Cmp(pending) == 0 {
+		return "pending"
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
-	client.hub.register <- client
-
-	// Allow collection of memory referenced by the caller by doing all work in
-	// new goroutines.
-	go client.writePump()
-	go client.readPump()
+	return hexutil.EncodeBig(number)
 }
