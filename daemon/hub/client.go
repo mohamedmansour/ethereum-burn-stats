@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"math/big"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -30,6 +31,8 @@ var (
 
 // Client is a middleman between the websocket connection and the hub.
 type client struct {
+	mu sync.Mutex
+
 	hub *hub
 
 	// The websocket connection.
@@ -54,6 +57,9 @@ func NewClient(
 }
 
 func (c *client) isSubscribedTo(subscription string) *big.Int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	return c.subscriptions[subscription]
 }
 
@@ -66,6 +72,9 @@ func (c *client) subscribeTo(subscription string) (*big.Int, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	c.subscriptions[subscription] = n
 

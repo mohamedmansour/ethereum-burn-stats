@@ -17,7 +17,8 @@ import (
 var log = logrus.StandardLogger()
 
 var allowedEthSubscriptions = map[string]bool{
-	"newHeads": true,
+	"newHeads":              true,
+	"internal_clientsCount": true,
 }
 
 type Hub interface {
@@ -41,7 +42,7 @@ type hub struct {
 	// Unregister requests from clients.
 	unregister chan *client
 
-	handlers map[string]func(c *client, message jsonrpcMessage) (interface{}, error)
+	handlers map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error)
 }
 
 func New(
@@ -60,12 +61,21 @@ func New(
 	}
 
 	subscription := make(chan map[string]interface{})
+	clients := make(map[*client]bool)
 
-	gethRPCClientHTTP, err := gethRPC.DialHTTPWithClient(gethEndpointHTTP, new(http.Client))
-	if err != nil {
-		return nil, err
+	// gethRPCClientHTTP, err := gethRPC.DialHTTPWithClient(gethEndpointHTTP, new(http.Client))
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	log.Infof("Initialize rpcClientHttp '%s'", gethEndpointHTTP)
+
+	rpcClient := &rpcClient{
+		endpoint:   gethEndpointHTTP,
+		httpClient: new(http.Client),
 	}
 
+	log.Infof("Initialize gethRPCClientWebsocket '%s'", gethEndpointWebsocket)
 	gethRPCClientWebsocket, err := gethRPC.Dial(gethEndpointWebsocket)
 	if err != nil {
 		return nil, err
@@ -85,22 +95,24 @@ func New(
 			case err := <-sub.Err():
 				log.Errorln("Error: ", err)
 			case header := <-headers:
-				log.Infoln("New block: ", header.Number)
+				clientsCount := len(clients)
+				log.Infof("new block: %v, clients: %d", header.Number, clientsCount)
 				subscription <- map[string]interface{}{
-					"newHeads": header,
+					"newHeads":              header,
+					"internal_clientsCount": clientsCount,
 				}
 			}
 		}
 	}()
 
-	handlers := map[string]func(c *client, message jsonrpcMessage) (interface{}, error){
-		"debug_getBlockReward": handleFunc(gethRPCClientHTTP),
+	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
+		"debug_getBlockReward": handleFunc(rpcClient),
 
-		"eth_blockNumber":      handleFunc(gethRPCClientHTTP),
-		"eth_chainId":          handleFunc(gethRPCClientHTTP),
-		"eth_gasPrice":         handleFunc(gethRPCClientHTTP),
-		"eth_getBlockByNumber": handleFunc(gethRPCClientHTTP),
-		"eth_syncing":          handleFunc(gethRPCClientHTTP),
+		"eth_blockNumber":      handleFunc(rpcClient),
+		"eth_chainId":          handleFunc(rpcClient),
+		"eth_gasPrice":         handleFunc(rpcClient),
+		"eth_getBlockByNumber": handleFunc(rpcClient),
+		"eth_syncing":          handleFunc(rpcClient),
 
 		"eth_subscribe": ethSubscribe(),
 	}
@@ -111,7 +123,7 @@ func New(
 		subscription: subscription,
 		register:     make(chan *client),
 		unregister:   make(chan *client),
-		clients:      make(map[*client]bool),
+		clients:      clients,
 
 		handlers: handlers,
 	}, nil
@@ -216,9 +228,9 @@ func (h *hub) serveWebSocket(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleFunc(
-	gethRPCClientHTTP *gethRPC.Client,
-) func(c *client, message jsonrpcMessage) (interface{}, error) {
-	return func(c *client, message jsonrpcMessage) (interface{}, error) {
+	rpcClient *rpcClient,
+) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
 			return nil, err
@@ -230,8 +242,11 @@ func handleFunc(
 			return nil, err
 		}
 
-		var raw json.RawMessage
-		err = gethRPCClientHTTP.CallContext(context.Background(), &raw, message.Method, params...)
+		raw, err := rpcClient.CallContext(
+			message.Version,
+			message.Method,
+			message.Params,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -240,8 +255,8 @@ func handleFunc(
 	}
 }
 
-func ethSubscribe() func(c *client, message jsonrpcMessage) (interface{}, error) {
-	return func(c *client, message jsonrpcMessage) (interface{}, error) {
+func ethSubscribe() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
 			return nil, err
@@ -271,7 +286,7 @@ func ethSubscribe() func(c *client, message jsonrpcMessage) (interface{}, error)
 			return nil, err
 		}
 
-		return toBlockNumArg(subscrptionID), nil
+		return json.RawMessage(fmt.Sprintf("\"%s\"", toBlockNumArg(subscrptionID))), nil
 	}
 }
 
