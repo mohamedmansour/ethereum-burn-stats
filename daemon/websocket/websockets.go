@@ -1,7 +1,8 @@
-package main
+package websocket
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -44,8 +45,8 @@ type Client struct {
 }
 
 type CommandPayload struct {
-	Type string `json:"type"`
-	Data interface{} `json:"data"`
+	Type  string      `json:"type"`
+	Value interface{} `json:"value"`
 }
 
 type MessageCommand struct {
@@ -80,7 +81,7 @@ func (c *Client) readPump() {
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		payload := CommandPayload {}
+		payload := CommandPayload{}
 		err := c.conn.ReadJSON(&payload)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
@@ -88,14 +89,14 @@ func (c *Client) readPump() {
 			}
 			break
 		}
-		
+
 		switch payload.Type {
 		case "message":
 			message := MessageCommand{}
 			err := c.unmarshal(payload.Data, &message)
 			if err != nil {
 				log.Printf("error: %v", err)
-				break;
+				break
 			}
 			log.Println(message.Message)
 			bytes, err := json.Marshal(MessageResponse{
@@ -104,11 +105,11 @@ func (c *Client) readPump() {
 			})
 			if err != nil {
 				log.Printf("error: %v", err)
-				break;
+				break
 			}
 			c.hub.broadcast <- bytes
 		}
-		
+
 	}
 }
 
@@ -155,6 +156,16 @@ func (c *Client) writePump() {
 				return
 			}
 		}
+	}
+}
+
+func New(httpAddress string, hub *Hub) {
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		ServeWebSocket(hub, w, r)
+	})
+	err := http.ListenAndServe(httpAddress, nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
 	}
 }
 

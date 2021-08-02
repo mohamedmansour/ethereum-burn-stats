@@ -1,4 +1,4 @@
-package main
+package ethereumservice
 
 import (
 	"context"
@@ -11,7 +11,9 @@ import (
 	gethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	gethRPC "github.com/ethereum/go-ethereum/rpc"
+	"github.com/mohamedmansour/ethereum-burn-stats/daemon/websocket"
 	"github.com/pkg/errors"
+	"github.com/prometheus/common/log"
 )
 
 // RPCDataFetcher defines a subset of methods conformed to by ETH1.0 RPC clients for
@@ -28,7 +30,7 @@ type RPCClient interface {
 }
 
 type Service struct {
-	hub  	   *Hub
+	hub        *websocket.Hub
 	isRunning  bool
 	cfg        *ServiceConfig
 	ctx        context.Context
@@ -40,17 +42,17 @@ type Service struct {
 
 // Web3ServiceConfig defines a config struct for web3 service to use through its life cycle.
 type ServiceConfig struct {
-	GethEndpoint      string
+	GethEndpoint string
 }
 
-func NewEthereumService(ctx context.Context, hub *Hub, cfg *ServiceConfig) (*Service, error) {
+func New(ctx context.Context, hub *websocket.Hub, cfg *ServiceConfig) (*Service, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	_ = cancel // govet fix for lost cancel. Cancel is handled in service.Stop()
 	s := &Service{
-		hub:        hub,
-		ctx:    	ctx,
-		cancel:		cancel,
-		cfg:		cfg,
+		hub:    hub,
+		ctx:    ctx,
+		cancel: cancel,
+		cfg:    cfg,
 	}
 	return s, nil
 }
@@ -75,8 +77,8 @@ func (s *Service) Stop() error {
 }
 
 type NewHeadResponse struct {
-	Command string `json:"command"`
-	Number *big.Int `json:"number"`
+	Command string   `json:"command"`
+	Number  *big.Int `json:"number"`
 }
 
 // run subscribes to all the services for the ETH1.0 chain.
@@ -98,15 +100,7 @@ func (s *Service) run(done <-chan struct{}) {
 			log.Errorln("Error: ", err)
 		case header := <-headers:
 			log.Infoln("Block Number: ", header.Number.String())
-			bytes, err := json.Marshal(NewHeadResponse{
-				Command: "newhead",
-				Number: header.Number,
-			})
-			if err != nil {
-				log.Printf("error: %v", err)
-				break;
-			}
-			s.hub.broadcast <- bytes
+			s.hub.Broadcast <- []byte(header.Number.String())
 		}
 	}
 }
