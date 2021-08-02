@@ -1,46 +1,47 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/mohamedmansour/ethereum-burn-stats/daemon/websocket"
-	"github.com/sirupsen/logrus"
+	"github.com/mohamedmansour/ethereum-burn-stats/daemon/hub"
 	"github.com/spf13/cobra"
 )
 
-var log = logrus.WithField("prefix", "main")
-
 func newRootCmd() *cobra.Command {
-	var gethEndpoint string
 	var addr string
+	var gethEndpointHTTP string
+	var gethEndpointWebsocket string
 
 	rootCmd := &cobra.Command{
-		Use:   "ethereum-burn-stats",
+		// TODO:
+		Use: "ethereum-burn-stats",
+		// TODO:
 		Short: "short",
 		Long:  `long`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if gethEndpoint == "" {
+			if gethEndpointHTTP == "" {
 				cmd.Help()
-				return fmt.Errorf("--geth-endpoint is required")
+				return fmt.Errorf("--geth-endpoint-http is required")
 			}
 
-			return root(gethEndpoint, addr)
+			if gethEndpointWebsocket == "" {
+				cmd.Help()
+				return fmt.Errorf("--geth-endpoint-websocket is required")
+			}
+
+			return root(addr, gethEndpointHTTP, gethEndpointWebsocket)
 		},
 	}
 
-	rootCmd.Flags().StringVar(&gethEndpoint, "geth-endpoint", "", "Endpoint to geth, can be rpc or http")
 	rootCmd.Flags().StringVar(&addr, "addr", ":8080", "HTTP service address")
+	rootCmd.Flags().StringVar(&gethEndpointHTTP, "geth-endpoint-http", "", "Endpoint to geth for http")
+	rootCmd.Flags().StringVar(&gethEndpointWebsocket, "geth-endpoint-websocket", "", "Endpoint to geth for websocket")
 
 	return rootCmd
 }
 
-func root(gethEndpoint string, addr string) error {
-	// var wg sync.WaitGroup
-
-	ctx := context.Background()
-
-	hub, err := websocket.NewHub(ctx, gethEndpoint)
+func root(addr string, gethEndpointHTTP string, gethEndpointWebsocket string) error {
+	hub, err := hub.New(gethEndpointHTTP, gethEndpointWebsocket)
 	if err != nil {
 		return err
 	}
@@ -49,39 +50,6 @@ func root(gethEndpoint string, addr string) error {
 	if err != nil {
 		return err
 	}
-
-	// wg.Add(3)
-
-	// go func(gethEndpoint string, hub *websocket.Hub, wg *sync.WaitGroup) {
-	// 	defer wg.Done()
-
-	// 	service, err := ethereumservice.New(
-	// 		context.Background(),
-	// 		hub,
-	// 		&ethereumservice.ServiceConfig{
-	// 			GethEndpoint: gethEndpoint,
-	// 		},
-	// 	)
-	// 	if err != nil {
-	// 		log.Error(err)
-	// 		return
-	// 	}
-
-	// 	service.Start()
-	// }(gethEndpoint, hub, &wg)
-
-	// go func(wg *sync.WaitGroup) {
-	// 	defer wg.Done()
-	// 	hub.Run()
-	// }(&wg)
-
-	// go func(addr string, hub *websocket.Hub, wg *sync.WaitGroup) {
-	// 	defer wg.Done()
-
-	// 	websocket.New(addr, hub)
-	// }(addr, hub, &wg)
-
-	// wg.Wait()
 
 	return nil
 }

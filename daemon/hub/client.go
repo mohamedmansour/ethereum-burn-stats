@@ -1,10 +1,8 @@
-package websocket
+package hub
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"log"
 	"math/big"
 	"strings"
 	"time"
@@ -38,8 +36,8 @@ var upgrader = websocket.Upgrader{
 }
 
 // Client is a middleman between the websocket connection and the hub.
-type Client struct {
-	hub *Hub
+type client struct {
+	hub *hub
 
 	// The websocket connection.
 	conn *websocket.Conn
@@ -48,13 +46,16 @@ type Client struct {
 	send chan []byte
 }
 
-func (c *Client) unmarshal(raw interface{}, data interface{}) error {
-	jsonString, err := json.Marshal(raw)
-	if err != nil {
-		return err
+func NewClient(
+	hub *hub,
+	conn *websocket.Conn,
+	send chan []byte,
+) *client {
+	return &client{
+		hub:  hub,
+		conn: conn,
+		send: send,
 	}
-	err = json.Unmarshal(jsonString, &data)
-	return err
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -62,7 +63,7 @@ func (c *Client) unmarshal(raw interface{}, data interface{}) error {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *Client) readPump() {
+func (c *client) readPump() {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -70,10 +71,11 @@ func (c *Client) readPump() {
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+
 	for {
 		message := jsonrpcMessage{}
 		err := c.conn.ReadJSON(&message)
-		fmt.Println(message)
+		log.Println(message)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v\n", err)
@@ -81,17 +83,23 @@ func (c *Client) readPump() {
 			break
 		}
 
-		fmt.Println(message.Method)
+		log.Println(message.Method)
 		switch message.Method {
 		case "eth_chainId":
-			chainID := toBlockNumArg(&c.hub.chainID)
-			fmt.Println(chainID)
+			chainID, err := c.hub.ethClientHTTP.ChainID(context.Background())
+			if err != nil {
+				log.Printf("error: %v\n", err)
+				break
+			}
 
-			// fmt.Println(fmt.Sprintf("0x%x", c.hub.chainID))
+			hexChainID := toBlockNumArg(chainID)
+			log.Println(hexChainID)
+
+			// log.Println(log.Sprintf("0x%x", c.hub.chainID))
 			b, err := json.Marshal(jsonrpcMessage{
 				Version: message.Version,
 				ID:      message.ID,
-				Result:  &chainID,
+				Result:  &hexChainID,
 			})
 			if err != nil {
 				log.Printf("error: %v\n", err)
@@ -107,7 +115,7 @@ func (c *Client) readPump() {
 
 		case "eth_syncing":
 			// TODO: context should be passed through?
-			_, err := c.hub.ethClient.SyncProgress(context.Background())
+			_, err := c.hub.ethClientHTTP.SyncProgress(context.Background())
 
 			syncing := err != nil
 
@@ -129,7 +137,7 @@ func (c *Client) readPump() {
 			}
 		case "eth_blockNumber":
 			// TODO: context should be passed through?
-			blockNumber, err := c.hub.ethClient.BlockNumber(context.Background())
+			blockNumber, err := c.hub.ethClientHTTP.BlockNumber(context.Background())
 			if err != nil {
 				log.Printf("error: %v\n", err)
 				break
@@ -168,7 +176,7 @@ func (c *Client) readPump() {
 				break
 			}
 
-			fmt.Println(params)
+			log.Println(params)
 			blockNumberInterface := params[0]
 			blockNumberString, ok := blockNumberInterface.(string)
 			if !ok {
@@ -178,19 +186,19 @@ func (c *Client) readPump() {
 			blockNumber := new(big.Int)
 			blockNumber, ok = blockNumber.SetString(strings.Replace(blockNumberString, "0x", "", -1), 16)
 			if !ok {
-				fmt.Println("SetString: error")
+				log.Println("SetString: error")
 				break
 			}
-			fmt.Println(blockNumber)
+			log.Println(blockNumber)
 
-			// block, err := c.hub.ethClient.BlockByNumber(context.Background(), blockNumber)
+			// block, err := c.hub.ethClientHTTP.BlockByNumber(context.Background(), blockNumber)
 			// if err != nil {
 			// 	log.Printf("error: %v\n", err)
 			// 	break
 			// }
 
 			var raw json.RawMessage
-			err = c.hub.gethRPCClient.CallContext(context.Background(), &raw, "eth_getBlockByNumber", toBlockNumArg(blockNumber), true)
+			err = c.hub.gethRPCClientHTTP.CallContext(context.Background(), &raw, "eth_getBlockByNumber", toBlockNumArg(blockNumber), true)
 			if err != nil {
 				log.Printf("error: %v\n", err)
 				break
@@ -208,96 +216,12 @@ func (c *Client) readPump() {
 			for _, transactionBefore := range transactionsBefore {
 				transactionBeforeMap := transactionBefore.(map[string]interface{})
 
-				// fmt.Println(transactionBeforeMap)
-				// fmt.Println(reflect.TypeOf(transactionsBefore))
+				// log.Println(transactionBeforeMap)
+				// log.Println(reflect.TypeOf(transactionsBefore))
 				transactions = append(transactions, transactionBeforeMap["hash"])
 			}
 
 			m["transactions"] = transactions
-
-			// b, err = json.Marshal(m)
-			// if err != nil {
-			// 	log.Printf("error: %v\n", err)
-			// 	break
-			// }
-
-			// type blockStruct struct {
-			// 	ParentHash  common.Hash      `json:"parentHash"       gencodec:"required"`
-			// 	UncleHash   common.Hash      `json:"sha3Uncles"       gencodec:"required"`
-			// 	Coinbase    common.Address   `json:"miner"            gencodec:"required"`
-			// 	Root        common.Hash      `json:"stateRoot"        gencodec:"required"`
-			// 	TxHash      common.Hash      `json:"transactionsRoot" gencodec:"required"`
-			// 	ReceiptHash common.Hash      `json:"receiptsRoot"     gencodec:"required"`
-			// 	Bloom       types.Bloom      `json:"logsBloom"        gencodec:"required"`
-			// 	Difficulty  common.Hash      `json:"difficulty"       gencodec:"required"`
-			// 	Number      common.Hash      `json:"number"           gencodec:"required"`
-			// 	GasLimit    string           `json:"gasLimit"         gencodec:"required"`
-			// 	GasUsed     string           `json:"gasUsed"          gencodec:"required"`
-			// 	Time        string           `json:"timestamp"        gencodec:"required"`
-			// 	Extra       []byte           `json:"extraData"        gencodec:"required"`
-			// 	MixDigest   common.Hash      `json:"mixHash"`
-			// 	Nonce       types.BlockNonce `json:"nonce"`
-
-			// 	Size            common.Hash   `json:"size"`
-			// 	TotalDifficulty common.Hash   `json:"totalDifficulty"`
-			// 	Transactions    []common.Hash `json:"transactions"`
-			// 	Uncles          []common.Hash `json:"uncles"`
-			// }
-
-			// header := block.Header()
-
-			// transactions := []common.Hash{}
-			// for _, t := range block.Transactions() {
-			// 	fmt.Println(t.Hash())
-			// 	transactions = append(transactions, t.Hash())
-			// }
-
-			// // var buf []byte
-			// // var tmp float64
-			// // tmp = block.Size()
-			// // n := math.Float64bits(tmp.(float64))
-			// // buf[0] = byte(n >> 56)
-			// // buf[1] = byte(n >> 48)
-			// // buf[2] = byte(n >> 40)
-			// // buf[3] = byte(n >> 32)
-			// // buf[4] = byte(n >> 24)
-			// // buf[5] = byte(n >> 16)
-			// // buf[6] = byte(n >> 8)
-			// // buf[7] = byte(n)
-
-			// // size := common.BytesToHash(buf)
-			// difficulty := common.BigToHash(block.Difficulty())
-
-			// type extHeader struct {
-			// 	types.Header
-			// 	Transactions []common.Hash `json:"transactions"`
-			// }
-
-			// bl := extHeader{
-			// 	types.Header{
-			// 		ParentHash:  header.ParentHash,
-			// 		UncleHash:   header.UncleHash,
-			// 		Coinbase:    header.Coinbase,
-			// 		Root:        header.Root,
-			// 		TxHash:      header.TxHash,
-			// 		ReceiptHash: header.ReceiptHash,
-			// 		Bloom:       header.Bloom,
-			// 		Difficulty:  header.Difficulty,
-			// 		Number:      header.Number,
-			// 		GasLimit:    header.GasLimit,
-			// 		GasUsed:     header.GasUsed,
-			// 		Time:        header.Time,
-			// 		Extra:       header.Extra,
-			// 		MixDigest:   header.MixDigest,
-			// 		Nonce:       header.Nonce,
-			// 	},
-
-			// 	// Size:            size,
-			// 	// TODO: wrong value
-			// 	// TotalDifficulty: difficulty,
-			// 	// Uncles:          []common.Hash{},
-			// }
-			// fmt.Println(bl)
 
 			b, err = json.Marshal(jsonrpcMessage{
 				Version: message.Version,
@@ -331,7 +255,7 @@ func (c *Client) readPump() {
 				break
 			}
 
-			// fmt.Println(params)
+			// log.Println(params)
 			blockNumberInterface := params[0]
 			blockNumberString, ok := blockNumberInterface.(string)
 			if !ok {
@@ -341,10 +265,10 @@ func (c *Client) readPump() {
 			blockNumber := new(big.Int)
 			blockNumber, ok = blockNumber.SetString(strings.Replace(blockNumberString, "0x", "", -1), 16)
 			if !ok {
-				fmt.Println("SetString: error")
+				log.Println("SetString: error")
 				break
 			}
-			// fmt.Println(blockNumber)
+			// log.Println(blockNumber)
 
 			// TODO: where do we get this from?
 			blockReward := "0x1bc16d674ec80000"
@@ -367,14 +291,14 @@ func (c *Client) readPump() {
 			}
 		case "eth_gasPrice":
 			// TODO: is this the correct API?
-			suggestGasPrice, err := c.hub.ethClient.SuggestGasPrice(context.Background())
+			suggestGasPrice, err := c.hub.ethClientHTTP.SuggestGasPrice(context.Background())
 			if err != nil {
 				log.Printf("error: %v\n", err)
 				break
 			}
-			fmt.Println(suggestGasPrice)
+			log.Println(suggestGasPrice)
 
-			suggestGasPriceHex := "0x0" // fmt.Sprintf("0x%x", suggestGasPrice)
+			suggestGasPriceHex := "0x0" // log.Sprintf("0x%x", suggestGasPrice)
 
 			b, err := json.Marshal(jsonrpcMessage{
 				Version: message.Version,
@@ -393,18 +317,6 @@ func (c *Client) readPump() {
 				delete(c.hub.clients, c)
 			}
 		}
-
-		// switch payload.Type {
-		// case "message":
-		// 	message := MessageCommand{}
-		// 	err := c.unmarshal(payload.Value, &message)
-		// 	if err != nil {
-		// 		log.Printf("error: %v", err)
-		// 		break
-		// 	}
-		// 	log.Println(message.Message)
-		// }
-
 	}
 }
 
@@ -413,7 +325,7 @@ func (c *Client) readPump() {
 // A goroutine running writePump is started for each connection. The
 // application ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
-func (c *Client) writePump() {
+func (c *client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
@@ -458,9 +370,11 @@ func toBlockNumArg(number *big.Int) string {
 	if number == nil {
 		return "latest"
 	}
+
 	pending := big.NewInt(-1)
 	if number.Cmp(pending) == 0 {
 		return "pending"
 	}
+
 	return hexutil.EncodeBig(number)
 }
