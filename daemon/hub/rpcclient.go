@@ -20,20 +20,25 @@ type HttpClient interface {
 func (c *rpcClient) CallContext(
 	version string,
 	method string,
-	params json.RawMessage,
+	args ...interface{},
 ) (json.RawMessage, error) {
 
 	requestMethod := "POST"
 	requestURL := c.endpoint
 
+	b, err := json.Marshal(args)
+	if err != nil {
+		return nil, err
+	}
+
 	data := jsonrpcMessage{
 		Version: version,
 		ID:      json.RawMessage("0"),
 		Method:  method,
-		Params:  params,
+		Params:  json.RawMessage(b),
 	}
 
-	b, err := json.Marshal(data)
+	b, err = json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
