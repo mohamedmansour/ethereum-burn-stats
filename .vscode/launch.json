@@ -18,7 +18,10 @@
             "mode": "auto",
             "program": "${workspaceFolder}/daemon",
             "args": [
-               "--geth-endpoint=http://localhost:5946"
+                "--geth-endpoint-http=http://localhost:8557",
+                "--geth-endpoint-websocket=ws://localhost:8556",
+                "--db-path=${workspaceFolder}/watchtheburn.db",
+                "--development",
             ]
         }
     ]

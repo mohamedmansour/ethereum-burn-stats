@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	gethRPC "github.com/ethereum/go-ethereum/rpc"
 	"github.com/gorilla/websocket"
+	"github.com/mohamedmansour/ethereum-burn-stats/daemon/sql"
 	"github.com/sirupsen/logrus"
 )
 
@@ -46,12 +47,15 @@ type hub struct {
 	unregister chan *client
 
 	handlers map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error)
+	
+	db *sql.Database
 }
 
 func New(
 	development bool,
 	gethEndpointHTTP string,
 	gethEndpointWebsocket string,
+	dbPath string,
 ) (Hub, error) {
 	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -107,6 +111,11 @@ func New(
 		return nil, err
 	}
 
+	db, err := sql.ConnectDatabase(dbPath)
+	if err != nil {
+		return nil, err
+	}
+
 	go func(latestBlock *LatestBlock) {
 		for {
 			select {
@@ -117,6 +126,7 @@ func New(
 				clientsCount := len(clients)
 				log.Infof("new block: %v, burned: %d, tips: %d, clients: %d", header.Number, blockBurned, blockTips, clientsCount)
 				latestBlock.updateBlockNumber(header.Number)
+				db.UpdateBlock(header, blockBurned, blockTips)
 				subscription <- map[string]interface{}{
 					"newHeads":              header,
 					"internal_clientsCount": clientsCount,

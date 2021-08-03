@@ -1,0 +1,22 @@
+{
+	"extensions": {
+		"recommendations": [
+			"golang.go",
+			"alexcvzz.vscode-sqlite"
+		]
+	},
+	"folders": [
+		{
+			"path": "daemon"
+		},
+		{
+			"path": "frontend"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		
+	}
+}

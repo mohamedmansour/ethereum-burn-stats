@@ -23,3 +23,5 @@ yarn-error.log*
 deploy.bat
 
 daemon/daemon
+
+*.db
