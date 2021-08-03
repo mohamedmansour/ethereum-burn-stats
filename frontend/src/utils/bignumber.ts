@@ -8,9 +8,9 @@ export function BigNumberMax(x: ethers.BigNumber, y: ethers.BigNumber): ethers.B
   return x.gt(y) ? x : y;
 }
 
-export function BigNumberNormalize(num: ethers.BigNumber | null | undefined): ethers.BigNumber {
+export function BigNumberNormalize(num: any): ethers.BigNumber {
   if (num === null || num === undefined) {
     return ethers.BigNumber.from(0);
   }
-  return num;
+  return ethers.BigNumber.from(num);
 }

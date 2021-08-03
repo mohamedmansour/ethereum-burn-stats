@@ -73,7 +73,7 @@ const safeTotalBurned = (eth: EthereumApi, blockNumber: number) => safeBurned(et
 export const BlockExplorerApi = {
   fetchDetails: async (eth:  EthereumApi, block: BurnedBlockTransaction, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
     const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : await safeTotalBurned(eth, block.number)
-    const gasPrice = await eth.getGasPrice()
+    const gasPrice = BigNumberNormalize(await eth.getGasPrice())
     return {
       currentBlock: block.number,
       totalBurned,
@@ -82,24 +82,39 @@ export const BlockExplorerApi = {
     }
   },
   fetchBlock: async (eth:  EthereumApi, blockNumber: number): Promise<BurnedBlockTransaction | undefined> => {
-    const blockNumberInHex = utils.hexValue(blockNumber)
     const block = await eth.getBlock(blockNumber)
     if (block) {
-      const rewards = getDefaultBigNumber(await eth.getBlockReward(blockNumberInHex))
-      const basefee = BigNumberNormalize(block.baseFeePerGas)
-      const burned =  await safeBurned(eth, blockNumber)
-      const gasTarget = block.gasLimit.div(2)
-      
-      return {
-        ...block,
-        burned,
-        rewards,
-        basefee,
-        gasTarget
-      }
+      return BlockExplorerApi.fetchBlockExtra(eth, block)
     }
 
     return undefined
+  },
+  fetchBlockExtra: async (eth: EthereumApi, block: ethers.providers.Block): Promise<BurnedBlockTransaction | undefined> => {
+    const baseFeePerGas = BigNumberNormalize(block.baseFeePerGas)
+    const gasLimit = BigNumberNormalize(block.gasLimit)
+    const gasUsed = BigNumberNormalize(block.gasUsed)
+    const difficulty = BigNumberNormalize(block.difficulty);
+    const number = BigNumberNormalize(block.number)
+    
+    const blockNumberInHex = utils.hexValue(block.number)
+    const rewards = getDefaultBigNumber(await eth.getBlockReward(blockNumberInHex))
+    const basefee = BigNumberNormalize(baseFeePerGas)
+    const burned =  await safeBurned(eth, block.number)
+    const gasTarget = gasLimit.div(2)
+
+    return {
+      ...block,
+      number: number.toNumber(),
+      transactions: block.transactions || [],
+      baseFeePerGas,
+      gasLimit,
+      gasUsed,
+      burned,
+      rewards,
+      basefee,
+      gasTarget,
+      difficulty: difficulty.toNumber()
+    }
   }
 }
 
@@ -144,13 +159,22 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
         maxBaseFee: ethers.BigNumber.from(Number.MIN_SAFE_INTEGER.toString()),
       }
       
-      action.blocks.forEach(block => {
+      action.blocks.map(block => {
+        block.burned = BigNumberNormalize(block.burned)
+        block.rewards = BigNumberNormalize(block.rewards)
+        block.gasTarget = BigNumberNormalize(block.gasTarget)
+        block.gasLimit = BigNumberNormalize(block.gasLimit)
+        block.gasUsed = BigNumberNormalize(block.gasUsed)
+        block.baseFeePerGas = BigNumberNormalize(block.baseFeePerGas)
+
         const basefee = BigNumberNormalize(block.baseFeePerGas)
         session.transactionCount += block.transactions.length
         session.burned = block.burned.add(session.burned)
         session.rewards = block.rewards.add(session.rewards)
         session.minBaseFee = BigNumberMin(basefee, session.minBaseFee)
         session.maxBaseFee = BigNumberMax(basefee, session.maxBaseFee)
+
+        return block;
       })
 
       return { blocks: action.blocks, details: action.details, session }
@@ -173,14 +197,14 @@ const BlockExplorerProvider = ({
     if (!eth)
       return
 
-    const onNewBlockHeader = async (blockNumber: number) => {
-      const block = await BlockExplorerApi.fetchBlock(eth, blockNumber)
-      if (!block)
+    const onNewBlockHeader = async (block: ethers.providers.Block) => {
+      const blockWithExtras = await BlockExplorerApi.fetchBlockExtra(eth, block)
+      if (!blockWithExtras)
         return
 
-      const details = await BlockExplorerApi.fetchDetails(eth, block, true)
+      const details = await BlockExplorerApi.fetchDetails(eth, blockWithExtras, true)
 
-      dispatch({ type: 'NEW_BLOCK', details, block, maxBlocksToRender })
+      dispatch({ type: 'NEW_BLOCK', details, block: blockWithExtras, maxBlocksToRender })
     }
 
     const prefetchBlockHeaders = async (blockHeaderCount: number) => {

@@ -1,9 +1,8 @@
 import { Badge, Box, Button, Flex, Heading, HStack, Input, useToast, } from "@chakra-ui/react";
-import { utils } from "ethers";
 import { useEffect, useRef, useState } from "react"
 import { Card } from "../atoms/Card";
 import { FirePit } from "../atoms/FirePit";
-import {  DaemonClientProvider, useDaemonClient } from "../contexts/DaemonClientContext";
+import { EthereumProvider, useEthereum } from "../contexts/EthereumContext";
 import { layoutConfig } from "../layoutConfig";
 
 enum SocketStatus {
@@ -41,11 +40,11 @@ export function ApiPage() {
   const toast = useToast()
   const ref = useRef<HTMLDivElement>(null)
   const [status, setStatus] = useState(SocketStatus.CONNECTING)
-  const client = useDaemonClient()
+  const { eth } = useEthereum()
   const [logs, setLogs] = useState<string[]>()
 
   useEffect(() => {
-    if (!client.eth) {
+    if (!eth) {
       return;
     }
 
@@ -57,10 +56,10 @@ export function ApiPage() {
       setLogs(logs => [...(logs || []), block.number.toString()])
     }
 
-    client.eth.on('block', onBlock)
+    eth.on('block', onBlock)
 
-    return () => client.eth?.off('block', onBlock)
-  }, [client])
+    return () => eth?.off('block', onBlock)
+  }, [eth])
 
   useEffect(() => {
     if (!ref.current)
@@ -74,7 +73,7 @@ export function ApiPage() {
 
 
   const onGetBlockClicked = async () => {
-    if (!client.eth) {
+    if (!eth) {
       toast({
         title: "Not connected to API",
         status: "error",
@@ -83,8 +82,7 @@ export function ApiPage() {
       return;
     }
 
-    const blockNumberInHex = utils.hexValue(1234)
-    const block = await client.eth.getBlock(blockNumberInHex)
+    const block = await eth.getBlock(1234)
     setLogs(logs => [...(logs || []), block.hash])
   }
 
@@ -119,8 +117,8 @@ export function ApiPage() {
 
 export function Api() {
   return (
-    <DaemonClientProvider url="ws://localhost:8080">
+    <EthereumProvider url="ws://localhost:8080">
       <ApiPage />
-    </DaemonClientProvider>
+    </EthereumProvider>
   )
 }
