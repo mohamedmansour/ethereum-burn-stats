@@ -73,13 +73,33 @@ func New(
 		httpClient: new(http.Client),
 	}
 
+	log.Infof("Get latest block...")
+
+	latestBlock := newLatestBlock()
+
+	_, err := ethBlockNumber(
+		rpcClient,
+		latestBlock,
+	)(
+		nil,
+		jsonrpcMessage{
+			Version: "2.0",
+			Method:  "eth_blockNumber",
+			Params:  json.RawMessage([]byte("[]")),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	blockNumber := latestBlock.getBlockNumber()
+	log.Infof("Latest block: %s", blockNumber.String())
+
 	log.Infof("Initialize gethRPCClientWebsocket '%s'", gethEndpointWebsocket)
 	gethRPCClientWebsocket, err := gethRPC.Dial(gethEndpointWebsocket)
 	if err != nil {
 		return nil, err
 	}
-
-	// ethClientWebsocket := ethclient.NewClient(gethRPCClientWebsocket)
 
 	headers := make(chan *types.Header)
 	sub, err := gethRPCClientWebsocket.EthSubscribe(context.Background(), headers, "newHeads")
@@ -87,7 +107,7 @@ func New(
 		return nil, err
 	}
 
-	go func() {
+	go func(latestBlock *LatestBlock) {
 		for {
 			select {
 			case err := <-sub.Err():
@@ -96,6 +116,7 @@ func New(
 				blockBurned, blockTips, _ := UpdateBlockBurnedAndTips(rpcClient, toBlockNumArg(header.Number))
 				clientsCount := len(clients)
 				log.Infof("new block: %v, burned: %d, tips: %d, clients: %d", header.Number, blockBurned, blockTips, clientsCount)
+				latestBlock.updateBlockNumber(header.Number)
 				subscription <- map[string]interface{}{
 					"newHeads":              header,
 					"internal_clientsCount": clientsCount,
@@ -104,16 +125,22 @@ func New(
 				}
 			}
 		}
-	}()
+	}(latestBlock)
 
 	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
 		"debug_getBlockReward": handleFunc(rpcClient),
 		"debug_burned":         handleFunc(rpcClient),
 
-		"eth_blockNumber":          handleFunc(rpcClient),
-		"eth_chainId":              handleFunc(rpcClient),
-		"eth_gasPrice":             handleFunc(rpcClient),
-		"eth_getBlockByNumber":     handleFunc(rpcClient),
+		"eth_blockNumber": ethBlockNumber(
+			rpcClient,
+			latestBlock,
+		),
+		"eth_chainId":  handleFunc(rpcClient),
+		"eth_gasPrice": handleFunc(rpcClient),
+		"eth_getBlockByNumber": ethGetBlockByNumber(
+			rpcClient,
+			latestBlock,
+		),
 		"eth_getTransactionByHash": handleFunc(rpcClient),
 		"eth_syncing":              handleFunc(rpcClient),
 
@@ -247,6 +274,91 @@ func handleFunc(
 		err = json.Unmarshal(b, &params)
 		if err != nil {
 			return nil, err
+		}
+
+		raw, err := rpcClient.CallContext(
+			message.Version,
+			message.Method,
+			params...,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		return raw, nil
+	}
+}
+
+func ethBlockNumber(
+	rpcClient *rpcClient,
+	latestBlock *LatestBlock,
+) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+		b, err := message.Params.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+
+		var params []interface{}
+		err = json.Unmarshal(b, &params)
+		if err != nil {
+			return nil, err
+		}
+
+		raw, err := rpcClient.CallContext(
+			message.Version,
+			message.Method,
+			params...,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		var hexBlockNumber string
+		err = json.Unmarshal(raw, &hexBlockNumber)
+		if err != nil {
+			return nil, err
+		}
+
+		blockNumber, err := hexutil.DecodeBig(hexBlockNumber)
+		if err != nil {
+			return nil, err
+		}
+
+		latestBlock.updateBlockNumber(blockNumber)
+
+		return raw, nil
+	}
+}
+
+func ethGetBlockByNumber(
+	rpcClient *rpcClient,
+	latestBlock *LatestBlock,
+) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+		b, err := message.Params.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+
+		var params []interface{}
+		err = json.Unmarshal(b, &params)
+		if err != nil {
+			return nil, err
+		}
+
+		hexBlockNumber, ok := params[0].(string)
+		if !ok {
+			return nil, fmt.Errorf("blockNumber is not a string - %s", params[0])
+		}
+
+		blockNumber, err := hexutil.DecodeBig(hexBlockNumber)
+		if err != nil {
+			return nil, fmt.Errorf("blockNumber was not a hex - %s", hexBlockNumber)
+		}
+
+		if !latestBlock.lessEqualsLatestBlock(blockNumber) {
+			return nil, fmt.Errorf("requested blockNumber is bigger than latest - r: %v, l: %v", blockNumber, latestBlock.blockNumber)
 		}
 
 		raw, err := rpcClient.CallContext(
