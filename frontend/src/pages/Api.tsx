@@ -1,18 +1,15 @@
 import { Badge, Box, Button, Flex, Heading, HStack, Input, useToast, } from "@chakra-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react"
+import { utils } from "ethers";
+import { useEffect, useRef, useState } from "react"
 import { Card } from "../atoms/Card";
 import { FirePit } from "../atoms/FirePit";
+import {  DaemonClientProvider, useDaemonClient } from "../contexts/DaemonClientContext";
 import { layoutConfig } from "../layoutConfig";
 
 enum SocketStatus {
   CONNECTING,
   CONNECTED,
   DISCONNECTED,
-}
-
-interface CommandEvent {
-  type: string;
-  data: unknown;
 }
 
 export function ChatInput({onSendChat}: {onSendChat: (msg: string) => void}) {
@@ -39,46 +36,31 @@ export function ChatInput({onSendChat}: {onSendChat: (msg: string) => void}) {
     </HStack>
   )
 }
-export function Api() {
+
+export function ApiPage() {
   const toast = useToast()
   const ref = useRef<HTMLDivElement>(null)
   const [status, setStatus] = useState(SocketStatus.CONNECTING)
-  const [connection, setConnection] = useState<WebSocket>()
+  const client = useDaemonClient()
   const [logs, setLogs] = useState<string[]>()
 
   useEffect(() => {
-    let conn: WebSocket;
-
-    const onClose = (evt: CloseEvent) => {
-      setStatus(SocketStatus.DISCONNECTED)
+    if (!client.eth) {
+      return;
     }
 
-    const onOpen = (evt: Event) => {
-      setStatus(SocketStatus.CONNECTED)
-      setConnection(conn);
-    }
-
-    const onMessage = (evt: MessageEvent<CommandEvent>) => {
-      setLogs(logs => [...(logs || []), evt.data.toString()])
-    }
-
-    const connectToWebSocket = () => {
-      conn = new WebSocket("ws://" + document.location.host + "/ws");
-      conn.addEventListener("close", onClose);
-      conn.addEventListener("message", onMessage);
-      conn.addEventListener("open", onOpen);
-    }
-
-    connectToWebSocket();
-
-    return () => {
-      if (conn) {
-        conn.removeEventListener("close", onClose);
-        conn.removeEventListener("message", onMessage);
-        conn.removeEventListener("open", onOpen);
+    const onBlock = (block: any) => {
+      console.log(block, block.number);
+      if (!block.number) {
+        debugger;
       }
+      setLogs(logs => [...(logs || []), block.number.toString()])
     }
-  }, [])
+
+    client.eth.on('block', onBlock)
+
+    return () => client.eth?.off('block', onBlock)
+  }, [client])
 
   useEffect(() => {
     if (!ref.current)
@@ -86,17 +68,13 @@ export function Api() {
     ref.current.scrollTop = ref.current.scrollHeight;
   }, [logs]);
 
-  const onSendMessage = useCallback((chatMessage: string) => {
-    if (!connection) {
-      return
-    }
-
-    connection.send(JSON.stringify({type: "message", data: { message: chatMessage }}));
-  }, [connection])
+  // const onSendMessage = useCallback((chatMessage: string) => {
+  //   connection.send(JSON.stringify({type: "message", data: { message: chatMessage }}));
+  // }, [connection])
 
 
-  const onGetBlockClicked = () => {
-    if (!connection || status !== SocketStatus.CONNECTED) {
+  const onGetBlockClicked = async () => {
+    if (!client.eth) {
       toast({
         title: "Not connected to API",
         status: "error",
@@ -105,7 +83,9 @@ export function Api() {
       return;
     }
 
-    setLogs(logs => [...(logs || []), "1"])
+    const blockNumberInHex = utils.hexValue(1234)
+    const block = await client.eth.getBlock(blockNumberInHex)
+    setLogs(logs => [...(logs || []), block.hash])
   }
 
   let connectedColor = status === SocketStatus.CONNECTED ? "green" : status === SocketStatus.DISCONNECTED ? "red" : "gray";
@@ -124,7 +104,7 @@ export function Api() {
               <Input placeholder="block number" />
               <Button flexShrink={0} colorScheme="teal" onClick={onGetBlockClicked}>getBlock</Button>
             </HStack>
-            <ChatInput onSendChat={onSendMessage} />
+            {/* <ChatInput onSendChat={onSendMessage} /> */}
           </HStack>
         </Card>
         <Card title="Logs" flex={1} overflow="hidden">
@@ -134,5 +114,13 @@ export function Api() {
         </Card>
       </Flex>
     </Flex>
+  )
+}
+
+export function Api() {
+  return (
+    <DaemonClientProvider url="ws://localhost:8080">
+      <ApiPage />
+    </DaemonClientProvider>
   )
 }

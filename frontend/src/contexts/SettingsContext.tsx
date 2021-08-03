@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { defaultSettings, Setting } from '../config';
+import { EventEmitter } from '../utils/event';
 
 export interface SettingConfig {
   verify: (value: any) => boolean,
@@ -27,34 +28,7 @@ const SettingsContext = React.createContext<SettingsContextType>({
 
 const useSettings = () => useContext(SettingsContext);
 
-type EventCallback = (value: any) => void
-const event = {
-  list: new Map<Setting, EventCallback[]>(),
-  on(setting: Setting, callback: EventCallback) {
-    event.list.has(setting) || event.list.set(setting, []);
-    event.list.get(setting)!.push(callback);
-    return event;
-  },
-
-  off(setting: Setting, callback: EventCallback) {
-    if (!event.list.has(setting)) return
-    const callbacks = event.list.get(setting)!
-    const foundCallbackIndex = callbacks.findIndex(callback)
-    if (foundCallbackIndex !== -1) {
-      callbacks.splice(foundCallbackIndex, 1)
-      if (callbacks.length === 0) {
-        event.list.delete(setting)
-      }
-    }
-  },
-
-  emit(eventType: Setting, value: any) {
-    event.list.has(eventType) &&
-    event.list.get(eventType)!.forEach((cb: EventCallback) => {
-        cb(value);
-      });
-  }
-};
+const eventEmitter = EventEmitter<Setting>()
 
 const SettingsProvider = ({
   children
@@ -68,7 +42,7 @@ const SettingsProvider = ({
   
   const set = (key: Setting, value: any): void => {
     localStorage[key] = value
-    event.emit(key, defaultSettings[key].config.convert(value))
+    eventEmitter.emit(key, defaultSettings[key].config.convert(value))
   }
 
   // Verify settings are correct.
@@ -86,8 +60,8 @@ const SettingsProvider = ({
       value={{
         get,
         set,
-        on: event.on,
-        off: event.off
+        on: eventEmitter.on,
+        off: eventEmitter.off
       }}
     >
       {children}
