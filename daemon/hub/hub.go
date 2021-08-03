@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -22,8 +23,15 @@ var allowedEthSubscriptions = map[string]bool{
 	"internal_clientsCount": true,
 }
 
-var globalBlockBurned = make(map[uint64]uint64)
-var globalBlockTips = make(map[uint64]uint64)
+type BlockCounter struct {
+	mu sync.Mutex
+	v  map[uint64]uint64
+}
+
+var globalBlockBurned = BlockCounter{v: make(map[uint64]uint64)}
+var globalBlockTips = BlockCounter{v: make(map[uint64]uint64)}
+var globalTotalBurned = BlockCounter{v: make(map[uint64]uint64)}
+var globalTotalTips = BlockCounter{v: make(map[uint64]uint64)}
 
 type Hub interface {
 	ListenAndServe(addr string) error
@@ -517,7 +525,7 @@ func getBurned(
 
 		for blockNum := blockStart; blockNum <= blockEnd; blockNum++ {
 			var blockBurned uint64
-			if blockBurned, ok = globalBlockBurned[blockNum]; !ok {
+			if blockBurned, ok = globalBlockBurned.v[blockNum]; !ok {
 				blockBurned, _, err = UpdateBlockBurnedAndTips(rpcClient, hexutil.EncodeUint64(blockNum))
 				if err != nil {
 					return nil, err
@@ -579,7 +587,7 @@ func getTips(
 
 		for blockNum := blockStart; blockNum <= blockEnd; blockNum++ {
 			var blockTips uint64
-			if blockTips, ok = globalBlockTips[blockNum]; !ok {
+			if blockTips, ok = globalBlockTips.v[blockNum]; !ok {
 				log.Printf("updating block #%d burned and tips\n", blockNum)
 				_, blockTips, err = UpdateBlockBurnedAndTips(rpcClient, hexutil.EncodeUint64(blockNum))
 				if err != nil {
@@ -671,8 +679,13 @@ func UpdateBlockBurnedAndTips(rpcClient *rpcClient, blockNumberHex string) (uint
 
 	}
 
-	globalBlockBurned[blockNumber] = blockBurned
-	globalBlockTips[blockNumber] = blockTips
+	globalBlockBurned.mu.Lock()
+	globalBlockBurned.v[blockNumber] = blockBurned
+	globalBlockBurned.mu.Unlock()
+
+	globalBlockTips.mu.Lock()
+	globalBlockTips.v[blockNumber] = blockTips
+	globalBlockTips.mu.Unlock()
 
 	return blockBurned, blockTips, nil
 }
