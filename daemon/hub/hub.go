@@ -47,7 +47,7 @@ type hub struct {
 	unregister chan *client
 
 	handlers map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error)
-	
+
 	db *sql.Database
 }
 
@@ -579,6 +579,7 @@ func getTips(
 		for blockNum := blockStart; blockNum <= blockEnd; blockNum++ {
 			var blockTips uint64
 			if blockTips, ok = globalBlockTips[blockNum]; !ok {
+				log.Printf("updating block #%d burned and tips\n", blockNum)
 				_, blockTips, err = UpdateBlockBurnedAndTips(rpcClient, hexutil.EncodeUint64(blockNum))
 				if err != nil {
 					return nil, err
@@ -612,11 +613,13 @@ func UpdateBlockBurnedAndTips(rpcClient *rpcClient, blockNumberHex string) (uint
 		return 0, 0, err
 	}
 
-	fmt.Printf("BURNED: block: %s\n", string(raw))
-
 	blockNumber, err := hexutil.DecodeUint64(blockNumberHex)
 	if err != nil {
 		return 0, 0, err
+	}
+
+	if block.BaseFeePerGas == "" {
+		return 0, 0, nil
 	}
 
 	baseFee, err := hexutil.DecodeUint64(block.BaseFeePerGas)
