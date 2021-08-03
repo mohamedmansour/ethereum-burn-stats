@@ -114,7 +114,7 @@ class WebSocketProvider {
   public onMessage(evt: MessageEvent) {
     const eventData = JSON.parse(evt.data) as AsyncMessage<{}>
     if (eventData.id) {
-      const [resolve, _] = this.promiseMap[eventData.id]
+      const [resolve, ] = this.promiseMap[eventData.id]
       resolve(eventData.result !== undefined ? eventData.result : eventData.params?.result)
       delete this.promiseMap[eventData.id]
     } else if (eventData.method === 'eth_subscription') {
@@ -144,7 +144,7 @@ export class EthereumApi extends WebSocketProvider {
   
   public async getBlockNumber(): Promise<number> {
     const key = `${this.connectedNetwork.chainId}getBlockNumber()`
-    return this.send('eth_blockNumber', [])
+    return this.cachedExecutor(key, () => this.send('eth_blockNumber', []), 10000)
   }
   
   public async getBlock(blockNumber: number): Promise<ethers.providers.Block> {
