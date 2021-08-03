@@ -138,8 +138,6 @@ func New(
 				subscription <- map[string]interface{}{
 					"newHeads":              header,
 					"internal_clientsCount": clientsCount,
-					"blockBurned":           blockBurned,
-					"blockTips":             blockTips,
 				}
 			}
 		}
@@ -147,7 +145,6 @@ func New(
 
 	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
 		"debug_getBlockReward": handleFunc(rpcClient),
-		"debug_burned":         handleFunc(rpcClient),
 
 		"eth_blockNumber": ethBlockNumber(
 			rpcClient,
@@ -163,8 +160,8 @@ func New(
 		"eth_syncing":              handleFunc(rpcClient),
 		"eth_getBalance":           handleFunc(rpcClient),
 
-		"getBurned": getBurned(rpcClient),
-		"getTips":   getTips(rpcClient),
+		"internal_getBurned": getBurned(rpcClient),
+		"internal_getTips":   getTips(rpcClient),
 
 		"eth_subscribe":   ethSubscribe(),
 		"eth_unsubscribe": ethUnsubscribe(),

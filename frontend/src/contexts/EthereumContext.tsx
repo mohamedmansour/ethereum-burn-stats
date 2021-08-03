@@ -134,7 +134,7 @@ export class EthereumApi extends WebSocketProvider {
   
   public async burned(start: string, end?: string): Promise<ethers.BigNumberish> {
     const key = `${this.connectedNetwork.chainId}burned(${start},${end})`
-    return this.cachedExecutor(key, () => this.send('debug_burned', [start, end || '']))
+    return this.cachedExecutor(key, () => this.send('internal_getBurned', [start, end || '']))
   }
 
   public async getBlockReward(blockNumberInHex: string): Promise<ethers.BigNumberish> {
