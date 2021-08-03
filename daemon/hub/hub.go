@@ -153,6 +153,7 @@ func New(
 		),
 		"eth_getTransactionByHash": handleFunc(rpcClient),
 		"eth_syncing":              handleFunc(rpcClient),
+		"eth_getBalance":           handleFunc(rpcClient),
 
 		"getBurned": getBurned(rpcClient),
 		"getTips":   getTips(rpcClient),
@@ -642,7 +643,7 @@ func UpdateBlockBurnedAndTips(rpcClient *rpcClient, blockNumberHex string) (uint
 			return 0, 0, err
 		}
 
-		fmt.Printf("BURNED: block: %s\n", string(raw))
+		// fmt.Printf("BURNED: block: %s\n", string(raw))
 
 		receipt := TransactionReceipt{}
 		err = json.Unmarshal(raw, &receipt)
@@ -666,7 +667,7 @@ func UpdateBlockBurnedAndTips(rpcClient *rpcClient, blockNumberHex string) (uint
 		blockBurned += burned
 		blockTips += tips
 
-		log.Printf("transactionHash: %s, gasUsed: %d, burned: %d, tips: %d\n", tHash, gasUsed, burned, tips)
+		// log.Printf("transactionHash: %s, gasUsed: %d, burned: %d, tips: %d\n", tHash, gasUsed, burned, tips)
 
 	}
 

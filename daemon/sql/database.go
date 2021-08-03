@@ -28,12 +28,12 @@ func ConnectDatabase(dbPath string) (*Database, error) {
 }
 
 func (d *Database) UpdateBlock(header *types.Header, burned uint64, tips uint64) {
-	d.db.Create(&BlockDetails{
-		Block: uint(header.Number.Uint64()),
-		Timestamp: header.Time,
-		Burned: burned,
-		Issued: 0,
-		Tips: tips,
-		Transactions: 0,
-	})
+	// d.db.Create(&BlockDetails{
+	// 	Block: uint(header.Number.Uint64()),
+	// 	Timestamp: header.Time,
+	// 	Burned: burned,
+	// 	Issued: 0,
+	// 	Tips: tips,
+	// 	Transactions: 0,
+	// })
 }
