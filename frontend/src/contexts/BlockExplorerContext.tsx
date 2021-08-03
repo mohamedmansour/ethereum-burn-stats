@@ -59,11 +59,12 @@ const safeBurned = async (eth: EthereumApi, blockNumber: number, fetchTotal: boo
     return ethers.BigNumber.from(0)
   }
 
+  const blockNumberInHex = utils.hexValue(blockNumber)
+
   if (fetchTotal) {
-    return getDefaultBigNumber(await eth.burned(utils.hexValue(eth.connectedNetwork.genesis)))
+    return getDefaultBigNumber(await eth.burned(utils.hexValue(eth.connectedNetwork.genesis), blockNumberInHex))
   }
 
-  const blockNumberInHex = utils.hexValue(blockNumber)
   return getDefaultBigNumber(await eth.burned(blockNumberInHex, blockNumberInHex))
 }
 
