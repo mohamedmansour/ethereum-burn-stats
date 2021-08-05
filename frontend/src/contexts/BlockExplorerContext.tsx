@@ -1,6 +1,6 @@
 import { useContext, createContext, useEffect } from "react"
 import { Block, BlockStats, EthereumApi, useEthereum } from "./EthereumContext"
-import { BigNumber, utils } from 'ethers'
+import { BigNumber } from 'ethers'
 import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../organisms/Loader";
 import { useReducer } from "react";
@@ -57,28 +57,28 @@ type ActionType =
   | NewBlockAction
   | InitAction
 
-const safeBurned = async (eth: EthereumApi, blockNumber: number, fetchTotal: boolean = false) => {
-  if (eth.connectedNetwork.genesis > blockNumber) {
-    return Zero()
-  }
+// const safeBurned = async (eth: EthereumApi, blockNumber: number, fetchTotal: boolean = false) => {
+//   if (eth.connectedNetwork.genesis > blockNumber) {
+//     return Zero()
+//   }
 
-  const blockNumberInHex = utils.hexValue(blockNumber)
+//   const blockNumberInHex = utils.hexValue(blockNumber)
 
-  if (fetchTotal) {
-    return eth.debug_burned(utils.hexValue(eth.connectedNetwork.genesis), blockNumberInHex)
-  }
+//   if (fetchTotal) {
+//     return eth.debug_burned(utils.hexValue(eth.connectedNetwork.genesis), blockNumberInHex)
+//   }
 
-  return eth.burned(blockNumberInHex, blockNumberInHex)
-}
+//   return eth.burned(blockNumberInHex, blockNumberInHex)
+// }
 
-const safeTotalBurned = (eth: EthereumApi, blockNumber: number) => safeBurned(eth, blockNumber, true)
+// const safeTotalBurned = (eth: EthereumApi, blockNumber: number) => safeBurned(eth, blockNumber, true)
 
 export const BlockExplorerApi = {
   fetchDetails: async (eth:  EthereumApi, block: BlockStats, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
-    const totalBurned = skipTotalBurned ? Zero() : await safeTotalBurned(eth, block.number)
+    //const totalBurned = skipTotalBurned ? Zero() : await safeTotalBurned(eth, block.number)
     return {
       currentBlock: block.number,
-      totalBurned,
+      totalBurned: Zero(),
       gasPrice: Zero(),
       currentBaseFee: block.baseFee
     }

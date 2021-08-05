@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -228,7 +227,7 @@ func New(
 	}(latestBlock)
 
 	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
-		"debug_burned":         handleFunc(rpcClient),
+		// "debug_burned":         handleFunc(rpcClient),
 
 		"eth_blockNumber": ethBlockNumber(
 			rpcClient,
@@ -655,7 +654,7 @@ func getBlockStats(
 }
 
 func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockStats, error) {
-	start := time.Now()
+	// start := time.Now()
 	var blockStats sql.BlockStats
 	var raw json.RawMessage
 	raw, err := rpcClient.CallContext(
@@ -818,8 +817,8 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockSta
 	globalBlockStats.v[blockNumber] = blockStats
 	globalBlockStats.mu.Unlock()
 
-	duration := time.Since(start) / time.Millisecond
-	log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
+	// duration := time.Since(start) / time.Millisecond
+	// log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
 
 	return blockStats, nil
 }

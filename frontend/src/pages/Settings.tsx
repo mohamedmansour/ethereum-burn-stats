@@ -72,7 +72,7 @@ export function Settings() {
           >
             <Flex direction={['column', 'column', 'row']} gridGap={4}>
               <Radio value={EthereumNetworkOptions.mainnet.key}>{EthereumNetworkOptions.mainnet.name}</Radio>
-              <Radio value={EthereumNetworkOptions.ropsten.key}>{EthereumNetworkOptions.ropsten.name}</Radio>
+              {/* <Radio value={EthereumNetworkOptions.ropsten.key}>{EthereumNetworkOptions.ropsten.name}</Radio> */}
             </Flex>
           </RadioGroup>
         </Card>
