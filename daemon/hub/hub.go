@@ -178,8 +178,11 @@ func New(
 				}
 
 				blockNumber = latestBlock.getBlockNumber()
+				log.Infof("Latest block: %s", blockNumber.String())
 				latestBlockNumber = blockNumber.Uint64()
-				break
+				if currentBlock == uint64(latestBlockNumber) {
+					break
+				}
 			}
 			currentBlock++
 		}
