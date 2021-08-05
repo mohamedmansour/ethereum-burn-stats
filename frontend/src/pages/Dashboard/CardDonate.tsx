@@ -7,7 +7,8 @@ import {
   ListItem,
   UnorderedList,
   LinkOverlay,
-  LinkBox
+  LinkBox,
+  Spacer
 } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
 import { ImHeart } from "react-icons/im";
@@ -20,20 +21,24 @@ export enum CardDonateType {
   BottomSideBar
 }
 
-export function CardDonate({type}: {type: CardDonateType}) {
+export function CardDonate({ type }: { type: CardDonateType }) {
   if (process.env.REACT_APP_SHOW_SERVER_SPONSOR === "true") {
     if (type === CardDonateType.TopSideBar) {
       const title = "nansen.ai: identify opportunities before everyone else. Analyses 90M+ labeled ethereum wallets and their activity.";
       return (
-        <Card gridGap={layoutConfig.miniGap} textAlign="center">
-          <Box>
-            <LinkBox title={title}>
-              <LinkOverlay href="https://www.nansen.ai" target="_blank" display="flex" justifyContent="center" alignItems="center">
-                <Text color="brand.secondaryText">Sponsored by</Text>
+        <Card gridGap={layoutConfig.miniGap}>
+          <LinkBox title={title} whiteSpace="nowrap">
+            <LinkOverlay href="https://www.nansen.ai" target="_blank" display="flex">
+              <HStack flex={1}>
+                <Icon as={VscHeart} />
+                <Text fontSize="md" fontWeight="bold" flex={1}>
+                  Sponsored By
+                </Text>
+                <Spacer />
                 <Image w="87px" h="30px" srcSet="/sponsor_nansen.png" ml={4} alt={title} />
-              </LinkOverlay>
-            </LinkBox>
-          </Box>
+              </HStack>
+            </LinkOverlay>
+          </LinkBox>
         </Card>
       )
     }
@@ -54,7 +59,7 @@ export function CardDonate({type}: {type: CardDonateType}) {
             </LinkOverlay>
           </LinkBox>
           <Text fontSize={12} mt={4}>Thanks to these patrons who has offered to help support the expensive server costs!</Text>
-          <Text fontSize={12} textAlign="right"><Link href="https://twitter.com/mohamedmansour">Become a patron!</Link></Text>
+          <Text fontSize={12} textAlign="right"><Link href="https://twitter.com/mohamedmansour" target="_blank">Become a patron!</Link></Text>
         </Box>
       </Card>
     )
