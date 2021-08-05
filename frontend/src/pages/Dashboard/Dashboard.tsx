@@ -59,17 +59,17 @@ export function Dashboard() {
   if (!eth) return <Loader>connecting to network ...</Loader>;
   if (!details) return <Loader>Loading Details</Loader>
   if (!session) return <Loader>Loading Session</Loader>
-  if (!blocks) return <Loader>Loading Blocks</Loader>
+  if (!blocks) return <Loader>Waiting for new blocks...</Loader>
 
   const amount = 1;
-  const latestBlock = blocks[0];
-  const activated = latestBlock.number > eth.connectedNetwork.genesis
+  const latestBlock = details.currentBlock;
+  const activated = latestBlock > eth.connectedNetwork.genesis
 
   if (isMobile) {
     return (
       <DashboardLayout>
         <CardDonate type={CardDonateType.TopSideBar} />
-        {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock.number} />}
+        {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock} />}
         {activated && <CardLiveChart blocks={blocks} />}
         <CardTotalBurned totalBurned={details.totalBurned} amount={amount} />
         <CardCurrentSession session={session} amount={amount} />
@@ -91,7 +91,7 @@ export function Dashboard() {
           <CardDonate type={CardDonateType.BottomSideBar}/>
         </Flex>
         <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>
-          {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock.number} />}
+          {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock} />}
           {activated && <CardLiveChart blocks={blocks} />}
           <CardBlocks activated={activated} />
         </Flex>

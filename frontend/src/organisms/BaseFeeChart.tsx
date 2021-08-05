@@ -75,14 +75,22 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
   const onTickFormat = (value: any, index: number) => {
     switch (props.chartType) {
       case "basefee": {
+        const realNumber = Number(value);
+        if (realNumber === -Infinity || realNumber === Infinity) {
+          return "0 WEI"
+        }
         const formatter = BigNumberFormat({
-          number: BigNumber.from((Number(value) * 1000000000).toFixed(0))
+          number: BigNumber.from((realNumber * 1000000000).toFixed(0))
         })
         return formatter.prettyValue + ' ' + formatter.currency
       }
       case "tips & burned": {
+        const realNumber = Number(value);
+        if (realNumber === -Infinity || realNumber === Infinity) {
+          return "0 WEI"
+        }
         const formatter = BigNumberFormat({
-          number: BigNumber.from((Number(value) * 1000000000000000000).toFixed(0))
+          number: BigNumber.from((realNumber * 1000000000000000000).toFixed(0))
         })
         return formatter.prettyValue + ' ' + formatter.currency
       }
