@@ -2,9 +2,9 @@ import { Text, HStack, Icon } from "@chakra-ui/react";
 import { FaBurn } from 'react-icons/fa';
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
-import { ethers } from "ethers";
+import { BigNumber } from "ethers";
 
-export function CardTotalBurned({ totalBurned, amount }: { totalBurned: ethers.BigNumber; amount: number; }) {
+export function CardTotalBurned({ totalBurned, amount }: { totalBurned: BigNumber; amount: number; }) {
   return (
     <Card
       gridGap={2}

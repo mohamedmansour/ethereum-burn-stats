@@ -11,20 +11,19 @@ import {
   Text,
   Flex,
 } from "@chakra-ui/react";
-import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Link as ReactLink, useParams } from "react-router-dom";
 import { BigNumberText } from "../organisms/BigNumberText";
 import { Card } from "../atoms/Card";
 import { Loader } from "../organisms/Loader";
-import { useEthereum } from "../contexts/EthereumContext";
+import { Transaction, useEthereum } from "../contexts/EthereumContext";
 import { layoutConfig } from "../layoutConfig";
 
 export function EthTransactionDetail() {
   let { id } = useParams<{ id: string }>();
   const { eth } = useEthereum();
-  const [transaction, setTransaction] = useState<TransactionResponse>();
+  const [transaction, setTransaction] = useState<Transaction>();
 
   useEffect(() => {
     if (!eth) return;
@@ -96,7 +95,7 @@ export function EthTransactionDetail() {
             </Tr>
             <Tr>
               <Td color="brand.secondaryText">Gas Limit</Td>
-              <Td><BigNumberText number={transaction.gasLimit} /></Td>
+              <Td><BigNumberText number={transaction.gas} /></Td>
             </Tr>
             <Tr>
               <Td color="brand.secondaryText">Gas Price</Td>
@@ -104,12 +103,12 @@ export function EthTransactionDetail() {
             </Tr>
             <Tr>
               <Td color="brand.secondaryText">Value</Td>
-              <Td><BigNumberText number={transaction.value} /></Td>
+              <Td>{transaction.value}</Td>
             </Tr>
             <Tr>
               <Td color="brand.secondaryText">Data</Td>
               <Td>
-                <Code w="50vw">{transaction.data}</Code>
+                <Code w="50vw">{transaction.input}</Code>
               </Td>
             </Tr>
             <Tr>

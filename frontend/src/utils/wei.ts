@@ -1,4 +1,4 @@
-import { ethers, utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 
 
 const MinBoundEther = utils.parseUnits("0.00009", "ether");
@@ -10,7 +10,7 @@ interface AutoFormatType {
 }
 
 export function autoFormatBigNumber(
-  number: ethers.BigNumber
+  number: BigNumber
 ): AutoFormatType {
   let formatted: AutoFormatType = { value: '0', currency: 'GWEI'};
 
@@ -33,7 +33,7 @@ export function autoFormatBigNumber(
 }
 
 export function autoFormatBigNumberToString(
-  number: ethers.BigNumber
+  number: BigNumber
 ): string {
   const formatter = autoFormatBigNumber(number)
   return `${formatter.value} ${formatter.currency}`

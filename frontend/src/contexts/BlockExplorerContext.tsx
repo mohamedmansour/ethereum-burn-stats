@@ -1,33 +1,33 @@
 import { useContext, createContext, useEffect } from "react"
-import { EthereumApi, useEthereum } from "./EthereumContext"
-import { ethers, utils } from 'ethers'
+import { Block, EthereumApi, useEthereum } from "./EthereumContext"
+import { BigNumber, utils } from 'ethers'
 import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../organisms/Loader";
 import { useReducer } from "react";
 import { Setting } from "../config";
-import { BigNumberMax, BigNumberMin, BigNumberNormalize } from "../utils/bignumber";
+import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
 
-export interface BurnedBlockTransaction extends ethers.providers.Block {
-  burned: ethers.BigNumber
-  rewards: ethers.BigNumber
-  basefee: ethers.BigNumber
-  gasTarget: ethers.BigNumber
+export interface BurnedBlockTransaction extends Block {
+  burned: BigNumber
+  rewards: BigNumber
+  basefee: BigNumber
+  gasTarget: BigNumber
 }
 
 export interface BlockExplorerSession {
-  burned: ethers.BigNumber
+  burned: BigNumber
   blockCount: number
   transactionCount: number
-  rewards: ethers.BigNumber
-  minBaseFee: ethers.BigNumber
-  maxBaseFee: ethers.BigNumber
+  rewards: BigNumber
+  minBaseFee: BigNumber
+  maxBaseFee: BigNumber
 }
 
 export interface BlockExplorerDetails {
-  totalBurned: ethers.BigNumber
-  gasPrice: ethers.BigNumber
+  totalBurned: BigNumber
+  gasPrice: BigNumber
   currentBlock: number
-  currentBaseFee: ethers.BigNumber
+  currentBaseFee: BigNumber
 }
 
 type BlockExplorerContextType = {
@@ -53,27 +53,26 @@ type ActionType =
   | NewBlockAction
   | InitAction
 
-const getDefaultBigNumber = (hex: ethers.BigNumberish) => ethers.BigNumber.from(!hex ? '0' : hex)
 const safeBurned = async (eth: EthereumApi, blockNumber: number, fetchTotal: boolean = false) => {
   if (eth.connectedNetwork.genesis > blockNumber) {
-    return ethers.BigNumber.from(0)
+    return Zero()
   }
 
   const blockNumberInHex = utils.hexValue(blockNumber)
 
   if (fetchTotal) {
-    return getDefaultBigNumber(await eth.debug_burned(utils.hexValue(eth.connectedNetwork.genesis), blockNumberInHex))
+    return eth.debug_burned(utils.hexValue(eth.connectedNetwork.genesis), blockNumberInHex)
   }
 
-  return getDefaultBigNumber(await eth.burned(blockNumberInHex, blockNumberInHex))
+  return eth.burned(blockNumberInHex, blockNumberInHex)
 }
 
 const safeTotalBurned = (eth: EthereumApi, blockNumber: number) => safeBurned(eth, blockNumber, true)
 
 export const BlockExplorerApi = {
   fetchDetails: async (eth:  EthereumApi, block: BurnedBlockTransaction, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
-    const totalBurned = skipTotalBurned ? ethers.BigNumber.from(0) : await safeTotalBurned(eth, block.number)
-    const gasPrice = BigNumberNormalize(await eth.getGasPrice())
+    const totalBurned = skipTotalBurned ? Zero() : await safeTotalBurned(eth, block.number)
+    const gasPrice = await eth.getGasPrice()
     return {
       currentBlock: block.number,
       totalBurned,
@@ -89,31 +88,28 @@ export const BlockExplorerApi = {
 
     return undefined
   },
-  fetchBlockExtra: async (eth: EthereumApi, block: ethers.providers.Block): Promise<BurnedBlockTransaction | undefined> => {
-    const baseFeePerGas = BigNumberNormalize(block.baseFeePerGas)
-    const gasLimit = BigNumberNormalize(block.gasLimit)
-    const gasUsed = BigNumberNormalize(block.gasUsed)
-    const difficulty = block.difficulty;
-    const number = BigNumberNormalize(block.number)
+  fetchBlockExtra: async (eth: EthereumApi, block: Block): Promise<BurnedBlockTransaction | undefined> => {
+    const baseFeePerGas = block.baseFeePerGas
+    const gasLimit = block.gasLimit
     
     const blockNumberInHex = utils.hexValue(block.number)
-    const rewards = getDefaultBigNumber(await eth.getBlockReward(blockNumberInHex))
-    const basefee = BigNumberNormalize(baseFeePerGas)
+    const rewards = await eth.getBlockReward(blockNumberInHex)
+    const basefee = baseFeePerGas
     const burned =  await safeBurned(eth, block.number)
     const gasTarget = gasLimit.div(2)
 
     return {
       ...block,
-      number: number.toNumber(),
+      number: block.number,
       transactions: block.transactions || [],
-      baseFeePerGas,
-      gasLimit,
-      gasUsed,
+      baseFeePerGas: block.gasLimit,
+      gasLimit: block.gasLimit,
+      gasUsed: block.gasUsed,
       burned,
       rewards,
       basefee,
       gasTarget,
-      difficulty, //: difficulty.toNumber()
+      difficulty: block.difficulty
     }
   }
 }
@@ -152,22 +148,15 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
     case 'INIT': {
       const session: BlockExplorerSession = {
         blockCount: action.blocks.length,
-        burned: ethers.BigNumber.from(0),
-        rewards: ethers.BigNumber.from(0),
+        burned: Zero(),
+        rewards: Zero(),
         transactionCount: 0,
-        minBaseFee: ethers.BigNumber.from(Number.MAX_SAFE_INTEGER.toString()),
-        maxBaseFee: ethers.BigNumber.from(Number.MIN_SAFE_INTEGER.toString()),
+        minBaseFee: BigNumber.from(Number.MAX_SAFE_INTEGER.toString()),
+        maxBaseFee: BigNumber.from(Number.MIN_SAFE_INTEGER.toString()),
       }
       
       action.blocks.map(block => {
-        block.burned = BigNumberNormalize(block.burned)
-        block.rewards = BigNumberNormalize(block.rewards)
-        block.gasTarget = BigNumberNormalize(block.gasTarget)
-        block.gasLimit = BigNumberNormalize(block.gasLimit)
-        block.gasUsed = BigNumberNormalize(block.gasUsed)
-        block.baseFeePerGas = BigNumberNormalize(block.baseFeePerGas)
-
-        const basefee = BigNumberNormalize(block.baseFeePerGas)
+        const basefee = block.baseFeePerGas
         session.transactionCount += block.transactions.length
         session.burned = block.burned.add(session.burned)
         session.rewards = block.rewards.add(session.rewards)
@@ -197,7 +186,7 @@ const BlockExplorerProvider = ({
     if (!eth)
       return
 
-    const onNewBlockHeader = async (block: ethers.providers.Block) => {
+    const onNewBlockHeader = async (block: Block) => {
       const blockWithExtras = await BlockExplorerApi.fetchBlockExtra(eth, block)
       if (!blockWithExtras)
         return

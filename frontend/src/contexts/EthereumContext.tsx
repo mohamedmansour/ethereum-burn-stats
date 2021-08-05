@@ -1,13 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import LRU from 'lru-cache';
-import { ethers, utils } from "ethers";
-import { BlockWithTransactions } from "@ethersproject/abstract-provider"
+import { BigNumber, utils } from "ethers";
 import { Ethereumish } from '../react-app-env';
 import { defaultNetwork, EthereumNetwork } from '../config';
 import { getNetworkFromSubdomain } from '../utils/subdomain';
 import { Loader } from '../organisms/Loader';
 import { EventEmitter } from '../utils/event';
-import { BigNumberNormalize } from '../utils/bignumber';
+import { HexToNumber, HexToBigNumber } from '../utils/number';
 
 declare global {
   interface Window {
@@ -16,9 +15,9 @@ declare global {
 }
 
 interface EthereumSyncing {
-  currentBlock: ethers.BigNumberish
-  highestBlock: ethers.BigNumberish
-  startingBlock: ethers.BigNumberish
+  currentBlock: number
+  highestBlock: number
+  startingBlock: number
   knownStates: number
   pulledStates: number
 }
@@ -38,6 +37,57 @@ interface AsyncMessage<T> {
     subscription: string
   }
   result?: string
+}
+
+export interface BaseBlock {
+  baseFeePerGas: BigNumber
+  gasLimit: BigNumber
+  gasUsed: BigNumber
+  number: number
+  size: number
+  timestamp: number
+  difficulty: number
+  totalDifficulty: number
+  extraData: string
+  hash: string
+  logsBloom: string
+  miner: string
+  mixHash: string
+  nonce: string
+  parentHash: string
+  receiptsRoot: string
+  sha3Uncles: string
+  stateRoot: string
+  transactionsRoot: string
+}
+
+export interface Block extends BaseBlock{
+  transactions: string[]
+}
+
+export interface BlockWithTransactions extends BaseBlock {
+  transactions: Transaction[];
+}
+
+export interface Transaction {
+  blockHash: string
+  from: string
+  hash: string
+  input: string
+  r: string
+  s: string
+  to: string
+  value: string
+  nonce: number
+  blockNumber: number
+  transactionIndex: number
+  type: number
+  v: number
+  gas: BigNumber
+  gasPrice: BigNumber
+  maxPriorityFeePerGas: BigNumber
+  maxFeePerGas: BigNumber
+  confirmations: number
 }
 
 class WebSocketProvider {
@@ -118,8 +168,56 @@ class WebSocketProvider {
       resolve(eventData.result !== undefined ? eventData.result : eventData.params?.result)
       delete this.promiseMap[eventData.id]
     } else if (eventData.method === 'eth_subscription') {
-      this.eventEmitter.emit('block', eventData.params?.result)
+      this.eventEmitter.emit('block', EthereumApiFormatters.FormatBlock(eventData.params?.result as Block))
     }
+  }
+}
+
+class EthereumApiFormatters {
+  static FormatTransaction(t: Transaction): Transaction {
+    t.nonce = HexToNumber(t.nonce)
+    t.blockNumber = HexToNumber(t.blockNumber)
+    t.transactionIndex = HexToNumber(t.transactionIndex)
+    t.type = HexToNumber(t.type)
+    t.v = HexToNumber(t.v)
+    t.gas = HexToBigNumber(t.gas)
+    t.gasPrice = HexToBigNumber(t.gasPrice)
+    t.maxPriorityFeePerGas = HexToBigNumber(t.maxPriorityFeePerGas)
+    t.maxFeePerGas = HexToBigNumber(t.maxFeePerGas)
+    t.confirmations = 0
+    return t
+  }
+
+  static FormatBlock(b: BaseBlock): BaseBlock {
+    b.baseFeePerGas = HexToBigNumber(b.baseFeePerGas)
+    b.gasLimit = HexToBigNumber(b.gasLimit)
+    b.gasUsed = HexToBigNumber(b.gasUsed)
+    b.number = HexToNumber(b.number)
+    b.size = HexToNumber(b.size)
+    b.timestamp = HexToNumber(b.timestamp)
+    b.difficulty = HexToNumber(b.difficulty)
+    b.totalDifficulty = HexToNumber(b.totalDifficulty)
+    return b
+  }
+
+  static FormatBlockWithTransactions(b: BlockWithTransactions): BlockWithTransactions {
+    b = EthereumApiFormatters.FormatBlock(b) as BlockWithTransactions
+    b.transactions = (b.transactions || []).map(EthereumApiFormatters.FormatTransaction)
+    return b
+  }
+
+  static FormatSync(s: EthereumSyncing | boolean): EthereumSyncing | boolean {
+    if (s !==  false) {
+      s = s as EthereumSyncing
+      s.currentBlock = HexToNumber(s.currentBlock)
+      s.highestBlock = HexToNumber(s.highestBlock)
+      s.startingBlock = HexToNumber(s.startingBlock)
+      s.knownStates = HexToNumber(s.startingBlock)
+      s.pulledStates = HexToNumber(s.startingBlock)
+      return s
+    }
+
+    return false
   }
 }
 
@@ -129,72 +227,66 @@ export class EthereumApi extends WebSocketProvider {
   }
 
   public async isSyncing(): Promise<EthereumSyncing | boolean> {
-    return this.send('eth_syncing', [])
+    return EthereumApiFormatters.FormatSync(await this.send('eth_syncing', []))
   }
   
-  public async debug_burned(start: string, end?: string): Promise<ethers.BigNumberish> {
+  public async debug_burned(start: string, end?: string): Promise<BigNumber> {
     const key = `${this.connectedNetwork.chainId}burned(${start},${end})`
-    return this.cachedExecutor(key, () => this.send('debug_burned', [start, end || '']))
+    const result = await this.cachedExecutor(key, () => this.send('debug_burned', [start, end || '']))
+    return HexToBigNumber(result)
   }
 
-  public async burned(start: string, end?: string): Promise<ethers.BigNumberish> {
+  public async burned(start: string, end?: string): Promise<BigNumber> {
     const key = `${this.connectedNetwork.chainId}burned(${start},${end})`
-    return this.cachedExecutor(key, () => this.send('internal_getBurned', [start, end || '']))
+    const result = await this.cachedExecutor(key, () => this.send('internal_getBurned', [start, end || '']))
+    return HexToBigNumber(result)
   }
 
-  public async getBlockReward(blockNumberInHex: string): Promise<ethers.BigNumberish> {
+  public async getBlockReward(blockNumberInHex: string): Promise<BigNumber> {
     const key = `${this.connectedNetwork.chainId}getBlockReward(${blockNumberInHex})`
-    return this.cachedExecutor(key, () => this.send('debug_getBlockReward', [blockNumberInHex]))
+    const result = await this.cachedExecutor(key, () => this.send('debug_getBlockReward', [blockNumberInHex]))
+    return HexToBigNumber(result);
   }
   
   public async getBlockNumber(): Promise<number> {
     const key = `${this.connectedNetwork.chainId}getBlockNumber()`
-    return this.cachedExecutor(key, () => this.send('eth_blockNumber', []), 10000)
+    const result = await this.cachedExecutor(key, () => this.send('eth_blockNumber', []), 10000)
+    return HexToNumber(result);
   }
   
-  public async getBlock(blockNumber: number): Promise<ethers.providers.Block> {
+  public async getBlock(blockNumber: number): Promise<Block> {
+    if (blockNumber < 0)
+      throw Error(`Invalid block of negative value ${blockNumber}`)
+
     const blockNumberInHex = utils.hexValue(blockNumber)
     const key = `${this.connectedNetwork.chainId}getBlock(${blockNumberInHex})`
-    return this.cachedExecutor(key, () => this.send('eth_getBlockByNumber', [blockNumberInHex, false]))
+    const result = await this.cachedExecutor<Block>(key, () => this.send('eth_getBlockByNumber', [blockNumberInHex, false]))
+    return EthereumApiFormatters.FormatBlock(result) as Block
   }
 
   public async getBlockWithTransactions(blockNumber: number): Promise<BlockWithTransactions> {
     const blockNumberInHex = utils.hexValue(blockNumber)
     const key = `${this.connectedNetwork.chainId}getBlock(${blockNumber})`
     const result = await this.cachedExecutor<BlockWithTransactions>(key, () => this.send('eth_getBlockByNumber', [blockNumberInHex, true]))
-    result.transactions = result.transactions.map(t => {
-      t.gasLimit = BigNumberNormalize(t.gasLimit);
-      t.value = BigNumberNormalize(t.value);
-      t.gasPrice = BigNumberNormalize(t.gasPrice);
-      t.maxPriorityFeePerGas = BigNumberNormalize(t.maxPriorityFeePerGas);
-      t.maxFeePerGas = BigNumberNormalize(t.maxFeePerGas);
-      return t;
-    });
-    result.gasLimit = BigNumberNormalize(result.gasLimit);
-    result.gasUsed = BigNumberNormalize(result.gasUsed);
-    return result
+    return EthereumApiFormatters.FormatBlockWithTransactions(result)
   }
 
-  public async getBalance(address: string): Promise<ethers.BigNumber> {
+  public async getBalance(address: string): Promise<BigNumber> {
     const key = `${this.connectedNetwork.chainId}getBalance(${address})`
     const result = await this.cachedExecutor(key, () => this.send('eth_getBalance', [address, 'latest']), 10000)
-    return BigNumberNormalize(result)
+    return HexToBigNumber(result)
   }
 
-  public async getTransaction(hash: string): Promise<ethers.providers.TransactionResponse> {
+  public async getTransaction(hash: string): Promise<Transaction> {
     const key = `${this.connectedNetwork.chainId}getTransaction(${hash})`
-    const result = await this.cachedExecutor<ethers.providers.TransactionResponse>(key, () => this.send('eth_getTransactionByHash', [hash]))
-    result.gasLimit = BigNumberNormalize(result.gasLimit);
-    result.value = BigNumberNormalize(result.value);
-    result.gasPrice = BigNumberNormalize(result.gasPrice);
-    result.maxPriorityFeePerGas = BigNumberNormalize(result.maxPriorityFeePerGas);
-    result.maxFeePerGas = BigNumberNormalize(result.maxFeePerGas);
-    return result
+    const result = await this.cachedExecutor<Transaction>(key, () => this.send('eth_getTransactionByHash', [hash]))
+    return EthereumApiFormatters.FormatTransaction(result);
   }
 
-  public async getGasPrice(): Promise<ethers.BigNumber> {
+  public async getGasPrice(): Promise<BigNumber> {
     const key = `${this.connectedNetwork.chainId}getGasPrice()`
-    return this.cachedExecutor(key, () => this.send('eth_gasPrice', []), 10000 /* throttle user every 10s */)
+    const result = await this.cachedExecutor<BigNumber>(key, () => this.send('eth_gasPrice', []), 10000 /* throttle user every 10s */)
+    return HexToBigNumber(result)
   }
 } 
 
@@ -227,10 +319,11 @@ const EthereumProvider = ({
     setMessage(`connecting to ${network.key}, please wait`)
 
     const checkStatus = async () => {
-      const syncStatus = await ethereum.isSyncing()
+      let syncStatus = await ethereum.isSyncing()
       if (syncStatus !==  false) {
-        const currentBlock = ethers.BigNumber.from((syncStatus as EthereumSyncing).currentBlock).toNumber()
-        const highestBlock = ethers.BigNumber.from((syncStatus as EthereumSyncing).highestBlock).toNumber()
+        syncStatus = syncStatus as EthereumSyncing
+        const currentBlock = syncStatus.currentBlock
+        const highestBlock = syncStatus.highestBlock
         const percentage = Math.floor((currentBlock / highestBlock) * 100)
         if (percentage === 99) {
           setMessage(`${network.name} is not ready, state healing in progress.`)

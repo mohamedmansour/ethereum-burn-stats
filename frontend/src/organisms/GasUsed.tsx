@@ -1,10 +1,10 @@
 import { Text } from "@chakra-ui/react";
-import { ethers } from "ethers";
+import { BigNumber } from "ethers";
 
 export interface GasUsedProps {
   activated: boolean
-  gasUsed: ethers.BigNumber
-  gasLimit: ethers.BigNumber
+  gasUsed: BigNumber
+  gasLimit: BigNumber
 }
 
 export function GasTarget(props: GasUsedProps) {

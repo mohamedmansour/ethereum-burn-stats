@@ -6,13 +6,14 @@ import {
   Tooltip,
   Box,
 } from "@chakra-ui/react";
-import { ethers, utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { useState } from "react";
 import { useEffect } from "react";
+import { Zero } from "../utils/number";
 import { autoFormatBigNumber } from "../utils/wei";
 
 export interface BigNumberProps extends HTMLChakraProps<"div"> {
-  number: ethers.BigNumber | undefined;
+  number: BigNumber | undefined;
   usdConversion?: number;
   label?: JSX.Element;
   disableTooltip?: boolean
@@ -34,21 +35,18 @@ export const BigNumberText = forwardRef<BigNumberProps, "div">(
     const [state, setState] = useState<BigNumberState | undefined>()
 
     useEffect(() => {
-      if (!number) {
-        return
-      }
-
+      let bignumber = number || Zero();
       let value = '';
       let currency = ''
   
       if (forced && forced !== 'auto') {
-        value = utils.formatUnits(number, forced)
+        value = utils.formatUnits(bignumber, forced)
         currency = forced === 'ether' ? 'ETH' : forced.toUpperCase()
       } else if (usdConversion && usdConversion > 1)  {
-        value = utils.formatEther(number.mul(usdConversion).toString())
+        value = utils.formatEther(bignumber.mul(usdConversion).toString())
         currency = 'USD'
       } else {
-        const formatter = autoFormatBigNumber(number);
+        const formatter = autoFormatBigNumber(bignumber);
         value = formatter.value
         currency = formatter.currency
       }

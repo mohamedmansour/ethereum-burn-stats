@@ -1,5 +1,5 @@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Flex, Grid, GridItem, Heading, Text, VStack } from "@chakra-ui/react";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useParams, Link as ReactLink } from "react-router-dom";
@@ -12,7 +12,7 @@ import { layoutConfig } from "../layoutConfig";
 export function EthAccountDetail() {
   let { id } = useParams<{ id: string }>();
   const { eth } = useEthereum();
-  const [balance, setBalance] = useState<ethers.BigNumber>();
+  const [balance, setBalance] = useState<BigNumber>();
 
   useEffect(() => {
     if (!eth) return;

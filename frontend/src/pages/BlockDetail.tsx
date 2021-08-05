@@ -24,13 +24,12 @@ import {
   Alert,
   AlertIcon,
 } from "@chakra-ui/react";
-import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { utils } from "ethers";
 import { useState, useEffect } from "react";
 import { VscChevronLeft, VscChevronRight } from "react-icons/vsc";
 import { useParams, Link as ReactLink, useHistory } from "react-router-dom";
 import { Loader } from "../organisms/Loader";
-import { useEthereum } from "../contexts/EthereumContext";
+import { Transaction, useEthereum } from "../contexts/EthereumContext";
 import { Card } from "../atoms/Card";
 import {
   BlockExplorerApi,
@@ -44,7 +43,7 @@ import { TablePlus, ThPlus } from "../atoms/TablePlus";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;
-  transactions?: Array<TransactionResponse>;
+  transactions?: Array<Transaction>;
   onBeforeRender?: boolean;
   onAfterRender?: boolean;
 }
@@ -72,7 +71,6 @@ export function EthBlockDetail() {
       }
 
       const block = await BlockExplorerApi.fetchBlock(eth, blockNumber);
-
       setState({
         block: block,
         transactions: blockTransactions.transactions,
@@ -226,8 +224,8 @@ export function EthBlockDetail() {
                   <TablePlus w="100%" colorScheme="whiteAlpha">
                     <Thead>
                       <Tr whiteSpace="nowrap">
-                        <ThPlus>Confs</ThPlus>
-                        <ThPlus>Tx</ThPlus>
+                        <ThPlus textAlign="left">Confs</ThPlus>
+                        <ThPlus textAlign="left">Tx</ThPlus>
                         <ThPlus>Value</ThPlus>
                         <ThPlus>Gas Price (wei)</ThPlus>
                       </Tr>
@@ -254,7 +252,7 @@ export function EthBlockDetail() {
                             </Link>
                           </Td>
                           <Td whiteSpace="nowrap" w="10%">
-                            <BigNumberText number={t.value} />
+                            {t.value}
                           </Td>
                           <Td w="10%">
                             <BigNumberText number={t.gasPrice} />

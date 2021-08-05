@@ -49,7 +49,6 @@ export function ApiPage() {
     }
 
     const onBlock = (block: any) => {
-      console.log(block, block.number);
       if (!block.number) {
         debugger;
       }
