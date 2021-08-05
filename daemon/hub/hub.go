@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -616,10 +617,20 @@ func getBlockStats(
 		var blockStats sql.BlockStats
 
 		if blockStats, ok = globalBlockStats.v[blockNumber]; !ok {
-			// log.Printf("updating block stats for block #%d\n", blockNumber)
-			blockStats, err = UpdateBlockStats(rpcClient, hexutil.EncodeUint64(blockNumber))
-			if err != nil {
-				return nil, err
+			if blockNumber >= londonBlock {
+				for !ok {
+					var found bool
+					if blockStats, found = globalBlockStats.v[blockNumber]; found {
+						ok = true
+					}
+					time.Sleep(100 * time.Millisecond)
+				}
+			} else {
+				log.Printf("updating block stats for block #%d\n", blockNumber)
+				blockStats, err = UpdateBlockStats(rpcClient, hexutil.EncodeUint64(blockNumber))
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 
@@ -633,7 +644,7 @@ func getBlockStats(
 }
 
 func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockStats, error) {
-	// start := time.Now()
+	start := time.Now()
 	var blockStats sql.BlockStats
 	var raw json.RawMessage
 	raw, err := rpcClient.CallContext(
@@ -804,8 +815,8 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockSta
 	globalTotalTips.v.Add(globalTotalTips.v, blockTips)
 	globalTotalTips.mu.Unlock()
 
-	// duration := time.Since(start) / time.Millisecond
-	// log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
+	duration := time.Since(start) / time.Millisecond
+	log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
 
 	return blockStats, nil
 }
