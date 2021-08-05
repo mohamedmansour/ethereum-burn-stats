@@ -39,3 +39,5 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
       defaultValue: 50,
     },
   };
+
+export const prefetchCount = 20;

@@ -4,7 +4,7 @@ import { BigNumber, utils } from 'ethers'
 import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../organisms/Loader";
 import { useReducer } from "react";
-import { Setting } from "../config";
+import { prefetchCount, Setting } from "../config";
 import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
 
 export interface BurnedBlockTransaction extends Block {
@@ -190,7 +190,7 @@ const BlockExplorerProvider = ({
     }
 
     const init = async () => {
-      const blocks = await prefetchBlockHeaders(10)
+      const blocks = await prefetchBlockHeaders(prefetchCount)
       if (blocks.length) {
         const block = blocks[0]
         const details = await BlockExplorerApi.fetchDetails(eth, block)
