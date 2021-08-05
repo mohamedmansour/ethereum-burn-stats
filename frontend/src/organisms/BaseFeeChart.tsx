@@ -105,8 +105,8 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
       <Box flex="1" w="99%" overflow="hidden">
         <ResponsiveContainer>
           <AreaChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }}>
-            <XAxis dataKey="name" />
-            <YAxis />
+            <YAxis fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
+            <XAxis dataKey="block" hide fontSize={10} />
             <Tooltip content={<CustomTooltip />} />
             <Legend verticalAlign="top" height={36} />
             <Area type="monotone" name="tips" dataKey="tipsFormatted" stackId="1" stroke="#E39764" fill="#FFA970" />
