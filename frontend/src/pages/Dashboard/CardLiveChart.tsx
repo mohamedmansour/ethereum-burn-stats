@@ -50,7 +50,7 @@ function RadioCard(props: RadioCardProps) {
 
 export function CardLiveChart(props: RadioCardProps) {
   const [chartType, setChartType] = useState<ChartType>('basefee')
-  const options: ChartType[] = ["tips & burned", "basefee", "transactions", "gas used"]
+  const options: ChartType[] = ["tips & burned", "basefee", "transactions", "gas"]
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: "chart",
     defaultValue: "basefee",

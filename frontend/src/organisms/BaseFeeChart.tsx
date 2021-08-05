@@ -10,7 +10,7 @@ interface BaseFeeChartProps extends HTMLChakraProps<"div">, FlexOptions {
   chartType: ChartType
 }
 
-export type ChartType = "tips & burned" | "basefee" | "transactions" | "gas used"
+export type ChartType = "tips & burned" | "basefee" | "transactions" | "gas"
 
 function CustomTooltip(props: TooltipProps<string, string>) {
   if (props.active && props.payload && props.payload.length) {
@@ -23,6 +23,7 @@ function CustomTooltip(props: TooltipProps<string, string>) {
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Tips:</Text><BigNumberText number={payload.tips} /></HStack>
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Basefee:</Text><BigNumberText number={payload.baseFee} /></HStack>
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Used:</Text><BigNumberText number={payload.gasUsed} forced="wei" /></HStack>
+        <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Target:</Text><BigNumberText number={payload.gasTarget} forced="wei" /></HStack>
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Txs:</Text><Text>{payload.transactions}</Text></HStack>
       </Box>
     );
@@ -31,11 +32,47 @@ function CustomTooltip(props: TooltipProps<string, string>) {
   return null;
 };
 
-const chartToTypeMapping = {
-  "tips & burned": 'tipsFormatted',
-  basefee: 'baseFeeFormatted',
-  transactions: 'transactions',
-  "gas used": 'gasUsedFormatted'
+const chartTypeMapping = {
+  "tips & burned": {
+    primary: {
+      dataKey: 'tipsFormatted',
+      name: 'tips'
+    },
+    secondary: {
+      dataKey: 'burnedFormatted',
+      name: 'burned'
+    },
+  },
+  basefee: {
+    primary: {
+      dataKey: 'baseFeeFormatted',
+      name: 'basefee'
+    },
+    secondary: {
+      dataKey: 'baseFeeFormatted',
+      name: 'basefee'
+    },
+  },
+  transactions: {
+    primary: {
+      dataKey: 'transactions',
+      name: 'transactions'
+    },
+    secondary: {
+      dataKey: 'transactions',
+      name: 'transactions'
+    },
+  },
+  gas: {
+    primary: {
+      dataKey: 'gasUsedFormatted',
+      name: 'gas used'
+    },
+    secondary: {
+      dataKey: 'gasTargetFormatted',
+      name: 'gas target'
+    },
+  },
 }
 
 interface ChartData {
@@ -64,8 +101,9 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
         case "basefee":
           chartData.baseFeeFormatted = utils.formatUnits(block.baseFee, 'gwei')
           break;
-        case "gas used":
+        case "gas":
           chartData.gasUsedFormatted = block.gasUsed.toNumber()
+          chartData.gasTargetFormatted = block.gasTarget.toNumber()
           break;
       }
 
@@ -100,7 +138,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
         })
         return formatter.prettyValue + ' ' + formatter.currency
       }
-      case "gas used": {
+      case "gas": {
         return utils.commify(Number(value))
       }
     }
@@ -111,7 +149,9 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
     return null;
   }
 
-  if (props.chartType === "tips & burned") {
+  const typeMapping = chartTypeMapping[data.chartType]
+
+  if (props.chartType === "tips & burned" || props.chartType === "gas") {
     return (
       <Box flex="1" w="99%" overflow="hidden">
         <ResponsiveContainer>
@@ -120,8 +160,8 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
             <XAxis dataKey="block" hide fontSize={10} />
             <Tooltip content={<CustomTooltip />} />
             <Legend verticalAlign="top" height={36} />
-            <Area type="monotone" name="tips" dataKey="tipsFormatted" stackId="1" stroke="#E39764" fill="#FFA970" />
-            <Area type="monotone" name="burned" dataKey="burnedFormatted" stackId="1" stroke="#E06F24" fill="#FF7B24" />
+            <Area type="monotone" name={typeMapping.primary.name} dataKey={typeMapping.primary.dataKey} stackId="1" stroke="#E39764" fill="#FFA970" />
+            <Area type="monotone" name={typeMapping.secondary.name} dataKey={typeMapping.secondary.dataKey} stackId="1" stroke="#E06F24" fill="#FF7B24" />
           </AreaChart>
         </ResponsiveContainer>
       </Box>
@@ -135,7 +175,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
           <YAxis yAxisId="left" type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
           <XAxis hide dataKey="block" angle={30} dx={20} dy={10} fontSize={10} />
           <Tooltip content={<CustomTooltip />} />
-          <Line yAxisId="left" type="monotone" dataKey={chartToTypeMapping[data.chartType]} stroke="#FF7B24" strokeWidth={2} dot={false} />
+          <Line yAxisId="left" type="monotone" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" strokeWidth={2} dot={false} />
         </LineChart>
       </ResponsiveContainer>
     </Box>
