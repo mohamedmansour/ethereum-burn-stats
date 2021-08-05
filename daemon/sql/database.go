@@ -1,7 +1,7 @@
 package sql
 
 import (
-	"github.com/ethereum/go-ethereum/core/types"
+	//"github.com/ethereum/go-ethereum/core/types"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -11,31 +11,38 @@ type Database struct {
 }
 
 func ConnectDatabase(dbPath string) (*Database, error) {
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+		CreateBatchSize: 100,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	// For now drop table at every run, we need to add some propagation of data
 	// so we don't miss anything on restarts.
-	db.Migrator().DropTable(&BlockDetails{})
-	db.Migrator().CreateTable(&BlockDetails{})
+	db.Migrator().DropTable(&BlockStats{})
+	db.Migrator().CreateTable(&BlockStats{})
 
 	return &Database{
 		db: db,
 	}, nil
 }
 
-func (d *Database) AddBlock(blockDetails BlockDetails) {
-	d.db.Create(blockDetails)
+func (d *Database) AddBlock(blockStats BlockStats) {
+	d.db.Create(blockStats)
 }
-func (d *Database) UpdateBlock(header *types.Header, burned string, tips string, transactions uint) {
-	d.db.Create(&BlockDetails{
-		Block:        uint(header.Number.Uint64()),
-		Timestamp:    header.Time,
-		Burned:       burned,
-		Issued:       "0x0",
-		Tips:         tips,
-		Transactions: transactions,
-	})
+
+func (d *Database) AddBlocks(blockStats []BlockStats) {
+	d.db.CreateInBatches(blockStats, len(blockStats))
 }
+
+//func (d *Database) UpdateBlock(header *types.Header, burned string, tips string, transactions uint) {
+//	d.db.Create(&BlockStats{
+//		Block:        uint(header.Number.Uint64()),
+//		Timestamp:    header.Time,
+//		Burned:       burned,
+//		Issued:       "0x0",
+//		Tips:         tips,
+//		Transactions: transactions,
+//	})
+//}
