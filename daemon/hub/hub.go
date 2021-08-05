@@ -20,8 +20,8 @@ import (
 var log = logrus.StandardLogger()
 
 var allowedEthSubscriptions = map[string]bool{
-	"newHeads":              true,
-	"blockStats":            true,
+	"newHeads":   true,
+	"blockStats": true,
 }
 
 type BlockStatsMap struct {
@@ -33,6 +33,10 @@ type BlockCounter struct {
 	mu sync.Mutex
 	v  map[uint64]int64
 }
+
+var londonBlock = uint64(12_965_000)
+var constantinopleBlock = uint64(7_280_000)
+var byzantiumBlock = uint64(4_370_000)
 
 var globalBlockStats = BlockStatsMap{v: make(map[uint64]sql.BlockStats)}
 var globalTotalBurned = BlockCounter{v: make(map[uint64]int64)}
@@ -68,6 +72,8 @@ func New(
 	gethEndpointWebsocket string,
 	dbPath string,
 	initializedb bool,
+	startingblock int,
+	ropsten bool,
 ) (Hub, error) {
 	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -78,6 +84,12 @@ func New(
 		upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}
+	}
+
+	if ropsten {
+		londonBlock = uint64(10_499_401)
+		constantinopleBlock = uint64(4_230_000)
+		byzantiumBlock = uint64(1_700_000)
 	}
 
 	subscription := make(chan map[string]interface{})
@@ -124,6 +136,10 @@ func New(
 			return nil, err
 		}
 		startingBlock := highestBlock + 1
+		if startingblock >= 0 {
+			startingBlock = uint(startingblock)
+		}
+
 		counter := uint64(0)
 		//for b := uint64(10499401); b <= blockNumber.Uint64(); b++ {
 		for b := uint64(startingBlock); b <= blockNumber.Uint64(); b++ {
@@ -853,13 +869,13 @@ type TransactionReceipt struct {
 
 func getBaseReward(blockNum uint64) big.Int {
 	baseReward := big.NewInt(0)
-	if blockNum >= 4_230_000 { //7_280_000 {
+	if blockNum >= constantinopleBlock { //4_230_000 { //7_280_000 {
 		constantinopleReward := big.NewInt(2000000000000000000)
 		baseReward.Add(baseReward, constantinopleReward)
 		return *baseReward
 	}
 
-	if blockNum >= 1_700_000 { // 4_370_000 {
+	if blockNum >= byzantiumBlock { //1_700_000 { // 4_370_000 {
 		byzantiumReward := big.NewInt(3000000000000000000)
 		baseReward.Add(baseReward, byzantiumReward)
 		return *baseReward
