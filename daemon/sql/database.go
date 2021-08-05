@@ -10,7 +10,6 @@ type Database struct {
 	db *gorm.DB
 }
 
-
 func ConnectDatabase(dbPath string) (*Database, error) {
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
@@ -27,13 +26,16 @@ func ConnectDatabase(dbPath string) (*Database, error) {
 	}, nil
 }
 
-func (d *Database) UpdateBlock(header *types.Header, burned uint64, tips uint64) {
-	// d.db.Create(&BlockDetails{
-	// 	Block: uint(header.Number.Uint64()),
-	// 	Timestamp: header.Time,
-	// 	Burned: burned,
-	// 	Issued: 0,
-	// 	Tips: tips,
-	// 	Transactions: 0,
-	// })
+func (d *Database) AddBlock(blockDetails BlockDetails) {
+	d.db.Create(blockDetails)
+}
+func (d *Database) UpdateBlock(header *types.Header, burned string, tips string, transactions uint) {
+	d.db.Create(&BlockDetails{
+		Block:        uint(header.Number.Uint64()),
+		Timestamp:    header.Time,
+		Burned:       burned,
+		Issued:       "0x0",
+		Tips:         tips,
+		Transactions: transactions,
+	})
 }

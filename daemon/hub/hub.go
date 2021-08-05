@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -25,13 +26,13 @@ var allowedEthSubscriptions = map[string]bool{
 
 type BlockCounter struct {
 	mu sync.Mutex
-	v  map[uint64]uint64
+	v  map[uint64]int64
 }
 
-var globalBlockBurned = BlockCounter{v: make(map[uint64]uint64)}
-var globalBlockTips = BlockCounter{v: make(map[uint64]uint64)}
-var globalTotalBurned = BlockCounter{v: make(map[uint64]uint64)}
-var globalTotalTips = BlockCounter{v: make(map[uint64]uint64)}
+var globalBlockBurned = BlockCounter{v: make(map[uint64]int64)}
+var globalBlockTips = BlockCounter{v: make(map[uint64]int64)}
+var globalTotalBurned = BlockCounter{v: make(map[uint64]int64)}
+var globalTotalTips = BlockCounter{v: make(map[uint64]int64)}
 
 type Hub interface {
 	ListenAndServe(addr string) error
@@ -64,11 +65,13 @@ func New(
 	gethEndpointHTTP string,
 	gethEndpointWebsocket string,
 	dbPath string,
+	initializedb bool,
 ) (Hub, error) {
 	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
+
 	if development {
 		upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
@@ -107,6 +110,23 @@ func New(
 	blockNumber := latestBlock.getBlockNumber()
 	log.Infof("Latest block: %s", blockNumber.String())
 
+	db, err := sql.ConnectDatabase(dbPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if initializedb {
+		//for b := uint64(10499401); b <= blockNumber.Uint64(); b++ {
+		for b := uint64(1); b <= blockNumber.Uint64(); b++ {
+			blockDetails, err := GetBlockDetails(rpcClient, hexutil.EncodeUint64(uint64(b)))
+			if err != nil {
+				log.Errorf("Error %v\n", err)
+				return nil, err
+			}
+			db.AddBlock(*blockDetails)
+		}
+	}
+
 	log.Infof("Initialize gethRPCClientWebsocket '%s'", gethEndpointWebsocket)
 	gethRPCClientWebsocket, err := gethRPC.Dial(gethEndpointWebsocket)
 	if err != nil {
@@ -119,22 +139,17 @@ func New(
 		return nil, err
 	}
 
-	db, err := sql.ConnectDatabase(dbPath)
-	if err != nil {
-		return nil, err
-	}
-
 	go func(latestBlock *LatestBlock) {
 		for {
 			select {
 			case err := <-sub.Err():
 				log.Errorln("Error: ", err)
 			case header := <-headers:
-				blockBurned, blockTips, _ := UpdateBlockBurnedAndTips(rpcClient, toBlockNumArg(header.Number))
+				//blockBurned, blockTips, blockTransactionCount, _ := UpdateBlockBurnedAndTips(rpcClient, toBlockNumArg(header.Number))
+				//db.UpdateBlock(header, blockBurned, blockTips, uint16(blockTransactionCount))
 				clientsCount := len(clients)
-				log.Infof("new block: %v, burned: %d, tips: %d, clients: %d", header.Number, blockBurned, blockTips, clientsCount)
+				//log.Infof("new block: %v, burned: %d, tips: %d, clients: %d", header.Number, blockBurned, blockTips, clientsCount)
 				latestBlock.updateBlockNumber(header.Number)
-				db.UpdateBlock(header, blockBurned, blockTips)
 				subscription <- map[string]interface{}{
 					"newHeads":              header,
 					"internal_clientsCount": clientsCount,
@@ -519,12 +534,12 @@ func getBurned(
 			return nil, err
 		}
 
-		var burned uint64
+		var burned int64
 
 		for blockNum := blockStart; blockNum <= blockEnd; blockNum++ {
-			var blockBurned uint64
+			var blockBurned int64
 			if blockBurned, ok = globalBlockBurned.v[blockNum]; !ok {
-				blockBurned, _, err = UpdateBlockBurnedAndTips(rpcClient, hexutil.EncodeUint64(blockNum))
+				blockBurned, _, _, err = UpdateBlockBurnedAndTips(rpcClient, hexutil.EncodeUint64(blockNum))
 				if err != nil {
 					return nil, err
 				}
@@ -532,7 +547,7 @@ func getBurned(
 			burned += blockBurned
 		}
 
-		burnedBig := new(big.Int).SetUint64(burned)
+		burnedBig := new(big.Int).SetInt64(burned)
 
 		return json.RawMessage(fmt.Sprintf("\"%s\"", hexutil.EncodeBig(burnedBig))), nil
 	}
@@ -583,13 +598,13 @@ func getTips(
 			return nil, err
 		}
 
-		var tips uint64
+		var tips int64
 
 		for blockNum := blockStart; blockNum <= blockEnd; blockNum++ {
-			var blockTips uint64
+			var blockTips int64
 			if blockTips, ok = globalBlockTips.v[blockNum]; !ok {
 				log.Printf("updating block #%d burned and tips\n", blockNum)
-				_, blockTips, err = UpdateBlockBurnedAndTips(rpcClient, hexutil.EncodeUint64(blockNum))
+				_, blockTips, _, err = UpdateBlockBurnedAndTips(rpcClient, hexutil.EncodeUint64(blockNum))
 				if err != nil {
 					return nil, err
 				}
@@ -597,14 +612,165 @@ func getTips(
 			tips += blockTips
 		}
 
-		tipsBig := new(big.Int).SetUint64(tips)
+		tipsBig := new(big.Int).SetInt64(tips)
 
 		return json.RawMessage(fmt.Sprintf("\"%s\"", hexutil.EncodeBig(tipsBig))), nil
 	}
 }
 
-func UpdateBlockBurnedAndTips(rpcClient *rpcClient, blockNumberHex string) (uint64, uint64, error) {
-	var blockBurned, blockTips uint64
+func GetBlockDetails(rpcClient *rpcClient, blockNumberHex string) (*sql.BlockDetails, error) {
+	start := time.Now()
+	var raw json.RawMessage
+	raw, err := rpcClient.CallContext(
+		"2.0",
+		"eth_getBlockByNumber",
+		blockNumberHex,
+		false,
+	)
+	if err != nil {
+		log.Printf("%v\n", err)
+		return nil, err
+	}
+
+	block := Block{}
+	err = json.Unmarshal(raw, &block)
+	if err != nil {
+		return nil, err
+	}
+
+	header := types.Header{}
+	err = json.Unmarshal(raw, &header)
+	if err != nil {
+		return nil, err
+	}
+
+	blockNumber, err := hexutil.DecodeUint64(blockNumberHex)
+	if err != nil {
+		return nil, err
+	}
+
+	baseFee := big.NewInt(0)
+
+	if block.BaseFeePerGas != "" {
+		baseFee, err = hexutil.DecodeBig(block.BaseFeePerGas)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	transactionCount := len(block.Transactions)
+
+	blockBurned := big.NewInt(0)
+	blockTips := big.NewInt(0)
+
+	blockReward := getBaseReward(blockNumber)
+
+	for n, uncleHash := range block.Uncles {
+		var raw json.RawMessage
+		raw, err := rpcClient.CallContext(
+			"2.0",
+			"eth_getUncleByBlockNumberAndIndex",
+			blockNumberHex,
+			hexutil.EncodeUint64(uint64(n)),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		uncle := Block{}
+		err = json.Unmarshal(raw, &uncle)
+		if err != nil {
+			return nil, err
+		}
+		if uncleHash != uncle.Hash {
+			err = fmt.Errorf("uncle hash doesn't match: have %s and want %s\n", uncleHash, uncle.Hash)
+			return nil, err
+		}
+
+		uncleBlockNumber, err := hexutil.DecodeUint64(uncle.Number)
+		if err != nil {
+			return nil, err
+		}
+
+		uncleMinerReward := getBaseReward(blockNumber)
+		blockDiffFactor := big.NewInt(int64(uncleBlockNumber) - int64(blockNumber) + 8)
+		uncleMinerReward.Mul(&uncleMinerReward, blockDiffFactor)
+		uncleMinerReward.Div(&uncleMinerReward, big.NewInt(8))
+
+		uncleInclusionReward := getBaseReward(blockNumber)
+		uncleInclusionReward.Div(&uncleInclusionReward, big.NewInt(32))
+
+		blockReward.Add(&blockReward, &uncleMinerReward)
+		blockReward.Add(&blockReward, &uncleInclusionReward)
+	}
+
+	for _, tHash := range block.Transactions {
+		var raw json.RawMessage
+		raw, err := rpcClient.CallContext(
+			"2.0",
+			"eth_getTransactionReceipt",
+			tHash,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		receipt := TransactionReceipt{}
+		err = json.Unmarshal(raw, &receipt)
+		if err != nil {
+			return nil, err
+		}
+
+		if receipt.BlockNumber == "" {
+			log.Warnf("block %d: found empty transaction receipt\n", blockNumber)
+			break
+		}
+		gasUsed, err := hexutil.DecodeBig(receipt.GasUsed)
+		if err != nil {
+			return nil, err
+		}
+
+		effectiveGasPrice := big.NewInt(0)
+
+		if receipt.EffectiveGasPrice != "" {
+			effectiveGasPrice, err = hexutil.DecodeBig(receipt.EffectiveGasPrice)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		burned := big.NewInt(0)
+		burned.Mul(gasUsed, baseFee)
+
+		tips := big.NewInt(0)
+		tips.Mul(gasUsed, effectiveGasPrice)
+		tips.Sub(tips, burned)
+
+		blockBurned.Add(blockBurned, burned)
+		blockTips.Add(blockTips, tips)
+
+		// log.Printf("transactionHash: %s, gasUsed: %d, burned: %d, tips: %d\n", tHash, gasUsed, burned, tips)
+
+	}
+
+	blockDetails := &sql.BlockDetails{
+		Block:        uint(blockNumber),
+		Timestamp:    header.Time,
+		Burned:       hexutil.EncodeBig(blockBurned),
+		Tips:         hexutil.EncodeBig(blockTips),
+		Issued:       hexutil.EncodeBig(&blockReward),
+		Transactions: uint(transactionCount),
+	}
+
+	duration := time.Since(start)
+
+	log.Printf("block: %d, issued: %s, baseFee: %d, burned: %s, tips: %s duration: %s, transactions: %d\n", blockNumber, blockReward.String(), baseFee, blockBurned.String(), blockTips.String(), duration, transactionCount)
+
+	return blockDetails, nil
+}
+
+func UpdateBlockBurnedAndTips(rpcClient *rpcClient, blockNumberHex string) (int64, int64, int, error) {
+	var blockBurned, blockTips int64
 
 	var raw json.RawMessage
 	raw, err := rpcClient.CallContext(
@@ -615,27 +781,33 @@ func UpdateBlockBurnedAndTips(rpcClient *rpcClient, blockNumberHex string) (uint
 	)
 	if err != nil {
 		log.Printf("%v\n", err)
-		return 0, 0, err
+		return 0, 0, 0, err
 	}
 
 	block := Block{}
 	err = json.Unmarshal(raw, &block)
 	if err != nil {
-		return 0, 0, err
+		return 0, 0, 0, err
+	}
+
+	header := types.Header{}
+	err = json.Unmarshal(raw, &header)
+	if err != nil {
+		return 0, 0, 0, err
 	}
 
 	blockNumber, err := hexutil.DecodeUint64(blockNumberHex)
 	if err != nil {
-		return 0, 0, err
+		return 0, 0, 0, err
 	}
 
 	if block.BaseFeePerGas == "" {
-		return 0, 0, nil
+		return 0, 0, 0, nil
 	}
 
 	baseFee, err := hexutil.DecodeUint64(block.BaseFeePerGas)
 	if err != nil {
-		return 0, 0, err
+		return 0, 0, 0, err
 	}
 
 	transactionCount := len(block.Transactions)
@@ -650,7 +822,7 @@ func UpdateBlockBurnedAndTips(rpcClient *rpcClient, blockNumberHex string) (uint
 			tHash,
 		)
 		if err != nil {
-			return 0, 0, err
+			return 0, 0, 0, err
 		}
 
 		// fmt.Printf("BURNED: block: %s\n", string(raw))
@@ -658,24 +830,24 @@ func UpdateBlockBurnedAndTips(rpcClient *rpcClient, blockNumberHex string) (uint
 		receipt := TransactionReceipt{}
 		err = json.Unmarshal(raw, &receipt)
 		if err != nil {
-			return 0, 0, err
+			return 0, 0, 0, err
 		}
 
 		gasUsed, err := hexutil.DecodeUint64(receipt.GasUsed)
 		if err != nil {
-			return 0, 0, err
+			return 0, 0, 0, err
 		}
 
 		effectiveGasPrice, err := hexutil.DecodeUint64(receipt.EffectiveGasPrice)
 		if err != nil {
-			return 0, 0, err
+			return 0, 0, 0, err
 		}
 
 		burned := gasUsed * baseFee
 		tips := gasUsed*effectiveGasPrice - burned
 
-		blockBurned += burned
-		blockTips += tips
+		blockBurned += int64(burned)
+		blockTips += int64(tips)
 
 		// log.Printf("transactionHash: %s, gasUsed: %d, burned: %d, tips: %d\n", tHash, gasUsed, burned, tips)
 
@@ -689,7 +861,7 @@ func UpdateBlockBurnedAndTips(rpcClient *rpcClient, blockNumberHex string) (uint
 	globalBlockTips.v[blockNumber] = blockTips
 	globalBlockTips.mu.Unlock()
 
-	return blockBurned, blockTips, nil
+	return blockBurned, blockTips, transactionCount, nil
 }
 
 type BlockWithTransactions struct {
@@ -786,3 +958,39 @@ type TransactionReceipt struct {
 	TransactionIndex string `json:"transactionIndex"`
 	Type             string `json:"type"`
 }
+
+func getBaseReward(blockNum uint64) big.Int {
+	baseReward := big.NewInt(0)
+	if blockNum >= 7_280_000 {
+		constantinopleReward := big.NewInt(2000000000000000000)
+		baseReward.Add(baseReward, constantinopleReward)
+		return *baseReward
+	}
+
+	if blockNum >= 4_370_000 {
+		byzantiumReward := big.NewInt(3000000000000000000)
+		baseReward.Add(baseReward, byzantiumReward)
+		return *baseReward
+	}
+
+	genesisReward := big.NewInt(5000000000000000000)
+	baseReward.Add(baseReward, genesisReward)
+	return *baseReward
+}
+
+//func getBaseReward(blockNum uint64) big.Int {
+//	baseReward := big.Int(0)
+//	if blockNum >= 4230000 {
+//		constantinopleReward := big.NewInt(2000000000000000000)
+//		baseReward.Add(baseReward, constantinopleReward)
+//	} else if blockNum >= 1700000 {
+//		byzantiumReward := big.NewInt(3000000000000000000)
+//		baseReward.Add(baseReward, constantinopleReward)
+//	} else {
+//		genesisReward := big.NewInt(5000000000000000000)
+//		baseReward.Add(baseReward, genesisReward)
+//	}
+//
+//	return baseReward
+
+//}
