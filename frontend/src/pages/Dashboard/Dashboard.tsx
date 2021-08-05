@@ -10,7 +10,6 @@ import {
   useBlockExplorer,
 } from "../../contexts/BlockExplorerContext";
 import { Loader } from "../../organisms/Loader";
-import { useCurrency } from "../../contexts/CurrencyContext";
 import { useEthereum } from "../../contexts/EthereumContext";
 import { layoutConfig } from "../../layoutConfig";
 import { useMobileDetector } from "../../contexts/MobileDetectorContext";
@@ -54,16 +53,15 @@ function DashboardLayout({ children }: { children: React.ReactNode; }) {
 
 export function Dashboard() {
   const { details, session, blocks } = useBlockExplorer();
-  const { currency, amount } = useCurrency();
   const { eth } = useEthereum();
   const { isMobile } = useMobileDetector();
 
   if (!eth) return <Loader>connecting to network ...</Loader>;
-  if (!currency || !amount) return <Loader>Loading Currency</Loader>
   if (!details) return <Loader>Loading Details</Loader>
   if (!session) return <Loader>Loading Session</Loader>
   if (!blocks) return <Loader>Loading Blocks</Loader>
 
+  const amount = 1;
   const latestBlock = blocks[0];
   const activated = latestBlock.number > eth.connectedNetwork.genesis
 

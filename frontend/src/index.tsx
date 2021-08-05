@@ -6,7 +6,6 @@ import { ChakraProvider, ColorModeScript, CSSReset } from '@chakra-ui/react';
 import customTheme from './theme';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { BlockExplorerProvider } from './contexts/BlockExplorerContext';
-import { CurrencyProvider } from './contexts/CurrencyContext';
 import { MobileDetectorProvider } from './contexts/MobileDetectorContext';
 
 function App() {
@@ -23,11 +22,9 @@ function App() {
         <SettingsProvider>
           <EthereumProvider url={url}>
             <BlockExplorerProvider>
-              <CurrencyProvider>
-                <MobileDetectorProvider>
-                  <Routing />
-                </MobileDetectorProvider>
-              </CurrencyProvider>
+              <MobileDetectorProvider>
+                <Routing />
+              </MobileDetectorProvider>
             </BlockExplorerProvider>
           </EthereumProvider>
         </SettingsProvider>
