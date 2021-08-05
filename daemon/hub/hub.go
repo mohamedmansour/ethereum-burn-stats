@@ -135,6 +135,7 @@ func New(
 			log.Errorf("Error %v\n", err)
 			return nil, err
 		}
+		log.Infof("Highest stored block in DB: %d", highestBlock)
 		latestBlockNumber := blockNumber.Uint64()
 		currentBlock := uint64(highestBlock) + uint64(1)
 		if startingblock >= 0 && uint(startingblock) > highestBlock {
