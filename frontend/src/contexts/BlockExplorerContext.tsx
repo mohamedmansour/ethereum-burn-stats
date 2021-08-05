@@ -28,9 +28,15 @@ export interface BlockExplorerDetails {
 }
 
 type BlockExplorerContextType = {
-  details?: BlockExplorerDetails,
+  details?: BlockExplorerDetails
   blocks?: BlockStats[]
   session?: BlockExplorerSession
+  clients?: number
+}
+
+interface NewClientsAction {
+  type: 'NEW_CLIENTS'
+  count: number
 }
 
 interface NewBlockAction {
@@ -47,6 +53,7 @@ interface InitAction {
 }
 
 type ActionType =
+  | NewClientsAction
   | NewBlockAction
   | InitAction
 
@@ -98,6 +105,9 @@ const useBlockExplorer = () => useContext(BlockExplorerContext);
 
 const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionType): BlockExplorerContextType => {
   switch (action.type) {
+    case 'NEW_CLIENTS': {
+      return {...state, clients: action.count };
+    }
     case 'NEW_BLOCK': {
       if (!state.details || !action.block || !action.details || !state.session)
         return state
@@ -161,6 +171,13 @@ const BlockExplorerProvider = ({
     if (!eth)
       return
 
+    const onClient = (count: number) => {
+      dispatch({ 
+        type: 'NEW_CLIENTS',
+        count
+      }) 
+    };
+
     const onNewBlockHeader = async (block: BlockStats) => {
       dispatch({ 
         type: 'NEW_BLOCK', 
@@ -168,7 +185,7 @@ const BlockExplorerProvider = ({
           totalBurned: BigNumber.from(0),
           gasPrice: BigNumber.from(0),
           currentBlock: block.number,
-          currentBaseFee: block.baseFee
+          currentBaseFee: block.baseFee,
         }, 
         block, 
         maxBlocksToRender 
@@ -197,11 +214,15 @@ const BlockExplorerProvider = ({
         dispatch({ type: 'INIT', details, blocks })
       }
       eth.on('block', onNewBlockHeader)
+      eth.on('client', onClient)
     }
 
     init()
     
-    return () => { eth.off('block', onNewBlockHeader) }
+    return () => { 
+      eth.off('block', onNewBlockHeader)
+      eth.off('client', onClient)
+    }
   }, [eth, maxBlocksToRender])
 
   return (

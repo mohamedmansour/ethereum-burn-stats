@@ -52,7 +52,7 @@ function DashboardLayout({ children }: { children: React.ReactNode; }) {
 }
 
 export function Dashboard() {
-  const { details, session, blocks } = useBlockExplorer();
+  const { details, session, blocks, clients } = useBlockExplorer();
   const { eth } = useEthereum();
   const { isMobile } = useMobileDetector();
 
@@ -73,7 +73,7 @@ export function Dashboard() {
         {activated && <CardLiveChart blocks={blocks} />}
         <CardTotalBurned totalBurned={details.totalBurned} amount={amount} />
         <CardCurrentSession session={session} amount={amount} />
-        <CardLatestStats details={details} />
+        <CardLatestStats details={details} clients={clients} />
         <CardBlocks activated={activated} />
         <CardDonate type={CardDonateType.BottomSideBar}/>
       </DashboardLayout>
@@ -87,7 +87,7 @@ export function Dashboard() {
           <CardDonate type={CardDonateType.TopSideBar} />
           <CardTotalBurned totalBurned={details.totalBurned} amount={amount} />
           <CardCurrentSession session={session} amount={amount} />
-          <CardLatestStats details={details} />
+          <CardLatestStats details={details} clients={clients} />
           <CardDonate type={CardDonateType.BottomSideBar}/>
         </Flex>
         <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>

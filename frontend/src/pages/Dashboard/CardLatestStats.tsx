@@ -5,25 +5,18 @@ import { BlockExplorerDetails } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
 import { layoutConfig } from "../../layoutConfig";
-import { useEthereum } from "../../contexts/EthereumContext";
 import { FirePit } from "../../atoms/FirePit";
 
-export function CardLatestStats({ details }: { details: BlockExplorerDetails; }) {
-  const { eth } = useEthereum();
-  const [count, setCount] = useState<number | undefined>();
+export function CardLatestStats({ details, clients }: { details: BlockExplorerDetails; clients: number | undefined }) {
+  const [count, setCount] = useState<number | undefined>(clients);
 
   useEffect(() => {
-    if (!eth) {
+    if (!clients) {
       return;
     }
 
-    const onClient = (count: number) => setCount(count);
-
-    eth.on('client', onClient)
-    return () => {
-      eth.off('client', onClient)
-    }
-  }, [eth]);
+    setCount(clients);
+  }, [clients]);
 
   return (
     <Card gridGap={layoutConfig.miniGap}>
