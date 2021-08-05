@@ -1,4 +1,4 @@
-import { Text, HStack, Icon, Box, Link, Tbody, Td, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList } from "@chakra-ui/react";
+import { Text, HStack, Icon, Box, Link, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList } from "@chakra-ui/react";
 import { Link as ReactLink } from "react-router-dom";
 import { FaCubes } from 'react-icons/fa';
 import { VscInfo } from "react-icons/vsc";
@@ -6,7 +6,7 @@ import { BlockProgress } from "../../atoms/BlockProgress";
 import { Card } from "../../atoms/Card";
 import { FirePit } from "../../atoms/FirePit";
 import { TablePlus, TdPlus, ThPlus } from "../../atoms/TablePlus";
-import { BurnedBlockTransaction, useBlockExplorer } from "../../contexts/BlockExplorerContext";
+import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { BigNumberText } from "../../organisms/BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
 import { Loader } from "../../organisms/Loader";

@@ -1,5 +1,5 @@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Flex, Grid, GridItem, Heading, Text, VStack } from "@chakra-ui/react";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "ethers";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useParams, Link as ReactLink } from "react-router-dom";

@@ -119,7 +119,6 @@ export function EthBlockDetail() {
   ) : undefined;
 
   const dtf = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'long', timeStyle: 'long' });
-  const activated = Number(id) > eth.connectedNetwork.genesis
   
   return (
     <Flex flex="1" direction="column" m={layoutConfig.gap} gridGap={layoutConfig.gap}>
