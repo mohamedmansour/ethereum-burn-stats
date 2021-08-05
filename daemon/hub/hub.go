@@ -207,6 +207,10 @@ func New(
 			case err := <-sub.Err():
 				log.Errorln("Error: ", err)
 			case header := <-headers:
+				latestBlockNumber := latestBlock.getBlockNumber()
+				if latestBlockNumber.Cmp(header.Number) == 0 {
+					continue
+				}
 				blockStats, err := UpdateBlockStats(rpcClient, toBlockNumArg(header.Number))
 				if err != nil {
 					log.Errorf("Error getting block stats: %v\n", err)
