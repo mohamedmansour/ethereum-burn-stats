@@ -4,6 +4,7 @@ import { BlockExplorerSession } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
 import { layoutConfig } from "../../layoutConfig";
+import { Zero } from "../../utils/number";
 
 export function CardCurrentSession({ session, amount }: { session: BlockExplorerSession; amount: number; }) {
   return (
@@ -36,7 +37,7 @@ export function CardCurrentSession({ session, amount }: { session: BlockExplorer
       </HStack>
       <HStack>
         <Text flex={1}>Highest Base Fee</Text>
-        <BigNumberText number={session.maxBaseFee} fontSize={16} />
+        <BigNumberText number={session.maxBaseFee.isNegative() ? Zero() : session.maxBaseFee} fontSize={16} />
       </HStack>
     </Card>
   );
