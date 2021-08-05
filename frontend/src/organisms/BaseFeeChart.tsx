@@ -36,12 +36,6 @@ const chartToTypeMapping = {
   transactions: 'transactions'
 }
 
-const chartTypeToName = {
-  "tips & burned": "tips",
-  "basefee": "base fee",
-  "transactions": "burned",
-}
-
 interface ChartData {
   points: any[]
   chartType: ChartType
