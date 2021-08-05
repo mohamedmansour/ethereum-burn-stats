@@ -9,7 +9,7 @@ export function CardLiveChart({ blocks }: { blocks: BlockStats[]; }) {
   return (
     <Card
       gridGap={layoutConfig.miniGap}
-      minH={150}
+      minH={200}
       h={["auto", "auto", 300]} flexShrink={0}
     >
       <HStack>
