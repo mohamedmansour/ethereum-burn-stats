@@ -28,9 +28,9 @@ type BlockStatsMap struct {
 	v  map[uint64]sql.BlockStats
 }
 
-type BlockCounter struct {
+type TotalCounter struct {
 	mu sync.Mutex
-	v  map[uint64]int64
+	v  *big.Int
 }
 
 var londonBlock = uint64(12_965_000)
@@ -38,8 +38,8 @@ var constantinopleBlock = uint64(7_280_000)
 var byzantiumBlock = uint64(4_370_000)
 
 var globalBlockStats = BlockStatsMap{v: make(map[uint64]sql.BlockStats)}
-var globalTotalBurned = BlockCounter{v: make(map[uint64]int64)}
-var globalTotalTips = BlockCounter{v: make(map[uint64]int64)}
+var globalTotalBurned = TotalCounter{} //v: big.Int}
+var globalTotalTips = TotalCounter{}   //v: big.Int}
 
 type Hub interface {
 	ListenAndServe(addr string) error
@@ -71,7 +71,6 @@ func New(
 	gethEndpointWebsocket string,
 	dbPath string,
 	initializedb bool,
-	startingblock int,
 	ropsten bool,
 ) (Hub, error) {
 	upgrader := &websocket.Upgrader{
@@ -90,6 +89,14 @@ func New(
 		constantinopleBlock = uint64(4_230_000)
 		byzantiumBlock = uint64(1_700_000)
 	}
+
+	globalTotalBurned.mu.Lock()
+	globalTotalBurned.v = big.NewInt(0)
+	globalTotalBurned.mu.Unlock()
+
+	globalTotalTips.mu.Lock()
+	globalTotalTips.v = big.NewInt(0)
+	globalTotalTips.mu.Unlock()
 
 	subscription := make(chan map[string]interface{})
 	clients := make(map[*client]bool)
@@ -135,16 +142,31 @@ func New(
 			return nil, err
 		}
 		log.Infof("Highest stored block in DB: %d", highestBlock)
+
+		burned, tips, err := db.GetTotals()
+		if err != nil {
+			log.Errorf("Error getting totals from database:%v\n", err)
+			return nil, err
+		}
+
+		log.Printf("Totals: %s burned and %s tips\n", burned.String(), tips.String())
+
+		globalTotalBurned.mu.Lock()
+		globalTotalBurned.v.Add(globalTotalBurned.v, burned)
+		globalTotalBurned.mu.Unlock()
+
+		globalTotalTips.mu.Lock()
+		globalTotalTips.v.Add(globalTotalTips.v, tips)
+		globalTotalTips.mu.Unlock()
+
 		latestBlockNumber := blockNumber.Uint64()
 		currentBlock := uint64(highestBlock) + uint64(1)
-		if startingblock >= 0 && uint(startingblock) > highestBlock {
-			currentBlock = uint64(startingblock)
+		if currentBlock == 1 {
+			currentBlock = londonBlock
 		}
 
 		counter := uint64(0)
-		//for b := uint64(10499401); b <= blockNumber.Uint64(); b++ {
-
-		for { //b := uint64(startingBlock); b <= blockNumber.Uint64(); b++ {
+		for {
 			counter++
 			_, err := UpdateBlockStats(rpcClient, hexutil.EncodeUint64(uint64(currentBlock)))
 			if err != nil {
@@ -152,7 +174,7 @@ func New(
 				return nil, err
 			}
 
-			if counter == 100 || currentBlock == uint64(latestBlockNumber) {
+			if counter == 10 || currentBlock == uint64(latestBlockNumber) {
 				var batchStats []sql.BlockStats
 				for counter > 0 {
 					batchStats = append(batchStats, globalBlockStats.v[currentBlock+1-counter])
@@ -186,6 +208,7 @@ func New(
 			}
 			currentBlock++
 		}
+
 	}
 
 	log.Infof("Initialize gethRPCClientWebsocket '%s'", gethEndpointWebsocket)
@@ -227,8 +250,6 @@ func New(
 	}(latestBlock)
 
 	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
-		// "debug_burned":         handleFunc(rpcClient),
-
 		"eth_blockNumber": ethBlockNumber(
 			rpcClient,
 			latestBlock,
@@ -242,9 +263,8 @@ func New(
 		"eth_syncing":              handleFunc(rpcClient),
 		"eth_getBalance":           handleFunc(rpcClient),
 
-		"internal_getBurned": getBurned(rpcClient),
-		//"internal_getTips":   getTips(rpcClient),
 		"internal_getBlockStats": getBlockStats(rpcClient),
+		"internal_getTotals":     getTotals(rpcClient),
 
 		"eth_subscribe":   ethSubscribe(),
 		"eth_unsubscribe": ethUnsubscribe(),
@@ -554,52 +574,11 @@ func toBlockNumArg(number *big.Int) string {
 	return hexutil.EncodeBig(number)
 }
 
-func getBurned(
+func getTotals(
 	rpcClient *rpcClient,
 ) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-		b, err := message.Params.MarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-
-		var params []interface{}
-		err = json.Unmarshal(b, &params)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(params) == 0 {
-			return nil, fmt.Errorf("no parameters provided %s", message.Method)
-		}
-
-		var blockStartHex string
-
-		blockStartHex, ok := params[0].(string)
-		if !ok {
-			return nil, fmt.Errorf("starting block is not a string - %v", params[0])
-		}
-
-		blockNumber, err := hexutil.DecodeUint64(blockStartHex)
-		if err != nil {
-			return nil, err
-		}
-
-		var blockStats sql.BlockStats
-
-		if blockStats, ok = globalBlockStats.v[blockNumber]; !ok {
-			blockStats, err = UpdateBlockStats(rpcClient, hexutil.EncodeUint64(blockNumber))
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		burned, err := hexutil.DecodeBig(blockStats.Burned)
-		if err != nil {
-			return nil, err
-		}
-
-		return json.RawMessage(fmt.Sprintf("\"%s\"", hexutil.EncodeBig(burned))), nil
+		return json.RawMessage(fmt.Sprintf("{\"burned\": \"%s\", \"tipped\": \"%s\"}", hexutil.EncodeBig(globalTotalBurned.v), hexutil.EncodeBig((globalTotalTips.v)))), nil
 	}
 }
 
@@ -816,6 +795,14 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockSta
 	globalBlockStats.mu.Lock()
 	globalBlockStats.v[blockNumber] = blockStats
 	globalBlockStats.mu.Unlock()
+
+	globalTotalBurned.mu.Lock()
+	globalTotalBurned.v.Add(globalTotalBurned.v, blockBurned)
+	globalTotalBurned.mu.Unlock()
+
+	globalTotalTips.mu.Lock()
+	globalTotalTips.v.Add(globalTotalTips.v, blockTips)
+	globalTotalTips.mu.Unlock()
 
 	// duration := time.Since(start) / time.Millisecond
 	// log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)

@@ -1,7 +1,13 @@
 package sql
 
 import (
+
 	//"github.com/ethereum/go-ethereum/core/types"
+
+	"fmt"
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -45,3 +51,30 @@ func (d *Database) GetHighestBlock() (uint, error) {
 	return blockStats[0].Number, nil
 }
 
+func (d *Database) GetTotals() (*big.Int, *big.Int, error) {
+	var blockStats []BlockStats
+
+	totalBurned := big.NewInt(0)
+	totalTips := big.NewInt(0)
+
+	result := d.db.Find(&blockStats)
+	if result.Error != nil {
+		return totalBurned, totalTips, nil
+	}
+
+	for _, block := range blockStats {
+		burned, err := hexutil.DecodeBig(block.Burned)
+		if err != nil {
+			return totalBurned, totalTips, fmt.Errorf("block.Burned was not a hex - %s", block.Burned)
+		}
+		totalBurned.Add(totalBurned, burned)
+
+		tips, err := hexutil.DecodeBig(block.Tips)
+		if err != nil {
+			return totalBurned, totalTips, fmt.Errorf("block.Burned was not a hex - %s", block.Tips)
+		}
+		totalTips.Add(totalBurned, tips)
+	}
+
+	return totalBurned, totalTips, nil
+}
