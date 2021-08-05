@@ -689,7 +689,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockSta
 		return blockStats, err
 	}
 
-	if blockNumber > 10_499_401 {
+	if blockNumber > londonBlock {
 		gasTarget.Div(gasTarget, big.NewInt(2))
 	}
 
