@@ -70,16 +70,16 @@ const safeBurned = async (eth: EthereumApi, blockNumber: number, fetchTotal: boo
 const safeTotalBurned = (eth: EthereumApi, blockNumber: number) => safeBurned(eth, blockNumber, true)
 
 export const BlockExplorerApi = {
-  fetchDetails: async (eth:  EthereumApi, block: BurnedBlockTransaction, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
+  fetchDetails: async (eth:  EthereumApi, block: BlockStats, skipTotalBurned = false): Promise<BlockExplorerDetails> => {
     const totalBurned = skipTotalBurned ? Zero() : await safeTotalBurned(eth, block.number)
-    const gasPrice = await eth.getGasPrice()
     return {
       currentBlock: block.number,
       totalBurned,
-      gasPrice,
-      currentBaseFee: block.basefee
+      gasPrice: Zero(),
+      currentBaseFee: block.baseFee
     }
   },
+
   fetchBlock: async (eth:  EthereumApi, blockNumber: number): Promise<BurnedBlockTransaction | undefined> => {
     const block = await eth.getBlock(blockNumber)
     if (block) {
@@ -192,19 +192,13 @@ const BlockExplorerProvider = ({
       return
 
     const onNewBlockHeader = async (block: BlockStats) => {
-      // const blockWithExtras = await BlockExplorerApi.fetchBlockExtra(eth, block)
-      // if (!blockWithExtras)
-      //   return
-
-      //const details = await BlockExplorerApi.fetchDetails(eth, blockWithExtras, true)
-
       dispatch({ 
         type: 'NEW_BLOCK', 
         details: {
           totalBurned: BigNumber.from(0),
           gasPrice: BigNumber.from(0),
-          currentBlock: 0,
-          currentBaseFee: BigNumber.from(0)
+          currentBlock: block.number,
+          currentBaseFee: block.baseFee
         }, 
         block, 
         maxBlocksToRender 
@@ -228,13 +222,9 @@ const BlockExplorerProvider = ({
     const init = async () => {
       const blocks = await prefetchBlockHeaders(10 /* Ease the server a bit so only 5 initial */)
       if (blocks.length) {
-        // const details = await BlockExplorerApi.fetchDetails(eth, blocks[0])
-        dispatch({ type: 'INIT', details: {
-          totalBurned: BigNumber.from(0),
-          gasPrice: BigNumber.from(0),
-          currentBlock: 0,
-          currentBaseFee: BigNumber.from(0)
-        }, blocks })
+        const block = blocks[0]
+        const details = await BlockExplorerApi.fetchDetails(eth, block)
+        dispatch({ type: 'INIT', details, blocks })
       }
       eth.on('block', onNewBlockHeader)
     }
