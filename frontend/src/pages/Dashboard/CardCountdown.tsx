@@ -7,6 +7,7 @@ import { Card } from "../../atoms/Card";
 import { useEffect, useState } from "react";
 import { useEthereum } from "../../contexts/EthereumContext";
 import { ActivationObj } from "./Dashboard";
+import { layoutConfig } from "../../layoutConfig";
 
 export function CardCountdown({ genesisBlock, currentBlock }: { genesisBlock: number; currentBlock: number; }) {
   const { eth } = useEthereum();
@@ -47,7 +48,7 @@ export function CardCountdown({ genesisBlock, currentBlock }: { genesisBlock: nu
   }
 
   return (
-    <Card gridGap={4} w="100%" textAlign="center">
+    <Card gridGap={layoutConfig.miniGap} w="100%" textAlign="center">
       <HStack>
         <Icon as={FaClock} />
         <Text fontSize="md" fontWeight="bold">

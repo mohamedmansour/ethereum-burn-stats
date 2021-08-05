@@ -12,11 +12,12 @@ import {
 import { Card } from "../../atoms/Card";
 import { ImHeart } from "react-icons/im";
 import { VscHeart } from "react-icons/vsc";
+import { layoutConfig } from "../../layoutConfig";
 
 export function CardDonate() {
   if (process.env.REACT_APP_SHOW_SERVER_SPONSOR === "true") {
     return (
-      <Card gridGap={4}>
+      <Card gridGap={layoutConfig.miniGap}>
         <HStack pr={10}>
           <Icon as={VscHeart} />
           <Text fontSize="md" fontWeight="bold">
@@ -35,7 +36,7 @@ export function CardDonate() {
     )
   }
   return (
-    <Card gridGap={4}>
+    <Card gridGap={layoutConfig.miniGap}>
       <HStack pr={10}>
         <Icon as={ImHeart} color="brand.orange" />
         <Text fontSize="md" fontWeight="bold">

@@ -29,7 +29,7 @@ const theme = extendTheme({
       baseStyle: {
         display: "flex",
         flexDirection: "column",
-        px: "2",
+        px: "4",
         py: "3",
         rounded: "md",
         bg: "brand.card",
@@ -49,6 +49,14 @@ const theme = extendTheme({
       defaultProps: {
         variant: "sticky",
       },
+    },
+    TdPlus: {
+      baseStyle: {
+        pt: 3,
+        pb: 3,
+        pr: 4,
+        pl: 4,
+      }
     },
     ThPlus: {
       variants: {

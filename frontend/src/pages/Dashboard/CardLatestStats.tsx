@@ -3,10 +3,11 @@ import { FaGasPump } from 'react-icons/fa';
 import { BlockExplorerDetails } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
+import { layoutConfig } from "../../layoutConfig";
 
 export function CardLatestStats({ details }: { details: BlockExplorerDetails; }) {
   return (
-    <Card gridGap={4}>
+    <Card gridGap={layoutConfig.miniGap}>
       <HStack pr={10}>
         <Icon as={FaGasPump} />
         <Text fontSize="md" fontWeight="bold">

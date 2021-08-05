@@ -3,10 +3,11 @@ import { FaWaveSquare } from 'react-icons/fa';
 import { BlockExplorerSession } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
+import { layoutConfig } from "../../layoutConfig";
 
 export function CardCurrentSession({ session, amount }: { session: BlockExplorerSession; amount: number; }) {
   return (
-    <Card gridGap={4}>
+    <Card gridGap={layoutConfig.miniGap}>
       <HStack pr={10}>
         <Icon as={FaWaveSquare} />
         <Text fontSize="md" fontWeight="bold">

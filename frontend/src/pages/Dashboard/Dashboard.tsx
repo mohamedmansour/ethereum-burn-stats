@@ -83,14 +83,14 @@ export function Dashboard() {
 
   return (
     <DashboardLayout>
-      <Flex flex={1} direction="row" gridGap={8}>
-        <Flex direction="column" w={300} flexShrink={0} gridGap={8}>
+      <Flex flex={1} direction="row" gridGap={layoutConfig.gap}>
+        <Flex direction="column" w={300} flexShrink={0} gridGap={layoutConfig.gap}>
           <CardTotalBurned totalBurned={details.totalBurned} amount={amount} />
           <CardCurrentSession session={session} amount={amount} />
           <CardLatestStats details={details} />
           <CardDonate />
         </Flex>
-        <Flex direction="column" flex={1} gridGap={8}>
+        <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>
           {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock.number} />}
           {activated && <CardLiveChart blocks={blocks} />}
           <CardBlocks activated={activated} />

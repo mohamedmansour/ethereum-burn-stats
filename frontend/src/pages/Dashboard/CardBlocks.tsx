@@ -5,13 +5,14 @@ import { VscInfo } from "react-icons/vsc";
 import { BlockProgress } from "../../atoms/BlockProgress";
 import { Card } from "../../atoms/Card";
 import { FirePit } from "../../atoms/FirePit";
-import { TablePlus, ThPlus } from "../../atoms/TablePlus";
+import { TablePlus, TdPlus, ThPlus } from "../../atoms/TablePlus";
 import { BurnedBlockTransaction, useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { BigNumberText } from "../../organisms/BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
 import { Loader } from "../../organisms/Loader";
 import { timeSince } from "../../utils/time";
 import { BlockStats } from "../../contexts/EthereumContext";
+import { layoutConfig } from "../../layoutConfig";
 
 function GasUsedInfo() {
   return (
@@ -29,23 +30,23 @@ function GasUsedInfo() {
 function BlockItem({ activated, block }: { activated: boolean, block: BlockStats }) {
   return (
     <Tr>
-      <Td>
+      <TdPlus>
         <Link
           to={`/block/${block.number}`}
           as={ReactLink}
         >
           {block.number}
         </Link>
-      </Td>
-      <Td><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></Td>
-      <Td textAlign="right"><BigNumberText number={block.tips} /></Td>
-      <Td textAlign="right"><BigNumberText number={block.baseFee} /></Td>
-      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasTarget gasTarget={block.gasTarget} /></HStack></VStack></Td>
-      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsed gasUsed={block.gasUsed} /></HStack></VStack></Td>
-      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack></VStack></Td>
-      <Td textAlign="right"><BigNumberText number={block.rewards} /></Td>
-      <Td textAlign="right">{block.transactions}</Td>
-      <Td textAlign="right">{timeSince(block.timestamp)}</Td>
+      </TdPlus>
+      <TdPlus><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></TdPlus>
+      <TdPlus textAlign="right"><BigNumberText number={block.tips} /></TdPlus>
+      <TdPlus textAlign="right"><BigNumberText number={block.baseFee} /></TdPlus>
+      <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasTarget gasTarget={block.gasTarget} /></HStack></VStack></TdPlus>
+      <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsed gasUsed={block.gasUsed} /></HStack></VStack></TdPlus>
+      <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack></VStack></TdPlus>
+      <TdPlus textAlign="right"><BigNumberText number={block.rewards} /></TdPlus>
+      <TdPlus textAlign="right">{block.transactions}</TdPlus>
+      <TdPlus textAlign="right">{timeSince(block.timestamp)}</TdPlus>
     </Tr>
   );
 }
@@ -60,7 +61,7 @@ export function BlockList({ activated }: { activated: boolean; }) {
     return <Loader>loading blocks ...</Loader>;
 
   return (
-    <Box position="relative" w="100%" h="100%" flex={1} overflow="auto" whiteSpace="nowrap">
+    <Box position="relative" h="100%" flex={1} overflow="auto" whiteSpace="nowrap" ml="-10px" mr="-10px">
       <TablePlus colorScheme="whiteAlpha">
         <Thead>
           <Tr>
@@ -78,10 +79,10 @@ export function BlockList({ activated }: { activated: boolean; }) {
         </Thead>
         <Tbody>
           <Tr>
-            <Td textAlign="left">{details.currentBlock + 1}</Td>
-            <Td colSpan={9}>
+            <TdPlus textAlign="left">{details.currentBlock + 1}</TdPlus>
+            <TdPlus colSpan={9}>
               <BlockProgress />
-            </Td>
+            </TdPlus>
           </Tr>
           {blocks.map((block, idx) => (
             <BlockItem
@@ -98,7 +99,7 @@ export function BlockList({ activated }: { activated: boolean; }) {
 export function CardBlocks({ activated }: { activated: boolean; }) {
   return (
     <Card
-      gridGap={4}
+      gridGap={layoutConfig.miniGap}
       flex={['auto', 'auto', 1]}
       h={[600, 600, "auto"]}
     >

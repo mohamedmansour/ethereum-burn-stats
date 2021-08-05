@@ -3,11 +3,13 @@ import { FaChartLine } from 'react-icons/fa';
 import { Card } from "../../atoms/Card";
 import { BaseFeeChart } from "../../organisms/BaseFeeChart";
 import { BlockStats } from "../../contexts/EthereumContext";
+import { layoutConfig } from "../../layoutConfig";
 
 export function CardLiveChart({ blocks }: { blocks: BlockStats[]; }) {
   return (
     <Card
-      gridGap={4}
+      gridGap={layoutConfig.miniGap}
+      minH={150}
       h={["auto", "auto", 300]} flexShrink={0}
     >
       <HStack>
