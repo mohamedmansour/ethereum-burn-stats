@@ -45,13 +45,3 @@ func (d *Database) GetHighestBlock() (uint, error) {
 	return blockStats[0].Number, nil
 }
 
-//func (d *Database) UpdateBlock(header *types.Header, burned string, tips string, transactions uint) {
-//	d.db.Create(&BlockStats{
-//		Block:        uint(header.Number.Uint64()),
-//		Timestamp:    header.Time,
-//		Burned:       burned,
-//		Issued:       "0x0",
-//		Tips:         tips,
-//		Transactions: transactions,
-//	})
-//}

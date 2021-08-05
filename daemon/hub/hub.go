@@ -20,8 +20,8 @@ import (
 var log = logrus.StandardLogger()
 
 var allowedEthSubscriptions = map[string]bool{
-	"newHeads":   true,
 	"blockStats": true,
+	"clientsCount": true,
 }
 
 type BlockStatsMap struct {
@@ -220,16 +220,14 @@ func New(
 				//log.Infof("new block: %v, burned: %d, tips: %d, clients: %d", header.Number, blockBurned, blockTips, clientsCount)
 				latestBlock.updateBlockNumber(header.Number)
 				subscription <- map[string]interface{}{
-					"newHeads":              header,
 					"blockStats":            blockStats,
-					"internal_clientsCount": clientsCount,
+					"clientsCount":          clientsCount,
 				}
 			}
 		}
 	}(latestBlock)
 
 	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
-		"debug_getBlockReward": handleFunc(rpcClient),
 		"debug_burned":         handleFunc(rpcClient),
 
 		"eth_blockNumber": ethBlockNumber(
@@ -237,7 +235,6 @@ func New(
 			latestBlock,
 		),
 		"eth_chainId":  handleFunc(rpcClient),
-		"eth_gasPrice": handleFunc(rpcClient),
 		"eth_getBlockByNumber": ethGetBlockByNumber(
 			rpcClient,
 			latestBlock,
@@ -584,26 +581,10 @@ func getBurned(
 			return nil, fmt.Errorf("starting block is not a string - %v", params[0])
 		}
 
-		//blockEndHex = blockStartHex
-
-		//if len(params) >= 2 {
-		//	blockEndHex, ok = params[1].(string)
-		//	if !ok {
-		//		return nil, fmt.Errorf("starting block is not a string - %v", params[1])
-		//	}
-		//}
-
 		blockNumber, err := hexutil.DecodeUint64(blockStartHex)
 		if err != nil {
 			return nil, err
 		}
-
-		//blockEnd, err := hexutil.DecodeUint64(blockEndHex)
-		//if err != nil {
-		//	return nil, err
-		//}
-
-		//burned := new(big.Int).SetInt64(0)
 
 		var blockStats sql.BlockStats
 
@@ -657,7 +638,7 @@ func getBlockStats(
 		var blockStats sql.BlockStats
 
 		if blockStats, ok = globalBlockStats.v[blockNumber]; !ok {
-			log.Printf("updating block stats for block #%d\n", blockNumber)
+			// log.Printf("updating block stats for block #%d\n", blockNumber)
 			blockStats, err = UpdateBlockStats(rpcClient, hexutil.EncodeUint64(blockNumber))
 			if err != nil {
 				return nil, err

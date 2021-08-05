@@ -125,8 +125,6 @@ func (c *client) readPump() {
 			continue
 		}
 
-		log.Printf(string(b))
-
 		function, ok := c.hub.handlers[message.Method]
 		if !ok {
 			log.Errorf("Could not find handler for '%s'", message.Method)
@@ -200,7 +198,6 @@ func (c *client) writePump() {
 				return
 			}
 
-			log.Print(string(message))
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {

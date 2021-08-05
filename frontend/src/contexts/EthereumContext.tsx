@@ -267,12 +267,6 @@ export class EthereumApi extends WebSocketProvider {
     return HexToBigNumber(result)
   }
 
-  public async getBlockReward(blockNumberInHex: string): Promise<BigNumber> {
-    const key = `${this.connectedNetwork.chainId}getBlockReward(${blockNumberInHex})`
-    const result = await this.cachedExecutor(key, () => this.send('debug_getBlockReward', [blockNumberInHex]))
-    return HexToBigNumber(result);
-  }
-  
   public async getBlockNumber(): Promise<number> {
     const key = `${this.connectedNetwork.chainId}getBlockNumber()`
     const result = await this.cachedExecutor(key, () => this.send('eth_blockNumber', []), 10000)
@@ -316,12 +310,6 @@ export class EthereumApi extends WebSocketProvider {
     const key = `${this.connectedNetwork.chainId}getTransaction(${hash})`
     const result = await this.cachedExecutor<Transaction>(key, () => this.send('eth_getTransactionByHash', [hash]))
     return EthereumApiFormatters.FormatTransaction(result);
-  }
-
-  public async getGasPrice(): Promise<BigNumber> {
-    const key = `${this.connectedNetwork.chainId}getGasPrice()`
-    const result = await this.cachedExecutor<BigNumber>(key, () => this.send('eth_gasPrice', []), 10000 /* throttle user every 10s */)
-    return HexToBigNumber(result)
   }
 } 
 
