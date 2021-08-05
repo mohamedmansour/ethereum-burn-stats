@@ -14,8 +14,29 @@ import { ImHeart } from "react-icons/im";
 import { VscHeart } from "react-icons/vsc";
 import { layoutConfig } from "../../layoutConfig";
 
-export function CardDonate() {
+
+export enum CardDonateType {
+  TopSideBar,
+  BottomSideBar
+}
+
+export function CardDonate({type}: {type: CardDonateType}) {
   if (process.env.REACT_APP_SHOW_SERVER_SPONSOR === "true") {
+    if (type === CardDonateType.TopSideBar) {
+      return (
+        <Card gridGap={layoutConfig.miniGap} textAlign="center">
+          <Box>
+            <LinkBox>
+              <LinkOverlay href="https://www.nansen.ai" target="_blank" display="flex" justifyContent="center" alignItems="center">
+                <Text color="brand.secondaryText">Sponsored by</Text>
+                <Image src="/sponsor_nansen.png" ml={4}/>
+              </LinkOverlay>
+            </LinkBox>
+          </Box>
+        </Card>
+      )
+    }
+
     return (
       <Card gridGap={layoutConfig.miniGap}>
         <HStack pr={10}>
@@ -29,12 +50,16 @@ export function CardDonate() {
             <LinkOverlay href="https://indexed.finance" target="_blank">
               <Image src="/sponsor_indexed-financed.png" />
             </LinkOverlay>
-            <Text fontSize={12} mt={4}>Thanks to <Link href="https://indexed.finance" target="_blank">https://indexed.finance</Link> who has offered to help support the server costs, so please check them out!</Text>
           </LinkBox>
         </Box>
       </Card>
     )
   }
+
+  if (type === CardDonateType.TopSideBar) {
+    return null;
+  }
+
   return (
     <Card gridGap={layoutConfig.miniGap}>
       <HStack pr={10}>

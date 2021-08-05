@@ -20,7 +20,7 @@ import { CardLatestStats } from "./CardLatestStats";
 import { CardCurrentSession } from "./CardCurrentSession";
 import { CardTotalBurned } from "./CardTotalBurned";
 import { CardCountdown } from "./CardCountdown";
-import { CardDonate } from "./CardDonate";
+import { CardDonate, CardDonateType } from "./CardDonate";
 
 export interface ActivationObj {
   blocksRemaining: number
@@ -70,13 +70,14 @@ export function Dashboard() {
   if (isMobile) {
     return (
       <DashboardLayout>
+        <CardDonate type={CardDonateType.TopSideBar} />
         {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock.number} />}
         {activated && <CardLiveChart blocks={blocks} />}
         <CardTotalBurned totalBurned={details.totalBurned} amount={amount} />
         <CardCurrentSession session={session} amount={amount} />
         <CardLatestStats details={details} />
         <CardBlocks activated={activated} />
-        <CardDonate />
+        <CardDonate type={CardDonateType.BottomSideBar}/>
       </DashboardLayout>
     )
   }
@@ -85,10 +86,11 @@ export function Dashboard() {
     <DashboardLayout>
       <Flex flex={1} direction="row" gridGap={layoutConfig.gap}>
         <Flex direction="column" w={300} flexShrink={0} gridGap={layoutConfig.gap}>
+          <CardDonate type={CardDonateType.TopSideBar} />
           <CardTotalBurned totalBurned={details.totalBurned} amount={amount} />
           <CardCurrentSession session={session} amount={amount} />
           <CardLatestStats details={details} />
-          <CardDonate />
+          <CardDonate type={CardDonateType.BottomSideBar}/>
         </Flex>
         <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>
           {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock.number} />}
