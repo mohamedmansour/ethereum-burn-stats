@@ -29,60 +29,64 @@ interface BigNumberState {
   currency: string
 }
 
+export function BigNumberFormat(props: BigNumberProps) {
+  let bignumber = props.number || Zero();
+  let value = '';
+  let currency = ''
+
+  if (props.forced && props.forced !== 'auto') {
+    value = utils.formatUnits(bignumber, props.forced)
+    currency = props.forced === 'ether' ? 'ETH' : props.forced.toUpperCase()
+  } else if (props.usdConversion && props.usdConversion > 1)  {
+    value = utils.formatEther(bignumber.mul(props.usdConversion).toString())
+    currency = 'USD'
+  } else {
+    const formatter = autoFormatBigNumber(bignumber);
+    value = formatter.value
+    currency = formatter.currency
+  }
+
+  let prettyValue = value
+  let skipCommify = false
+  const decimalPosition = value.indexOf(".");
+  if (decimalPosition !== -1) {
+    const numberOfDecimals = value.length - decimalPosition - 1 /* remove dot */;
+    const decimalValue = value.substr(decimalPosition + 1);
+    if (props.usdConversion && props.usdConversion > 1 && value.startsWith('0.0000')) {
+        prettyValue = '< 0.0000'
+        skipCommify = true
+    } else if (props.doNotShortenDecimals === undefined || !props.doNotShortenDecimals) { 
+      if (parseInt(decimalValue) === 0) {
+        prettyValue = value.substr(0, decimalPosition);
+      } else if (decimalPosition === 1 && numberOfDecimals > 4) {
+        prettyValue = value.substr(0, decimalPosition + 5);
+      } else if (numberOfDecimals > 2) {
+        prettyValue = value.substr(0, decimalPosition + 3);
+      } else if (numberOfDecimals > 1) {
+        prettyValue = value.substr(0, decimalPosition + 2);
+      }
+    }
+  }
+
+  if (!skipCommify) {
+    prettyValue = utils.commify(prettyValue)
+  }
+
+  return {
+    prettyValue,
+    value,
+    currency
+  }
+}
+
 export const BigNumberText = forwardRef<BigNumberProps, "div">(
   (props: BigNumberProps, ref: React.ForwardedRef<any>) => {
     const { number, usdConversion, label, disableTooltip, doNotShortenDecimals, removeCurrencyColor, forced, hideCurrency, ...rest } = props;
     const [state, setState] = useState<BigNumberState | undefined>()
 
     useEffect(() => {
-      let bignumber = number || Zero();
-      let value = '';
-      let currency = ''
-  
-      if (forced && forced !== 'auto') {
-        value = utils.formatUnits(bignumber, forced)
-        currency = forced === 'ether' ? 'ETH' : forced.toUpperCase()
-      } else if (usdConversion && usdConversion > 1)  {
-        value = utils.formatEther(bignumber.mul(usdConversion).toString())
-        currency = 'USD'
-      } else {
-        const formatter = autoFormatBigNumber(bignumber);
-        value = formatter.value
-        currency = formatter.currency
-      }
-  
-      let prettyValue = value
-      let skipCommify = false
-      const decimalPosition = value.indexOf(".");
-      if (decimalPosition !== -1) {
-        const numberOfDecimals = value.length - decimalPosition - 1 /* remove dot */;
-        const decimalValue = value.substr(decimalPosition + 1);
-        if (usdConversion && usdConversion > 1 && value.startsWith('0.0000')) {
-            prettyValue = '< 0.0000'
-            skipCommify = true
-        } else if (doNotShortenDecimals === undefined || !doNotShortenDecimals) { 
-          if (parseInt(decimalValue) === 0) {
-            prettyValue = value.substr(0, decimalPosition);
-          } else if (decimalPosition === 1 && numberOfDecimals > 4) {
-            prettyValue = value.substr(0, decimalPosition + 5);
-          } else if (numberOfDecimals > 2) {
-            prettyValue = value.substr(0, decimalPosition + 3);
-          } else if (numberOfDecimals > 1) {
-            prettyValue = value.substr(0, decimalPosition + 2);
-          }
-        }
-      }
-    
-      if (!skipCommify) {
-        prettyValue = utils.commify(prettyValue)
-      }
-
-      setState({
-        prettyValue,
-        value,
-        currency
-      })
-    }, [number, forced, usdConversion, doNotShortenDecimals]);
+      setState(BigNumberFormat(props))
+    }, [props]);
  
     if (!state) {
       return (

@@ -12,7 +12,7 @@ interface AutoFormatType {
 export function autoFormatBigNumber(
   number: BigNumber
 ): AutoFormatType {
-  let formatted: AutoFormatType = { value: '0', currency: 'GWEI'};
+  let formatted: AutoFormatType = { value: '0', currency: 'WEI'};
 
   if (!number || number.isZero()) {
     return formatted
