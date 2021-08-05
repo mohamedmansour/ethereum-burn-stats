@@ -18,10 +18,9 @@ func ConnectDatabase(dbPath string) (*Database, error) {
 		return nil, err
 	}
 
-	// For now drop table at every run, we need to add some propagation of data
-	// so we don't miss anything on restarts.
-	//db.Migrator().DropTable(&BlockStats{})
-	db.Migrator().CreateTable(&BlockStats{})
+	if !db.Migrator().HasTable(&BlockStats{}) {
+		db.Migrator().CreateTable(&BlockStats{})
+	}
 
 	return &Database{
 		db: db,

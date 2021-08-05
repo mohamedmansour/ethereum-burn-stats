@@ -135,35 +135,53 @@ func New(
 			log.Errorf("Error %v\n", err)
 			return nil, err
 		}
-		startingBlock := highestBlock + 1
+		latestBlockNumber := blockNumber.Uint64()
+		currentBlock := uint64(highestBlock) + uint64(1)
 		if startingblock >= 0 {
-			startingBlock = uint(startingblock)
+			currentBlock = uint64(startingblock)
 		}
 
 		counter := uint64(0)
 		//for b := uint64(10499401); b <= blockNumber.Uint64(); b++ {
-		for b := uint64(startingBlock); b <= blockNumber.Uint64(); b++ {
+
+		for { //b := uint64(startingBlock); b <= blockNumber.Uint64(); b++ {
 			counter++
-			start := time.Now()
-			_, err := UpdateBlockStats(rpcClient, hexutil.EncodeUint64(uint64(b)))
+			_, err := UpdateBlockStats(rpcClient, hexutil.EncodeUint64(uint64(currentBlock)))
 			if err != nil {
 				log.Errorf("Error %v\n", err)
 				return nil, err
 			}
-			if counter == 1000 {
+
+			if counter == 100 || currentBlock == uint64(latestBlockNumber) {
 				var batchStats []sql.BlockStats
 				for counter > 0 {
-					batchStats = append(batchStats, globalBlockStats.v[b+1-counter])
+					batchStats = append(batchStats, globalBlockStats.v[currentBlock+1-counter])
 					counter--
 				}
-				start = time.Now()
 				db.AddBlocks(batchStats)
-				duration := time.Since(start)
-				fmt.Printf("blocks add db: %s\n", duration)
 			}
 
-			duration := time.Since(start)
-			fmt.Printf("block get stats: %s\n", duration)
+			if currentBlock == uint64(latestBlockNumber) {
+				_, err := ethBlockNumber(
+					rpcClient,
+					latestBlock,
+				)(
+					nil,
+					jsonrpcMessage{
+						Version: "2.0",
+						Method:  "eth_blockNumber",
+						Params:  json.RawMessage([]byte("[]")),
+					},
+				)
+				if err != nil {
+					return nil, err
+				}
+
+				blockNumber = latestBlock.getBlockNumber()
+				latestBlockNumber = blockNumber.Uint64()
+				break
+			}
+			currentBlock++
 		}
 	}
 
@@ -649,6 +667,7 @@ func getBlockStats(
 }
 
 func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockStats, error) {
+	start := time.Now()
 	var blockStats sql.BlockStats
 	var raw json.RawMessage
 	raw, err := rpcClient.CallContext(
@@ -811,7 +830,8 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockSta
 	globalBlockStats.v[blockNumber] = blockStats
 	globalBlockStats.mu.Unlock()
 
-	log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String())
+	duration := time.Since(start) / time.Millisecond
+	log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
 
 	return blockStats, nil
 }

@@ -55,7 +55,7 @@ func (c *rpcClient) CallContext(
 	}
 
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Connection", "close")
+	//request.Header.Add("Connection", "close")
 	request.Header.Add("X-Custom-Method", method)
 
 	//Firing the request and receiving response
