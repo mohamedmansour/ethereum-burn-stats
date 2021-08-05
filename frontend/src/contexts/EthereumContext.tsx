@@ -39,6 +39,18 @@ interface AsyncMessage<T> {
   result?: string
 }
 
+export interface BlockStats {
+  baseFee: BigNumber
+  burned: BigNumber
+  gasTarget: BigNumber
+  gasUsed: BigNumber
+  rewards: BigNumber
+  tips: BigNumber
+  number: number
+  timestamp: number
+  transactions: number
+}
+
 export interface BaseBlock {
   baseFeePerGas: BigNumber
   gasLimit: BigNumber
@@ -117,7 +129,7 @@ class WebSocketProvider {
       this.connection.addEventListener("message", this.onMessage.bind(this));
       this.connection.addEventListener("open", () => {
         this.status = WebSocketStatus.CONNECTED;
-        this.send("eth_subscribe", ["newHeads"]).then(() => resolve()).catch(e => reject(e))
+        this.send("eth_subscribe", ["blockStats"]).then(() => resolve()).catch(e => reject(e))
       });
       this.connection.addEventListener("error", (e) => reject(e));
     })
@@ -153,11 +165,11 @@ class WebSocketProvider {
     this.connection.close();
   }
 
-  public on(eventName: 'block', callback: (block: any) => void) {
+  public on(eventName: 'block', callback: (block: BlockStats) => void) {
     this.eventEmitter.on(eventName, callback);
   }
 
-  public off(eventName: 'block', callback: (block: any) => void) {
+  public off(eventName: 'block', callback: (block: BlockStats) => void) {
     this.eventEmitter.off(eventName, callback);
   }
 
@@ -168,7 +180,7 @@ class WebSocketProvider {
       resolve(eventData.result !== undefined ? eventData.result : eventData.params?.result)
       delete this.promiseMap[eventData.id]
     } else if (eventData.method === 'eth_subscription') {
-      this.eventEmitter.emit('block', EthereumApiFormatters.FormatBlock(eventData.params?.result as Block))
+      this.eventEmitter.emit('block', EthereumApiFormatters.FormatBlockStats(eventData.params?.result as BlockStats))
     }
   }
 }
@@ -197,6 +209,19 @@ class EthereumApiFormatters {
     b.timestamp = HexToNumber(b.timestamp)
     b.difficulty = HexToNumber(b.difficulty)
     b.totalDifficulty = HexToNumber(b.totalDifficulty)
+    return b
+  }
+
+  static FormatBlockStats(b: BlockStats): BlockStats {
+    b.baseFee = HexToBigNumber(b.baseFee)
+    b.burned = HexToBigNumber(b.burned)
+    b.gasTarget = HexToBigNumber(b.gasTarget)
+    b.gasUsed = HexToBigNumber(b.gasUsed)
+    b.rewards = HexToBigNumber(b.rewards)
+    b.tips = HexToBigNumber(b.tips)
+    b.number = HexToNumber(b.number)
+    b.timestamp = HexToNumber(b.timestamp)
+    b.transactions = HexToNumber(b.transactions)
     return b
   }
 
@@ -262,6 +287,16 @@ export class EthereumApi extends WebSocketProvider {
     const key = `${this.connectedNetwork.chainId}getBlock(${blockNumberInHex})`
     const result = await this.cachedExecutor<Block>(key, () => this.send('eth_getBlockByNumber', [blockNumberInHex, false]))
     return EthereumApiFormatters.FormatBlock(result) as Block
+  }
+
+  public async getBlockStats(blockNumber: number): Promise<BlockStats> {
+    if (blockNumber < 0)
+      throw Error(`Invalid block of negative value ${blockNumber}`)
+
+    const blockNumberInHex = utils.hexValue(blockNumber)
+    const key = `${this.connectedNetwork.chainId}getBlockStats(${blockNumberInHex})`
+    const result = await this.cachedExecutor<BlockStats>(key, () => this.send('internal_getBlockStats', [blockNumberInHex]))
+    return EthereumApiFormatters.FormatBlockStats(result)
   }
 
   public async getBlockWithTransactions(blockNumber: number): Promise<BlockWithTransactions> {

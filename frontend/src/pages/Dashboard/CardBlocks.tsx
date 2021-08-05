@@ -11,6 +11,7 @@ import { BigNumberText } from "../../organisms/BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
 import { Loader } from "../../organisms/Loader";
 import { timeSince } from "../../utils/time";
+import { BlockStats } from "../../contexts/EthereumContext";
 
 function GasUsedInfo() {
   return (
@@ -25,7 +26,7 @@ function GasUsedInfo() {
   );
 }
 
-function BlockItem({ activated, block }: { activated: boolean, block: BurnedBlockTransaction }) {
+function BlockItem({ activated, block }: { activated: boolean, block: BlockStats }) {
   return (
     <Tr>
       <Td>
@@ -37,13 +38,14 @@ function BlockItem({ activated, block }: { activated: boolean, block: BurnedBloc
         </Link>
       </Td>
       <Td><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></Td>
-      <Td textAlign="right"><BigNumberText number={block.basefee} /></Td>
-      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasTarget gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></HStack></VStack></Td>
-      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsed gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></HStack></VStack></Td>
-      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsedPercent gasUsed={block.gasUsed} gasLimit={block.gasLimit} activated={activated} /></HStack></VStack></Td>
+      <Td textAlign="right"><BigNumberText number={block.tips} /></Td>
+      <Td textAlign="right"><BigNumberText number={block.baseFee} /></Td>
+      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasTarget gasTarget={block.gasTarget} /></HStack></VStack></Td>
+      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsed gasUsed={block.gasUsed} /></HStack></VStack></Td>
+      <Td textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack></VStack></Td>
       <Td textAlign="right"><BigNumberText number={block.rewards} /></Td>
-      <Td textAlign="right">{block.transactions.length}</Td>
-      <Td textAlign="right">{timeSince(block.timestamp as number)}</Td>
+      <Td textAlign="right">{block.transactions}</Td>
+      <Td textAlign="right">{timeSince(block.timestamp)}</Td>
     </Tr>
   );
 }
@@ -64,6 +66,7 @@ export function BlockList({ activated }: { activated: boolean; }) {
           <Tr>
             <ThPlus textAlign="left" width="0.1%">Block</ThPlus>
             <ThPlus>Burned</ThPlus>
+            <ThPlus>Tips</ThPlus>
             <ThPlus>Base Fee</ThPlus>
             <ThPlus>Gas Target</ThPlus>
             <ThPlus><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
@@ -76,7 +79,7 @@ export function BlockList({ activated }: { activated: boolean; }) {
         <Tbody>
           <Tr>
             <Td textAlign="left">{details.currentBlock + 1}</Td>
-            <Td colSpan={8}>
+            <Td colSpan={9}>
               <BlockProgress />
             </Td>
           </Tr>

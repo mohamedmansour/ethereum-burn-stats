@@ -21,7 +21,7 @@ var log = logrus.StandardLogger()
 
 var allowedEthSubscriptions = map[string]bool{
 	"newHeads":              true,
-	"internal_clientsCount": true,
+	"blockStats":            true,
 }
 
 type BlockStatsMap struct {
@@ -60,8 +60,6 @@ type hub struct {
 	unregister chan *client
 
 	handlers map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error)
-
-	db *sql.Database
 }
 
 func New(
@@ -177,16 +175,12 @@ func New(
 				if err != nil {
 					log.Errorf("Error getting block stats: %v\n", err)
 				}
-				blockStatsJson, err := json.Marshal(blockStats)
-				if err != nil {
-					log.Errorf("Error marshaling block stats: %v\n", err)
-				}
 				clientsCount := len(clients)
 				//log.Infof("new block: %v, burned: %d, tips: %d, clients: %d", header.Number, blockBurned, blockTips, clientsCount)
 				latestBlock.updateBlockNumber(header.Number)
 				subscription <- map[string]interface{}{
 					"newHeads":              header,
-					"blockStats":            blockStatsJson,
+					"blockStats":            blockStats,
 					"internal_clientsCount": clientsCount,
 				}
 			}
@@ -281,8 +275,6 @@ func (h *hub) listen() {
 						log.Error(err)
 						continue
 					}
-
-					log.Println(string(b))
 
 					select {
 					case client.send <- b:
@@ -719,7 +711,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockSta
 			return blockStats, err
 		}
 		if uncleHash != uncle.Hash {
-			err = fmt.Errorf("uncle hash doesn't match: have %s and want %s\n", uncleHash, uncle.Hash)
+			err = fmt.Errorf("uncle hash doesn't match: have %s and want %s", uncleHash, uncle.Hash)
 			return blockStats, err
 		}
 
@@ -808,50 +800,6 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockSta
 	return blockStats, nil
 }
 
-//type BlockWithTransactions struct {
-//	BaseFeePerGas   string `json:"baseFeePerGas"`
-//	Difficulty      string `json:"difficulty"`
-//	ExtraData       string `json:"extraData"`
-//	GasLimit        string `json:"gasLimit"`
-//	GasUsed         string `json:"gasUsed"`
-//	Hash            string `json:"hash"`
-//	LogsBloom       string `json:"logsBloom"`
-//	Miner           string `json:"miner"`
-//	MixHash         string `json:"mixHash"`
-//	Nonce           string `json:"nonce"`
-//	Number          string `json:"number"`
-//	ParentHash      string `json:"parentHash"`
-//	ReceiptsRoot    string `json:"receiptsRoot"`
-//	Sha3Uncles      string `json:"sha3Uncles"`
-//	Size            string `json:"size"`
-//	StateRoot       string `json:"stateRoot"`
-//	Timestamp       string `json:"timestamp"`
-//	TotalDifficulty string `json:"totalDifficulty"`
-//	Transactions    []struct {
-//		BlockHash            string        `json:"blockHash"`
-//		BlockNumber          string        `json:"blockNumber"`
-//		From                 string        `json:"from"`
-//		Gas                  string        `json:"gas"`
-//		GasPrice             string        `json:"gasPrice"`
-//		Hash                 string        `json:"hash"`
-//		Input                string        `json:"input"`
-//		Nonce                string        `json:"nonce"`
-//		To                   string        `json:"to"`
-//		TransactionIndex     string        `json:"transactionIndex"`
-//		Value                string        `json:"value"`
-//		Type                 string        `json:"type"`
-//		V                    string        `json:"v"`
-//		R                    string        `json:"r"`
-//		S                    string        `json:"s"`
-//		MaxFeePerGas         string        `json:"maxFeePerGas,omitempty"`
-//		MaxPriorityFeePerGas string        `json:"maxPriorityFeePerGas,omitempty"`
-//		AccessList           []interface{} `json:"accessList,omitempty"`
-//		ChainID              string        `json:"chainId,omitempty"`
-//	} `json:"transactions"`
-//	TransactionsRoot string        `json:"transactionsRoot"`
-//	Uncles           []interface{} `json:"uncles"`
-//}
-
 type Block struct {
 	BaseFeePerGas    string        `json:"baseFeePerGas"`
 	Difficulty       string        `json:"difficulty"`
@@ -921,20 +869,3 @@ func getBaseReward(blockNum uint64) big.Int {
 	baseReward.Add(baseReward, genesisReward)
 	return *baseReward
 }
-
-//func getBaseReward(blockNum uint64) big.Int {
-//	baseReward := big.Int(0)
-//	if blockNum >= 4230000 {
-//		constantinopleReward := big.NewInt(2000000000000000000)
-//		baseReward.Add(baseReward, constantinopleReward)
-//	} else if blockNum >= 1700000 {
-//		byzantiumReward := big.NewInt(3000000000000000000)
-//		baseReward.Add(baseReward, constantinopleReward)
-//	} else {
-//		genesisReward := big.NewInt(5000000000000000000)
-//		baseReward.Add(baseReward, genesisReward)
-//	}
-//
-//	return baseReward
-
-//}

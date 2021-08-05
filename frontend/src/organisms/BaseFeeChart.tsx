@@ -2,11 +2,11 @@ import { Box, FlexOptions, forwardRef, HStack, HTMLChakraProps, Text } from "@ch
 import { utils } from "ethers";
 import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
-import { BurnedBlockTransaction } from "../contexts/BlockExplorerContext";
+import { BlockStats } from "../contexts/EthereumContext";
 import { autoFormatBigNumberToString } from "../utils/wei";
 
 interface BaseFeeChartProps extends HTMLChakraProps<"div">, FlexOptions  {
-  data: BurnedBlockTransaction[]
+  data: BlockStats[]
 }
 
 interface CustomTooltipProps extends TooltipProps<string, string> {
@@ -41,9 +41,9 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
         index: i,
         block: block.number,
         burnedFormatted: autoFormatBigNumberToString(block.burned),
-        basefeeFormatted: autoFormatBigNumberToString(block.basefee),
-        transactions: block.transactions.length,
-        basefee: parseFloat(utils.formatUnits(block.basefee, 'wei'))
+        basefeeFormatted: autoFormatBigNumberToString(block.baseFee),
+        transactions: block.transactions,
+        basefee: parseFloat(utils.formatUnits(block.baseFee, 'wei'))
       }
 
       newData.push(chartData)

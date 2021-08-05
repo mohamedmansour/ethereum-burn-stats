@@ -207,9 +207,9 @@ export function EthBlockDetail() {
                   <Text color="brand.secondaryText">Difficulty:</Text>
                   <Text>{utils.commify(state.block.difficulty)}</Text>
                   <Text color="brand.secondaryText">Gas used:</Text>
-                  <HStack><GasUsed gasUsed={state.block.gasUsed} gasLimit={state.block.gasLimit} activated={activated} /><Text>/</Text><GasUsedPercent gasUsed={state.block.gasUsed} gasLimit={state.block.gasLimit} activated={activated} /></HStack>
+                  <HStack><GasUsed gasUsed={state.block.gasUsed} /><Text>/</Text><GasUsedPercent gasUsed={state.block.gasUsed} gasTarget={state.block.gasTarget} /></HStack>
                   <Text color="brand.secondaryText">Gas target:</Text>
-                  <GasTarget gasUsed={state.block.gasUsed} gasLimit={state.block.gasLimit} activated={activated} />
+                  <GasTarget gasTarget={state.block.gasTarget} />
                   <Text color="brand.secondaryText">Extra data:</Text>
                   <Text wordBreak="break-all" title={'data: ' + state.block.extraData}>
                     {utils.toUtf8String(state.block.extraData, () => 0)}

@@ -1,5 +1,5 @@
 import { useContext, createContext, useEffect } from "react"
-import { Block, EthereumApi, useEthereum } from "./EthereumContext"
+import { Block, BlockStats, EthereumApi, useEthereum } from "./EthereumContext"
 import { BigNumber, utils } from 'ethers'
 import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../organisms/Loader";
@@ -32,21 +32,21 @@ export interface BlockExplorerDetails {
 
 type BlockExplorerContextType = {
   details?: BlockExplorerDetails,
-  blocks?: BurnedBlockTransaction[]
+  blocks?: BlockStats[]
   session?: BlockExplorerSession
 }
 
 interface NewBlockAction {
   type: 'NEW_BLOCK'
   details: BlockExplorerDetails
-  block: BurnedBlockTransaction
+  block: BlockStats
   maxBlocksToRender: number
 }
 
 interface InitAction {
   type: 'INIT'
   details: BlockExplorerDetails
-  blocks: BurnedBlockTransaction[]
+  blocks: BlockStats[]
 }
 
 type ActionType =
@@ -88,6 +88,11 @@ export const BlockExplorerApi = {
 
     return undefined
   },
+
+  fetchBlockStats: async (eth:  EthereumApi, blockNumber: number): Promise<BlockStats | undefined> => {
+    return eth.getBlockStats(blockNumber)
+  },
+
   fetchBlockExtra: async (eth: EthereumApi, block: Block): Promise<BurnedBlockTransaction | undefined> => {
     const baseFeePerGas = block.baseFeePerGas
     const gasLimit = block.gasLimit
@@ -135,7 +140,7 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
 
       state.session.rewards = state.session.rewards.add(action.block.rewards)
       state.session.blockCount = state.session.blockCount + 1
-      state.session.transactionCount = state.session.transactionCount + action.block.transactions.length
+      state.session.transactionCount = state.session.transactionCount + action.block.transactions
 
       const newState: BlockExplorerContextType  = {
         details: { ...action.details,  totalBurned },
@@ -156,8 +161,8 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
       }
       
       action.blocks.map(block => {
-        const basefee = block.baseFeePerGas
-        session.transactionCount += block.transactions.length
+        const basefee = block.baseFee
+        session.transactionCount += block.transactions
         session.burned = block.burned.add(session.burned)
         session.rewards = block.rewards.add(session.rewards)
         session.minBaseFee = BigNumberMin(basefee, session.minBaseFee)
@@ -186,23 +191,33 @@ const BlockExplorerProvider = ({
     if (!eth)
       return
 
-    const onNewBlockHeader = async (block: Block) => {
-      const blockWithExtras = await BlockExplorerApi.fetchBlockExtra(eth, block)
-      if (!blockWithExtras)
-        return
+    const onNewBlockHeader = async (block: BlockStats) => {
+      // const blockWithExtras = await BlockExplorerApi.fetchBlockExtra(eth, block)
+      // if (!blockWithExtras)
+      //   return
 
-      const details = await BlockExplorerApi.fetchDetails(eth, blockWithExtras, true)
+      //const details = await BlockExplorerApi.fetchDetails(eth, blockWithExtras, true)
 
-      dispatch({ type: 'NEW_BLOCK', details, block: blockWithExtras, maxBlocksToRender })
+      dispatch({ 
+        type: 'NEW_BLOCK', 
+        details: {
+          totalBurned: BigNumber.from(0),
+          gasPrice: BigNumber.from(0),
+          currentBlock: 0,
+          currentBaseFee: BigNumber.from(0)
+        }, 
+        block, 
+        maxBlocksToRender 
+      })
     }
 
     const prefetchBlockHeaders = async (blockHeaderCount: number) => {
       const latestBlockNumber = (process.env.REACT_APP_START_BLOCK ? parseInt(process.env.REACT_APP_START_BLOCK) : await eth.getBlockNumber())
 
-      const processedBlocks: BurnedBlockTransaction[] = []
+      const processedBlocks: BlockStats[] = []
       for (var i = 0; i < blockHeaderCount; i++) {
         const blockNumber = Math.max(0, latestBlockNumber - i)
-        const block = await BlockExplorerApi.fetchBlock(eth, blockNumber)
+        const block = await BlockExplorerApi.fetchBlockStats(eth, blockNumber)
         if (block)
           processedBlocks.push(block)
       }
@@ -213,8 +228,13 @@ const BlockExplorerProvider = ({
     const init = async () => {
       const blocks = await prefetchBlockHeaders(10 /* Ease the server a bit so only 5 initial */)
       if (blocks.length) {
-        const details = await BlockExplorerApi.fetchDetails(eth, blocks[0])
-        dispatch({ type: 'INIT', details, blocks })
+        // const details = await BlockExplorerApi.fetchDetails(eth, blocks[0])
+        dispatch({ type: 'INIT', details: {
+          totalBurned: BigNumber.from(0),
+          gasPrice: BigNumber.from(0),
+          currentBlock: 0,
+          currentBaseFee: BigNumber.from(0)
+        }, blocks })
       }
       eth.on('block', onNewBlockHeader)
     }

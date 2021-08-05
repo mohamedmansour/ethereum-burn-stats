@@ -1,10 +1,10 @@
 import { Text, HStack, Icon } from "@chakra-ui/react";
 import { FaChartLine } from 'react-icons/fa';
-import { BurnedBlockTransaction } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
 import { BaseFeeChart } from "../../organisms/BaseFeeChart";
+import { BlockStats } from "../../contexts/EthereumContext";
 
-export function CardLiveChart({ blocks }: { blocks: BurnedBlockTransaction[]; }) {
+export function CardLiveChart({ blocks }: { blocks: BlockStats[]; }) {
   return (
     <Card
       gridGap={4}

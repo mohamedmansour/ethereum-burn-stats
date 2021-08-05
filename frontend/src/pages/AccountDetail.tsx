@@ -54,7 +54,7 @@ export function EthAccountDetail() {
           <Card>
             <VStack>
               <Heading size="sm">Balance</Heading>
-              <BigNumberText number={balance || ethers.BigNumber.from(0)} />
+              <BigNumberText number={balance} />
             </VStack>
           </Card>
         </GridItem>

@@ -1,38 +1,22 @@
 import { Text } from "@chakra-ui/react";
 import { BigNumber } from "ethers";
 
-export interface GasUsedProps {
-  activated: boolean
-  gasUsed: BigNumber
-  gasLimit: BigNumber
-}
-
-export function GasTarget(props: GasUsedProps) {
-  var gasTarget = props.gasLimit.toNumber()
-  if (props.activated) {
-    gasTarget = props.gasLimit.toNumber() / 2
-  }
-
+export function GasTarget({gasTarget}: {gasTarget: BigNumber}) {
   return (
-        <Text size="sm">{gasTarget.toLocaleString(undefined, {'minimumFractionDigits': 0, 'maximumFractionDigits': 0})}</Text>
+        <Text size="sm">{gasTarget.toNumber().toLocaleString(undefined, {'minimumFractionDigits': 0, 'maximumFractionDigits': 0})}</Text>
   )
 }
 
-export function GasUsed(props: GasUsedProps) {
-  const gasUsed = props.gasUsed.toNumber()
-
+export function GasUsed({gasUsed}: {gasUsed: BigNumber}) {
   return (
-        <Text size="sm">{gasUsed.toLocaleString(undefined, {'minimumFractionDigits': 0, 'maximumFractionDigits': 0})}</Text>
+        <Text size="sm">{gasUsed.toNumber().toLocaleString(undefined, {'minimumFractionDigits': 0, 'maximumFractionDigits': 0})}</Text>
   )
 }
 
-export function GasUsedPercent(props: GasUsedProps) {
-  const gasUsed = props.gasUsed.toNumber()
-  var gasTarget = props.gasLimit.toNumber()
-  if (props.activated) {
-    gasTarget = props.gasLimit.toNumber() / 2
-  }
-  const percentage = gasUsed / gasTarget * 100
+export function GasUsedPercent({gasUsed, gasTarget}: {gasUsed: BigNumber, gasTarget: BigNumber}) {
+  const gasUsedNumber = gasUsed.toNumber()
+  const gasTargetNumber = gasTarget.toNumber()
+  const percentage = gasUsedNumber / gasTargetNumber * 100
 
   return (
         <Text size="sm">{percentage.toFixed(0)}%</Text>
