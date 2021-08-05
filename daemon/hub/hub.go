@@ -120,9 +120,15 @@ func New(
 	}
 
 	if initializedb {
+		highestBlock, err := db.GetHighestBlock()
+		if err != nil {
+			log.Errorf("Error %v\n", err)
+			return nil, err
+		}
+		startingBlock := highestBlock + 1
 		counter := uint64(0)
 		//for b := uint64(10499401); b <= blockNumber.Uint64(); b++ {
-		for b := uint64(1); b <= blockNumber.Uint64(); b++ {
+		for b := uint64(startingBlock); b <= blockNumber.Uint64(); b++ {
 			counter++
 			start := time.Now()
 			_, err := UpdateBlockStats(rpcClient, hexutil.EncodeUint64(uint64(b)))
