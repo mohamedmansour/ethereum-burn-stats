@@ -62,7 +62,7 @@ const safeBurned = async (eth: EthereumApi, blockNumber: number, fetchTotal: boo
   const blockNumberInHex = utils.hexValue(blockNumber)
 
   if (fetchTotal) {
-    return getDefaultBigNumber(await eth.burned(utils.hexValue(eth.connectedNetwork.genesis), blockNumberInHex))
+    return getDefaultBigNumber(await eth.debug_burned(utils.hexValue(eth.connectedNetwork.genesis), blockNumberInHex))
   }
 
   return getDefaultBigNumber(await eth.burned(blockNumberInHex, blockNumberInHex))
@@ -93,7 +93,7 @@ export const BlockExplorerApi = {
     const baseFeePerGas = BigNumberNormalize(block.baseFeePerGas)
     const gasLimit = BigNumberNormalize(block.gasLimit)
     const gasUsed = BigNumberNormalize(block.gasUsed)
-    const difficulty = BigNumberNormalize(block.difficulty);
+    const difficulty = block.difficulty;
     const number = BigNumberNormalize(block.number)
     
     const blockNumberInHex = utils.hexValue(block.number)
@@ -113,7 +113,7 @@ export const BlockExplorerApi = {
       rewards,
       basefee,
       gasTarget,
-      difficulty: difficulty.toNumber()
+      difficulty, //: difficulty.toNumber()
     }
   }
 }

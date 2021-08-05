@@ -145,6 +145,7 @@ func New(
 
 	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
 		"debug_getBlockReward": handleFunc(rpcClient),
+		"debug_burned":         handleFunc(rpcClient),
 
 		"eth_blockNumber": ethBlockNumber(
 			rpcClient,
