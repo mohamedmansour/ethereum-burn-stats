@@ -46,7 +46,7 @@ sub vcl_backend_response {
         } else if (bereq.http.X-Custom-Method == "eth_syncing") {
             set beresp.ttl = 1m;
         } else { 
-            set beresp.ttl = 30d;
+            set beresp.ttl = 1d;
         }
     }
     return (deliver);
