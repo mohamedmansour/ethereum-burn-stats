@@ -137,7 +137,7 @@ func New(
 		}
 		latestBlockNumber := blockNumber.Uint64()
 		currentBlock := uint64(highestBlock) + uint64(1)
-		if startingblock >= 0 {
+		if startingblock >= 0 && uint(startingblock) > highestBlock {
 			currentBlock = uint64(startingblock)
 		}
 
@@ -203,12 +203,11 @@ func New(
 			case err := <-sub.Err():
 				log.Errorln("Error: ", err)
 			case header := <-headers:
-				//blockBurned, blockTips, blockTransactionCount, _ := UpdateBlockBurnedAndTips(rpcClient, toBlockNumArg(header.Number))
-				//db.UpdateBlock(header, blockBurned, blockTips, uint16(blockTransactionCount))
 				blockStats, err := UpdateBlockStats(rpcClient, toBlockNumArg(header.Number))
 				if err != nil {
 					log.Errorf("Error getting block stats: %v\n", err)
 				}
+				db.AddBlock(blockStats)
 				clientsCount := len(clients)
 				//log.Infof("new block: %v, burned: %d, tips: %d, clients: %d", header.Number, blockBurned, blockTips, clientsCount)
 				latestBlock.updateBlockNumber(header.Number)
