@@ -23,13 +23,14 @@ export enum CardDonateType {
 export function CardDonate({type}: {type: CardDonateType}) {
   if (process.env.REACT_APP_SHOW_SERVER_SPONSOR === "true") {
     if (type === CardDonateType.TopSideBar) {
+      const title = "nansen.ai: identify opportunities before everyone else. Analyses 90M+ labeled ethereum wallets and their activity.";
       return (
         <Card gridGap={layoutConfig.miniGap} textAlign="center">
           <Box>
-            <LinkBox>
+            <LinkBox title={title}>
               <LinkOverlay href="https://www.nansen.ai" target="_blank" display="flex" justifyContent="center" alignItems="center">
                 <Text color="brand.secondaryText">Sponsored by</Text>
-                <Image src="/sponsor_nansen.png" ml={4}/>
+                <Image w="87px" h="30px" srcSet="/sponsor_nansen.png" ml={4} alt={title} />
               </LinkOverlay>
             </LinkBox>
           </Box>
@@ -37,20 +38,23 @@ export function CardDonate({type}: {type: CardDonateType}) {
       )
     }
 
+    const title = "indexed.finance: defi investing made easy, crypto indexes and yield aggregators"
     return (
       <Card gridGap={layoutConfig.miniGap}>
         <HStack pr={10}>
           <Icon as={VscHeart} />
           <Text fontSize="md" fontWeight="bold">
-            Server Sponsor
+            Patrons
           </Text>
         </HStack>
         <Box>
-          <LinkBox>
+          <LinkBox title={title}>
             <LinkOverlay href="https://indexed.finance" target="_blank">
-              <Image src="/sponsor_indexed-financed.png" />
+              <Image w="150px" h="60px" srcSet="/sponsor_indexed-financed.png" title={title} />
             </LinkOverlay>
           </LinkBox>
+          <Text fontSize={12} mt={4}>Thanks to these patrons who has offered to help support the expensive server costs!</Text>
+          <Text fontSize={12} textAlign="right"><Link href="https://twitter.com/mohamedmansour">Become a patron!</Link></Text>
         </Box>
       </Card>
     )
