@@ -532,7 +532,9 @@ func getBurned(
 			burned += blockBurned
 		}
 
-		return json.RawMessage(fmt.Sprintf("%d", burned)), nil
+		burnedBig := new(big.Int).SetUint64(burned)
+
+		return json.RawMessage(fmt.Sprintf("\"%s\"", hexutil.EncodeBig(burnedBig))), nil
 	}
 }
 
@@ -595,7 +597,9 @@ func getTips(
 			tips += blockTips
 		}
 
-		return json.RawMessage(fmt.Sprintf("%d", tips)), nil
+		tipsBig := new(big.Int).SetUint64(tips)
+
+		return json.RawMessage(fmt.Sprintf("\"%s\"", hexutil.EncodeBig(tipsBig))), nil
 	}
 }
 
