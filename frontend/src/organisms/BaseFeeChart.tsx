@@ -10,7 +10,7 @@ interface BaseFeeChartProps extends HTMLChakraProps<"div">, FlexOptions {
   chartType: ChartType
 }
 
-export type ChartType = "tips & burned" | "basefee" | "transactions"
+export type ChartType = "tips & burned" | "basefee" | "transactions" | "gas used"
 
 function CustomTooltip(props: TooltipProps<string, string>) {
   if (props.active && props.payload && props.payload.length) {
@@ -22,6 +22,7 @@ function CustomTooltip(props: TooltipProps<string, string>) {
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Rewards:</Text><BigNumberText number={payload.rewards} /></HStack>
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Tips:</Text><BigNumberText number={payload.tips} /></HStack>
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Basefee:</Text><BigNumberText number={payload.baseFee} /></HStack>
+        <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Used:</Text><BigNumberText number={payload.gasUsed} forced="wei" /></HStack>
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Txs:</Text><Text>{payload.transactions}</Text></HStack>
       </Box>
     );
@@ -33,7 +34,8 @@ function CustomTooltip(props: TooltipProps<string, string>) {
 const chartToTypeMapping = {
   "tips & burned": 'tipsFormatted',
   basefee: 'baseFeeFormatted',
-  transactions: 'transactions'
+  transactions: 'transactions',
+  "gas used": 'gasUsedFormatted'
 }
 
 interface ChartData {
@@ -62,10 +64,14 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
         case "basefee":
           chartData.baseFeeFormatted = utils.formatUnits(block.baseFee, 'gwei')
           break;
+        case "gas used":
+          chartData.gasUsedFormatted = block.gasUsed.toNumber()
+          break;
       }
 
       newData.push(chartData)
     }
+
     setData({
       points: newData,
       chartType: props.chartType
@@ -76,7 +82,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
     switch (props.chartType) {
       case "basefee": {
         const realNumber = Number(value);
-        if (realNumber === -Infinity || realNumber === Infinity) {
+        if (realNumber === -Infinity || realNumber === Infinity || realNumber === 0) {
           return "0 WEI"
         }
         const formatter = BigNumberFormat({
@@ -86,13 +92,16 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
       }
       case "tips & burned": {
         const realNumber = Number(value);
-        if (realNumber === -Infinity || realNumber === Infinity) {
+        if (realNumber === -Infinity || realNumber === Infinity || realNumber === 0) {
           return "0 WEI"
         }
         const formatter = BigNumberFormat({
           number: BigNumber.from((realNumber * 1000000000000000000).toFixed(0))
         })
         return formatter.prettyValue + ' ' + formatter.currency
+      }
+      case "gas used": {
+        return utils.commify(Number(value))
       }
     }
     return value

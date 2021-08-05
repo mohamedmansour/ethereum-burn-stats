@@ -98,6 +98,8 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
         state.session.tips = state.session.tips.add(action.block.tips)
       }
 
+      state.details.currentBaseFee = action.block.baseFee
+      state.details.currentBlock = action.block.number
       state.session.rewards = state.session.rewards.add(action.block.rewards)
       state.session.blockCount = state.session.blockCount + 1
       state.session.transactionCount = state.session.transactionCount + action.block.transactions
