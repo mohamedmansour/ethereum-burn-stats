@@ -18,10 +18,6 @@ export function CardLatestStats({ details }: { details: BlockExplorerDetails; })
         <Text flex={1}>Base Fee</Text>
         <BigNumberText number={details.currentBaseFee} fontSize={16} textAlign="right" />
       </HStack>
-      <HStack>
-        <Text flex={1}>Gas Price</Text>
-        <BigNumberText number={details.gasPrice} fontSize={16} textAlign="right" />
-      </HStack>
     </Card>
   );
 }
