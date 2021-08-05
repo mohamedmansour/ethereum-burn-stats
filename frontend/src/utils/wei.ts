@@ -14,7 +14,7 @@ export function autoFormatBigNumber(
 ): AutoFormatType {
   let formatted: AutoFormatType = { value: '0', currency: 'GWEI'};
 
-  if (number.isZero()) {
+  if (!number || number.isZero()) {
     return formatted
   }
 
