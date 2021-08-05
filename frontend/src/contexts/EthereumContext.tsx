@@ -102,6 +102,11 @@ export interface Transaction {
   confirmations: number
 }
 
+export interface Totals {
+  burned: BigNumber
+  tipped: BigNumber
+}
+
 class WebSocketProvider {
   private eventEmitter = EventEmitter<string>()
   private connection: WebSocket;
@@ -292,6 +297,12 @@ class EthereumApiFormatters {
 
     return false
   }
+
+  static FormatTotals(s: Totals): Totals {
+    s.burned = HexToBigNumber(s.burned)
+    s.tipped = HexToBigNumber(s.tipped)
+    return s
+  }
 }
 
 export class EthereumApi extends WebSocketProvider {
@@ -303,16 +314,10 @@ export class EthereumApi extends WebSocketProvider {
     return EthereumApiFormatters.FormatSync(await this.send('eth_syncing', []))
   }
   
-  public async debug_burned(start: string, end?: string): Promise<BigNumber> {
-    const key = `${this.connectedNetwork.chainId}burned(${start},${end})`
-    const result = await this.cachedExecutor(key, () => this.send('debug_burned', [start, end || '']))
-    return HexToBigNumber(result)
-  }
-
-  public async burned(start: string, end?: string): Promise<BigNumber> {
-    const key = `${this.connectedNetwork.chainId}burned(${start},${end})`
-    const result = await this.cachedExecutor(key, () => this.send('internal_getBurned', [start, end || '']))
-    return HexToBigNumber(result)
+  public async getTotals(): Promise<Totals> {
+    const key = `${this.connectedNetwork.chainId}getTotals()`
+    const result = await this.cachedExecutor<Totals>(key, () => this.send('internal_getTotals', []))
+    return EthereumApiFormatters.FormatTotals(result)
   }
 
   public async getBlockNumber(): Promise<number> {

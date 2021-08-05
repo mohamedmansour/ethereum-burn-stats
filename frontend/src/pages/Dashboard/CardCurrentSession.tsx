@@ -23,6 +23,10 @@ export function CardCurrentSession({ session, amount }: { session: BlockExplorer
         <BigNumberText number={session.rewards} usdConversion={amount} fontSize={16} />
       </HStack>
       <HStack>
+        <Text flex={1}>Tips</Text>
+        <BigNumberText number={session.tips} usdConversion={amount} fontSize={16} />
+      </HStack>
+      <HStack>
         <Text flex={1}>Blocks</Text>
         <Text fontSize={16}>{session.blockCount}</Text>
       </HStack>
