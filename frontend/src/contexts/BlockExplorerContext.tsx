@@ -8,10 +8,7 @@ import { Setting } from "../config";
 import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
 
 export interface BurnedBlockTransaction extends Block {
-  burned: BigNumber
-  rewards: BigNumber
-  basefee: BigNumber
-  gasTarget: BigNumber
+  stats: BlockStats
 }
 
 export interface BlockExplorerSession {
@@ -81,41 +78,14 @@ export const BlockExplorerApi = {
   },
 
   fetchBlock: async (eth:  EthereumApi, blockNumber: number): Promise<BurnedBlockTransaction | undefined> => {
-    const block = await eth.getBlock(blockNumber)
+    const block = await eth.getBlock(blockNumber) as BurnedBlockTransaction
     if (block) {
-      return BlockExplorerApi.fetchBlockExtra(eth, block)
+      const blockStats = await eth.getBlockStats(block.number)
+      block.stats = blockStats
+      return block
     }
 
     return undefined
-  },
-
-  fetchBlockStats: async (eth:  EthereumApi, blockNumber: number): Promise<BlockStats | undefined> => {
-    return eth.getBlockStats(blockNumber)
-  },
-
-  fetchBlockExtra: async (eth: EthereumApi, block: Block): Promise<BurnedBlockTransaction | undefined> => {
-    const baseFeePerGas = block.baseFeePerGas
-    const gasLimit = block.gasLimit
-    
-    const blockNumberInHex = utils.hexValue(block.number)
-    const rewards = await eth.getBlockReward(blockNumberInHex)
-    const basefee = baseFeePerGas
-    const burned =  await safeBurned(eth, block.number)
-    const gasTarget = gasLimit.div(2)
-
-    return {
-      ...block,
-      number: block.number,
-      transactions: block.transactions || [],
-      baseFeePerGas: block.gasLimit,
-      gasLimit: block.gasLimit,
-      gasUsed: block.gasUsed,
-      burned,
-      rewards,
-      basefee,
-      gasTarget,
-      difficulty: block.difficulty
-    }
   }
 }
 
@@ -211,7 +181,7 @@ const BlockExplorerProvider = ({
       const processedBlocks: BlockStats[] = []
       for (var i = 0; i < blockHeaderCount; i++) {
         const blockNumber = Math.max(0, latestBlockNumber - i)
-        const block = await BlockExplorerApi.fetchBlockStats(eth, blockNumber)
+        const block = await eth.getBlockStats(blockNumber)
         if (block)
           processedBlocks.push(block)
       }
@@ -220,7 +190,7 @@ const BlockExplorerProvider = ({
     }
 
     const init = async () => {
-      const blocks = await prefetchBlockHeaders(10 /* Ease the server a bit so only 5 initial */)
+      const blocks = await prefetchBlockHeaders(10)
       if (blocks.length) {
         const block = blocks[0]
         const details = await BlockExplorerApi.fetchDetails(eth, block)

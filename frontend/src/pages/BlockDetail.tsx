@@ -154,40 +154,50 @@ export function EthBlockDetail() {
           </TabList>
           <TabPanels height="100%" flex={1}>
             <TabPanel p="0" height="inherit">
-              <Grid
-                templateColumns={["repeat(2, 1fr)", "repeat(3, 1fr)"]}
-                gridGap="4"
-              >
-                <GridItem colSpan={1}>
-                  <Card>
-                    <VStack>
-                      <Heading size="sm">Block Reward</Heading>
-                      <BigNumberText number={state.block.rewards} />
-                    </VStack>
-                  </Card>
-                </GridItem>
-                <GridItem colSpan={1}>
-                  <Card>
-                    <VStack>
-                      <Heading size="sm">Base Fee</Heading>
-                      <BigNumberText number={state.block.basefee} />
-                    </VStack>
-                  </Card>
-                </GridItem>
-                <GridItem colSpan={[2, 1]}>
-                  <Card>
-                    <VStack>
-                      <Heading size="sm">
-                        <HStack>
-                          <Text>Burned</Text>
-                          <FirePit size="12px" />
-                        </HStack>
-                      </Heading>
-                      <BigNumberText number={state.block.burned} />
-                    </VStack>
-                  </Card>
-                </GridItem>
-              </Grid>
+              {state.block.stats && (
+                <Grid
+                  templateColumns={["repeat(2, 1fr)", "repeat(4, 1fr)"]}
+                  gridGap="4"
+                >
+                  <GridItem colSpan={1}>
+                    <Card>
+                      <VStack>
+                        <Heading size="sm">Block Reward</Heading>
+                        <BigNumberText number={state.block.stats.rewards} />
+                      </VStack>
+                    </Card>
+                  </GridItem>
+                  <GridItem colSpan={1}>
+                    <Card>
+                      <VStack>
+                        <Heading size="sm">Base Fee</Heading>
+                        <BigNumberText number={state.block.stats.baseFee} />
+                      </VStack>
+                    </Card>
+                  </GridItem>
+                  <GridItem colSpan={1}>
+                    <Card>
+                      <VStack>
+                        <Heading size="sm">Tips</Heading>
+                        <BigNumberText number={state.block.stats.tips} />
+                      </VStack>
+                    </Card>
+                  </GridItem>
+                  <GridItem colSpan={1}>
+                    <Card>
+                      <VStack>
+                        <Heading size="sm">
+                          <HStack>
+                            <Text>Burned</Text>
+                            <FirePit size="12px" />
+                          </HStack>
+                        </Heading>
+                        <BigNumberText number={state.block.stats.burned} />
+                      </VStack>
+                    </Card>
+                  </GridItem>
+                </Grid>
+              )}
               <Card mt="4">
                 <Heading size="sm">Info</Heading>
                 <Grid templateColumns={["auto", "150px auto"]} gap={4} p="2">
@@ -206,9 +216,9 @@ export function EthBlockDetail() {
                   <Text color="brand.secondaryText">Difficulty:</Text>
                   <Text>{utils.commify(state.block.difficulty)}</Text>
                   <Text color="brand.secondaryText">Gas used:</Text>
-                  <HStack><GasUsed gasUsed={state.block.gasUsed} /><Text>/</Text><GasUsedPercent gasUsed={state.block.gasUsed} gasTarget={state.block.gasTarget} /></HStack>
+                  <HStack><GasUsed gasUsed={state.block.gasUsed} /><Text>/</Text><GasUsedPercent gasUsed={state.block.gasUsed} gasTarget={state.block.stats.gasTarget} /></HStack>
                   <Text color="brand.secondaryText">Gas target:</Text>
-                  <GasTarget gasTarget={state.block.gasTarget} />
+                  <GasTarget gasTarget={state.block.stats.gasTarget} />
                   <Text color="brand.secondaryText">Extra data:</Text>
                   <Text wordBreak="break-all" title={'data: ' + state.block.extraData}>
                     {utils.toUtf8String(state.block.extraData, () => 0)}
