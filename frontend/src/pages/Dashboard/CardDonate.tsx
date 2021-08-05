@@ -55,7 +55,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
         <Box>
           <LinkBox title={title}>
             <LinkOverlay href="https://indexed.finance" target="_blank">
-              <Image w="150px" h="60px" srcSet="/sponsor_indexed-financed.png" title={title} />
+              <Image w="265px" h="41px" srcSet="/sponsor_ndx.png" title={title} />
             </LinkOverlay>
           </LinkBox>
           <Text fontSize={12} mt={4}>Thanks to these patrons who has offered to help support the expensive server costs!</Text>
