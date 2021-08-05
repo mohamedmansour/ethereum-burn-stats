@@ -113,7 +113,7 @@ class WebSocketProvider {
   });
 
   protected status: WebSocketStatus = WebSocketStatus.CONNECTING
-  
+  private ethSubcribeMap: {[key: string]: string} = {}  
   public ready: Promise<void>;
 
   constructor(url: string) {
@@ -129,7 +129,24 @@ class WebSocketProvider {
       this.connection.addEventListener("message", this.onMessage.bind(this));
       this.connection.addEventListener("open", () => {
         this.status = WebSocketStatus.CONNECTED;
-        this.send("eth_subscribe", ["blockStats"]).then(() => resolve()).catch(e => reject(e))
+        const ensureEventsSubscribed = [
+          new Promise<[string, string]>((resolve, reject) => {
+            this.send("eth_subscribe", ["blockStats"]).then((data) => {
+              resolve(["block", data as string])
+            }).catch(e => reject(e))
+          }),
+          new Promise<[string, string]>((resolve, reject) => {
+            this.send("eth_subscribe", ["clientsCount"]).then((data) => {
+              resolve(["client", data as string])
+            }).catch(e => reject(e))
+          })
+        ]
+        Promise.all(ensureEventsSubscribed).then((results) => {
+          results.forEach(([name, id] ) => {
+            this.ethSubcribeMap[id] = name
+          })
+          resolve()
+        }).catch(e => reject(e))
       });
       this.connection.addEventListener("error", (e) => reject(e));
     })
@@ -165,22 +182,53 @@ class WebSocketProvider {
     this.connection.close();
   }
 
-  public on(eventName: 'block', callback: (block: BlockStats) => void) {
+  public on<T>(eventName: 'block' | 'client', callback: (data: T) => void) {
     this.eventEmitter.on(eventName, callback);
   }
 
-  public off(eventName: 'block', callback: (block: BlockStats) => void) {
+  public off<T>(eventName: 'block' | 'client', callback: (data: T) => void) {
     this.eventEmitter.off(eventName, callback);
   }
 
   public onMessage(evt: MessageEvent) {
-    const eventData = JSON.parse(evt.data) as AsyncMessage<{}>
+    // Sometimes messages come in multiple pairs to detect it.
+    if (evt.data.indexOf('\n') !== -1) {
+      const numberOfMessages = evt.data.split('\n')
+      numberOfMessages.forEach((message: string) => this.processMessage(message))
+    } else {
+      this.processMessage(evt.data as string);
+    }
+  }
+
+  private processMessage(message: string): void {
+    let eventData: AsyncMessage<{}>
+    try {
+      eventData = JSON.parse(message) as AsyncMessage<{}>
+    }
+    catch (e) {
+      console.error(`Please report to developer: "${message}"`)
+      return
+    }
+
     if (eventData.id) {
       const [resolve, ] = this.promiseMap[eventData.id]
       resolve(eventData.result !== undefined ? eventData.result : eventData.params?.result)
       delete this.promiseMap[eventData.id]
     } else if (eventData.method === 'eth_subscription') {
-      this.eventEmitter.emit('block', EthereumApiFormatters.FormatBlockStats(eventData.params?.result as BlockStats))
+      if (!eventData.params) {
+        console.error('Something went wrong with receiving the message from server');
+        return;
+      }
+      const subscribedEvent = this.ethSubcribeMap[eventData.params.subscription];
+      if (subscribedEvent === 'block') {
+        this.eventEmitter.emit('block', EthereumApiFormatters.FormatBlockStats(eventData.params.result as BlockStats))
+      }
+      else if (subscribedEvent === 'client') {
+        this.eventEmitter.emit('client', eventData.params.result)
+      } 
+      else {
+        console.error('unknown event', eventData.params)
+      }
     }
   }
 }
