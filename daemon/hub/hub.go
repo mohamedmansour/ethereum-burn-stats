@@ -132,9 +132,30 @@ func New(
 		}
 		log.Infof("Highest stored block in DB: %d", highestBlockInDb)
 
+		missingBlockNumbers, err := db.GetMissingBlockNumbers(londonBlock)
+		if err != nil {
+			log.Errorf("Error getting missing block numbers from database: %v", err)
+			return nil, err
+		}
+
+		if len(missingBlockNumbers) > 0 {
+			log.Infof("Starting to fetch %d missing blocks", len(missingBlockNumbers))
+		}
+		for _, n := range missingBlockNumbers {
+			blockStats, err := UpdateBlockStats(rpcClient, n)
+			if err != nil {
+				log.Errorf("Error %v", err)
+				return nil, err
+			}
+			db.AddBlock(blockStats)
+		}
+		if len(missingBlockNumbers) > 0 {
+			log.Infof("Finished fetching missing blocks")
+		}
+
 		allBlockStats, err := db.GetAllBlockStats()
 		if err != nil {
-			log.Errorf("Error getting totals from database:%v\n", err)
+			log.Errorf("Error getting totals from database: %v", err)
 			return nil, err
 		}
 

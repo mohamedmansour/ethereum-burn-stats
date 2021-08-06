@@ -66,6 +66,34 @@ func (d *Database) GetAllBlockStats() ([]BlockStats, error) {
 
 	return blockStats, nil
 }
+
+func (d *Database) GetMissingBlockNumbers(startingBlockNumber uint64) ([]uint64, error) {
+	var blockStats []BlockStats
+	var blockNumbers, missingBlockNumbers []uint64
+
+	result := d.db.Find(&blockStats)
+	if result.Error != nil {
+		return missingBlockNumbers, result.Error
+	}
+
+	for _, b := range blockStats {
+		blockNumbers = append(blockNumbers, uint64(b.Number))
+	}
+
+	for i := 1; i < len(blockNumbers); i++ {
+		if blockNumbers[i]-blockNumbers[i-1] != 1 {
+			for x := uint64(1); x < blockNumbers[i]-blockNumbers[i-1]; x++ {
+				missingBlockNumber := blockNumbers[i-1] + x
+				if missingBlockNumber > startingBlockNumber {
+					missingBlockNumbers = append(missingBlockNumbers, missingBlockNumber)
+				}
+			}
+		}
+	}
+
+	return missingBlockNumbers, nil
+}
+
 func (d *Database) GetTotals() (*big.Int, *big.Int, error) {
 	var blockStats []BlockStats
 
