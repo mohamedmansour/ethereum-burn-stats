@@ -62,7 +62,9 @@ export const BlockExplorerApi = {
     const block = await eth.getBlock(blockNumber) as BurnedBlockTransaction
     if (block) {
       const blockStats = await eth.getBlockStats(block.number)
-      block.stats = blockStats
+      if (blockStats) {
+        block.stats = blockStats
+      }
       return block
     }
 

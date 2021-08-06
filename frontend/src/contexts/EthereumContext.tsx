@@ -265,7 +265,8 @@ class EthereumApiFormatters {
     return b
   }
 
-  static FormatBlockStats(b: BlockStats): BlockStats {
+  static FormatBlockStats(b: BlockStats): BlockStats | undefined {
+    if (!b) return undefined;
     b.baseFee = HexToBigNumber(b.baseFee)
     b.burned = HexToBigNumber(b.burned)
     b.gasTarget = HexToBigNumber(b.gasTarget)
@@ -336,7 +337,7 @@ export class EthereumApi extends WebSocketProvider {
     return EthereumApiFormatters.FormatBlock(result) as Block
   }
 
-  public async getBlockStats(blockNumber: number): Promise<BlockStats> {
+  public async getBlockStats(blockNumber: number): Promise<BlockStats | undefined> {
     if (blockNumber < 0)
       throw Error(`Invalid block of negative value ${blockNumber}`)
 
