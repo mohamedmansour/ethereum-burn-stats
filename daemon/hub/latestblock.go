@@ -1,41 +1,40 @@
 package hub
 
 import (
-	"math/big"
 	"sync"
 )
 
 type LatestBlock struct {
-	blockNumber *big.Int
+	blockNumber uint64
 	mu          sync.Mutex
 }
 
 func newLatestBlock() *LatestBlock {
 	return &LatestBlock{
-		blockNumber: new(big.Int).SetUint64(0),
+		blockNumber: 0,
 	}
 }
 
-func (lb *LatestBlock) getBlockNumber() big.Int {
+func (lb *LatestBlock) getBlockNumber() uint64 {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
 
-	return *lb.blockNumber
+	return lb.blockNumber
 }
 
-func (lb *LatestBlock) lessEqualsLatestBlock(blockNumber *big.Int) bool {
+//func (lb *LatestBlock) lessEqualsLatestBlock(blockNumber *big.Int) bool {
+//	lb.mu.Lock()
+//	defer lb.mu.Unlock()
+//
+//	return lb.blockNumber.Cmp(blockNumber) >= 0
+//}
+
+func (lb *LatestBlock) updateBlockNumber(newBlockNumber uint64) {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
 
-	return lb.blockNumber.Cmp(blockNumber) >= 0
-}
-
-func (lb *LatestBlock) updateBlockNumber(newBlockNumber *big.Int) {
-	lb.mu.Lock()
-	defer lb.mu.Unlock()
-
-	if lb.blockNumber.Cmp(newBlockNumber) >= 0 {
-		// new number is smaller
+	if newBlockNumber <= lb.blockNumber {
+		// new number is same or smaller
 		return
 	}
 

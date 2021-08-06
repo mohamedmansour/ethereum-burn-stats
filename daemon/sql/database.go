@@ -41,14 +41,16 @@ func (d *Database) AddBlocks(blockStats []BlockStats) {
 	d.db.CreateInBatches(blockStats, len(blockStats))
 }
 
-func (d *Database) GetHighestBlock() (uint, error) {
+func (d *Database) GetHighestBlockNumber() (uint64, error) {
 	var blockStats []BlockStats
 	result := d.db.Last(&blockStats)
 	if result.Error != nil {
 		return 0, nil
 	}
 
-	return blockStats[0].Number, nil
+	highestBlockNumber := uint64(blockStats[0].Number)
+
+	return highestBlockNumber, nil
 }
 
 func (d *Database) GetAllBlockStats() ([]BlockStats, error) {

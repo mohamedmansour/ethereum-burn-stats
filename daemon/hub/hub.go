@@ -112,30 +112,12 @@ func New(
 	log.Infof("Get latest block...")
 
 	latestBlock := newLatestBlock()
-
-	latestBlockRaw, err := rpcClient.CallContext(
-		"2.0",
-		"eth_blockNumber",
-	)
+	latestBlockNumber, err := UpdateLatestBlock(rpcClient, latestBlock)
 	if err != nil {
+		log.Errorf("error updating latest block: %v", err)
 		return nil, err
 	}
-
-	var hexBlockNumber string
-	err = json.Unmarshal(latestBlockRaw, &hexBlockNumber)
-	if err != nil {
-		return nil, err
-	}
-
-	latestBlockNumber, err := hexutil.DecodeBig(hexBlockNumber)
-	if err != nil {
-		return nil, err
-	}
-
-	latestBlock.updateBlockNumber(latestBlockNumber)
-
-	blockNumber := latestBlock.getBlockNumber()
-	log.Infof("Latest block: %s", blockNumber.String())
+	log.Infof("Latest block: %d", latestBlockNumber)
 
 	db, err := sql.ConnectDatabase(dbPath)
 	if err != nil {
@@ -143,12 +125,12 @@ func New(
 	}
 
 	if initializedb {
-		highestBlock, err := db.GetHighestBlock()
+		highestBlockInDb, err := db.GetHighestBlockNumber()
 		if err != nil {
 			log.Errorf("Error %v\n", err)
 			return nil, err
 		}
-		log.Infof("Highest stored block in DB: %d", highestBlock)
+		log.Infof("Highest stored block in DB: %d", highestBlockInDb)
 
 		allBlockStats, err := db.GetAllBlockStats()
 		if err != nil {
@@ -180,51 +162,33 @@ func New(
 		globalTotalTips.v.Add(globalTotalTips.v, tips)
 		globalTotalTips.mu.Unlock()
 
-		latestBlockNumber := blockNumber.Uint64()
-		currentBlock := uint64(highestBlock) + uint64(1)
+		currentBlock := highestBlockInDb + 1
 		if currentBlock == 1 {
 			currentBlock = londonBlock
 		}
 
-		for {
-			blockStats, err := UpdateBlockStats(rpcClient, hexutil.EncodeUint64(uint64(currentBlock)))
-			if err != nil {
-				log.Errorf("Error %v\n", err)
-				return nil, err
-			}
-			db.AddBlock(blockStats)
-
-			if currentBlock == uint64(latestBlockNumber) {
-				latestBlockRaw, err := rpcClient.CallContext(
-					"2.0",
-					"eth_blockNumber",
-				)
+		if latestBlockNumber > currentBlock {
+			for {
+				blockStats, err := UpdateBlockStats(rpcClient, currentBlock)
 				if err != nil {
+					log.Errorf("Error %v\n", err)
 					return nil, err
 				}
+				db.AddBlock(blockStats)
 
-				var hexBlockNumber string
-				err = json.Unmarshal(latestBlockRaw, &hexBlockNumber)
-				if err != nil {
-					return nil, err
-				}
-
-				latestBlockNumberBig, err := hexutil.DecodeBig(hexBlockNumber)
-				if err != nil {
-					return nil, err
-				}
-				latestBlockNumber, err := hexutil.DecodeUint64(hexBlockNumber)
-				if err != nil {
-					return nil, err
-				}
-				latestBlock.updateBlockNumber(latestBlockNumberBig)
-
-				log.Infof("Latest block: %d", latestBlockNumber)
 				if currentBlock == uint64(latestBlockNumber) {
-					break
+					latestBlockNumber, err = UpdateLatestBlock(rpcClient, latestBlock)
+					if err != nil {
+						log.Errorf("error updating latest block: %v", err)
+						return nil, err
+					}
+					log.Infof("Latest block: %d", latestBlockNumber)
+					if currentBlock == uint64(latestBlockNumber) {
+						break
+					}
 				}
+				currentBlock++
 			}
-			currentBlock++
 		}
 
 	}
@@ -248,17 +212,23 @@ func New(
 				log.Errorln("Error: ", err)
 			case header := <-headers:
 				latestBlockNumber := latestBlock.getBlockNumber()
-				if latestBlockNumber.Cmp(header.Number) == 0 {
+				if latestBlockNumber == header.Number.Uint64() {
 					continue
 				}
-				blockStats, err := UpdateBlockStats(rpcClient, toBlockNumArg(header.Number))
+
+				blockNumber := header.Number.Uint64()
+
+				blockStats, err := UpdateBlockStats(rpcClient, blockNumber)
 				if err != nil {
-					log.Errorf("Error getting block stats: %v\n", err)
+					log.Errorf("Error getting block stats: %v", err)
 				}
+
 				db.AddBlock(blockStats)
+
 				clientsCount := len(clients)
-				//log.Infof("new block: %v, burned: %d, tips: %d, clients: %d", header.Number, blockBurned, blockTips, clientsCount)
-				latestBlock.updateBlockNumber(header.Number)
+
+				latestBlock.updateBlockNumber(blockNumber)
+
 				subscription <- map[string]interface{}{
 					"blockStats":   blockStats,
 					"clientsCount": clientsCount,
@@ -268,20 +238,17 @@ func New(
 	}(latestBlock)
 
 	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
-		"eth_blockNumber": ethBlockNumber(
-			rpcClient,
-			latestBlock,
-		),
-		"eth_chainId": handleFunc(rpcClient),
-		"eth_getBlockByNumber": ethGetBlockByNumber(
-			rpcClient,
-			latestBlock,
-		),
-		"eth_getTransactionByHash": handleFunc(rpcClient),
-		"eth_syncing":              handleFunc(rpcClient),
-		"eth_getBalance":           handleFunc(rpcClient),
+		"eth_blockNumber": ethBlockNumber(rpcClient, latestBlock),
+		"eth_chainId":     handleFunc(rpcClient),
+		//"eth_getBlockByNumber": ethGetBlockByNumber(
+		//	rpcClient,
+		//	latestBlock,
+		//),
+		//"eth_getTransactionByHash": handleFunc(rpcClient),
+		"eth_syncing": handleFunc(rpcClient),
+		//"eth_getBalance":           handleFunc(rpcClient),
 
-		"internal_getBlockStats": getBlockStats(rpcClient),
+		"internal_getBlockStats": getBlockStats(rpcClient, latestBlock),
 		"internal_getTotals":     getTotals(rpcClient),
 
 		"eth_subscribe":   ethSubscribe(),
@@ -430,7 +397,7 @@ func ethBlockNumber(
 ) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 		blockNumber := latestBlock.getBlockNumber()
-		blockNumberHex := hexutil.EncodeBig(&blockNumber)
+		blockNumberHex := hexutil.EncodeUint64(blockNumber)
 
 		return json.RawMessage(fmt.Sprintf("\"%s\"", blockNumberHex)), nil
 	}
@@ -457,13 +424,15 @@ func ethGetBlockByNumber(
 			return nil, fmt.Errorf("blockNumber is not a string - %s", params[0])
 		}
 
-		blockNumber, err := hexutil.DecodeBig(hexBlockNumber)
+		blockNumberBig, err := hexutil.DecodeBig(hexBlockNumber)
 		if err != nil {
 			return nil, fmt.Errorf("blockNumber was not a hex - %s", hexBlockNumber)
 		}
 
-		if !latestBlock.lessEqualsLatestBlock(blockNumber) {
-			return nil, fmt.Errorf("requested blockNumber is bigger than latest - r: %v, l: %v", blockNumber, latestBlock.blockNumber)
+		blockNumber := blockNumberBig.Uint64()
+
+		if blockNumber > latestBlock.getBlockNumber() {
+			return nil, fmt.Errorf("requested blockNumber is bigger than latest - req: %d, lat: %d", blockNumber, latestBlock.blockNumber)
 		}
 
 		raw, err := rpcClient.CallContext(
@@ -580,6 +549,7 @@ func getTotals(
 
 func getBlockStats(
 	rpcClient *rpcClient,
+	latestBlock *LatestBlock,
 ) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
@@ -609,11 +579,16 @@ func getBlockStats(
 			return nil, err
 		}
 
+		latestBlockNumber := (latestBlock.getBlockNumber())
+		if blockNumber > latestBlockNumber {
+			return nil, err
+		}
+
 		var blockStats sql.BlockStats
 
 		globalBlockStats.mu.Lock()
 		if blockStats, ok = globalBlockStats.v[blockNumber]; !ok {
-			log.Printf("error fetching block stats for block #%d\n", blockNumber)
+			log.Printf("error fetching block stats for block #%d", blockNumber)
 			globalBlockStats.mu.Unlock()
 			return nil, err
 		}
@@ -621,41 +596,40 @@ func getBlockStats(
 
 		blockStatsJson, err := json.Marshal(blockStats)
 		if err != nil {
-			log.Errorf("Error marshaling block stats: %v\n", err)
+			log.Errorf("Error marshaling block stats: %vn", err)
 		}
 
 		return json.RawMessage(blockStatsJson), nil
 	}
 }
 
-func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockStats, error) {
+func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats, error) {
 	start := time.Now()
+	var blockNumberHex string
 	var blockStats sql.BlockStats
-	var raw json.RawMessage
-	raw, err := rpcClient.CallContext(
+	var rawResponse json.RawMessage
+
+	blockNumberHex = hexutil.EncodeUint64(blockNumber)
+
+	rawResponse, err := rpcClient.CallContext(
 		"2.0",
 		"eth_getBlockByNumber",
 		blockNumberHex,
 		false,
 	)
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Errorf("error getting block details from geth: %v", err)
 		return blockStats, err
 	}
 
 	block := Block{}
-	err = json.Unmarshal(raw, &block)
+	err = json.Unmarshal(rawResponse, &block)
 	if err != nil {
 		return blockStats, err
 	}
 
 	header := types.Header{}
-	err = json.Unmarshal(raw, &header)
-	if err != nil {
-		return blockStats, err
-	}
-
-	blockNumber, err := hexutil.DecodeUint64(blockNumberHex)
+	err = json.Unmarshal(rawResponse, &header)
 	if err != nil {
 		return blockStats, err
 	}
@@ -747,8 +721,9 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockSta
 		}
 
 		if receipt.BlockNumber == "" {
-			log.Warnf("block %d: found empty transaction receipt\n", blockNumber)
-			break
+			log.Warnf("block %d: found empty transaction receipt", blockNumber)
+			continue
+			//break
 		}
 		gasUsed, err := hexutil.DecodeBig(receipt.GasUsed)
 		if err != nil {
@@ -804,6 +779,34 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumberHex string) (sql.BlockSta
 	log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
 
 	return blockStats, nil
+}
+
+func UpdateLatestBlock(rpcClient *rpcClient, latestBlock *LatestBlock) (uint64, error) {
+	latestBlockRaw, err := rpcClient.CallContext(
+		"2.0",
+		"eth_blockNumber",
+	)
+	if err != nil {
+		fmt.Errorf("failed to fetch latest block number from geth\n")
+		return 0, err
+	}
+
+	var hexBlockNumber string
+	err = json.Unmarshal(latestBlockRaw, &hexBlockNumber)
+	if err != nil {
+		fmt.Errorf("couldn't unmarshal latest bock number response: %v\n", latestBlockRaw)
+		return 0, err
+	}
+
+	latestBlockNumber, err := hexutil.DecodeUint64(hexBlockNumber)
+	if err != nil {
+		fmt.Errorf("latest block could not be decoded from hex to uint: %v\n", hexBlockNumber)
+		return 0, err
+	}
+
+	latestBlock.updateBlockNumber(latestBlockNumber)
+
+	return latestBlockNumber, nil
 }
 
 type Block struct {
