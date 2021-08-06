@@ -614,6 +614,7 @@ func getBlockStats(
 		globalBlockStats.mu.Lock()
 		if blockStats, ok = globalBlockStats.v[blockNumber]; !ok {
 			log.Printf("error fetching block stats for block #%d\n", blockNumber)
+			globalBlockStats.mu.Unlock()
 			return nil, err
 		}
 		globalBlockStats.mu.Unlock()
