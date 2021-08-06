@@ -34,6 +34,9 @@ func ConnectDatabase(dbPath string) (*Database, error) {
 }
 
 func (d *Database) AddBlock(blockStats BlockStats) {
+	if blockStats.Number == 0 {
+		return
+	}
 	d.db.Create(blockStats)
 }
 
