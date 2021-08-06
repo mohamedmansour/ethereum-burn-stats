@@ -177,8 +177,8 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
             <XAxis dataKey="block" hide fontSize={10} />
             <Tooltip content={<CustomTooltip />} />
             <Legend verticalAlign="top" height={36} wrapperStyle={{fontSize: "10px"}} />
-            <Area type="monotone" name={typeMapping.primary.name} dataKey={typeMapping.primary.dataKey} stackId="1" stroke="#E39764" fill="#FFA970" />
-            <Area type="monotone" name={typeMapping.secondary.name} dataKey={typeMapping.secondary.dataKey} stackId="1" stroke="#E06F24" fill="#FF7B24" />
+            <Area type="monotone" name={typeMapping.primary.name} dataKey={typeMapping.primary.dataKey} stackId="1" stroke="#E39764" fill="#FFA970"  isAnimationActive={false} />
+            <Area type="monotone" name={typeMapping.secondary.name} dataKey={typeMapping.secondary.dataKey} stackId="1" stroke="#E06F24" fill="#FF7B24"  isAnimationActive={false} />
           </AreaChart>
         </ResponsiveContainer>
       </Box>
@@ -192,7 +192,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
           <YAxis yAxisId="left" type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
           <XAxis hide dataKey="block" angle={30} dx={20} dy={10} fontSize={10} tickCount={10}/>
           <Tooltip content={<CustomTooltip />} />
-          <Line yAxisId="left" type="monotone" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" strokeWidth={2} dot={false} />
+          <Line yAxisId="left" type="monotone" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" strokeWidth={2} dot={false} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
     </Box>
