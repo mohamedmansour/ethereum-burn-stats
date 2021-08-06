@@ -150,6 +150,20 @@ func New(
 		}
 		log.Infof("Highest stored block in DB: %d", highestBlock)
 
+		allBlockStats, err := db.GetAllBlockStats()
+		if err != nil {
+			log.Errorf("Error getting totals from database:%v\n", err)
+			return nil, err
+		}
+
+		for _, b := range allBlockStats {
+			globalBlockStats.mu.Lock()
+			globalBlockStats.v[uint64(b.Number)] = b
+			globalBlockStats.mu.Unlock()
+		}
+
+		allBlockStats = []sql.BlockStats{}
+
 		burned, tips, err := db.GetTotals()
 		if err != nil {
 			log.Errorf("Error getting totals from database:%v\n", err)

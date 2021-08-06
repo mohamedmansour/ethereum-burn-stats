@@ -51,6 +51,16 @@ func (d *Database) GetHighestBlock() (uint, error) {
 	return blockStats[0].Number, nil
 }
 
+func (d *Database) GetAllBlockStats() ([]BlockStats, error) {
+	var blockStats []BlockStats
+
+	result := d.db.Find(&blockStats)
+	if result.Error != nil {
+		return []BlockStats{}, nil
+	}
+
+	return blockStats, nil
+}
 func (d *Database) GetTotals() (*big.Int, *big.Int, error) {
 	var blockStats []BlockStats
 
