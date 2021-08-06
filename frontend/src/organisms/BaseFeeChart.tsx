@@ -3,6 +3,7 @@ import { BigNumber, utils } from "ethers";
 import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, Area, AreaChart } from 'recharts';
 import { BlockStats } from "../contexts/EthereumContext";
+import { Zero } from "../utils/number";
 import { BigNumberFormat, BigNumberText } from "./BigNumberText";
 
 interface BaseFeeChartProps extends HTMLChakraProps<"div">, FlexOptions {
@@ -80,14 +81,30 @@ interface ChartData {
   chartType: ChartType
 }
 
+const maxItemsInChart = 30;
+
 export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFeeChartProps, ref: React.ForwardedRef<any>) => {
   const [data, setData] = useState<ChartData>()
 
   useEffect(() => {
-    const newData = []
+    const newData = new Array(maxItemsInChart);
+    newData.fill({
+      tipsFormatted: 0,
+      tips: Zero(),
+      burnedFormatted: 0,
+      burned: Zero(),
+      baseFeeFormatted: 0,
+      baseFee: Zero(),
+      gasUsedFormatted: 0,
+      gasUsed: Zero(),
+      gasTargetFormatted: 0,
+      gasTarget: Zero(),
+    })
 
-    for (let i = props.data.length - 1; i >= 0; i--) {
-      const block = props.data[i]
+    // Fill up the data for the last |maxItemsInChart| blocks,
+    const minBounds = props.data.length > newData.length ? 0 : newData.length - props.data.length;
+    for (var i = newData.length - 1; i >= minBounds; i--)  {
+      const block = props.data[i - minBounds]
       const chartData: { [key: string]: any } = {
         index: i,
         ...block,
@@ -107,7 +124,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
           break;
       }
 
-      newData.push(chartData)
+      newData[i] = chartData
     }
 
     setData({
@@ -134,7 +151,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
           return "0 WEI"
         }
         const formatter = BigNumberFormat({
-          number: BigNumber.from((realNumber * 1000000000000000000).toFixed(0))
+          number: utils.parseEther(realNumber.toString())
         })
         return formatter.prettyValue + ' ' + formatter.currency
       }
@@ -159,7 +176,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
             <YAxis fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
             <XAxis dataKey="block" hide fontSize={10} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend verticalAlign="top" height={36} />
+            <Legend verticalAlign="top" height={36} wrapperStyle={{fontSize: "10px"}} />
             <Area type="monotone" name={typeMapping.primary.name} dataKey={typeMapping.primary.dataKey} stackId="1" stroke="#E39764" fill="#FFA970" />
             <Area type="monotone" name={typeMapping.secondary.name} dataKey={typeMapping.secondary.dataKey} stackId="1" stroke="#E06F24" fill="#FF7B24" />
           </AreaChart>
@@ -173,7 +190,7 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
       <ResponsiveContainer>
         <LineChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }}>
           <YAxis yAxisId="left" type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
-          <XAxis hide dataKey="block" angle={30} dx={20} dy={10} fontSize={10} />
+          <XAxis hide dataKey="block" angle={30} dx={20} dy={10} fontSize={10} tickCount={10}/>
           <Tooltip content={<CustomTooltip />} />
           <Line yAxisId="left" type="monotone" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" strokeWidth={2} dot={false} />
         </LineChart>

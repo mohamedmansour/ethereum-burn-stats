@@ -18,7 +18,7 @@ function RadioCard(props: RadioCardProps) {
   const checkbox = getCheckboxProps()
 
   return (
-    <Box as="label" fontSize={10}>
+    <Box as="label" fontSize={12}>
       <input {...input} style={{display: "none"}}/>
       <Box
         {...checkbox}
