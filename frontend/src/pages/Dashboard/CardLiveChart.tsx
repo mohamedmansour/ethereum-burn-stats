@@ -83,7 +83,16 @@ export function CardLiveChart(props: RadioCardProps) {
           Live Chart
         </Text>
         <Spacer />
-        <Button variant="ghost" leftIcon={<Icon as={doNotShowChart ? VscChevronDown : VscChevronUp} />} _hover={{ bg: 'branding.background' }} onClick={() => setDoNotShowChart(doNotShow => !doNotShow)}></Button>
+        <Button 
+            title={doNotShowChart ? "Show the chart" : "Hide the chart"}
+            variant="ghost" 
+            size="sm" 
+            leftIcon={<Icon as={doNotShowChart ? VscChevronDown : VscChevronUp} />} 
+            _hover={{ bg: '#333' }} 
+            _active={{ bg: '#222' }} 
+            iconSpacing={0} 
+            onClick={() => setDoNotShowChart(doNotShow => !doNotShow)}>
+        </Button>
       </HStack>
       {!doNotShowChart && (
         <>

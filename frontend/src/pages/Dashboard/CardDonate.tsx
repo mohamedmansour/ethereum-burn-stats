@@ -26,7 +26,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
     if (type === CardDonateType.TopSideBar) {
       const title = "nansen.ai: identify opportunities before everyone else. Analyses 90M+ labeled ethereum wallets and their activity.";
       return (
-        <Card gridGap={layoutConfig.miniGap}>
+        <Card gridGap={layoutConfig.miniGap} minH="56px">
           <LinkBox title={title} whiteSpace="nowrap">
             <LinkOverlay href="https://www.nansen.ai" target="_blank" display="flex">
               <HStack flex={1}>

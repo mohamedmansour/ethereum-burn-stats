@@ -32,7 +32,6 @@ function App() {
 
   return (
     <React.StrictMode>
-      <ColorModeScript />
       <ChakraProvider theme={customTheme}>
         <CSSReset />
         <SettingsProvider>
