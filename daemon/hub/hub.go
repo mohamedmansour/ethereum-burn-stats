@@ -184,7 +184,9 @@ func New(
 			if counter == 10 || currentBlock == uint64(latestBlockNumber) {
 				var batchStats []sql.BlockStats
 				for counter > 0 {
+					globalBlockStats.mu.Lock()
 					batchStats = append(batchStats, globalBlockStats.v[currentBlock+1-counter])
+					globalBlockStats.mu.Unlock()
 					counter--
 				}
 				db.AddBlocks(batchStats)
@@ -555,7 +557,15 @@ func getTotals(
 	rpcClient *rpcClient,
 ) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-		return json.RawMessage(fmt.Sprintf("{\"burned\": \"%s\", \"tipped\": \"%s\"}", hexutil.EncodeBig(globalTotalBurned.v), hexutil.EncodeBig((globalTotalTips.v)))), nil
+		globalTotalBurned.mu.Lock()
+		burned := hexutil.EncodeBig(globalTotalBurned.v)
+		globalTotalBurned.mu.Unlock()
+
+		globalTotalTips.mu.Lock()
+		tipped := hexutil.EncodeBig(globalTotalTips.v)
+		globalTotalTips.mu.Unlock()
+
+		return json.RawMessage(fmt.Sprintf("{\"burned\": \"%s\", \"tipped\": \"%s\"}", burned, tipped)), nil
 	}
 }
 
@@ -592,10 +602,12 @@ func getBlockStats(
 
 		var blockStats sql.BlockStats
 
+		globalBlockStats.mu.Lock()
 		if blockStats, ok = globalBlockStats.v[blockNumber]; !ok {
 			log.Printf("error fetching block stats for block #%d\n", blockNumber)
 			return nil, err
 		}
+		globalBlockStats.mu.Unlock()
 
 		blockStatsJson, err := json.Marshal(blockStats)
 		if err != nil {
