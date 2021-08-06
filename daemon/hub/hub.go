@@ -261,13 +261,13 @@ func New(
 	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
 		"eth_blockNumber": ethBlockNumber(rpcClient, latestBlock),
 		"eth_chainId":     handleFunc(rpcClient),
-		//"eth_getBlockByNumber": ethGetBlockByNumber(
-		//	rpcClient,
-		//	latestBlock,
-		//),
-		//"eth_getTransactionByHash": handleFunc(rpcClient),
-		"eth_syncing": handleFunc(rpcClient),
-		//"eth_getBalance":           handleFunc(rpcClient),
+		"eth_getBlockByNumber": ethGetBlockByNumber(
+			rpcClient,
+			latestBlock,
+		),
+		"eth_getTransactionByHash": handleFunc(rpcClient),
+		"eth_syncing":              handleFunc(rpcClient),
+		"eth_getBalance":           handleFunc(rpcClient),
 
 		"internal_getBlockStats": getBlockStats(rpcClient, latestBlock),
 		"internal_getTotals":     getTotals(rpcClient),
