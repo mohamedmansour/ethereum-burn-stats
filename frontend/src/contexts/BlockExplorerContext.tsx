@@ -61,8 +61,8 @@ export const BlockExplorerApi = {
   fetchBlock: async (eth: EthereumApi, blockNumber: number): Promise<BurnedBlockTransaction | undefined> => {
     const block = await eth.getBlock(blockNumber) as BurnedBlockTransaction
     if (block) {
-      // const blockStats = await eth.getBlockStats(block.number)
-      // block.stats = blockStats
+      const blockStats = await eth.getBlockStats(block.number)
+      block.stats = blockStats
       return block
     }
 
@@ -175,12 +175,13 @@ const BlockExplorerProvider = ({
       const latestBlockNumber = (process.env.REACT_APP_START_BLOCK ? parseInt(process.env.REACT_APP_START_BLOCK) : await eth.getBlockNumber())
 
       const processedBlocks: BlockStats[] = []
-      // for (var i = 0; i < blockHeaderCount; i++) {
-      //   const blockNumber = Math.max(0, latestBlockNumber - i)
-      //   const block = await eth.getBlockStats(blockNumber)
-      //   if (block)
-      //     processedBlocks.push(block)
-      // }
+      
+      for (var i = 0; i < blockHeaderCount; i++) {
+        const blockNumber = Math.max(0, latestBlockNumber - i)
+        const block = await eth.getBlockStats(blockNumber)
+        if (block)
+          processedBlocks.push(block)
+      }
 
       return [latestBlockNumber, processedBlocks]
     }
