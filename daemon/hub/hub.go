@@ -172,25 +172,13 @@ func New(
 			currentBlock = londonBlock
 		}
 
-		counter := uint64(0)
 		for {
-			counter++
-			_, err := UpdateBlockStats(rpcClient, hexutil.EncodeUint64(uint64(currentBlock)))
+			blockStats, err := UpdateBlockStats(rpcClient, hexutil.EncodeUint64(uint64(currentBlock)))
 			if err != nil {
 				log.Errorf("Error %v\n", err)
 				return nil, err
 			}
-
-			if counter == 10 || currentBlock == uint64(latestBlockNumber) {
-				var batchStats []sql.BlockStats
-				for counter > 0 {
-					globalBlockStats.mu.Lock()
-					batchStats = append(batchStats, globalBlockStats.v[currentBlock+1-counter])
-					globalBlockStats.mu.Unlock()
-					counter--
-				}
-				db.AddBlocks(batchStats)
-			}
+			db.AddBlock(blockStats)
 
 			if currentBlock == uint64(latestBlockNumber) {
 				_, err := ethBlockNumber(
