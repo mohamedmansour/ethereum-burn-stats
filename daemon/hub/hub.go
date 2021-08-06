@@ -181,24 +181,31 @@ func New(
 			db.AddBlock(blockStats)
 
 			if currentBlock == uint64(latestBlockNumber) {
-				_, err := ethBlockNumber(
-					rpcClient,
-					latestBlock,
-				)(
-					nil,
-					jsonrpcMessage{
-						Version: "2.0",
-						Method:  "eth_blockNumber",
-						Params:  json.RawMessage([]byte("[]")),
-					},
+				latestBlockRaw, err := rpcClient.CallContext(
+					"2.0",
+					"eth_blockNumber",
 				)
 				if err != nil {
 					return nil, err
 				}
 
-				blockNumber = latestBlock.getBlockNumber()
-				log.Infof("Latest block: %s", blockNumber.String())
-				latestBlockNumber = blockNumber.Uint64()
+				var hexBlockNumber string
+				err = json.Unmarshal(latestBlockRaw, &hexBlockNumber)
+				if err != nil {
+					return nil, err
+				}
+
+				latestBlockNumberBig, err := hexutil.DecodeBig(hexBlockNumber)
+				if err != nil {
+					return nil, err
+				}
+				latestBlockNumber, err := hexutil.DecodeUint64(hexBlockNumber)
+				if err != nil {
+					return nil, err
+				}
+				latestBlock.updateBlockNumber(latestBlockNumberBig)
+
+				log.Infof("Latest block: %d", latestBlockNumber)
 				if currentBlock == uint64(latestBlockNumber) {
 					break
 				}
