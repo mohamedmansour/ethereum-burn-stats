@@ -20,7 +20,7 @@ import (
 var log = logrus.StandardLogger()
 
 var allowedEthSubscriptions = map[string]bool{
-	"blockStats": true,
+	"blockStats":   true,
 	"clientsCount": true,
 }
 
@@ -113,20 +113,26 @@ func New(
 
 	latestBlock := newLatestBlock()
 
-	_, err := ethBlockNumber(
-		rpcClient,
-		latestBlock,
-	)(
-		nil,
-		jsonrpcMessage{
-			Version: "2.0",
-			Method:  "eth_blockNumber",
-			Params:  json.RawMessage([]byte("[]")),
-		},
+	latestBlockRaw, err := rpcClient.CallContext(
+		"2.0",
+		"eth_blockNumber",
 	)
 	if err != nil {
 		return nil, err
 	}
+
+	var hexBlockNumber string
+	err = json.Unmarshal(latestBlockRaw, &hexBlockNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	latestBlockNumber, err := hexutil.DecodeBig(hexBlockNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	latestBlock.updateBlockNumber(latestBlockNumber)
 
 	blockNumber := latestBlock.getBlockNumber()
 	log.Infof("Latest block: %s", blockNumber.String())
@@ -243,8 +249,8 @@ func New(
 				//log.Infof("new block: %v, burned: %d, tips: %d, clients: %d", header.Number, blockBurned, blockTips, clientsCount)
 				latestBlock.updateBlockNumber(header.Number)
 				subscription <- map[string]interface{}{
-					"blockStats":            blockStats,
-					"clientsCount":          clientsCount,
+					"blockStats":   blockStats,
+					"clientsCount": clientsCount,
 				}
 			}
 		}
@@ -255,7 +261,7 @@ func New(
 			rpcClient,
 			latestBlock,
 		),
-		"eth_chainId":  handleFunc(rpcClient),
+		"eth_chainId": handleFunc(rpcClient),
 		"eth_getBlockByNumber": ethGetBlockByNumber(
 			rpcClient,
 			latestBlock,
@@ -412,40 +418,10 @@ func ethBlockNumber(
 	latestBlock *LatestBlock,
 ) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-		b, err := message.Params.MarshalJSON()
-		if err != nil {
-			return nil, err
-		}
+		blockNumber := latestBlock.getBlockNumber()
+		blockNumberHex := hexutil.EncodeBig(&blockNumber)
 
-		var params []interface{}
-		err = json.Unmarshal(b, &params)
-		if err != nil {
-			return nil, err
-		}
-
-		raw, err := rpcClient.CallContext(
-			message.Version,
-			message.Method,
-			params...,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		var hexBlockNumber string
-		err = json.Unmarshal(raw, &hexBlockNumber)
-		if err != nil {
-			return nil, err
-		}
-
-		blockNumber, err := hexutil.DecodeBig(hexBlockNumber)
-		if err != nil {
-			return nil, err
-		}
-
-		latestBlock.updateBlockNumber(blockNumber)
-
-		return raw, nil
+		return json.RawMessage(fmt.Sprintf("\"%s\"", blockNumberHex)), nil
 	}
 }
 
@@ -617,21 +593,8 @@ func getBlockStats(
 		var blockStats sql.BlockStats
 
 		if blockStats, ok = globalBlockStats.v[blockNumber]; !ok {
-			if blockNumber >= londonBlock {
-				for !ok {
-					var found bool
-					if blockStats, found = globalBlockStats.v[blockNumber]; found {
-						ok = true
-					}
-					time.Sleep(100 * time.Millisecond)
-				}
-			} else {
-				log.Printf("updating block stats for block #%d\n", blockNumber)
-				blockStats, err = UpdateBlockStats(rpcClient, hexutil.EncodeUint64(blockNumber))
-				if err != nil {
-					return nil, err
-				}
-			}
+			log.Printf("error fetching block stats for block #%d\n", blockNumber)
+			return nil, err
 		}
 
 		blockStatsJson, err := json.Marshal(blockStats)
