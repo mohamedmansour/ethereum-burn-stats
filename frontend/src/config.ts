@@ -28,7 +28,8 @@ export const EthereumNetworkOptions: {
 };
 
 export enum Setting {
-  maxBlocksToRender = "maxBlocksToRender"
+  maxBlocksToRender = "maxBlocksToRender",
+  doNotShowChart = "doNotShowChart"
 }
 
 export const defaultNetwork = EthereumNetworkOptions['mainnet']
@@ -37,6 +38,10 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
     [Setting.maxBlocksToRender]: {
       config: IntegerSetting,
       defaultValue: 50,
+    },
+    [Setting.doNotShowChart]: {
+      config: BooleanSetting,
+      defaultValue: false,
     },
   };
 

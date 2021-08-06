@@ -1,10 +1,13 @@
-import { Text, HStack, Icon, useRadio, Box, UseRadioProps, useRadioGroup, Grid, Flex } from "@chakra-ui/react";
+import { Text, HStack, Icon, useRadio, Box, UseRadioProps, useRadioGroup, Grid, Flex, Button, Spacer } from "@chakra-ui/react";
 import { FaChartLine } from 'react-icons/fa';
+import { useEffect, useState } from "react";
+import { VscChevronUp, VscChevronDown } from "react-icons/vsc";
 import { Card } from "../../atoms/Card";
 import { BaseFeeChart, ChartType } from "../../organisms/BaseFeeChart";
 import { BlockStats } from "../../contexts/EthereumContext";
 import { layoutConfig } from "../../layoutConfig";
-import { useState } from "react";
+import { Setting } from "../../config";
+import { useSettings } from "../../contexts/SettingsContext";
 
 interface RadioCardProps extends UseRadioProps {
   children?: React.ReactNode
@@ -19,7 +22,7 @@ function RadioCard(props: RadioCardProps) {
 
   return (
     <Box as="label" fontSize={12}>
-      <input {...input} style={{display: "none"}}/>
+      <input {...input} style={{ display: "none" }} />
       <Box
         {...checkbox}
         cursor="pointer"
@@ -49,6 +52,15 @@ function RadioCard(props: RadioCardProps) {
 }
 
 export function CardLiveChart(props: RadioCardProps) {
+  const settings = useSettings();
+  const [doNotShowChart, setDoNotShowChart] = useState<boolean>(
+    settings.get(Setting.doNotShowChart)
+  );
+
+  useEffect(() => {
+    settings.set(Setting.doNotShowChart, doNotShowChart);
+  }, [settings, doNotShowChart]);
+
   const [chartType, setChartType] = useState<ChartType>('basefee')
   const options: ChartType[] = ["tips & burned", "basefee", "transactions", "gas"]
   const { getRootProps, getRadioProps } = useRadioGroup({
@@ -62,28 +74,34 @@ export function CardLiveChart(props: RadioCardProps) {
   return (
     <Card
       gridGap={layoutConfig.miniGap}
-      minH={300}
-      h={["auto", "auto", 300]} flexShrink={0}
+      minH={doNotShowChart ? 0 : 300}
+      h={["auto", "auto", doNotShowChart ? "auto" : 300]} flexShrink={0}
     >
       <HStack>
         <Icon as={FaChartLine} />
         <Text fontSize="md" fontWeight="bold">
           Live Chart
         </Text>
+        <Spacer />
+        <Button variant="ghost" leftIcon={<Icon as={doNotShowChart ? VscChevronDown : VscChevronUp} />} _hover={{ bg: 'branding.background' }} onClick={() => setDoNotShowChart(doNotShow => !doNotShow)}></Button>
       </HStack>
-      <Flex justifyContent={["center", "center", "flex-end"]}>
-        <Grid {...group} templateColumns={["repeat(2, 1fr)","repeat(2, 1fr)","repeat(4, 1fr)"]} display="inline-grid" gridGap={2} mt={2} mb={2}>
-          {options.map((value) => {
-            const radio = getRadioProps({ value })
-            return (
-              <RadioCard key={value} {...radio}>
-                {value}
-              </RadioCard>
-            )
-          })}
-        </Grid>
-      </Flex>
-      <BaseFeeChart data={props.blocks || []} chartType={chartType} />
+      {!doNotShowChart && (
+        <>
+          <Flex justifyContent={["center", "center", "flex-end"]}>
+            <Grid {...group} templateColumns={["repeat(2, 1fr)", "repeat(2, 1fr)", "repeat(4, 1fr)"]} display="inline-grid" gridGap={2} mt={2} mb={2}>
+              {options.map((value) => {
+                const radio = getRadioProps({ value })
+                return (
+                  <RadioCard key={value} {...radio}>
+                    {value}
+                  </RadioCard>
+                )
+              })}
+            </Grid>
+          </Flex>
+          <BaseFeeChart data={props.blocks || []} chartType={chartType} />
+        </>
+      )}
     </Card>
   );
 }
