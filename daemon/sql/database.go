@@ -28,16 +28,23 @@ func ConnectDatabase(dbPath string) (*Database, error) {
 		db.Migrator().CreateTable(&BlockStats{})
 	}
 
+	if !db.Migrator().HasTable(&BlockStatsPercentiles{}) {
+		db.Migrator().CreateTable(&BlockStatsPercentiles{})
+	}
+
 	return &Database{
 		db: db,
 	}, nil
 }
 
-func (d *Database) AddBlock(blockStats BlockStats) {
+func (d *Database) AddBlock(blockStats BlockStats, blockStatsPercentiles []BlockStatsPercentiles) {
 	if blockStats.Number == 0 {
 		return
 	}
 	d.db.Create(blockStats)
+	for _, b := range blockStatsPercentiles {
+		d.db.Create(b)
+	}
 }
 
 func (d *Database) AddBlocks(blockStats []BlockStats) {

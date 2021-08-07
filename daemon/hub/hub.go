@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/big"
 	"net/http"
+	"sort"
 	"sync"
 	"time"
 
@@ -119,12 +121,11 @@ func New(
 	}
 	log.Infof("Latest block: %d", latestBlockNumber)
 
-
 	db, err := sql.ConnectDatabase(dbPath)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if initializedb {
 		go InitializeMissingBlocks(rpcClient, db, londonBlock, latestBlockNumber, latestBlock)
 	}
@@ -154,12 +155,12 @@ func New(
 
 				blockNumber := header.Number.Uint64()
 
-				blockStats, err := UpdateBlockStats(rpcClient, blockNumber)
+				blockStats, blockStatsPercentiles, err := UpdateBlockStats(rpcClient, blockNumber)
 				if err != nil {
 					log.Errorf("Error getting block stats: %v", err)
 				}
 
-				db.AddBlock(blockStats)
+				db.AddBlock(blockStats, blockStatsPercentiles)
 
 				clientsCount := len(clients)
 
@@ -330,27 +331,27 @@ func InitializeMissingBlocks(rpcClient *rpcClient, db *sql.Database, londonBlock
 	highestBlockInDb, err := db.GetHighestBlockNumber()
 	if err != nil {
 		log.Errorf("Highest block not found %v", err)
-		return;
+		return
 	}
 	log.Infof("Highest stored block in DB: %d", highestBlockInDb)
 
 	missingBlockNumbers, err := db.GetMissingBlockNumbers(londonBlock)
 	if err != nil {
 		log.Errorf("Error getting missing block numbers from database: %v", err)
-		return;
+		return
 	}
 
 	if len(missingBlockNumbers) > 0 {
 		log.Infof("Starting to fetch %d missing blocks", len(missingBlockNumbers))
 	}
-	
+
 	for _, n := range missingBlockNumbers {
-		blockStats, err := UpdateBlockStats(rpcClient, n)
+		blockStats, blockStatsPercentiles, err := UpdateBlockStats(rpcClient, n)
 		if err != nil {
 			log.Errorf("Cannot update block state for '%d',  %v", n, err)
-			return;
+			return
 		}
-		db.AddBlock(blockStats)
+		db.AddBlock(blockStats, blockStatsPercentiles)
 	}
 
 	if len(missingBlockNumbers) > 0 {
@@ -360,7 +361,7 @@ func InitializeMissingBlocks(rpcClient *rpcClient, db *sql.Database, londonBlock
 	allBlockStats, err := db.GetAllBlockStats()
 	if err != nil {
 		log.Errorf("Error getting totals from database: %v", err)
-		return;
+		return
 	}
 
 	for _, b := range allBlockStats {
@@ -374,7 +375,7 @@ func InitializeMissingBlocks(rpcClient *rpcClient, db *sql.Database, londonBlock
 	burned, tips, err := db.GetTotals()
 	if err != nil {
 		log.Errorf("Error getting totals from database:%v", err)
-		return;
+		return
 	}
 
 	log.Printf("Totals: %s burned and %s tips\n", burned.String(), tips.String())
@@ -394,21 +395,21 @@ func InitializeMissingBlocks(rpcClient *rpcClient, db *sql.Database, londonBlock
 
 	if latestBlockNumber > currentBlock {
 		for {
-			blockStats, err := UpdateBlockStats(rpcClient, currentBlock)
+			blockStats, blockStatsPercentiles, err := UpdateBlockStats(rpcClient, currentBlock)
 			if err != nil {
 				log.Errorf("Cannot update block state for '%d',  %v", currentBlock, err)
-				return;
+				return
 			}
-			db.AddBlock(blockStats)
+			db.AddBlock(blockStats, blockStatsPercentiles)
 
 			if currentBlock == latestBlockNumber {
 				latestBlockNumber, err = UpdateLatestBlock(rpcClient, latestBlock)
 				if err != nil {
 					log.Errorf("Error updating latest block: %v", err)
-					return;
+					return
 				}
 				log.Infof("Latest block: %d", latestBlockNumber)
-				if currentBlock == latestBlockNumber{
+				if currentBlock == latestBlockNumber {
 					break
 				}
 			}
@@ -629,10 +630,11 @@ func getBlockStats(
 	}
 }
 
-func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats, error) {
+func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats, []sql.BlockStatsPercentiles, error) {
 	start := time.Now()
 	var blockNumberHex string
 	var blockStats sql.BlockStats
+	var blockStatsPercentiles []sql.BlockStatsPercentiles
 	var rawResponse json.RawMessage
 
 	blockNumberHex = hexutil.EncodeUint64(blockNumber)
@@ -645,29 +647,29 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 	)
 	if err != nil {
 		log.Errorf("error getting block details from geth: %v", err)
-		return blockStats, err
+		return blockStats, blockStatsPercentiles, err
 	}
 
 	block := Block{}
 	err = json.Unmarshal(rawResponse, &block)
 	if err != nil {
-		return blockStats, err
+		return blockStats, blockStatsPercentiles, err
 	}
 
 	header := types.Header{}
 	err = json.Unmarshal(rawResponse, &header)
 	if err != nil {
-		return blockStats, err
+		return blockStats, blockStatsPercentiles, err
 	}
 
 	gasUsed, err := hexutil.DecodeBig(block.GasUsed)
 	if err != nil {
-		return blockStats, err
+		return blockStats, blockStatsPercentiles, err
 	}
 
 	gasTarget, err := hexutil.DecodeBig(block.GasLimit)
 	if err != nil {
-		return blockStats, err
+		return blockStats, blockStatsPercentiles, err
 	}
 
 	if blockNumber > londonBlock {
@@ -679,7 +681,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 	if block.BaseFeePerGas != "" {
 		baseFee, err = hexutil.DecodeBig(block.BaseFeePerGas)
 		if err != nil {
-			return blockStats, err
+			return blockStats, blockStatsPercentiles, err
 		}
 	}
 
@@ -699,22 +701,22 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 			hexutil.EncodeUint64(uint64(n)),
 		)
 		if err != nil {
-			return blockStats, err
+			return blockStats, blockStatsPercentiles, err
 		}
 
 		uncle := Block{}
 		err = json.Unmarshal(raw, &uncle)
 		if err != nil {
-			return blockStats, err
+			return blockStats, blockStatsPercentiles, err
 		}
 		if uncleHash != uncle.Hash {
 			err = fmt.Errorf("uncle hash doesn't match: have %s and want %s", uncleHash, uncle.Hash)
-			return blockStats, err
+			return blockStats, blockStatsPercentiles, err
 		}
 
 		uncleBlockNumber, err := hexutil.DecodeUint64(uncle.Number)
 		if err != nil {
-			return blockStats, err
+			return blockStats, blockStatsPercentiles, err
 		}
 
 		uncleMinerReward := getBaseReward(blockNumber)
@@ -729,6 +731,8 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 		blockReward.Add(&blockReward, &uncleInclusionReward)
 	}
 
+	var allPriorityFeePerGasMwei []uint64
+
 	for _, tHash := range block.Transactions {
 		var raw json.RawMessage
 		raw, err := rpcClient.CallContext(
@@ -737,13 +741,13 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 			tHash,
 		)
 		if err != nil {
-			return blockStats, err
+			return blockStats, blockStatsPercentiles, err
 		}
 
 		receipt := TransactionReceipt{}
 		err = json.Unmarshal(raw, &receipt)
 		if err != nil {
-			return blockStats, err
+			return blockStats, blockStatsPercentiles, err
 		}
 
 		if receipt.BlockNumber == "" {
@@ -753,7 +757,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 		}
 		gasUsed, err := hexutil.DecodeBig(receipt.GasUsed)
 		if err != nil {
-			return blockStats, err
+			return blockStats, blockStatsPercentiles, err
 		}
 
 		effectiveGasPrice := big.NewInt(0)
@@ -761,7 +765,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 		if receipt.EffectiveGasPrice != "" {
 			effectiveGasPrice, err = hexutil.DecodeBig(receipt.EffectiveGasPrice)
 			if err != nil {
-				return blockStats, err
+				return blockStats, blockStatsPercentiles, err
 			}
 		}
 
@@ -772,12 +776,32 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 		tips.Mul(gasUsed, effectiveGasPrice)
 		tips.Sub(tips, burned)
 
+		priorityFeePerGas := big.NewInt(0)
+		priorityFeePerGas.Div(tips, gasUsed)
+		priorityFeePerGasMwei := priorityFeePerGas.Div(priorityFeePerGas, big.NewInt(1_000_000)).Uint64()
+
+		allPriorityFeePerGasMwei = append(allPriorityFeePerGasMwei, priorityFeePerGasMwei)
+
 		blockBurned.Add(blockBurned, burned)
 		blockTips.Add(blockTips, tips)
-
-		// log.Printf("transactionHash: %s, gasUsed: %d, burned: %d, tips: %d\n", tHash, gasUsed, burned, tips)
-
 	}
+
+	// sort slices that will be used for percentile calculations later
+	sort.Slice(allPriorityFeePerGasMwei, func(i, j int) bool { return allPriorityFeePerGasMwei[i] < allPriorityFeePerGasMwei[j] })
+
+	blockStatsPercentiles = append(blockStatsPercentiles, sql.BlockStatsPercentiles{
+		Number:       uint(blockNumber),
+		Metric:       "PFpG",
+		Maximum:      uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 100)),
+		Median:       uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 50)),
+		Minimum:      uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 0)),
+		Tenth:        uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 10)),
+		TwentyFifth:  uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 25)),
+		SeventyFifth: uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 75)),
+		Ninetieth:    uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 90)),
+		NinetyFifth:  uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 95)),
+		NinetyNinth:  uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 95)),
+	})
 
 	blockStats.Number = uint(blockNumber)
 	blockStats.Timestamp = header.Time
@@ -804,7 +828,24 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 	duration := time.Since(start) / time.Millisecond
 	log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
 
-	return blockStats, nil
+	return blockStats, blockStatsPercentiles, nil
+}
+
+func GetPercentileSortedUint64(values []uint64, perc int) uint64 {
+	if len(values) == 0 {
+		return 0
+	}
+	if perc == 100 {
+		return values[len(values)-1]
+	}
+
+	rank := int(math.Ceil(float64(len(values)) * float64(perc) / 100))
+
+	if rank == 0 {
+		return values[0]
+	}
+
+	return values[rank-1]
 }
 
 func UpdateLatestBlock(rpcClient *rpcClient, latestBlock *LatestBlock) (uint64, error) {
@@ -813,7 +854,7 @@ func UpdateLatestBlock(rpcClient *rpcClient, latestBlock *LatestBlock) (uint64, 
 		"eth_blockNumber",
 	)
 	if err != nil {
-		
+
 		return 0, fmt.Errorf("failed to fetch latest block number from geth")
 	}
 
