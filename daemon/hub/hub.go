@@ -119,99 +119,14 @@ func New(
 	}
 	log.Infof("Latest block: %d", latestBlockNumber)
 
+
 	db, err := sql.ConnectDatabase(dbPath)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if initializedb {
-		highestBlockInDb, err := db.GetHighestBlockNumber()
-		if err != nil {
-			log.Errorf("Error %v\n", err)
-			return nil, err
-		}
-		log.Infof("Highest stored block in DB: %d", highestBlockInDb)
-
-		missingBlockNumbers, err := db.GetMissingBlockNumbers(londonBlock)
-		if err != nil {
-			log.Errorf("Error getting missing block numbers from database: %v", err)
-			return nil, err
-		}
-
-		if len(missingBlockNumbers) > 0 {
-			log.Infof("Starting to fetch %d missing blocks", len(missingBlockNumbers))
-		}
-		for _, n := range missingBlockNumbers {
-			blockStats, err := UpdateBlockStats(rpcClient, n)
-			if err != nil {
-				log.Errorf("Error %v", err)
-				return nil, err
-			}
-			db.AddBlock(blockStats)
-		}
-		if len(missingBlockNumbers) > 0 {
-			log.Infof("Finished fetching missing blocks")
-		}
-
-		allBlockStats, err := db.GetAllBlockStats()
-		if err != nil {
-			log.Errorf("Error getting totals from database: %v", err)
-			return nil, err
-		}
-
-		for _, b := range allBlockStats {
-			globalBlockStats.mu.Lock()
-			globalBlockStats.v[uint64(b.Number)] = b
-			globalBlockStats.mu.Unlock()
-		}
-
-		allBlockStats = []sql.BlockStats{}
-
-		burned, tips, err := db.GetTotals()
-		if err != nil {
-			log.Errorf("Error getting totals from database:%v\n", err)
-			return nil, err
-		}
-
-		log.Printf("Totals: %s burned and %s tips\n", burned.String(), tips.String())
-
-		globalTotalBurned.mu.Lock()
-		globalTotalBurned.v.Add(globalTotalBurned.v, burned)
-		globalTotalBurned.mu.Unlock()
-
-		globalTotalTips.mu.Lock()
-		globalTotalTips.v.Add(globalTotalTips.v, tips)
-		globalTotalTips.mu.Unlock()
-
-		currentBlock := highestBlockInDb + 1
-		if currentBlock == 1 {
-			currentBlock = londonBlock
-		}
-
-		if latestBlockNumber > currentBlock {
-			for {
-				blockStats, err := UpdateBlockStats(rpcClient, currentBlock)
-				if err != nil {
-					log.Errorf("Error %v\n", err)
-					return nil, err
-				}
-				db.AddBlock(blockStats)
-
-				if currentBlock == uint64(latestBlockNumber) {
-					latestBlockNumber, err = UpdateLatestBlock(rpcClient, latestBlock)
-					if err != nil {
-						log.Errorf("error updating latest block: %v", err)
-						return nil, err
-					}
-					log.Infof("Latest block: %d", latestBlockNumber)
-					if currentBlock == uint64(latestBlockNumber) {
-						break
-					}
-				}
-				currentBlock++
-			}
-		}
-
+		go InitializeMissingBlocks(rpcClient, db, londonBlock, latestBlockNumber, latestBlock)
 	}
 
 	log.Infof("Initialize gethRPCClientWebsocket '%s'", gethEndpointWebsocket)
@@ -409,6 +324,96 @@ func handleFunc(
 		}
 
 		return raw, nil
+	}
+}
+func InitializeMissingBlocks(rpcClient *rpcClient, db *sql.Database, londonBlock uint64, latestBlockNumber uint64, latestBlock *LatestBlock) {
+	highestBlockInDb, err := db.GetHighestBlockNumber()
+	if err != nil {
+		log.Errorf("Highest block not found %v", err)
+		return;
+	}
+	log.Infof("Highest stored block in DB: %d", highestBlockInDb)
+
+	missingBlockNumbers, err := db.GetMissingBlockNumbers(londonBlock)
+	if err != nil {
+		log.Errorf("Error getting missing block numbers from database: %v", err)
+		return;
+	}
+
+	if len(missingBlockNumbers) > 0 {
+		log.Infof("Starting to fetch %d missing blocks", len(missingBlockNumbers))
+	}
+	
+	for _, n := range missingBlockNumbers {
+		blockStats, err := UpdateBlockStats(rpcClient, n)
+		if err != nil {
+			log.Errorf("Cannot update block state for '%d',  %v", n, err)
+			return;
+		}
+		db.AddBlock(blockStats)
+	}
+
+	if len(missingBlockNumbers) > 0 {
+		log.Infof("Finished fetching missing blocks")
+	}
+
+	allBlockStats, err := db.GetAllBlockStats()
+	if err != nil {
+		log.Errorf("Error getting totals from database: %v", err)
+		return;
+	}
+
+	for _, b := range allBlockStats {
+		globalBlockStats.mu.Lock()
+		globalBlockStats.v[uint64(b.Number)] = b
+		globalBlockStats.mu.Unlock()
+	}
+
+	allBlockStats = []sql.BlockStats{}
+
+	burned, tips, err := db.GetTotals()
+	if err != nil {
+		log.Errorf("Error getting totals from database:%v", err)
+		return;
+	}
+
+	log.Printf("Totals: %s burned and %s tips\n", burned.String(), tips.String())
+
+	globalTotalBurned.mu.Lock()
+	globalTotalBurned.v.Add(globalTotalBurned.v, burned)
+	globalTotalBurned.mu.Unlock()
+
+	globalTotalTips.mu.Lock()
+	globalTotalTips.v.Add(globalTotalTips.v, tips)
+	globalTotalTips.mu.Unlock()
+
+	currentBlock := highestBlockInDb + 1
+	if currentBlock == 1 {
+		currentBlock = londonBlock
+	}
+
+	if latestBlockNumber > currentBlock {
+		for {
+			blockStats, err := UpdateBlockStats(rpcClient, currentBlock)
+			if err != nil {
+				log.Errorf("Cannot update block state for '%d',  %v", currentBlock, err)
+				return;
+			}
+			db.AddBlock(blockStats)
+
+			if currentBlock == latestBlockNumber {
+				latestBlockNumber, err = UpdateLatestBlock(rpcClient, latestBlock)
+				if err != nil {
+					log.Errorf("Error updating latest block: %v", err)
+					return;
+				}
+				log.Infof("Latest block: %d", latestBlockNumber)
+				if currentBlock == latestBlockNumber{
+					break
+				}
+			}
+			currentBlock++
+		}
 	}
 }
 
@@ -808,21 +813,19 @@ func UpdateLatestBlock(rpcClient *rpcClient, latestBlock *LatestBlock) (uint64, 
 		"eth_blockNumber",
 	)
 	if err != nil {
-		fmt.Errorf("failed to fetch latest block number from geth\n")
-		return 0, err
+		
+		return 0, fmt.Errorf("failed to fetch latest block number from geth")
 	}
 
 	var hexBlockNumber string
 	err = json.Unmarshal(latestBlockRaw, &hexBlockNumber)
 	if err != nil {
-		fmt.Errorf("couldn't unmarshal latest bock number response: %v\n", latestBlockRaw)
-		return 0, err
+		return 0, fmt.Errorf("couldn't unmarshal latest bock number response: %v", latestBlockRaw)
 	}
 
 	latestBlockNumber, err := hexutil.DecodeUint64(hexBlockNumber)
 	if err != nil {
-		fmt.Errorf("latest block could not be decoded from hex to uint: %v\n", hexBlockNumber)
-		return 0, err
+		return 0, fmt.Errorf("latest block could not be decoded from hex to uint: %v", hexBlockNumber)
 	}
 
 	latestBlock.updateBlockNumber(latestBlockNumber)
