@@ -154,20 +154,20 @@ func New(
 
 				blockNumber := header.Number.Uint64()
 
-				latestBlock.updateBlockNumber(blockNumber)
-
 				blockStats, err := UpdateBlockStats(rpcClient, blockNumber)
 				if err != nil {
 					log.Errorf("Error getting block stats: %v", err)
-				} else {
-					db.AddBlock(blockStats)
+				}
 
-					clientsCount := len(clients)
+				db.AddBlock(blockStats)
 
-					subscription <- map[string]interface{}{
-						"blockStats":   blockStats,
-						"clientsCount": clientsCount,
-					}
+				clientsCount := len(clients)
+
+				latestBlock.updateBlockNumber(blockNumber)
+
+				subscription <- map[string]interface{}{
+					"blockStats":   blockStats,
+					"clientsCount": clientsCount,
 				}
 			}
 		}
