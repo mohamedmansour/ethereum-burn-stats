@@ -22,10 +22,11 @@ interface EthereumSyncing {
   pulledStates: number
 }
 
-enum WebSocketStatus {
-  CONNECTING,
-  CONNECTED,
-  DISCONNECTED,
+export enum WebSocketStatus {
+  Connecting,
+  Connected,
+  Disconnected,
+  Error,
 }
 
 interface AsyncMessage<T> {
@@ -107,8 +108,19 @@ export interface Totals {
   tipped: BigNumber
 }
 
+interface WebSocketEventMap {
+  "status": WebSocketStatus
+  "block": BlockStats
+  "client": number
+}
+
+interface WebSocketSubscriptionMap {
+  channel: string
+  event: keyof WebSocketEventMap
+}
+
 class WebSocketProvider {
-  private eventEmitter = EventEmitter<string>()
+  private eventEmitter = EventEmitter<keyof WebSocketEventMap>()
   private connection: WebSocket;
   private asyncId: number = 0
   private promiseMap: {[key: number]: [ (value: any | PromiseLike<any>) => void, (e: unknown) => void]} = {}
@@ -116,44 +128,66 @@ class WebSocketProvider {
     max: 10000,
     maxAge: 1000 * 60 * 60  // 1 hour
   });
+  private channelsToSubscribe: WebSocketSubscriptionMap[]  = [
+    { channel: 'blockStats', event: 'block' },
+    { channel: 'clientsCount', event: 'client' },
+  ]
 
-  protected status: WebSocketStatus = WebSocketStatus.CONNECTING
-  private ethSubcribeMap: {[key: string]: string} = {}  
-  public ready: Promise<void>;
+  private _status: WebSocketStatus = WebSocketStatus.Connecting
+  private ethSubcribeMap: {[key: string]: keyof WebSocketEventMap} = {}  
 
   constructor(url: string) {
     this.connection = new WebSocket(url);
-    this.ready = this.connect()
+  }
+
+  public get ready(): Promise<void> {
+    return this.connect()
+  }
+
+  public get status() {
+    return this._status;
+  }
+
+  private set status(status: WebSocketStatus) {
+    this._status = status;
   }
 
   private connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.connection.addEventListener("close", () => {
-        this.status = WebSocketStatus.DISCONNECTED;
+        this.status = WebSocketStatus.Disconnected;
+        this.eventEmitter.emit('status', this.status);
       });
+
       this.connection.addEventListener("message", this.onMessage.bind(this));
+
       this.connection.addEventListener("open", () => {
-        this.status = WebSocketStatus.CONNECTED;
-        const ensureEventsSubscribed = [
-          new Promise<[string, string]>((resolve, reject) => {
-            this.send("eth_subscribe", ["blockStats"]).then((data) => {
-              resolve(["block", data as string])
-            }).catch(e => reject(e))
-          }),
-          new Promise<[string, string]>((resolve, reject) => {
-            this.send("eth_subscribe", ["clientsCount"]).then((data) => {
-              resolve(["client", data as string])
+        this.status = WebSocketStatus.Connected;
+        this.eventEmitter.emit('status', this.status);
+
+        // Make sure we get a registration callback from websocket that we are
+        // indeed connected to these channels.
+        const ensureChannelsSubscribed = this.channelsToSubscribe.map(sub => (
+          new Promise<[keyof WebSocketEventMap, string]>((resolve, reject) => {
+            this.send("eth_subscribe", [sub.channel]).then((data) => {
+              resolve([sub.event, data as string])
             }).catch(e => reject(e))
           })
-        ]
-        Promise.all(ensureEventsSubscribed).then((results) => {
+        ))
+
+        Promise.all(ensureChannelsSubscribed).then((results) => {
           results.forEach(([name, id] ) => {
             this.ethSubcribeMap[id] = name
           })
           resolve()
         }).catch(e => reject(e))
       });
-      this.connection.addEventListener("error", (e) => reject(e));
+
+      this.connection.addEventListener("error", (e) => {
+        this.status = WebSocketStatus.Error;
+        this.eventEmitter.emit('status', this.status);
+        reject(e)
+      });
     })
   }
 
@@ -187,12 +221,12 @@ class WebSocketProvider {
     this.connection.close();
   }
 
-  public on<T>(eventName: 'block' | 'client', callback: (data: T) => void) {
-    this.eventEmitter.on(eventName, callback);
+  public on<K extends keyof WebSocketEventMap>(type: K, listener: (ev: WebSocketEventMap[K]) => void) {
+    this.eventEmitter.on(type, listener);
   }
 
-  public off<T>(eventName: 'block' | 'client', callback: (data: T) => void) {
-    this.eventEmitter.off(eventName, callback);
+  public off<K extends keyof WebSocketEventMap>(type: K, listener: (ev: WebSocketEventMap[K]) => void) {
+    this.eventEmitter.off(type, listener);
   }
 
   public onMessage(evt: MessageEvent) {
@@ -225,12 +259,9 @@ class WebSocketProvider {
         return;
       }
       const subscribedEvent = this.ethSubcribeMap[eventData.params.subscription];
-      if (subscribedEvent === 'block') {
-        this.eventEmitter.emit('block', EthereumApiFormatters.FormatBlockStats(eventData.params.result as BlockStats))
+      if (subscribedEvent) {
+        this.eventEmitter.emit(subscribedEvent, eventData.params.result)
       }
-      else if (subscribedEvent === 'client') {
-        this.eventEmitter.emit('client', eventData.params.result)
-      } 
       else {
         console.error('unknown event', eventData.params)
       }
