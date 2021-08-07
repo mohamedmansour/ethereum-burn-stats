@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import ReactGA from 'react-ga';
 import { EthereumProvider } from './contexts/EthereumContext';
 import { Routing } from './templates/Routing';
-import { ChakraProvider, ColorModeScript, CSSReset } from '@chakra-ui/react';
+import { ChakraProvider, CSSReset } from '@chakra-ui/react';
 import customTheme from './theme';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { BlockExplorerProvider } from './contexts/BlockExplorerContext';
