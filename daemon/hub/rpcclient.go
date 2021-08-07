@@ -20,6 +20,7 @@ type HttpClient interface {
 func (c *rpcClient) CallContext(
 	version string,
 	method string,
+	blockNumber string,
 	args ...interface{},
 ) (json.RawMessage, error) {
 
@@ -57,6 +58,9 @@ func (c *rpcClient) CallContext(
 	request.Header.Add("Content-Type", "application/json")
 	//request.Header.Add("Connection", "close")
 	request.Header.Add("X-Custom-Method", method)
+	if blockNumber != "" {
+		request.Header.Add("X-Custom-Block-Number", blockNumber)
+	}
 
 	//Firing the request and receiving response
 	response, err := c.httpClient.Do(request)
