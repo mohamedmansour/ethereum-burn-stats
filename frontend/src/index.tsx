@@ -26,9 +26,7 @@ if (typeof GOOGLE_ANALYTICS_ID === 'string') {
 
 function App() {
   const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:'
-  const url = process.env.NODE_ENV === 'production'
-    ? `${protocol}//${window.location.host}/ws`
-    : `${protocol}//${process.env.REACT_APP_WEB3_URL}`
+  const url = `${protocol}//${process.env.REACT_APP_WEB3_URL}`
 
   return (
     <React.StrictMode>
