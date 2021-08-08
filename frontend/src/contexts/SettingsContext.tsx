@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { defaultSettings, Setting } from '../config';
-import { EventEmitter } from '../utils/event';
+import { EventEmitter } from '../libs/event';
 
 export interface SettingConfig {
   verify: (value: any) => boolean,

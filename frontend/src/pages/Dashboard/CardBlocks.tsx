@@ -11,7 +11,7 @@ import { BigNumberText } from "../../organisms/BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
 import { Loader } from "../../organisms/Loader";
 import { timeSince } from "../../utils/time";
-import { BlockStats } from "../../contexts/EthereumContext";
+import { BlockStats } from "../../libs/ethereum";
 
 function GasUsedInfo() {
   return (

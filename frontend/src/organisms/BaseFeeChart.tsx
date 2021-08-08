@@ -2,7 +2,7 @@ import { Box, HStack, Text } from "@chakra-ui/react";
 import { BigNumber, utils } from "ethers";
 import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, Area, AreaChart } from 'recharts';
-import { BlockStats } from "../contexts/EthereumContext";
+import { BlockStats } from "../libs/ethereum";
 import { Zero } from "../utils/number";
 import { BigNumberFormat, BigNumberText } from "./BigNumberText";
 

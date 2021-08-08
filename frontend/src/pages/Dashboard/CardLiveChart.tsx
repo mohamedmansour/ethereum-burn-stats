@@ -3,7 +3,7 @@ import { FaChartLine } from 'react-icons/fa';
 import { useEffect, useState } from "react";
 import { Card } from "../../atoms/Card";
 import { BaseFeeChart, ChartType } from "../../organisms/BaseFeeChart";
-import { BlockStats } from "../../contexts/EthereumContext";
+import { BlockStats } from "../../libs/ethereum";
 import { Setting } from "../../config";
 import { useSettings } from "../../contexts/SettingsContext";
 

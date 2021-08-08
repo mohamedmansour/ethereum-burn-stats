@@ -17,7 +17,8 @@ import { Link as ReactLink, useParams } from "react-router-dom";
 import { BigNumberText } from "../organisms/BigNumberText";
 import { Card } from "../atoms/Card";
 import { Loader } from "../organisms/Loader";
-import { Transaction, useEthereum } from "../contexts/EthereumContext";
+import { useEthereum } from "../contexts/EthereumContext";
+import { Transaction } from "../libs/ethereum";
 import { layoutConfig } from "../layoutConfig";
 
 export function EthTransactionDetail() {

@@ -29,7 +29,7 @@ import { useState, useEffect } from "react";
 import { VscChevronLeft, VscChevronRight } from "react-icons/vsc";
 import { useParams, Link as ReactLink, useHistory } from "react-router-dom";
 import { Loader } from "../organisms/Loader";
-import { Transaction, useEthereum } from "../contexts/EthereumContext";
+import { useEthereum } from "../contexts/EthereumContext";
 import { Card } from "../atoms/Card";
 import {
   BlockExplorerApi,
@@ -40,6 +40,7 @@ import { BigNumberText } from "../organisms/BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "../organisms/GasUsed";
 import { layoutConfig } from "../layoutConfig";
 import { TablePlus, ThPlus } from "../atoms/TablePlus";
+import { Transaction } from "../libs/ethereum";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;

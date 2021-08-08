@@ -1,11 +1,12 @@
 import { useContext, createContext, useEffect } from "react"
-import { Block, BlockStats, EthereumApi, useEthereum } from "./EthereumContext"
+import { useEthereum } from "./EthereumContext"
 import { BigNumber } from 'ethers'
 import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../organisms/Loader";
 import { useReducer } from "react";
 import { prefetchCount, Setting } from "../config";
 import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
+import { Block, BlockStats, EthereumApi } from "../libs/ethereum";
 
 export interface BurnedBlockTransaction extends Block {
   stats: BlockStats
@@ -212,6 +213,7 @@ const BlockExplorerProvider = ({
           }, blocks: []
         })
       }
+
       eth.on('block', onNewBlockHeader)
       eth.on('client', onClient)
     }

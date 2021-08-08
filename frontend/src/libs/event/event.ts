@@ -1,6 +1,17 @@
 export type EventCallback = (value: any) => void
 
-export function EventEmitter<T extends string>() {
+/**
+ * Simple pub/sub style event system.
+ * 
+ * Example:
+ * 
+ *  const event = EventEmitter();
+ *  event.on('hello', (value) => {
+ *   console.log(value)
+ *  });
+ *  event.emit('hello', 'world');
+ */
+export function EventEmitter<T>() {
   const list = new Map<T, EventCallback[]>()
 
   const on = (eventName: T, callback: EventCallback) => {
