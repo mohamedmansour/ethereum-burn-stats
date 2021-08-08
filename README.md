@@ -3,7 +3,7 @@ When EIP-1559 gets deployed, ETH will be burned in every block if transactions e
 
 If you have a local Ethereum (we use geth) instance, you can update `REACT_APP_WEB3_URL` in  `.env.production.local` to your local ETH instance and run this offline! The instructions below show how to deploy it to a remote website under nginx.
 
-[![Azure Static Web Apps CI/CD](https://github.com/mohamedmansour/ethereum-burn-stats/actions/workflows/frontend-azure-static-web-apps.yml/badge.svg)](https://github.com/mohamedmansour/ethereum-burn-stats/actions/workflows/frontend-azure-static-web-apps.yml)
+[![Frontend CI/CD](https://github.com/mohamedmansour/ethereum-burn-stats/actions/workflows/frontend-azure-static-web-apps.yml/badge.svg?branch=main)](https://github.com/mohamedmansour/ethereum-burn-stats/actions/workflows/frontend-azure-static-web-apps.yml)
 
 ## Donate towards Server Costs 💰
 The costs of running this experiment is pretty high since it requires a dev version of Geth to be up and running which requires lots of memory and cpu. The VM and SSD storage currently costs exactly $150/month USD. If you would like to help out with the costs, please reach out to me. 
