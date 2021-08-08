@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"net/http"
 	"sort"
+	"strconv"
 	"sync"
 	"time"
 
@@ -127,7 +128,7 @@ func New(
 	}
 
 	if initializedb {
-		go InitializeMissingBlocks(rpcClient, db, londonBlock, latestBlockNumber, latestBlock)
+		InitializeMissingBlocks(rpcClient, db, londonBlock, latestBlockNumber, latestBlock)
 	}
 
 	log.Infof("Initialize gethRPCClientWebsocket '%s'", gethEndpointWebsocket)
@@ -318,6 +319,7 @@ func handleFunc(
 		raw, err := rpcClient.CallContext(
 			message.Version,
 			message.Method,
+			"",
 			params...,
 		)
 		if err != nil {
@@ -465,6 +467,7 @@ func ethGetBlockByNumber(
 		raw, err := rpcClient.CallContext(
 			message.Version,
 			message.Method,
+			blockNumberBig.String(),
 			params...,
 		)
 		if err != nil {
@@ -642,6 +645,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 	rawResponse, err := rpcClient.CallContext(
 		"2.0",
 		"eth_getBlockByNumber",
+		strconv.Itoa(int(blockNumber)),
 		blockNumberHex,
 		false,
 	)
@@ -697,6 +701,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 		raw, err := rpcClient.CallContext(
 			"2.0",
 			"eth_getUncleByBlockNumberAndIndex",
+			strconv.Itoa(int(blockNumber)),
 			blockNumberHex,
 			hexutil.EncodeUint64(uint64(n)),
 		)
@@ -738,6 +743,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 		raw, err := rpcClient.CallContext(
 			"2.0",
 			"eth_getTransactionReceipt",
+			strconv.Itoa(int(blockNumber)),
 			tHash,
 		)
 		if err != nil {
@@ -852,6 +858,7 @@ func UpdateLatestBlock(rpcClient *rpcClient, latestBlock *LatestBlock) (uint64, 
 	latestBlockRaw, err := rpcClient.CallContext(
 		"2.0",
 		"eth_blockNumber",
+		"",
 	)
 	if err != nil {
 
