@@ -9,6 +9,9 @@ backend default {
 }
 
 sub vcl_recv {
+    if (req.http.X-Custom-Method == "eth_blockNumber") {
+        return (pass);
+    }
     unset req.http.X-Body-Len;
     if (req.method == "POST" && req.url ~ "$") {
         std.cache_req_body(10KB);
@@ -37,17 +40,59 @@ sub vcl_backend_fetch {
 
 sub vcl_backend_response {
     if (beresp.status == 200) {
-        if (bereq.http.X-Custom-Method == "eth_blockNumber") {
-            set beresp.ttl = 1s;
-        } else if (bereq.http.X-Custom-Method == "eth_gasPrice") {
-            set beresp.ttl = 1s;
-        } else if (bereq.http.X-Custom-Method == "eth_chainId") {
-            set beresp.ttl = 1m;
-        } else if (bereq.http.X-Custom-Method == "eth_syncing") {
-            set beresp.ttl = 1m;
-        } else { 
-            set beresp.ttl = 1d;
+        //cache eth_syncing for 10 seconds
+        if (bereq.http.X-Custom-Method == "eth_syncing") {
+            set beresp.ttl = 10s;
+            return (deliver);
         }
+
+        //cache eth_chainId for 1 minute
+        if (bereq.http.X-Custom-Method == "eth_chainId") {
+            set beresp.ttl = 1m;
+            return (deliver);
+        }
+        
+        //cache eth_getTransactionReceipt for 1d if valid
+        //valid responses > 500 bytes
+        //invalid responses < 500 bytes and return a null result buried in json
+        if (bereq.http.X-Custom-Method == "eth_getTransactionReceipt") {
+            if (std.integer(beresp.http.content-length, 500) < 500) {
+                set beresp.ttl = 0s;
+                return (deliver);
+            }
+            set beresp.ttl = 1d;
+            return (deliver);
+        }
+
+        //cache eth_getBlockByNumber for 7d if valid
+        //valid responses > 500 bytes
+        //invalid responses < 500 bytes and return a null result buried in json
+        if (bereq.http.X-Custom-Method == "eth_getBlockByNumber") {
+            if (std.integer(beresp.http.content-length, 500) < 500) {
+                set beresp.ttl = 0s;
+                return (deliver);
+            }
+            set beresp.ttl = 7d;
+            return (deliver);
+        }
+
+        //cache eth_getUncleByBlockNumberAndIndex for 7d if valid
+        //valid responses > 500 bytes
+        //invalid responses < 500 bytes and return a null result buried in json
+        if (bereq.http.X-Custom-Method == "eth_getUncleByBlockNumberAndIndex") {
+            if (std.integer(beresp.http.content-length, 500) < 500) {
+                set beresp.ttl = 0s;
+                return (deliver);
+            }
+            set beresp.ttl = 7d;
+            return (deliver);
+        }
+
+        //cache all other calls for 1 minute
+        set beresp.ttl = 1m;
+
+        return (deliver);
     }
+
     return (deliver);
 }
