@@ -123,9 +123,17 @@ interface WebSocketEventMap {
   "retrySuccess": RetryAttempt
 }
 
+type WebSocketMessageFormatter = ((result: unknown) => unknown) | undefined
+
 interface WebSocketSubscriptionMap {
   channel: string
   event: keyof WebSocketEventMap
+  formatter?: WebSocketMessageFormatter
+}
+
+interface WebSocketSubscribedEvent {
+  name: keyof WebSocketEventMap
+  formatter: WebSocketMessageFormatter
 }
 
 abstract class WebSocketRetry {
@@ -190,11 +198,11 @@ class WebSocketProvider extends WebSocketRetry {
     maxAge: 1000 * 60 * 60  // 1 hour
   });
   private channelsToSubscribe: WebSocketSubscriptionMap[]  = [
-    { channel: 'blockStats', event: 'block' },
+    { channel: 'blockStats', event: 'block', formatter: (b: any) => EthereumApiFormatters.FormatBlockStats(b) },
     { channel: 'clientsCount', event: 'client' },
   ]
   private _status: WebSocketStatus = WebSocketStatus.Connecting
-  private ethSubcribeMap: {[key: string]: keyof WebSocketEventMap} = {}  
+  private ethSubcribeMap: {[key: string]: WebSocketSubscribedEvent} = {}  
 
   constructor(private url: string, maxRetry: number) {
     super(maxRetry);
@@ -252,16 +260,16 @@ class WebSocketProvider extends WebSocketRetry {
         // Make sure we get a registration callback from websocket that we are
         // indeed connected to these channels.
         const ensureChannelsSubscribed = this.channelsToSubscribe.map(sub => (
-          new Promise<[keyof WebSocketEventMap, string]>((resolve, reject) => {
+          new Promise<[keyof WebSocketEventMap, string, WebSocketMessageFormatter]>((resolve, reject) => {
             this.send("eth_subscribe", [sub.channel]).then((data) => {
-              resolve([sub.event, data as string])
+              resolve([sub.event, data as string, sub.formatter])
             }).catch(e => reject(e))
           })
         ))
 
         Promise.all(ensureChannelsSubscribed).then((results) => {
-          results.forEach(([name, id] ) => {
-            this.ethSubcribeMap[id] = name
+          results.forEach(([name, id, formatter] ) => {
+            this.ethSubcribeMap[id] = { name, formatter }
           })
           resolve()
         }).catch(e => reject(e))
@@ -344,7 +352,7 @@ class WebSocketProvider extends WebSocketRetry {
       }
       const subscribedEvent = this.ethSubcribeMap[eventData.params.subscription];
       if (subscribedEvent) {
-        this.eventEmitter.emit(subscribedEvent, eventData.params.result)
+        this.eventEmitter.emit(subscribedEvent.name, subscribedEvent.formatter ? subscribedEvent.formatter(eventData.params.result) : eventData.params.result)
       }
       else {
         console.error('unknown event', eventData.params)
