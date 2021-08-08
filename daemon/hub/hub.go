@@ -27,12 +27,12 @@ var allowedEthSubscriptions = map[string]bool{
 	"clientsCount": true,
 }
 
-type BlockStatsMap struct {
+type blockStatsMap struct {
 	mu sync.Mutex
 	v  map[uint64]sql.BlockStats
 }
 
-type TotalCounter struct {
+type totalCounter struct {
 	mu sync.Mutex
 	v  *big.Int
 }
@@ -41,9 +41,9 @@ var londonBlock = uint64(12_965_000)
 var constantinopleBlock = uint64(7_280_000)
 var byzantiumBlock = uint64(4_370_000)
 
-var globalBlockStats = BlockStatsMap{v: make(map[uint64]sql.BlockStats)}
-var globalTotalBurned = TotalCounter{} //v: big.Int}
-var globalTotalTips = TotalCounter{}   //v: big.Int}
+var globalBlockStats = blockStatsMap{v: make(map[uint64]sql.BlockStats)}
+var globalTotalBurned = totalCounter{} //v: big.Int}
+var globalTotalTips = totalCounter{}   //v: big.Int}
 
 // Hub maintains the set of active clients and subscriptions messages to the
 // clients.
@@ -51,24 +51,25 @@ type Hub struct {
 	upgrader *websocket.Upgrader
 
 	// Registered clients.
-	clients map[*client]bool
+	clients map[*Client]bool
 
 	// Inbound messages from the clients.
 	subscription chan map[string]interface{}
 
 	// Register requests from the clients.
-	register chan *client
+	register chan *Client
 
 	// Unregister requests from clients.
-	unregister chan *client
+	unregister chan *Client
 
-	handlers map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error)
+	handlers map[string]func(c *Client, message jsonrpcMessage) (json.RawMessage, error)
 
-	rpcClient    *RpcClient
+	rpcClient    *RPCClient
 	db           *sql.Database
 	latestBlock  *LatestBlock
 }
 
+// New initializes a Hub instance.
 func New(
 	development bool,
 	gethEndpointHTTP string,
@@ -103,11 +104,11 @@ func New(
 	globalTotalTips.mu.Unlock()
 
 	subscription := make(chan map[string]interface{})
-	clients := make(map[*client]bool)
+	clients := make(map[*Client]bool)
 
 	log.Infof("Initialize rpcClientHttp '%s'", gethEndpointHTTP)
 
-	rpcClient := &RpcClient{
+	rpcClient := &RPCClient{
 		endpoint:   gethEndpointHTTP,
 		httpClient: new(http.Client),
 	}
@@ -125,8 +126,8 @@ func New(
 		upgrader: upgrader,
 
 		subscription: subscription,
-		register:     make(chan *client),
-		unregister:   make(chan *client),
+		register:     make(chan *Client),
+		unregister:   make(chan *Client),
 		clients:      clients,
 
 		rpcClient:    rpcClient,
@@ -134,7 +135,7 @@ func New(
 		latestBlock:  latestBlock,
 	}
 
-	err = h.Initialize(initializedb, gethEndpointWebsocket)
+	err = h.initialize(initializedb, gethEndpointWebsocket)
 	if err != nil {
 		return h, nil
 	}
@@ -142,40 +143,55 @@ func New(
 	return h, nil
 }
 
-func (h *Hub) Initialize(initializedb bool, gethEndpointWebsocket string) error {
-	var err error
+func (h *Hub) initialize(initializedb bool, gethEndpointWebsocket string) error {
+	latestBlockNumber, err := h.initializeLatestBlock()
+	if err != nil {
+		return err
+	}
+	
 	if initializedb {
-		err = h.InitializeMissingBlocks(londonBlock)
+		err = h.initializeMissingBlocks(londonBlock, latestBlockNumber)
 		if err != nil && h.latestBlock.blockNumber == 0 {
 			return err
 		}
 	}
 
-	h.InitializeWebSocketHandlers()
+	h.initializeWebSocketHandlers()
 
-	err = h.InitializeGrpcWebSocket(gethEndpointWebsocket)
+	err = h.initializeGrpcWebSocket(gethEndpointWebsocket)
 
 	return err
 }
 
-func (h *Hub) InitializeWebSocketHandlers() {
-	h.handlers = map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
-		"eth_blockNumber":          h.EthBlockNumber(),
-		"eth_chainId":              h.HandleFunc(),
-		"eth_getBlockByNumber":     h.EthGetBlockByNumber(),
-		"eth_getTransactionByHash": h.HandleFunc(),
-		"eth_syncing":              h.HandleFunc(),
-		"eth_getBalance":           h.HandleFunc(),
+func (h *Hub) initializeLatestBlock() (uint64, error) {
+	var latestBlockNumber uint64
+	latestBlockNumber, err := h.updateLatestBlock()
+	if err != nil {
+		return 0, fmt.Errorf("error updating latest block: %v", err)
+	}
+
+	log.Infof("Latest block: %d", latestBlockNumber)
+	return latestBlockNumber, nil
+}
+
+func (h *Hub) initializeWebSocketHandlers() {
+	h.handlers = map[string]func(c *Client, message jsonrpcMessage) (json.RawMessage, error){
+		"eth_blockNumber":          h.ethBlockNumber(),
+		"eth_chainId":              h.handleFunc(),
+		"eth_getBlockByNumber":     h.ethGetBlockByNumber(),
+		"eth_getTransactionByHash": h.handleFunc(),
+		"eth_syncing":              h.handleFunc(),
+		"eth_getBalance":           h.handleFunc(),
 
 		"internal_getBlockStats":   h.getBlockStats(),
 		"internal_getTotals":       h.getTotals(),
 
-		"eth_subscribe":            h.EthSubscribe(),
-		"eth_unsubscribe":          h.EthUnsubscribe(),
+		"eth_subscribe":            h.ethSubscribe(),
+		"eth_unsubscribe":          h.ethUnsubscribe(),
 	}
 }
 
-func (h *Hub) InitializeGrpcWebSocket(gethEndpointWebsocket string) error {
+func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 	log.Infof("Initialize gethRPCClientWebsocket '%s'", gethEndpointWebsocket)
 	gethRPCClientWebsocket, err := gethRPC.Dial(gethEndpointWebsocket)
 	if err != nil {
@@ -223,7 +239,7 @@ func (h *Hub) InitializeGrpcWebSocket(gethEndpointWebsocket string) error {
 	return nil
 }
 
-func (h *Hub) Listen() {
+func (h *Hub) listen() {
 	for {
 		select {
 		case client := <-h.register:
@@ -286,10 +302,11 @@ func (h *Hub) Listen() {
 	}
 }
 
+// ListenAndServe serves the hub on the given network address.
 func (h *Hub) ListenAndServe(addr string) error {
-	go h.Listen()
+	go h.listen()
 
-	http.HandleFunc("/", h.ServeWebSocket)
+	http.HandleFunc("/", h.serveWebSocket)
 
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
@@ -299,8 +316,7 @@ func (h *Hub) ListenAndServe(addr string) error {
 	return nil
 }
 
-// ServeWebSocket handles websocket requests from the peer.
-func (h *Hub) ServeWebSocket(w http.ResponseWriter, r *http.Request) {
+func (h *Hub) serveWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -319,8 +335,8 @@ func (h *Hub) ServeWebSocket(w http.ResponseWriter, r *http.Request) {
 	go client.readPump()
 }
 
-func (h *Hub) HandleFunc() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) handleFunc() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
 			return nil, err
@@ -345,14 +361,7 @@ func (h *Hub) HandleFunc() func(c *client, message jsonrpcMessage) (json.RawMess
 		return raw, nil
 	}
 }
-func (h *Hub) InitializeMissingBlocks(londonBlock uint64) error {
-	latestBlockNumber, err := h.UpdateLatestBlock()
-	if err != nil {
-		return fmt.Errorf("error updating latest block: %v", err)
-	}
-
-	log.Infof("Latest block: %d", latestBlockNumber)
-
+func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint64) error {
 	highestBlockInDb, err := h.db.GetHighestBlockNumber()
 	if err != nil {
 		return fmt.Errorf("highest block not found %v", err)
@@ -422,7 +431,7 @@ func (h *Hub) InitializeMissingBlocks(londonBlock uint64) error {
 			h.db.AddBlock(blockStats, blockStatsPercentiles)
 
 			if currentBlock == latestBlockNumber {
-				latestBlockNumber, err = h.UpdateLatestBlock()
+				latestBlockNumber, err = h.updateLatestBlock()
 				if err != nil {
 					return fmt.Errorf("error updating latest block: %v", err)
 				}
@@ -438,8 +447,8 @@ func (h *Hub) InitializeMissingBlocks(londonBlock uint64) error {
 	return nil
 }
 
-func (h *Hub) EthBlockNumber() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) ethBlockNumber() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 		blockNumber := h.latestBlock.getBlockNumber()
 		blockNumberHex := hexutil.EncodeUint64(blockNumber)
 
@@ -447,8 +456,8 @@ func (h *Hub) EthBlockNumber() func(c *client, message jsonrpcMessage) (json.Raw
 	}
 }
 
-func (h *Hub) EthGetBlockByNumber() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) ethGetBlockByNumber() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
 			return nil, err
@@ -490,8 +499,8 @@ func (h *Hub) EthGetBlockByNumber() func(c *client, message jsonrpcMessage) (jso
 	}
 }
 
-func (h *Hub) EthSubscribe() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) ethSubscribe() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
 			return nil, err
@@ -525,8 +534,8 @@ func (h *Hub) EthSubscribe() func(c *client, message jsonrpcMessage) (json.RawMe
 	}
 }
 
-func (h *Hub) EthUnsubscribe() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) ethUnsubscribe() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
 			return nil, err
@@ -573,8 +582,8 @@ func toBlockNumArg(number *big.Int) string {
 	return hexutil.EncodeBig(number)
 }
 
-func (h* Hub) getTotals() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h* Hub) getTotals() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 		globalTotalBurned.mu.Lock()
 		burned := hexutil.EncodeBig(globalTotalBurned.v)
 		globalTotalBurned.mu.Unlock()
@@ -587,8 +596,8 @@ func (h* Hub) getTotals() func(c *client, message jsonrpcMessage) (json.RawMessa
 	}
 }
 
-func (h *Hub) getBlockStats() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) getBlockStats() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
 			return nil, err
@@ -631,12 +640,12 @@ func (h *Hub) getBlockStats() func(c *client, message jsonrpcMessage) (json.RawM
 		}
 		globalBlockStats.mu.Unlock()
 
-		blockStatsJson, err := json.Marshal(blockStats)
+		blockStatsJSON, err := json.Marshal(blockStats)
 		if err != nil {
 			log.Errorf("Error marshaling block stats: %vn", err)
 		}
 
-		return json.RawMessage(blockStatsJson), nil
+		return json.RawMessage(blockStatsJSON), nil
 	}
 }
 
@@ -805,15 +814,15 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 	blockStatsPercentiles = append(blockStatsPercentiles, sql.BlockStatsPercentiles{
 		Number:       uint(blockNumber),
 		Metric:       "PFpG",
-		Maximum:      uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 100)),
-		Median:       uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 50)),
-		Minimum:      uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 0)),
-		Tenth:        uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 10)),
-		TwentyFifth:  uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 25)),
-		SeventyFifth: uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 75)),
-		Ninetieth:    uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 90)),
-		NinetyFifth:  uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 95)),
-		NinetyNinth:  uint(GetPercentileSortedUint64(allPriorityFeePerGasMwei, 95)),
+		Maximum:      uint(getPercentileSortedUint64(allPriorityFeePerGasMwei, 100)),
+		Median:       uint(getPercentileSortedUint64(allPriorityFeePerGasMwei, 50)),
+		Minimum:      uint(getPercentileSortedUint64(allPriorityFeePerGasMwei, 0)),
+		Tenth:        uint(getPercentileSortedUint64(allPriorityFeePerGasMwei, 10)),
+		TwentyFifth:  uint(getPercentileSortedUint64(allPriorityFeePerGasMwei, 25)),
+		SeventyFifth: uint(getPercentileSortedUint64(allPriorityFeePerGasMwei, 75)),
+		Ninetieth:    uint(getPercentileSortedUint64(allPriorityFeePerGasMwei, 90)),
+		NinetyFifth:  uint(getPercentileSortedUint64(allPriorityFeePerGasMwei, 95)),
+		NinetyNinth:  uint(getPercentileSortedUint64(allPriorityFeePerGasMwei, 95)),
 	})
 
 	blockStats.Number = uint(blockNumber)
@@ -844,7 +853,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 	return blockStats, blockStatsPercentiles, nil
 }
 
-func GetPercentileSortedUint64(values []uint64, perc int) uint64 {
+func getPercentileSortedUint64(values []uint64, perc int) uint64 {
 	if len(values) == 0 {
 		return 0
 	}
@@ -861,7 +870,7 @@ func GetPercentileSortedUint64(values []uint64, perc int) uint64 {
 	return values[rank-1]
 }
 
-func (h* Hub) UpdateLatestBlock() (uint64, error) {
+func (h* Hub) updateLatestBlock() (uint64, error) {
 	latestBlockRaw, err := h.rpcClient.CallContext(
 		"2.0",
 		"eth_blockNumber",
@@ -886,57 +895,6 @@ func (h* Hub) UpdateLatestBlock() (uint64, error) {
 	h.latestBlock.updateBlockNumber(latestBlockNumber)
 
 	return latestBlockNumber, nil
-}
-
-type Block struct {
-	BaseFeePerGas    string        `json:"baseFeePerGas"`
-	Difficulty       string        `json:"difficulty"`
-	ExtraData        string        `json:"extraData"`
-	GasLimit         string        `json:"gasLimit"`
-	GasUsed          string        `json:"gasUsed"`
-	Hash             string        `json:"hash"`
-	LogsBloom        string        `json:"logsBloom"`
-	Miner            string        `json:"miner"`
-	MixHash          string        `json:"mixHash"`
-	Nonce            string        `json:"nonce"`
-	Number           string        `json:"number"`
-	ParentHash       string        `json:"parentHash"`
-	ReceiptsRoot     string        `json:"receiptsRoot"`
-	Sha3Uncles       string        `json:"sha3Uncles"`
-	Size             string        `json:"size"`
-	StateRoot        string        `json:"stateRoot"`
-	Timestamp        string        `json:"timestamp"`
-	TotalDifficulty  string        `json:"totalDifficulty"`
-	Transactions     []string      `json:"transactions"`
-	TransactionsRoot string        `json:"transactionsRoot"`
-	Uncles           []interface{} `json:"uncles"`
-}
-
-type TransactionReceipt struct {
-	BlockHash         string      `json:"blockHash"`
-	BlockNumber       string      `json:"blockNumber"`
-	ContractAddress   interface{} `json:"contractAddress"`
-	CumulativeGasUsed string      `json:"cumulativeGasUsed"`
-	EffectiveGasPrice string      `json:"effectiveGasPrice"`
-	From              string      `json:"from"`
-	GasUsed           string      `json:"gasUsed"`
-	Logs              []struct {
-		Address          string   `json:"address"`
-		Topics           []string `json:"topics"`
-		Data             string   `json:"data"`
-		BlockNumber      string   `json:"blockNumber"`
-		TransactionHash  string   `json:"transactionHash"`
-		TransactionIndex string   `json:"transactionIndex"`
-		BlockHash        string   `json:"blockHash"`
-		LogIndex         string   `json:"logIndex"`
-		Removed          bool     `json:"removed"`
-	} `json:"logs"`
-	LogsBloom        string `json:"logsBloom"`
-	Status           string `json:"status"`
-	To               string `json:"to"`
-	TransactionHash  string `json:"transactionHash"`
-	TransactionIndex string `json:"transactionIndex"`
-	Type             string `json:"type"`
 }
 
 func getBaseReward(blockNum uint64) big.Int {

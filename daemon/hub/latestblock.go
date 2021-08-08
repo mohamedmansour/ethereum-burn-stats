@@ -4,6 +4,7 @@ import (
 	"sync"
 )
 
+// LatestBlock defines a mutexed block number
 type LatestBlock struct {
 	blockNumber uint64
 	mu          sync.Mutex
