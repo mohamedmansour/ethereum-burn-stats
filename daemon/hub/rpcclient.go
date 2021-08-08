@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type rpcClient struct {
+type RpcClient struct {
 	endpoint   string
 	httpClient HttpClient
 }
@@ -17,7 +17,7 @@ type HttpClient interface {
 	Do(request *http.Request) (*http.Response, error)
 }
 
-func (c *rpcClient) CallContext(
+func (c *RpcClient) CallContext(
 	version string,
 	method string,
 	blockNumber string,

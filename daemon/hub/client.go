@@ -26,14 +26,13 @@ const (
 
 var (
 	newline = []byte{'\n'}
-	space   = []byte{' '}
 )
 
 // Client is a middleman between the websocket connection and the hub.
 type client struct {
 	mu sync.Mutex
 
-	hub *hub
+	hub *Hub
 
 	// The websocket connection.
 	conn *websocket.Conn
@@ -45,7 +44,7 @@ type client struct {
 }
 
 func NewClient(
-	hub *hub,
+	hub *Hub,
 	conn *websocket.Conn,
 ) *client {
 	return &client{

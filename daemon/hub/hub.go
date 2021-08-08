@@ -45,13 +45,9 @@ var globalBlockStats = BlockStatsMap{v: make(map[uint64]sql.BlockStats)}
 var globalTotalBurned = TotalCounter{} //v: big.Int}
 var globalTotalTips = TotalCounter{}   //v: big.Int}
 
-type Hub interface {
-	ListenAndServe(addr string) error
-}
-
 // Hub maintains the set of active clients and subscriptions messages to the
 // clients.
-type hub struct {
+type Hub struct {
 	upgrader *websocket.Upgrader
 
 	// Registered clients.
@@ -67,6 +63,10 @@ type hub struct {
 	unregister chan *client
 
 	handlers map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error)
+
+	rpcClient    *RpcClient
+	db           *sql.Database
+	latestBlock  *LatestBlock
 }
 
 func New(
@@ -76,7 +76,7 @@ func New(
 	dbPath string,
 	initializedb bool,
 	ropsten bool,
-) (Hub, error) {
+) (*Hub, error) {
 	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -107,7 +107,7 @@ func New(
 
 	log.Infof("Initialize rpcClientHttp '%s'", gethEndpointHTTP)
 
-	rpcClient := &rpcClient{
+	rpcClient := &RpcClient{
 		endpoint:   gethEndpointHTTP,
 		httpClient: new(http.Client),
 	}
@@ -115,32 +115,77 @@ func New(
 	log.Infof("Get latest block...")
 
 	latestBlock := newLatestBlock()
-	latestBlockNumber, err := UpdateLatestBlock(rpcClient, latestBlock)
-	if err != nil {
-		log.Errorf("error updating latest block: %v", err)
-		return nil, err
-	}
-	log.Infof("Latest block: %d", latestBlockNumber)
 
 	db, err := sql.ConnectDatabase(dbPath)
 	if err != nil {
 		return nil, err
 	}
 
-	if initializedb {
-		InitializeMissingBlocks(rpcClient, db, londonBlock, latestBlockNumber, latestBlock)
+	h := &Hub{
+		upgrader: upgrader,
+
+		subscription: subscription,
+		register:     make(chan *client),
+		unregister:   make(chan *client),
+		clients:      clients,
+
+		rpcClient:    rpcClient,
+		db:           db,
+		latestBlock:  latestBlock,
 	}
 
+	err = h.Initialize(initializedb, gethEndpointWebsocket)
+	if err != nil {
+		return h, nil
+	}
+
+	return h, nil
+}
+
+func (h *Hub) Initialize(initializedb bool, gethEndpointWebsocket string) error {
+	var err error
+	if initializedb {
+		err = h.InitializeMissingBlocks(londonBlock)
+		if err != nil && h.latestBlock.blockNumber == 0 {
+			return err
+		}
+	}
+
+	h.InitializeWebSocketHandlers()
+
+	err = h.InitializeGrpcWebSocket(gethEndpointWebsocket)
+
+	return err
+}
+
+func (h *Hub) InitializeWebSocketHandlers() {
+	h.handlers = map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
+		"eth_blockNumber":          h.EthBlockNumber(),
+		"eth_chainId":              h.HandleFunc(),
+		"eth_getBlockByNumber":     h.EthGetBlockByNumber(),
+		"eth_getTransactionByHash": h.HandleFunc(),
+		"eth_syncing":              h.HandleFunc(),
+		"eth_getBalance":           h.HandleFunc(),
+
+		"internal_getBlockStats":   h.getBlockStats(),
+		"internal_getTotals":       h.getTotals(),
+
+		"eth_subscribe":            h.EthSubscribe(),
+		"eth_unsubscribe":          h.EthUnsubscribe(),
+	}
+}
+
+func (h *Hub) InitializeGrpcWebSocket(gethEndpointWebsocket string) error {
 	log.Infof("Initialize gethRPCClientWebsocket '%s'", gethEndpointWebsocket)
 	gethRPCClientWebsocket, err := gethRPC.Dial(gethEndpointWebsocket)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("WebSocket cannot dial: %v", err) 
 	}
 
 	headers := make(chan *types.Header)
 	sub, err := gethRPCClientWebsocket.EthSubscribe(context.Background(), headers, "newHeads")
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("WebSpclet cannot subscribe to newHeads: %v", err) 
 	}
 
 	go func(latestBlock *LatestBlock) {
@@ -156,56 +201,29 @@ func New(
 
 				blockNumber := header.Number.Uint64()
 
-				blockStats, blockStatsPercentiles, err := UpdateBlockStats(rpcClient, blockNumber)
+				blockStats, blockStatsPercentiles, err := h.updateBlockStats(blockNumber)
 				if err != nil {
 					log.Errorf("Error getting block stats: %v", err)
 				}
 
-				db.AddBlock(blockStats, blockStatsPercentiles)
+				h.db.AddBlock(blockStats, blockStatsPercentiles)
 
-				clientsCount := len(clients)
+				clientsCount := len(h.clients)
 
 				latestBlock.updateBlockNumber(blockNumber)
 
-				subscription <- map[string]interface{}{
+				h.subscription <- map[string]interface{}{
 					"blockStats":   blockStats,
 					"clientsCount": clientsCount,
 				}
 			}
 		}
-	}(latestBlock)
+	}(h.latestBlock)
 
-	handlers := map[string]func(c *client, message jsonrpcMessage) (json.RawMessage, error){
-		"eth_blockNumber": ethBlockNumber(rpcClient, latestBlock),
-		"eth_chainId":     handleFunc(rpcClient),
-		"eth_getBlockByNumber": ethGetBlockByNumber(
-			rpcClient,
-			latestBlock,
-		),
-		"eth_getTransactionByHash": handleFunc(rpcClient),
-		"eth_syncing":              handleFunc(rpcClient),
-		"eth_getBalance":           handleFunc(rpcClient),
-
-		"internal_getBlockStats": getBlockStats(rpcClient, latestBlock),
-		"internal_getTotals":     getTotals(rpcClient),
-
-		"eth_subscribe":   ethSubscribe(),
-		"eth_unsubscribe": ethUnsubscribe(),
-	}
-
-	return &hub{
-		upgrader: upgrader,
-
-		subscription: subscription,
-		register:     make(chan *client),
-		unregister:   make(chan *client),
-		clients:      clients,
-
-		handlers: handlers,
-	}, nil
+	return nil
 }
 
-func (h *hub) listen() {
+func (h *Hub) Listen() {
 	for {
 		select {
 		case client := <-h.register:
@@ -268,10 +286,10 @@ func (h *hub) listen() {
 	}
 }
 
-func (h *hub) ListenAndServe(addr string) error {
-	go h.listen()
+func (h *Hub) ListenAndServe(addr string) error {
+	go h.Listen()
 
-	http.HandleFunc("/", h.serveWebSocket)
+	http.HandleFunc("/", h.ServeWebSocket)
 
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
@@ -282,7 +300,7 @@ func (h *hub) ListenAndServe(addr string) error {
 }
 
 // ServeWebSocket handles websocket requests from the peer.
-func (h *hub) serveWebSocket(w http.ResponseWriter, r *http.Request) {
+func (h *Hub) ServeWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -301,9 +319,7 @@ func (h *hub) serveWebSocket(w http.ResponseWriter, r *http.Request) {
 	go client.readPump()
 }
 
-func handleFunc(
-	rpcClient *rpcClient,
-) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) HandleFunc() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
@@ -316,7 +332,7 @@ func handleFunc(
 			return nil, err
 		}
 
-		raw, err := rpcClient.CallContext(
+		raw, err := h.rpcClient.CallContext(
 			message.Version,
 			message.Method,
 			"",
@@ -329,18 +345,23 @@ func handleFunc(
 		return raw, nil
 	}
 }
-func InitializeMissingBlocks(rpcClient *rpcClient, db *sql.Database, londonBlock uint64, latestBlockNumber uint64, latestBlock *LatestBlock) {
-	highestBlockInDb, err := db.GetHighestBlockNumber()
+func (h *Hub) InitializeMissingBlocks(londonBlock uint64) error {
+	latestBlockNumber, err := h.UpdateLatestBlock()
 	if err != nil {
-		log.Errorf("Highest block not found %v", err)
-		return
+		return fmt.Errorf("error updating latest block: %v", err)
+	}
+
+	log.Infof("Latest block: %d", latestBlockNumber)
+
+	highestBlockInDb, err := h.db.GetHighestBlockNumber()
+	if err != nil {
+		return fmt.Errorf("highest block not found %v", err)
 	}
 	log.Infof("Highest stored block in DB: %d", highestBlockInDb)
 
-	missingBlockNumbers, err := db.GetMissingBlockNumbers(londonBlock)
+	missingBlockNumbers, err := h.db.GetMissingBlockNumbers(londonBlock)
 	if err != nil {
-		log.Errorf("Error getting missing block numbers from database: %v", err)
-		return
+		return fmt.Errorf("error getting missing block numbers from database: %v", err)
 	}
 
 	if len(missingBlockNumbers) > 0 {
@@ -348,22 +369,20 @@ func InitializeMissingBlocks(rpcClient *rpcClient, db *sql.Database, londonBlock
 	}
 
 	for _, n := range missingBlockNumbers {
-		blockStats, blockStatsPercentiles, err := UpdateBlockStats(rpcClient, n)
+		blockStats, blockStatsPercentiles, err := h.updateBlockStats(n)
 		if err != nil {
-			log.Errorf("Cannot update block state for '%d',  %v", n, err)
-			return
+			return fmt.Errorf("cannot update block state for '%d',  %v", n, err)
 		}
-		db.AddBlock(blockStats, blockStatsPercentiles)
+		h.db.AddBlock(blockStats, blockStatsPercentiles)
 	}
 
 	if len(missingBlockNumbers) > 0 {
 		log.Infof("Finished fetching missing blocks")
 	}
 
-	allBlockStats, err := db.GetAllBlockStats()
+	allBlockStats, err := h.db.GetAllBlockStats()
 	if err != nil {
-		log.Errorf("Error getting totals from database: %v", err)
-		return
+		return fmt.Errorf("error getting totals from database: %v", err)
 	}
 
 	for _, b := range allBlockStats {
@@ -374,10 +393,9 @@ func InitializeMissingBlocks(rpcClient *rpcClient, db *sql.Database, londonBlock
 
 	allBlockStats = []sql.BlockStats{}
 
-	burned, tips, err := db.GetTotals()
+	burned, tips, err := h.db.GetTotals()
 	if err != nil {
-		log.Errorf("Error getting totals from database:%v", err)
-		return
+		return fmt.Errorf("error getting totals from database:%v", err)
 	}
 
 	log.Printf("Totals: %s burned and %s tips\n", burned.String(), tips.String())
@@ -397,18 +415,16 @@ func InitializeMissingBlocks(rpcClient *rpcClient, db *sql.Database, londonBlock
 
 	if latestBlockNumber > currentBlock {
 		for {
-			blockStats, blockStatsPercentiles, err := UpdateBlockStats(rpcClient, currentBlock)
+			blockStats, blockStatsPercentiles, err := h.updateBlockStats(currentBlock)
 			if err != nil {
-				log.Errorf("Cannot update block state for '%d',  %v", currentBlock, err)
-				return
+				return fmt.Errorf("cannot update block state for '%d',  %v", currentBlock, err)
 			}
-			db.AddBlock(blockStats, blockStatsPercentiles)
+			h.db.AddBlock(blockStats, blockStatsPercentiles)
 
 			if currentBlock == latestBlockNumber {
-				latestBlockNumber, err = UpdateLatestBlock(rpcClient, latestBlock)
+				latestBlockNumber, err = h.UpdateLatestBlock()
 				if err != nil {
-					log.Errorf("Error updating latest block: %v", err)
-					return
+					return fmt.Errorf("error updating latest block: %v", err)
 				}
 				log.Infof("Latest block: %d", latestBlockNumber)
 				if currentBlock == latestBlockNumber {
@@ -418,24 +434,20 @@ func InitializeMissingBlocks(rpcClient *rpcClient, db *sql.Database, londonBlock
 			currentBlock++
 		}
 	}
+	
+	return nil
 }
 
-func ethBlockNumber(
-	rpcClient *rpcClient,
-	latestBlock *LatestBlock,
-) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) EthBlockNumber() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
-		blockNumber := latestBlock.getBlockNumber()
+		blockNumber := h.latestBlock.getBlockNumber()
 		blockNumberHex := hexutil.EncodeUint64(blockNumber)
 
 		return json.RawMessage(fmt.Sprintf("\"%s\"", blockNumberHex)), nil
 	}
 }
 
-func ethGetBlockByNumber(
-	rpcClient *rpcClient,
-	latestBlock *LatestBlock,
-) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) EthGetBlockByNumber() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
@@ -460,11 +472,11 @@ func ethGetBlockByNumber(
 
 		blockNumber := blockNumberBig.Uint64()
 
-		if blockNumber > latestBlock.getBlockNumber() {
-			return nil, fmt.Errorf("requested blockNumber is bigger than latest - req: %d, lat: %d", blockNumber, latestBlock.blockNumber)
+		if blockNumber > h.latestBlock.getBlockNumber() {
+			return nil, fmt.Errorf("requested blockNumber is bigger than latest - req: %d, lat: %d", blockNumber, h.latestBlock.blockNumber)
 		}
 
-		raw, err := rpcClient.CallContext(
+		raw, err := h.rpcClient.CallContext(
 			message.Version,
 			message.Method,
 			blockNumberBig.String(),
@@ -478,7 +490,7 @@ func ethGetBlockByNumber(
 	}
 }
 
-func ethSubscribe() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) EthSubscribe() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
@@ -513,7 +525,7 @@ func ethSubscribe() func(c *client, message jsonrpcMessage) (json.RawMessage, er
 	}
 }
 
-func ethUnsubscribe() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) EthUnsubscribe() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
@@ -561,9 +573,7 @@ func toBlockNumArg(number *big.Int) string {
 	return hexutil.EncodeBig(number)
 }
 
-func getTotals(
-	rpcClient *rpcClient,
-) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h* Hub) getTotals() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 		globalTotalBurned.mu.Lock()
 		burned := hexutil.EncodeBig(globalTotalBurned.v)
@@ -577,10 +587,7 @@ func getTotals(
 	}
 }
 
-func getBlockStats(
-	rpcClient *rpcClient,
-	latestBlock *LatestBlock,
-) func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) getBlockStats() func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
 		if err != nil {
@@ -609,7 +616,7 @@ func getBlockStats(
 			return nil, err
 		}
 
-		latestBlockNumber := (latestBlock.getBlockNumber())
+		latestBlockNumber := (h.latestBlock.getBlockNumber())
 		if blockNumber > latestBlockNumber {
 			return nil, err
 		}
@@ -633,7 +640,7 @@ func getBlockStats(
 	}
 }
 
-func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats, []sql.BlockStatsPercentiles, error) {
+func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockStatsPercentiles, error) {
 	start := time.Now()
 	var blockNumberHex string
 	var blockStats sql.BlockStats
@@ -642,7 +649,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 
 	blockNumberHex = hexutil.EncodeUint64(blockNumber)
 
-	rawResponse, err := rpcClient.CallContext(
+	rawResponse, err := h.rpcClient.CallContext(
 		"2.0",
 		"eth_getBlockByNumber",
 		strconv.Itoa(int(blockNumber)),
@@ -698,7 +705,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 
 	for n, uncleHash := range block.Uncles {
 		var raw json.RawMessage
-		raw, err := rpcClient.CallContext(
+		raw, err := h.rpcClient.CallContext(
 			"2.0",
 			"eth_getUncleByBlockNumberAndIndex",
 			strconv.Itoa(int(blockNumber)),
@@ -740,7 +747,7 @@ func UpdateBlockStats(rpcClient *rpcClient, blockNumber uint64) (sql.BlockStats,
 
 	for _, tHash := range block.Transactions {
 		var raw json.RawMessage
-		raw, err := rpcClient.CallContext(
+		raw, err := h.rpcClient.CallContext(
 			"2.0",
 			"eth_getTransactionReceipt",
 			strconv.Itoa(int(blockNumber)),
@@ -854,14 +861,14 @@ func GetPercentileSortedUint64(values []uint64, perc int) uint64 {
 	return values[rank-1]
 }
 
-func UpdateLatestBlock(rpcClient *rpcClient, latestBlock *LatestBlock) (uint64, error) {
-	latestBlockRaw, err := rpcClient.CallContext(
+func (h* Hub) UpdateLatestBlock() (uint64, error) {
+	latestBlockRaw, err := h.rpcClient.CallContext(
 		"2.0",
 		"eth_blockNumber",
 		"",
 	)
+	
 	if err != nil {
-
 		return 0, fmt.Errorf("failed to fetch latest block number from geth")
 	}
 
@@ -876,7 +883,7 @@ func UpdateLatestBlock(rpcClient *rpcClient, latestBlock *LatestBlock) (uint64, 
 		return 0, fmt.Errorf("latest block could not be decoded from hex to uint: %v", hexBlockNumber)
 	}
 
-	latestBlock.updateBlockNumber(latestBlockNumber)
+	h.latestBlock.updateBlockNumber(latestBlockNumber)
 
 	return latestBlockNumber, nil
 }
