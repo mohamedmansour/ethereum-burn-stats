@@ -138,7 +138,7 @@ export function BaseFeeChart(props: BaseFeeChartProps) {
       case "basefee": {
         const realNumber = Number(value);
         if (realNumber === -Infinity || realNumber === Infinity || realNumber === 0) {
-          return "0 WEI"
+          return "0"
         }
         const formatter = BigNumberFormat({
           number: BigNumber.from((realNumber * 1000000000).toFixed(0))
@@ -148,7 +148,7 @@ export function BaseFeeChart(props: BaseFeeChartProps) {
       case "tips & burned": {
         const realNumber = Number(value);
         if (realNumber === -Infinity || realNumber === Infinity || realNumber === 0) {
-          return "0 WEI"
+          return "0"
         }
         const formatter = BigNumberFormat({
           number: utils.parseEther(realNumber.toString())

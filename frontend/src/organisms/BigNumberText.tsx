@@ -14,7 +14,7 @@ export interface BigNumberProps extends HTMLChakraProps<"div"> {
   usdConversion?: number;
   label?: JSX.Element;
   disableTooltip?: boolean
-  doNotShortenDecimals?: boolean
+  doNotShowDecimals?: boolean
   hideCurrency?: boolean;
   removeCurrencyColor?: boolean
   forced?: 'ether' | 'gwei' | 'wei' | 'auto'
@@ -43,41 +43,21 @@ export function BigNumberFormat(props: BigNumberProps) {
     currency = formatter.currency
   }
 
-  let prettyValue = value
-  let skipCommify = false
-  const decimalPosition = value.indexOf(".");
-  if (decimalPosition !== -1) {
-    const numberOfDecimals = value.length - decimalPosition - 1 /* remove dot */;
-    const decimalValue = value.substr(decimalPosition + 1);
-    if (props.usdConversion && props.usdConversion > 1 && value.startsWith('0.0000')) {
-        prettyValue = '< 0.0000'
-        skipCommify = true
-    } else if (props.doNotShortenDecimals === undefined || !props.doNotShortenDecimals) { 
-      if (parseInt(decimalValue) === 0) {
-        prettyValue = value.substr(0, decimalPosition);
-      } else if (decimalPosition === 1 && numberOfDecimals > 4) {
-        prettyValue = value.substr(0, decimalPosition + 5);
-      } else if (numberOfDecimals > 2) {
-        prettyValue = value.substr(0, decimalPosition + 3);
-      } else if (numberOfDecimals > 1) {
-        prettyValue = value.substr(0, decimalPosition + 2);
-      }
-    }
-  }
+  let maximumFractionDigits = 0;
+  if (currency === 'ETH') maximumFractionDigits = 4;
+  else if (currency === 'USD') maximumFractionDigits = 2;
 
-  if (!skipCommify) {
-    prettyValue = utils.commify(prettyValue)
-  }
+  const valueNumber = parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits});
 
   return {
-    prettyValue,
+    prettyValue: valueNumber,
     value,
     currency
   }
 }
 
 export function BigNumberText(props: BigNumberProps) {
-  const { number, usdConversion, label, disableTooltip, doNotShortenDecimals, removeCurrencyColor, forced, hideCurrency, ...rest } = props;
+  const { number, usdConversion, label, disableTooltip, removeCurrencyColor, doNotShowDecimals, forced, hideCurrency, ...rest } = props;
   const [state, setState] = useState<BigNumberState | undefined>()
 
   useEffect(() => {
