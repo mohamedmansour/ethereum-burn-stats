@@ -42,8 +42,9 @@ var constantinopleBlock = uint64(7_280_000)
 var byzantiumBlock = uint64(4_370_000)
 
 var globalBlockStats = blockStatsMap{v: make(map[uint64]sql.BlockStats)}
-var globalTotalBurned = totalCounter{} //v: big.Int}
-var globalTotalTips = totalCounter{}   //v: big.Int}
+var globalTotalBurned = totalCounter{}
+var globalTotalIssuance = totalCounter{}
+var globalTotalTips = totalCounter{}
 
 // Hub maintains the set of active clients and subscriptions messages to the
 // clients.
@@ -64,9 +65,9 @@ type Hub struct {
 
 	handlers map[string]func(c *Client, message jsonrpcMessage) (json.RawMessage, error)
 
-	rpcClient    *RPCClient
-	db           *sql.Database
-	latestBlock  *LatestBlock
+	rpcClient   *RPCClient
+	db          *sql.Database
+	latestBlock *LatestBlock
 }
 
 // New initializes a Hub instance.
@@ -99,6 +100,10 @@ func New(
 	globalTotalBurned.v = big.NewInt(0)
 	globalTotalBurned.mu.Unlock()
 
+	globalTotalIssuance.mu.Lock()
+	globalTotalIssuance.v = big.NewInt(0)
+	globalTotalIssuance.mu.Unlock()
+
 	globalTotalTips.mu.Lock()
 	globalTotalTips.v = big.NewInt(0)
 	globalTotalTips.mu.Unlock()
@@ -130,9 +135,9 @@ func New(
 		unregister:   make(chan *Client),
 		clients:      clients,
 
-		rpcClient:    rpcClient,
-		db:           db,
-		latestBlock:  latestBlock,
+		rpcClient:   rpcClient,
+		db:          db,
+		latestBlock: latestBlock,
 	}
 
 	err = h.initialize(initializedb, gethEndpointWebsocket)
@@ -148,7 +153,7 @@ func (h *Hub) initialize(initializedb bool, gethEndpointWebsocket string) error 
 	if err != nil {
 		return err
 	}
-	
+
 	if initializedb {
 		err = h.initializeMissingBlocks(londonBlock, latestBlockNumber)
 		if err != nil && h.latestBlock.blockNumber == 0 {
@@ -183,11 +188,11 @@ func (h *Hub) initializeWebSocketHandlers() {
 		"eth_syncing":              h.handleFunc(),
 		"eth_getBalance":           h.handleFunc(),
 
-		"internal_getBlockStats":   h.getBlockStats(),
-		"internal_getTotals":       h.getTotals(),
+		"internal_getBlockStats": h.getBlockStats(),
+		"internal_getTotals":     h.getTotals(),
 
-		"eth_subscribe":            h.ethSubscribe(),
-		"eth_unsubscribe":          h.ethUnsubscribe(),
+		"eth_subscribe":   h.ethSubscribe(),
+		"eth_unsubscribe": h.ethUnsubscribe(),
 	}
 }
 
@@ -195,13 +200,13 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 	log.Infof("Initialize gethRPCClientWebsocket '%s'", gethEndpointWebsocket)
 	gethRPCClientWebsocket, err := gethRPC.Dial(gethEndpointWebsocket)
 	if err != nil {
-		return fmt.Errorf("WebSocket cannot dial: %v", err) 
+		return fmt.Errorf("WebSocket cannot dial: %v", err)
 	}
 
 	headers := make(chan *types.Header)
 	sub, err := gethRPCClientWebsocket.EthSubscribe(context.Background(), headers, "newHeads")
 	if err != nil {
-		return fmt.Errorf("WebSpclet cannot subscribe to newHeads: %v", err) 
+		return fmt.Errorf("WebSpclet cannot subscribe to newHeads: %v", err)
 	}
 
 	go func(latestBlock *LatestBlock) {
@@ -402,16 +407,20 @@ func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint
 
 	allBlockStats = []sql.BlockStats{}
 
-	burned, tips, err := h.db.GetTotals()
+	burned, issuance, tips, err := h.db.GetTotals()
 	if err != nil {
 		return fmt.Errorf("error getting totals from database:%v", err)
 	}
 
-	log.Printf("Totals: %s burned and %s tips\n", burned.String(), tips.String())
+	log.Printf("Totals: %s burned, %s issuance, and %s tips\n", burned.String(), issuance.String(), tips.String())
 
 	globalTotalBurned.mu.Lock()
 	globalTotalBurned.v.Add(globalTotalBurned.v, burned)
 	globalTotalBurned.mu.Unlock()
+
+	globalTotalIssuance.mu.Lock()
+	globalTotalIssuance.v.Add(globalTotalIssuance.v, issuance)
+	globalTotalIssuance.mu.Unlock()
 
 	globalTotalTips.mu.Lock()
 	globalTotalTips.v.Add(globalTotalTips.v, tips)
@@ -443,7 +452,7 @@ func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint
 			currentBlock++
 		}
 	}
-	
+
 	return nil
 }
 
@@ -582,17 +591,21 @@ func toBlockNumArg(number *big.Int) string {
 	return hexutil.EncodeBig(number)
 }
 
-func (h* Hub) getTotals() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) getTotals() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 		globalTotalBurned.mu.Lock()
 		burned := hexutil.EncodeBig(globalTotalBurned.v)
 		globalTotalBurned.mu.Unlock()
 
+		globalTotalIssuance.mu.Lock()
+		issuance := hexutil.EncodeBig(globalTotalIssuance.v)
+		globalTotalIssuance.mu.Unlock()
+
 		globalTotalTips.mu.Lock()
 		tipped := hexutil.EncodeBig(globalTotalTips.v)
 		globalTotalTips.mu.Unlock()
 
-		return json.RawMessage(fmt.Sprintf("{\"burned\": \"%s\", \"tipped\": \"%s\"}", burned, tipped)), nil
+		return json.RawMessage(fmt.Sprintf("{\"burned\": \"%s\", \"issuance\": \"%s\", \"tipped\": \"%s\"}", burned, issuance, tipped)), nil
 	}
 }
 
@@ -870,13 +883,13 @@ func getPercentileSortedUint64(values []uint64, perc int) uint64 {
 	return values[rank-1]
 }
 
-func (h* Hub) updateLatestBlock() (uint64, error) {
+func (h *Hub) updateLatestBlock() (uint64, error) {
 	latestBlockRaw, err := h.rpcClient.CallContext(
 		"2.0",
 		"eth_blockNumber",
 		"",
 	)
-	
+
 	if err != nil {
 		return 0, fmt.Errorf("failed to fetch latest block number from geth")
 	}
