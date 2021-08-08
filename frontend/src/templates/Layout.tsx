@@ -11,6 +11,7 @@ import { FirePit } from "../atoms/FirePit";
 import { Footer } from "../organisms/Footer";
 import { EthereumNetworkBadge } from "../organisms/Network";
 import { layoutConfig } from "../layoutConfig";
+import { Announcement } from "../organisms/Announcement";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -50,6 +51,7 @@ export function Layout(props: LayoutProps) {
         </HStack>
         <EthereumNetworkBadge marginLeft="auto" />
       </Flex>
+      <Announcement />
       <Flex
         flex={1}
         w="100%"

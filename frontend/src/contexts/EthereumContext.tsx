@@ -117,7 +117,7 @@ interface WebSocketEventMap {
   "status": WebSocketStatus
   "block": BlockStats
   "client": number
-  "retryMaxAttemptsReached": boolean
+  "retryMaxAttemptsReached": number
   "retryStarting": void
   "retryAttempt": RetryAttempt
   "retrySuccess": RetryAttempt
@@ -310,6 +310,7 @@ class WebSocketProvider extends WebSocketRetry {
   }
 
   public disconnect(): void {
+    this.eventEmitter.clear();
     this.connection.close();
   }
 
@@ -511,7 +512,6 @@ const EthereumProvider = ({
 }) => {
   const [eth, setEth] = useState<EthereumApi | undefined>()
   const [message, setMessage] = useState<string>('connecting to eth node')
-
   useEffect(() => {
     if (!url)
       return;
@@ -535,8 +535,19 @@ const EthereumProvider = ({
         return false
       }
     
+      ethereum.off('retrySuccess', onRetryCheckStatus)
+      ethereum.off('retryMaxAttemptsReached', onRetryMaxAttemptsReached)
       setEth(ethereum)
       return true
+    }
+
+    const onRetryCheckStatus = async () => {
+      checkStatus()
+    }
+
+    const onRetryMaxAttemptsReached = async (attempts: number) => {
+      setMessage(`Tried to connect to mainnet ${attempts} times. Please refresh and try again.`)
+      ethereum.disconnect()
     }
 
     let timer: number;
@@ -550,6 +561,10 @@ const EthereumProvider = ({
         }, 12000)
       }
     })
+
+    ethereum.on('retrySuccess', onRetryCheckStatus)
+    ethereum.on('retryMaxAttemptsReached', onRetryMaxAttemptsReached)
+
     return () => { 
       clearInterval(timer);
       ethereum.disconnect();

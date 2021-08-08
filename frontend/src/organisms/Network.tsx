@@ -7,9 +7,9 @@ import { useEthereum } from "../contexts/EthereumContext";
 export const EthereumNetworkBadge = forwardRef<HTMLChakraProps<"button">, "button">(
     (props: HTMLChakraProps<"button">, ref: React.ForwardedRef<any>) => {
   const history = useHistory()
-  const eth = useEthereum();
+  const { eth } = useEthereum();
   
-  const name = eth.eth?.connectedNetwork.name || 'Connecting to network...'
+  const name = eth?.connectedNetwork.name || 'Connecting to network...'
   return (
     <Button
       colorScheme="orange"

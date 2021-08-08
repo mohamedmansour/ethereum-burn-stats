@@ -1,6 +1,6 @@
 export type EventCallback = (value: any) => void
 
-export function EventEmitter<T>() {
+export function EventEmitter<T extends string>() {
   const list = new Map<T, EventCallback[]>()
 
   const on = (eventName: T, callback: EventCallback) => {
@@ -28,10 +28,14 @@ export function EventEmitter<T>() {
     }
   }
 
+  const clear = () => {
+    list.clear();
+  }
+
   return {
-      list,
-      on,
-      off,
-      emit
+    on,
+    off,
+    clear,
+    emit
   }
 }
