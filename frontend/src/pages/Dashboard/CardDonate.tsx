@@ -8,7 +8,8 @@ import {
   UnorderedList,
   LinkOverlay,
   LinkBox,
-  Spacer
+  Spacer,
+  SimpleGrid
 } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
 import { ImHeart } from "react-icons/im";
@@ -53,12 +54,14 @@ export function CardDonate({ type }: { type: CardDonateType }) {
           </Text>
         </HStack>
         <Box>
-          <LinkBox title={title}>
-            <LinkOverlay href="https://indexed.finance" target="_blank">
-              <Image w="265px" h="41px" srcSet="/sponsor_ndx.png" title={title} />
-            </LinkOverlay>
-          </LinkBox>
-          <Text fontSize={12} mt={4}>Thanks to these patrons who has offered to help support the expensive server costs!</Text>
+          <SimpleGrid columns={2} gridGap={2} mt={2}>
+            <LinkBox title={title}>
+              <LinkOverlay href="https://indexed.finance" target="_blank">
+                <Image srcSet="/sponsor_indexed.png" title={title} />
+              </LinkOverlay>
+            </LinkBox>
+          </SimpleGrid>
+          <Text fontSize={12} mt={4} mb={2}>Thanks to these patrons who has offered to help support the expensive server costs!</Text>
           <Text fontSize={12} textAlign="right"><Link href="https://twitter.com/mohamedmansour" target="_blank">Become a patron!</Link></Text>
         </Box>
       </Card>
