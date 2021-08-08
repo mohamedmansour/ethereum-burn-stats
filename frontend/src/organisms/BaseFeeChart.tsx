@@ -1,6 +1,6 @@
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { BigNumber, utils } from "ethers";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, Area, AreaChart } from 'recharts';
 import { BlockStats } from "../libs/ethereum";
 import { Zero } from "../utils/number";
@@ -83,7 +83,7 @@ interface ChartData {
 
 const maxItemsInChart = 20;
 
-export function BaseFeeChart(props: BaseFeeChartProps) {
+function LiveChart(props: BaseFeeChartProps) {
   const [data, setData] = useState<ChartData>()
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export function BaseFeeChart(props: BaseFeeChartProps) {
     // Fill up the data for the last |maxItemsInChart| blocks,
     const minBounds = props.data.length > newData.length ? 0 : newData.length - props.data.length;
     for (var i = newData.length - 1; i >= minBounds; i--)  {
-      const block = props.data[i - minBounds]
+      const block = props.data[props.data.length - (i - minBounds) - 1]
       const chartData: { [key: string]: any } = {
         index: i,
         ...block,
@@ -198,3 +198,5 @@ export function BaseFeeChart(props: BaseFeeChartProps) {
     </Box>
   )
 }
+
+export const BaseFeeChart = React.memo(LiveChart)
