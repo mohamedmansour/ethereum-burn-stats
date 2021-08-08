@@ -101,30 +101,38 @@ func (d *Database) GetMissingBlockNumbers(startingBlockNumber uint64) ([]uint64,
 	return missingBlockNumbers, nil
 }
 
-func (d *Database) GetTotals() (*big.Int, *big.Int, error) {
+func (d *Database) GetTotals() (*big.Int, *big.Int, *big.Int, error) {
 	var blockStats []BlockStats
 
 	totalBurned := big.NewInt(0)
+	totalIssuance := big.NewInt(0)
 	totalTips := big.NewInt(0)
 
 	result := d.db.Find(&blockStats)
 	if result.Error != nil {
-		return totalBurned, totalTips, nil
+		return totalBurned, totalIssuance, totalTips, nil
 	}
 
 	for _, block := range blockStats {
 		burned, err := hexutil.DecodeBig(block.Burned)
 		if err != nil {
-			return totalBurned, totalTips, fmt.Errorf("block.Burned was not a hex - %s", block.Burned)
+			return totalBurned, totalIssuance, totalTips, fmt.Errorf("block.Burned was not a hex - %s", block.Burned)
 		}
 		totalBurned.Add(totalBurned, burned)
 
+		rewards, err := hexutil.DecodeBig(block.Rewards)
+		if err != nil {
+			return totalBurned, totalIssuance, totalTips, fmt.Errorf("block.Rewards was not a hex - %s", block.Rewards)
+		}
+		totalIssuance.Add(totalIssuance, rewards)
+		totalIssuance.Sub(totalIssuance, burned)
+
 		tips, err := hexutil.DecodeBig(block.Tips)
 		if err != nil {
-			return totalBurned, totalTips, fmt.Errorf("block.Burned was not a hex - %s", block.Tips)
+			return totalBurned, totalIssuance, totalTips, fmt.Errorf("block.Burned was not a hex - %s", block.Tips)
 		}
 		totalTips.Add(totalBurned, tips)
 	}
 
-	return totalBurned, totalTips, nil
+	return totalBurned, totalIssuance, totalTips, nil
 }
