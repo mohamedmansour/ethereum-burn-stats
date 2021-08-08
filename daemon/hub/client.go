@@ -26,14 +26,13 @@ const (
 
 var (
 	newline = []byte{'\n'}
-	space   = []byte{' '}
 )
 
 // Client is a middleman between the websocket connection and the hub.
-type client struct {
+type Client struct {
 	mu sync.Mutex
 
-	hub *hub
+	hub *Hub
 
 	// The websocket connection.
 	conn *websocket.Conn
@@ -44,11 +43,12 @@ type client struct {
 	subscriptions map[string]*big.Int
 }
 
+// NewClient creates a new client.
 func NewClient(
-	hub *hub,
+	hub *Hub,
 	conn *websocket.Conn,
-) *client {
-	return &client{
+) *Client {
+	return &Client{
 		hub:           hub,
 		conn:          conn,
 		send:          make(chan []byte, 256),
@@ -56,14 +56,14 @@ func NewClient(
 	}
 }
 
-func (c *client) isSubscribedTo(subscription string) *big.Int {
+func (c *Client) isSubscribedTo(subscription string) *big.Int {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	return c.subscriptions[subscription]
 }
 
-func (c *client) subscribeTo(subscription string) (*big.Int, error) {
+func (c *Client) subscribeTo(subscription string) (*big.Int, error) {
 	max := new(big.Int)
 	max.Exp(big.NewInt(2), big.NewInt(130), nil).Sub(max, big.NewInt(1))
 
@@ -81,7 +81,7 @@ func (c *client) subscribeTo(subscription string) (*big.Int, error) {
 	return n, nil
 }
 
-func (c *client) unsubscribeTo(subscriptionID *big.Int) (*big.Int, error) {
+func (c *Client) unsubscribeTo(subscriptionID *big.Int) (*big.Int, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -100,7 +100,7 @@ func (c *client) unsubscribeTo(subscriptionID *big.Int) (*big.Int, error) {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *client) readPump() {
+func (c *Client) readPump() {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -165,7 +165,7 @@ func (c *client) readPump() {
 // A goroutine running writePump is started for each connection. The
 // application ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
-func (c *client) writePump() {
+func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()

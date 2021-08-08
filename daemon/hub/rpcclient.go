@@ -8,16 +8,19 @@ import (
 	"net/http"
 )
 
-type rpcClient struct {
+// RPCClient is a client for the RPC interface
+type RPCClient struct {
 	endpoint   string
-	httpClient HttpClient
+	httpClient HTTPClient
 }
 
-type HttpClient interface {
+// HTTPClient is an interface for making HTTP requests
+type HTTPClient interface {
 	Do(request *http.Request) (*http.Response, error)
 }
 
-func (c *rpcClient) CallContext(
+// CallContext is a context for a single RPC call
+func (c *RPCClient) CallContext(
 	version string,
 	method string,
 	blockNumber string,

@@ -17,6 +17,6 @@
 		}
 	],
 	"settings": {
-		
+		"files.insertFinalNewline": true
 	}
 }
