@@ -23,8 +23,8 @@ export interface EthereumNetwork {
 export const EthereumNetworkOptions: {
   [key: string]: EthereumNetwork
 } = {
-  // ropsten: { name: "Ropsten (testnet)", key: "ropsten", genesis: 10499401, chainId: 3},
   mainnet: { name: "Mainnet", key: "mainnet", genesis: 12965000, chainId: 1},
+  staging: { name: "Staging", key: "staging", genesis: 12965000, chainId: 1},
 };
 
 export enum Setting {
