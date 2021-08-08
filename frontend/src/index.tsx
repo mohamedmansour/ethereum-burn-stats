@@ -8,6 +8,7 @@ import customTheme from './theme';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { BlockExplorerProvider } from './contexts/BlockExplorerContext';
 import { MobileDetectorProvider } from './contexts/MobileDetectorContext';
+import { maxReconnectionAttempts } from './config';
 
 const GOOGLE_ANALYTICS_ID: string | undefined = process.env.REACT_APP_GOOGLE_ANALYTICS_ID
 if (typeof GOOGLE_ANALYTICS_ID === 'string') {
@@ -33,7 +34,7 @@ function App() {
       <ChakraProvider theme={customTheme}>
         <CSSReset />
         <SettingsProvider>
-          <EthereumProvider url={url}>
+          <EthereumProvider url={url} maxReconnectionAttempts={maxReconnectionAttempts}>
             <BlockExplorerProvider>
               <MobileDetectorProvider>
                 <Routing />

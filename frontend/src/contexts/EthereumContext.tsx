@@ -108,10 +108,19 @@ export interface Totals {
   tipped: BigNumber
 }
 
+interface RetryAttempt {
+  elapsed: number
+  attempt: number
+}
+
 interface WebSocketEventMap {
   "status": WebSocketStatus
   "block": BlockStats
   "client": number
+  "retryMaxAttemptsReached": boolean
+  "retryStarting": void
+  "retryAttempt": RetryAttempt
+  "retrySuccess": RetryAttempt
 }
 
 interface WebSocketSubscriptionMap {
@@ -119,7 +128,59 @@ interface WebSocketSubscriptionMap {
   event: keyof WebSocketEventMap
 }
 
-class WebSocketProvider {
+abstract class WebSocketRetry {
+  private retry = 0;
+  private startReconnectingTime = 0;
+
+  constructor(private maxRetry: number) {}
+
+  public attemptReconnect() {
+    if (this.maxRetry <= this.retry) {
+      console.info('[retry]', `Reached maximium retry attempts of ${this.maxRetry}, will not reconnect`);
+      this.onRetryMaxAttemptsReached(this.maxRetry);
+      return;
+    }
+
+    if (this.retry === 0) {
+      console.info('[retry]', `Starting reconnection attempts`);
+      this.onRetryStarting();
+      this.startReconnectingTime = Date.now();
+    }
+
+    this.retry = this.retry + 1;
+    const delayInSeconds = Math.max(Math.min(Math.pow(2, this.retry)
+              + this.randInt(-this.retry, this.retry), 600), 1) + 3;
+
+    console.info('[retry]', `Attempting to reconnect in ${delayInSeconds}s`);
+    this.onRetryAttempt(delayInSeconds, this.retry);
+
+    setTimeout(async () => await this.onRetry(), delayInSeconds  * 1000);
+  }
+
+  public recordSuccessfulConnection() {
+    if (this.retry === 0)
+      return;
+
+    const ellapsedTimeInSeconds = (Date.now() - this.startReconnectingTime)  / 1000;
+    console.info('[retry]', `Successfully reconnected in ${Math.floor(ellapsedTimeInSeconds)}s with ${this.retry === 1 ? 'a single attempt': `${this.retry} attempts`}`);
+    this.onRetrySuccess(ellapsedTimeInSeconds, this.retry);
+
+    this.retry = 0;
+    this.startReconnectingTime = 0;
+  }
+
+  private randInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1) + min)
+  }
+
+  protected abstract onRetry(): Promise<void>;
+  protected abstract onRetryMaxAttemptsReached(attempts: number): void;
+  protected abstract onRetryStarting(): void;
+  protected abstract onRetryAttempt(whenInSeconds: number, attempt: number): void;
+  protected abstract onRetrySuccess(ellapsed: number, attempts: number): void;
+}
+
+class WebSocketProvider extends WebSocketRetry {
   private eventEmitter = EventEmitter<keyof WebSocketEventMap>()
   private connection: WebSocket;
   private asyncId: number = 0
@@ -132,12 +193,12 @@ class WebSocketProvider {
     { channel: 'blockStats', event: 'block' },
     { channel: 'clientsCount', event: 'client' },
   ]
-
   private _status: WebSocketStatus = WebSocketStatus.Connecting
   private ethSubcribeMap: {[key: string]: keyof WebSocketEventMap} = {}  
 
-  constructor(url: string) {
-    this.connection = new WebSocket(url);
+  constructor(private url: string, maxRetry: number) {
+    super(maxRetry);
+    this.connection = new WebSocket(this.url);
   }
 
   public get ready(): Promise<void> {
@@ -152,16 +213,39 @@ class WebSocketProvider {
     this._status = status;
   }
 
+  protected onRetry(): Promise<void> {
+    this.connection = new WebSocket(this.url);
+    return this.connect()
+  }
+
+  protected onRetryMaxAttemptsReached(attempts: number) {
+    this.eventEmitter.emit('retryMaxAttemptsReached', attempts);
+  }
+
+  protected onRetryStarting() {
+    this.eventEmitter.emit('retryStarting', null);
+  }
+
+  protected onRetryAttempt(elapsed: number, attempt: number) {
+    this.eventEmitter.emit('retryAttempt', { elapsed, attempt })
+  }
+
+  protected onRetrySuccess(elapsed: number, attempt: number) {
+    this.eventEmitter.emit('retrySuccess', { elapsed, attempt })
+  }
+
   private connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.connection.addEventListener("close", () => {
         this.status = WebSocketStatus.Disconnected;
-        this.eventEmitter.emit('status', this.status);
+        this.eventEmitter.emit('status', this.status); 
+        this.attemptReconnect();
       });
 
       this.connection.addEventListener("message", this.onMessage.bind(this));
 
       this.connection.addEventListener("open", () => {
+        this.recordSuccessfulConnection();
         this.status = WebSocketStatus.Connected;
         this.eventEmitter.emit('status', this.status);
 
@@ -338,8 +422,8 @@ class EthereumApiFormatters {
 }
 
 export class EthereumApi extends WebSocketProvider {
-  constructor(public connectedNetwork: EthereumNetwork, url: string) {
-    super(url)
+  constructor(public connectedNetwork: EthereumNetwork, url: string, maxReconnectionAttempts: number) {
+    super(url, maxReconnectionAttempts)
   }
 
   public async isSyncing(): Promise<EthereumSyncing | boolean> {
@@ -411,9 +495,11 @@ const useEthereum = () => useContext(EthereumContext);
 const EthereumProvider = ({
   children,
   url,
+  maxReconnectionAttempts,
 }: {
   children: React.ReactNode
-  url?: string | undefined
+  url: string | undefined,
+  maxReconnectionAttempts: number
 }) => {
   const [eth, setEth] = useState<EthereumApi | undefined>()
   const [message, setMessage] = useState<string>('connecting to eth node')
@@ -423,7 +509,7 @@ const EthereumProvider = ({
       return;
 
     const network = getNetworkFromSubdomain() || defaultNetwork
-    const ethereum = new EthereumApi(network, url)
+    const ethereum = new EthereumApi(network, url, maxReconnectionAttempts)
     setMessage(`connecting to ${network.key}, please wait`)
 
     const checkStatus = async () => {
@@ -460,7 +546,7 @@ const EthereumProvider = ({
       clearInterval(timer);
       ethereum.disconnect();
     }
-  }, [url])
+  }, [url, maxReconnectionAttempts])
 
   return (
     <EthereumContext.Provider
