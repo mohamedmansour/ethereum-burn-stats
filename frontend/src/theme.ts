@@ -1,4 +1,5 @@
 import { extendTheme } from "@chakra-ui/react"
+import { layoutConfig } from "./layoutConfig"
 
 const theme = extendTheme({
   colors: {
@@ -15,6 +16,11 @@ const theme = extendTheme({
     },
   },
   components: {
+    Divider: {
+      baseStyle: {
+        opacity: 0.05,
+      }
+    },
     Tooltip: {
       baseStyle: {
         bg: 'brand.subheader'
@@ -29,11 +35,12 @@ const theme = extendTheme({
       baseStyle: {
         display: "flex",
         flexDirection: "column",
-        px: "4",
-        py: "3",
+        px: 4,
+        py: 3,
         rounded: "md",
         bg: "brand.card",
-        shadow: "dark-lg"
+        shadow: "dark-lg",
+        gridGap: layoutConfig.miniGap
       }
     },
     TablePlus: {
@@ -62,12 +69,12 @@ const theme = extendTheme({
       variants: {
         sticky: {
           position: "sticky",
-          top: 0,
+          top: -5,
           bg: "brand.card",
           color: "brand.secondaryText",
           zIndex: 5,
           textAlign: "right",
-          paddingTop: 0,
+          paddingTop: 5,
           _notFirst: {
             paddingLeft: 0,
           }

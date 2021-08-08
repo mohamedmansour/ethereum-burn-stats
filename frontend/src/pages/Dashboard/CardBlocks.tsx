@@ -12,7 +12,6 @@ import { GasTarget, GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
 import { Loader } from "../../organisms/Loader";
 import { timeSince } from "../../utils/time";
 import { BlockStats } from "../../contexts/EthereumContext";
-import { layoutConfig } from "../../layoutConfig";
 
 function GasUsedInfo() {
   return (
@@ -99,16 +98,11 @@ export function BlockList({ activated }: { activated: boolean; }) {
 export function CardBlocks({ activated }: { activated: boolean; }) {
   return (
     <Card
-      gridGap={layoutConfig.miniGap}
+      title="Blocks"
+      icon={FaCubes}
       flex={['auto', 'auto', 1]}
       h={[600, 600, "auto"]}
     >
-      <HStack>
-        <Icon as={FaCubes} />
-        <Text fontSize="md" fontWeight="bold">
-          Blocks
-        </Text>
-      </HStack>
       <BlockList activated={activated} />
     </Card>
   );

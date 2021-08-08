@@ -1,10 +1,7 @@
 import {
   HStack,
-  forwardRef,
   HTMLChakraProps,
   Text,
-  Tooltip,
-  Box,
 } from "@chakra-ui/react";
 import { BigNumber, utils } from "ethers";
 import { useState } from "react";
@@ -79,46 +76,36 @@ export function BigNumberFormat(props: BigNumberProps) {
   }
 }
 
-export const BigNumberText = forwardRef<BigNumberProps, "div">(
-  (props: BigNumberProps, ref: React.ForwardedRef<any>) => {
-    const { number, usdConversion, label, disableTooltip, doNotShortenDecimals, removeCurrencyColor, forced, hideCurrency, ...rest } = props;
-    const [state, setState] = useState<BigNumberState | undefined>()
+export function BigNumberText(props: BigNumberProps) {
+  const { number, usdConversion, label, disableTooltip, doNotShortenDecimals, removeCurrencyColor, forced, hideCurrency, ...rest } = props;
+  const [state, setState] = useState<BigNumberState | undefined>()
 
-    useEffect(() => {
-      setState(BigNumberFormat(props))
-    }, [props]);
- 
-    if (!state) {
-      return (
-        <HStack display="inline-flex" {...rest} ref={ref} />
-      )
-    }
+  useEffect(() => {
+    setState(BigNumberFormat(props))
+  }, [props]);
 
-    const currencyColor = removeCurrencyColor !== undefined && removeCurrencyColor ? undefined : "brand.secondaryText"
-    if (disableTooltip !== undefined && disableTooltip) {
-      return (
-        <HStack display="inline-flex" {...rest} ref={ref}>
-          <Text>{state.prettyValue}</Text>
-          {!hideCurrency && <Text color={currencyColor}>{state.currency}</Text>}
-        </HStack>
-      )
-    }
-    
-    const tooltipLabel = props.label || (
-      <Text>
-        {state.value} {state.currency}
-      </Text>
-    );
-
+  if (!state) {
     return (
-      <Box {...rest} position="relative" display="inline">
-        <Tooltip label={tooltipLabel}>
-          <HStack display="inline-flex">
-            <Text>{state.prettyValue}</Text>
-            {!hideCurrency && <Text color={currencyColor}>{state.currency}</Text>}
-          </HStack>
-        </Tooltip>
-      </Box>
-    );
+      <HStack display="inline-flex" {...rest}>
+        <Text>0</Text>
+      </HStack>
+    )
   }
-);
+
+  const currencyColor = removeCurrencyColor !== undefined && removeCurrencyColor ? undefined : "brand.secondaryText"
+  if (disableTooltip !== undefined && disableTooltip) {
+    return (
+      <HStack display="inline-flex" {...rest} >
+        <Text>{state.prettyValue}</Text>
+        {!hideCurrency && <Text color={currencyColor}>{state.currency}</Text>}
+      </HStack>
+    )
+  }
+
+  return (
+    <HStack display="inline-flex" {...rest} position="relative">
+      <Text>{state.prettyValue}</Text>
+      {!hideCurrency && <Text color={currencyColor}>{state.currency}</Text>}
+    </HStack>
+  );
+}

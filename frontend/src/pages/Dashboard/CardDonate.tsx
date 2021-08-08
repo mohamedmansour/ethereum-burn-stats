@@ -2,7 +2,8 @@ import {
   Text,
   Link,
   Image,
-  HStack, Box,
+  HStack,
+  Box,
   Icon,
   ListItem,
   UnorderedList,
@@ -14,7 +15,6 @@ import {
 import { Card } from "../../atoms/Card";
 import { ImHeart } from "react-icons/im";
 import { VscHeart } from "react-icons/vsc";
-import { layoutConfig } from "../../layoutConfig";
 
 
 export enum CardDonateType {
@@ -27,7 +27,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
     if (type === CardDonateType.TopSideBar) {
       const title = "nansen.ai: identify opportunities before everyone else. Analyses 90M+ labeled ethereum wallets and their activity.";
       return (
-        <Card gridGap={layoutConfig.miniGap} minH="56px">
+        <Card minH="56px">
           <LinkBox title={title} whiteSpace="nowrap">
             <LinkOverlay href="https://www.nansen.ai" target="_blank" display="flex">
               <HStack flex={1}>
@@ -46,13 +46,9 @@ export function CardDonate({ type }: { type: CardDonateType }) {
 
     const title = "indexed.finance: defi investing made easy, crypto indexes and yield aggregators"
     return (
-      <Card gridGap={layoutConfig.miniGap}>
-        <HStack pr={10}>
-          <Icon as={VscHeart} />
-          <Text fontSize="md" fontWeight="bold">
-            Patrons
-          </Text>
-        </HStack>
+      <Card 
+          title="Patrons"
+          icon={VscHeart}>
         <Box>
           <SimpleGrid columns={2} gridGap={2} mt={2}>
             <LinkBox title={title}>
@@ -73,13 +69,9 @@ export function CardDonate({ type }: { type: CardDonateType }) {
   }
 
   return (
-    <Card gridGap={layoutConfig.miniGap}>
-      <HStack pr={10}>
-        <Icon as={ImHeart} color="brand.orange" />
-        <Text fontSize="md" fontWeight="bold">
-          Donate
-        </Text>
-      </HStack>
+    <Card 
+        title="Current Session"
+        icon={ImHeart}>
       <Box pl={4} pr={4} pb={4}>
         <Text>It's expensive hosting multiple geth instances on the cloud. Any help would be appreciated:</Text>
         <UnorderedList mt={4}>

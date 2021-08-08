@@ -1,13 +1,9 @@
-import {
-  Text, HStack, Box,
-  Icon
-} from "@chakra-ui/react";
+import { Text, Box } from "@chakra-ui/react";
 import { FaClock } from 'react-icons/fa';
 import { Card } from "../../atoms/Card";
 import { useEffect, useState } from "react";
 import { useEthereum } from "../../contexts/EthereumContext";
 import { ActivationObj } from "./Dashboard";
-import { layoutConfig } from "../../layoutConfig";
 
 export function CardCountdown({ genesisBlock, currentBlock }: { genesisBlock: number; currentBlock: number; }) {
   const { eth } = useEthereum();
@@ -48,13 +44,11 @@ export function CardCountdown({ genesisBlock, currentBlock }: { genesisBlock: nu
   }
 
   return (
-    <Card gridGap={layoutConfig.miniGap} w="100%" textAlign="center">
-      <HStack>
-        <Icon as={FaClock} />
-        <Text fontSize="md" fontWeight="bold">
-          {eth?.connectedNetwork.name} Countdown
-        </Text>
-      </HStack>
+    <Card 
+        title={`${eth?.connectedNetwork.name} Countdown`}
+        icon={FaClock}
+        w="100%"
+        textAlign="center">
       <Box>
         <Text fontSize={[60, 60, 80]} lineHeight={['60px', '60px', '80px']}>{activation.blocksRemaining}</Text>
         <Text fontSize={[10, 10, 12]} color="brand.secondaryText">Blocks Remaining</Text>

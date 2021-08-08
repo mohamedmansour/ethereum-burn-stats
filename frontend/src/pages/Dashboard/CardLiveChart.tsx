@@ -1,11 +1,9 @@
-import { Text, HStack, Icon, useRadio, Box, UseRadioProps, useRadioGroup, Grid, Flex, Button, Spacer } from "@chakra-ui/react";
+import { useRadio, Box, UseRadioProps, useRadioGroup, Grid, Flex } from "@chakra-ui/react";
 import { FaChartLine } from 'react-icons/fa';
 import { useEffect, useState } from "react";
-import { VscChevronUp, VscChevronDown } from "react-icons/vsc";
 import { Card } from "../../atoms/Card";
 import { BaseFeeChart, ChartType } from "../../organisms/BaseFeeChart";
 import { BlockStats } from "../../contexts/EthereumContext";
-import { layoutConfig } from "../../layoutConfig";
 import { Setting } from "../../config";
 import { useSettings } from "../../contexts/SettingsContext";
 
@@ -73,44 +71,26 @@ export function CardLiveChart(props: RadioCardProps) {
 
   return (
     <Card
-      gridGap={layoutConfig.miniGap}
+      title="Live Chart"
+      icon={FaChartLine}
+      collapsible={doNotShowChart}
+      onCollapsed={(collapsed) => setDoNotShowChart(collapsed)}
       minH={doNotShowChart ? 0 : 300}
       h={["auto", "auto", doNotShowChart ? "auto" : 300]} flexShrink={0}
     >
-      <HStack>
-        <Icon as={FaChartLine} />
-        <Text fontSize="md" fontWeight="bold">
-          Live Chart
-        </Text>
-        <Spacer />
-        <Button 
-            title={doNotShowChart ? "Show the chart" : "Hide the chart"}
-            variant="ghost" 
-            size="sm" 
-            leftIcon={<Icon as={doNotShowChart ? VscChevronDown : VscChevronUp} />} 
-            _hover={{ bg: '#333' }} 
-            _active={{ bg: '#222' }} 
-            iconSpacing={0} 
-            onClick={() => setDoNotShowChart(doNotShow => !doNotShow)}>
-        </Button>
-      </HStack>
-      {!doNotShowChart && (
-        <>
-          <Flex justifyContent={["center", "center", "flex-end"]}>
-            <Grid {...group} templateColumns={["repeat(2, 1fr)", "repeat(2, 1fr)", "repeat(4, 1fr)"]} display="inline-grid" gridGap={2} mt={2} mb={2}>
-              {options.map((value) => {
-                const radio = getRadioProps({ value })
-                return (
-                  <RadioCard key={value} {...radio}>
-                    {value}
-                  </RadioCard>
-                )
-              })}
-            </Grid>
-          </Flex>
-          <BaseFeeChart data={props.blocks || []} chartType={chartType} />
-        </>
-      )}
+      <Flex justifyContent={["center", "center", "flex-end"]}>
+        <Grid {...group} templateColumns={["repeat(2, 1fr)", "repeat(2, 1fr)", "repeat(4, 1fr)"]} display="inline-grid" gridGap={2} mt={2} mb={2}>
+          {options.map((value) => {
+            const radio = getRadioProps({ value })
+            return (
+              <RadioCard key={value} {...radio}>
+                {value}
+              </RadioCard>
+            )
+          })}
+        </Grid>
+      </Flex>
+      <BaseFeeChart data={props.blocks || []} chartType={chartType} />
     </Card>
   );
 }

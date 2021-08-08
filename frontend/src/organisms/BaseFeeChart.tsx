@@ -1,4 +1,4 @@
-import { Box, FlexOptions, forwardRef, HStack, HTMLChakraProps, Text } from "@chakra-ui/react";
+import { Box, HStack, Text } from "@chakra-ui/react";
 import { BigNumber, utils } from "ethers";
 import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, Area, AreaChart } from 'recharts';
@@ -6,7 +6,7 @@ import { BlockStats } from "../contexts/EthereumContext";
 import { Zero } from "../utils/number";
 import { BigNumberFormat, BigNumberText } from "./BigNumberText";
 
-interface BaseFeeChartProps extends HTMLChakraProps<"div">, FlexOptions {
+interface BaseFeeChartProps {
   data: BlockStats[]
   chartType: ChartType
 }
@@ -81,9 +81,9 @@ interface ChartData {
   chartType: ChartType
 }
 
-const maxItemsInChart = 30;
+const maxItemsInChart = 20;
 
-export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFeeChartProps, ref: React.ForwardedRef<any>) => {
+export function BaseFeeChart(props: BaseFeeChartProps) {
   const [data, setData] = useState<ChartData>()
 
   useEffect(() => {
@@ -197,4 +197,4 @@ export const BaseFeeChart = forwardRef<BaseFeeChartProps, 'div'>((props: BaseFee
       </ResponsiveContainer>
     </Box>
   )
-})
+}

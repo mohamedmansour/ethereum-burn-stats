@@ -198,8 +198,7 @@ export function EthBlockDetail() {
                   </GridItem>
                 </Grid>
               )}
-              <Card mt="4">
-                <Heading size="sm">Info</Heading>
+                <Card mt="4" title="Info">
                 <Grid templateColumns={["auto", "150px auto"]} gap={4} p="2">
                   <Text color="brand.secondaryText">Timestamp:</Text>
                   <Text>{dtf.format(state.block.timestamp * 1000)}</Text>
