@@ -26,10 +26,14 @@ func ConnectDatabase(dbPath string) (*Database, error) {
 
 	if !db.Migrator().HasTable(&BlockStats{}) {
 		db.Migrator().CreateTable(&BlockStats{})
+	} else {
+		db.Migrator().AutoMigrate(BlockStats{})
 	}
 
 	if !db.Migrator().HasTable(&BlockStatsPercentiles{}) {
 		db.Migrator().CreateTable(&BlockStatsPercentiles{})
+	} else {
+		db.Migrator().AutoMigrate(BlockStats{})
 	}
 
 	return &Database{
