@@ -7,6 +7,7 @@ type BlockStats struct {
 	Burned       string `json:"burned"`
 	GasTarget    string `json:"gasTarget"`
 	GasUsed      string `json:"gasUsed"`
+	PriorityFee  string `json:"priorityFee"`
 	Rewards      string `json:"rewards"`
 	Tips         string `json:"tips"`
 	Transactions string `json:"transactions"`
