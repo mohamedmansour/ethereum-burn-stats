@@ -95,7 +95,7 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
     }
     case 'INIT': {
       const session: BlockExplorerSession = {
-        blockCount: action.blocks.length,
+        blockCount: 0,
         burned: Zero(),
         rewards: Zero(),
         tips: Zero(),
@@ -103,17 +103,6 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
         minBaseFee: BigNumber.from(Number.MAX_SAFE_INTEGER.toString()),
         maxBaseFee: BigNumber.from(Number.MIN_SAFE_INTEGER.toString()),
       }
-
-      action.blocks.map(block => {
-        const basefee = block.baseFee
-        session.transactionCount += block.transactions
-        session.burned = block.burned.add(session.burned)
-        session.rewards = block.rewards.add(session.rewards)
-        session.minBaseFee = BigNumberMin(basefee, session.minBaseFee)
-        session.maxBaseFee = BigNumberMax(basefee, session.maxBaseFee)
-
-        return block;
-      })
 
       return { blocks: action.blocks, details: action.details, session }
     }
