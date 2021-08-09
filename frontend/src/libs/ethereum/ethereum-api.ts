@@ -22,8 +22,6 @@ interface EthereumWebSocketEventMap extends WebSocketEventMap {
 export class EthereumApi extends WebSocketProvider<EthereumWebSocketEventMap> {
   constructor(public connectedNetwork: EthereumNetwork, url: string, maxReconnectionAttempts: number) {
     super(url, maxReconnectionAttempts, [
-      { channel: 'blockStats', event: 'block', formatter: (b: any) => EthereumApiFormatters.FormatBlockStats(b) },
-      { channel: 'clientsCount', event: 'client' },
       { channel: 'data', event: 'data', formatter: (d: any) => EthereumApiFormatters.FormatBlockData(d) },
     ])
   }
