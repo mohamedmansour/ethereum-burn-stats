@@ -13,6 +13,8 @@ import { Loader } from "../../organisms/Loader";
 import { timeSince } from "../../utils/time";
 import { BlockStats } from "../../libs/ethereum";
 
+const enableAnimation = false;
+
 function GasUsedInfo() {
   return (
     <Box p={4}>
@@ -37,7 +39,7 @@ function BlockItem({ activated, block }: { activated: boolean, block: BlockStats
           {block.number}
         </Link>
       </TdPlus>
-      <TdPlus><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></TdPlus>
+      <TdPlus><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} />{enableAnimation && <FirePit size="12px" />}</HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.tips} /></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.baseFee} /></TdPlus>
       <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasTarget gasTarget={block.gasTarget} /></HStack></VStack></TdPlus>
@@ -77,12 +79,7 @@ export function BlockList({ activated }: { activated: boolean; }) {
           </Tr>
         </Thead>
         <Tbody>
-          <Tr>
-            <TdPlus textAlign="left">{details.currentBlock + 1}</TdPlus>
-            <TdPlus colSpan={9}>
-              <BlockProgress />
-            </TdPlus>
-          </Tr>
+	  {enableAnimation && <Tr><TdPlus textAlign="left">{details.currentBlock + 1}</TdPlus><TdPlus colSpan={9}><BlockProgress /></TdPlus></Tr>}
           {blocks.map((block, idx) => (
             <BlockItem
               key={idx}

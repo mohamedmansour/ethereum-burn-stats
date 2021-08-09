@@ -6,6 +6,8 @@ import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
 import { FirePit } from "../../atoms/FirePit";
 
+const enableAnimation = false;
+
 export function CardLatestStats({ details, clients }: { details: BlockExplorerDetails; clients: number | undefined }) {
   const [count, setCount] = useState<number | undefined>(clients);
 
@@ -26,7 +28,7 @@ export function CardLatestStats({ details, clients }: { details: BlockExplorerDe
         <BigNumberText number={details.currentBaseFee} fontSize={16} textAlign="right" />
       </HStack>
       <HStack>
-        <HStack flex={1}><Text>Watching the Burn</Text> <FirePit size="12px" /></HStack>
+        <HStack flex={1}><Text>Watching the Burn</Text>{enableAnimation && <FirePit size="12px" />}</HStack>
         {count === undefined && <Text>calculating ...</Text>}
         {count !== undefined && <Text>{count} users</Text>}
       </HStack>
