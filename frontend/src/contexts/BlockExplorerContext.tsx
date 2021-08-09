@@ -4,12 +4,12 @@ import { BigNumber } from 'ethers'
 import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../organisms/Loader";
 import { useReducer } from "react";
-import { prefetchCount, Setting } from "../config";
+import { Setting } from "../config";
 import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
-import { Block, BlockStats, EthereumApi } from "../libs/ethereum";
+import { BlockData, BlockStats, BlockWithTransactions, Totals } from "../libs/ethereum";
 
-export interface BurnedBlockTransaction extends Block {
-  stats: BlockStats
+export interface BurnedBlockTransaction extends BlockWithTransactions {
+  stats?: BlockStats
 }
 
 export interface BlockExplorerSession {
@@ -23,27 +23,21 @@ export interface BlockExplorerSession {
 }
 
 export interface BlockExplorerDetails {
-  totalBurned: BigNumber
-  totalTipped: BigNumber
+  totals: Totals
   currentBlock: number
   currentBaseFee: BigNumber
+  clients: number
 }
 
 type BlockExplorerContextType = {
   details?: BlockExplorerDetails
   blocks?: BlockStats[]
   session?: BlockExplorerSession
-  clients?: number
 }
 
-interface NewClientsAction {
-  type: 'NEW_CLIENTS'
-  count: number
-}
-
-interface NewBlockAction {
-  type: 'NEW_BLOCK'
-  block: BlockStats
+interface NewDataAction {
+  type: 'NEW_DATA'
+  data: BlockData
   maxBlocksToRender: number
 }
 
@@ -54,24 +48,8 @@ interface InitAction {
 }
 
 type ActionType =
-  | NewClientsAction
-  | NewBlockAction
+  | NewDataAction
   | InitAction
-
-export const BlockExplorerApi = {
-  fetchBlock: async (eth: EthereumApi, blockNumber: number): Promise<BurnedBlockTransaction | undefined> => {
-    const block = await eth.getBlock(blockNumber) as BurnedBlockTransaction
-    if (block) {
-      const blockStats = await eth.getBlockStats(block.number)
-      if (blockStats) {
-        block.stats = blockStats
-      }
-      return block
-    }
-
-    return undefined
-  }
-}
 
 const BlockExplorerContext = createContext<BlockExplorerContextType>({
   details: undefined,
@@ -82,36 +60,34 @@ const useBlockExplorer = () => useContext(BlockExplorerContext);
 
 const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionType): BlockExplorerContextType => {
   switch (action.type) {
-    case 'NEW_CLIENTS': {
-      return { ...state, clients: action.count };
-    }
-    case 'NEW_BLOCK': {
-      if (!state.details || !action.block || !state.session)
+    case 'NEW_DATA': {
+      if (!state.details || !state.session)
         return state
 
-      let totalBurned = state.details.totalBurned
-      if (!action.block.burned.isZero()) {
-        totalBurned = action.block.burned.add(totalBurned)
-        state.session.burned = state.session.burned.add(action.block.burned)
+      const { block, totals, clients } = action.data
+
+      if (!block.burned.isZero()) {
+        state.session.burned = state.session.burned.add(block.burned)
       }
 
-      let totalTipped = state.details.totalTipped
-      if (!action.block.tips.isZero()) {
-        totalTipped = action.block.tips.add(totalTipped)
-        state.session.tips = state.session.tips.add(action.block.tips)
+      if (!block.tips.isZero()) {
+        state.session.tips = state.session.tips.add(block.tips)
       }
 
-      state.details.currentBaseFee = action.block.baseFee
-      state.details.currentBlock = action.block.number
-      state.session.rewards = state.session.rewards.add(action.block.rewards)
+      if (!block.rewards.isZero()) {
+        state.session.rewards = state.session.rewards.add(block.rewards)
+      }
+
+      state.details.currentBaseFee = block.baseFee
+      state.details.currentBlock = block.number
       state.session.blockCount = state.session.blockCount + 1
-      state.session.transactionCount = state.session.transactionCount + action.block.transactions
-      state.session.minBaseFee = BigNumberMin(action.block.baseFee, state.session.minBaseFee)
-      state.session.maxBaseFee = BigNumberMax(action.block.baseFee, state.session.maxBaseFee)
+      state.session.transactionCount = state.session.transactionCount + block.transactions
+      state.session.minBaseFee = BigNumberMin(block.baseFee, state.session.minBaseFee)
+      state.session.maxBaseFee = BigNumberMax(block.baseFee, state.session.maxBaseFee)
 
       const newState: BlockExplorerContextType = {
-        details: { ...state.details, totalBurned, totalTipped },
-        blocks: [action.block, ...((state.blocks || []).slice(0, action.maxBlocksToRender - 1))],
+        details: { ...state.details, totals, clients },
+        blocks: [block, ...((state.blocks || []).slice(0, action.maxBlocksToRender - 1))],
         session: state.session
       }
 
@@ -119,7 +95,7 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
     }
     case 'INIT': {
       const session: BlockExplorerSession = {
-        blockCount: action.blocks.length,
+        blockCount: 0,
         burned: Zero(),
         rewards: Zero(),
         tips: Zero(),
@@ -127,17 +103,6 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
         minBaseFee: BigNumber.from(Number.MAX_SAFE_INTEGER.toString()),
         maxBaseFee: BigNumber.from(Number.MIN_SAFE_INTEGER.toString()),
       }
-
-      action.blocks.map(block => {
-        const basefee = block.baseFee
-        session.transactionCount += block.transactions
-        session.burned = block.burned.add(session.burned)
-        session.rewards = block.rewards.add(session.rewards)
-        session.minBaseFee = BigNumberMin(basefee, session.minBaseFee)
-        session.maxBaseFee = BigNumberMax(basefee, session.maxBaseFee)
-
-        return block;
-      })
 
       return { blocks: action.blocks, details: action.details, session }
     }
@@ -159,70 +124,39 @@ const BlockExplorerProvider = ({
     if (!eth)
       return
 
-    const onClient = (count: number) => {
+    const onNewData = async (data: BlockData) => {
       dispatch({
-        type: 'NEW_CLIENTS',
-        count
-      })
-    };
-
-    const onNewBlockHeader = async (block: BlockStats) => {
-      dispatch({
-        type: 'NEW_BLOCK',
-        block,
+        type: 'NEW_DATA',
+        data,
         maxBlocksToRender
       })
     }
 
-    const prefetchBlockHeaders = async (blockHeaderCount: number): Promise<[number, BlockStats[]]> => {
-      const latestBlockNumber = (process.env.REACT_APP_START_BLOCK ? parseInt(process.env.REACT_APP_START_BLOCK) : await eth.getBlockNumber())
-
-      const processedBlocks: BlockStats[] = []
-      
-      for (var i = 0; i < blockHeaderCount; i++) {
-        const blockNumber = Math.max(0, latestBlockNumber - i)
-        const block = await eth.getBlockStats(blockNumber)
-        if (block)
-          processedBlocks.push(block)
-      }
-
-      return [latestBlockNumber, processedBlocks]
-    }
-
     const init = async () => {
-      const totals = await eth.getTotals()
-      const [latestBlockNumber, blocks] = await prefetchBlockHeaders(prefetchCount)
-
-      if (blocks.length) {
-        const block = blocks[0]
-        const details = {
-          currentBlock: block.number,
-          totalBurned: totals.burned,
-          totalTipped: totals.tipped,
-          currentBaseFee: block.baseFee
-        }
-        dispatch({ type: 'INIT', details, blocks })
-      } else {
-        dispatch({
-          type: 'INIT',
-          details: {
-            currentBlock: latestBlockNumber,
-            totalBurned: totals.burned,
-            totalTipped: totals.tipped,
-            currentBaseFee: Zero()
-          }, blocks: []
-        })
+      const initialData = await eth.getInitialData()
+      
+      let currentBaseFee = Zero()
+      if (initialData.blocks.length) {
+        const block = initialData.blocks[0]
+        currentBaseFee = block.baseFee
+      } 
+      
+      const details: BlockExplorerDetails = {
+        currentBlock: initialData.blockNumber,
+        currentBaseFee: currentBaseFee,
+        totals: initialData.totals,
+        clients: initialData.clients
       }
 
-      eth.on('block', onNewBlockHeader)
-      eth.on('client', onClient)
+      dispatch({ type: 'INIT', details, blocks: initialData.blocks })
+
+      eth.on('data', onNewData)
     }
 
     init()
 
     return () => {
-      eth.off('block', onNewBlockHeader)
-      eth.off('client', onClient)
+      eth.off('data', onNewData)
     }
   }, [eth, maxBlocksToRender])
 

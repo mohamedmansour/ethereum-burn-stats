@@ -32,7 +32,6 @@ import { Loader } from "../organisms/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
 import { Card } from "../atoms/Card";
 import {
-  BlockExplorerApi,
   BurnedBlockTransaction,
 } from "../contexts/BlockExplorerContext";
 import { FirePit } from "../atoms/FirePit";
@@ -60,8 +59,8 @@ export function EthBlockDetail() {
       if (!eth || !id) return;
       const blockNumber = parseInt(id);
       
-      const blockTransactions = await eth.getBlockWithTransactions(blockNumber);
-      if (!blockTransactions) {
+      const blockTransaction = await eth.getBlockWithTransactions(blockNumber);
+      if (!blockTransaction) {
         setState({
           block: undefined,
           transactions: undefined,
@@ -71,10 +70,14 @@ export function EthBlockDetail() {
         return
       }
 
-      const block = await BlockExplorerApi.fetchBlock(eth, blockNumber);
+      const stats = await eth.getBlockStats(blockTransaction.number);
+
       setState({
-        block: block,
-        transactions: blockTransactions.transactions,
+        block: {
+          ...blockTransaction,
+          stats: stats
+        },
+        transactions: blockTransaction.transactions,
         onBeforeRender: blockNumber > 0,
         onAfterRender: true,
       });
