@@ -838,12 +838,16 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 		NinetyNinth:  uint(getPercentileSortedUint64(allPriorityFeePerGasMwei, 95)),
 	})
 
+	priorityFee := big.NewInt(int64(getPercentileSortedUint64(allPriorityFeePerGasMwei, 50)))
+	priorityFee.Mul(priorityFee, big.NewInt(1_000_000))
+
 	blockStats.Number = uint(blockNumber)
 	blockStats.Timestamp = header.Time
 	blockStats.BaseFee = hexutil.EncodeBig(baseFee)
 	blockStats.Burned = hexutil.EncodeBig(blockBurned)
 	blockStats.GasTarget = hexutil.EncodeBig(gasTarget)
 	blockStats.GasUsed = hexutil.EncodeBig(gasUsed)
+	blockStats.PriorityFee = hexutil.EncodeBig(priorityFee)
 	blockStats.Rewards = hexutil.EncodeBig(&blockReward)
 	blockStats.Tips = hexutil.EncodeBig(blockTips)
 	blockStats.Transactions = hexutil.EncodeBig(transactionCount)
