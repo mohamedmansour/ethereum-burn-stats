@@ -17,7 +17,7 @@ import { CardBlocks } from "./CardBlocks";
 import { CardLiveChart } from "./CardLiveChart";
 import { CardLatestStats } from "./CardLatestStats";
 import { CardCurrentSession } from "./CardCurrentSession";
-import { CardTotalBurned } from "./CardTotalBurned";
+import { CardTotals } from "./CardTotals";
 import { CardCountdown } from "./CardCountdown";
 import { CardDonate, CardDonateType } from "./CardDonate";
 
@@ -71,7 +71,7 @@ export function Dashboard() {
         <CardDonate type={CardDonateType.TopSideBar} />
         {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock} />}
         {activated && <CardLiveChart blocks={blocks} />}
-        <CardTotalBurned totalBurned={details.totals.burned} amount={amount} />
+        <CardTotals totals={details.totals} amount={amount} />
         <CardCurrentSession session={session} amount={amount} />
         <CardLatestStats details={details} clients={details.clients} />
         <CardBlocks activated={activated} />
@@ -85,7 +85,7 @@ export function Dashboard() {
       <Flex flex={1} direction="row" gridGap={layoutConfig.gap}>
         <Flex direction="column" w={300} flexShrink={0} gridGap={layoutConfig.gap}>
           <CardDonate type={CardDonateType.TopSideBar} />
-          <CardTotalBurned totalBurned={details.totals.burned} amount={amount} />
+          <CardTotals totals={details.totals} amount={amount} />
           <CardCurrentSession session={session} amount={amount} />
           <CardLatestStats details={details} clients={details.clients} />
           <CardDonate type={CardDonateType.BottomSideBar}/>

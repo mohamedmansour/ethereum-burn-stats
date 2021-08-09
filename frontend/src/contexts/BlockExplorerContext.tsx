@@ -18,8 +18,9 @@ export interface BlockExplorerSession {
   blockCount: number
   transactionCount: number
   rewards: BigNumber
-  minBaseFee: BigNumber
-  maxBaseFee: BigNumber
+  minBaseFee?: BigNumber
+  maxBaseFee?: BigNumber
+  since: number
 }
 
 export interface BlockExplorerDetails {
@@ -82,8 +83,8 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
       state.details.currentBlock = block.number
       state.session.blockCount = state.session.blockCount + 1
       state.session.transactionCount = state.session.transactionCount + block.transactions
-      state.session.minBaseFee = BigNumberMin(block.baseFee, state.session.minBaseFee)
-      state.session.maxBaseFee = BigNumberMax(block.baseFee, state.session.maxBaseFee)
+      state.session.minBaseFee = state.session.minBaseFee ? BigNumberMin(block.baseFee, state.session.minBaseFee) : block.baseFee
+      state.session.maxBaseFee = state.session.maxBaseFee ? BigNumberMax(block.baseFee, state.session.maxBaseFee) : block.baseFee
 
       const newState: BlockExplorerContextType = {
         details: { ...state.details, totals, clients },
@@ -100,8 +101,7 @@ const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionTyp
         rewards: Zero(),
         tips: Zero(),
         transactionCount: 0,
-        minBaseFee: BigNumber.from(Number.MAX_SAFE_INTEGER.toString()),
-        maxBaseFee: BigNumber.from(Number.MIN_SAFE_INTEGER.toString()),
+        since: Date.now()
       }
 
       return { blocks: action.blocks, details: action.details, session }

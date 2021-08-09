@@ -250,11 +250,12 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 				blockStats, blockStatsPercentiles, err := h.updateBlockStats(blockNumber)
 				if err != nil {
 					log.Errorf("Error getting block stats: %v", err)
+				} else {
+					latestBlocks.addBlock(blockStats)
 				}
 
 				h.db.AddBlock(blockStats, blockStatsPercentiles)
 				latestBlock.updateBlockNumber(blockNumber)
-				latestBlocks.addBlock(blockStats)
 
 				clientsCount := len(h.clients)
 				totals := h.getTotals()
@@ -923,6 +924,11 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 	globalTotalBurned.mu.Lock()
 	globalTotalBurned.v.Add(globalTotalBurned.v, blockBurned)
 	globalTotalBurned.mu.Unlock()
+
+	globalTotalIssuance.mu.Lock()
+	globalTotalIssuance.v.Add(globalTotalIssuance.v, &blockReward)
+	globalTotalIssuance.v.Sub(globalTotalIssuance.v, blockBurned)
+	globalTotalIssuance.mu.Unlock()
 
 	globalTotalTips.mu.Lock()
 	globalTotalTips.v.Add(globalTotalTips.v, blockTips)
