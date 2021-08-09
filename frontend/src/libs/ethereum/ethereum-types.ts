@@ -77,8 +77,15 @@ export interface Totals {
   issuance: BigNumber
 }
 
-export interface Data {
-  blockStats: BlockStats
+export interface InitialData {
+  blockNumber: number
+  blocks: BlockStats[]
+  clients: number
+  totals: Totals
+}
+
+export interface BlockData {
+  block: BlockStats
   clients: number
   totals: Totals
 }

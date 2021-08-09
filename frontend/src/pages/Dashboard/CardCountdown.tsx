@@ -17,9 +17,11 @@ export function CardCountdown({ genesisBlock, currentBlock }: { genesisBlock: nu
     if (!eth)
       return;
     const run = async () => {
-      const current = await eth.getBlock(currentBlock);
-      const previous = await eth.getBlock(currentBlock - numberOfBlocksToLookback);
-      setTimePerBlockInMs(((current.timestamp - previous.timestamp) * 1000) / numberOfBlocksToLookback);
+      const current = await eth.getBlockStats(currentBlock);
+      const previous = await eth.getBlockStats(currentBlock - numberOfBlocksToLookback);
+      if (current && previous) {
+        setTimePerBlockInMs(((current.timestamp - previous.timestamp) * 1000) / numberOfBlocksToLookback);
+      }
     };
 
     run();

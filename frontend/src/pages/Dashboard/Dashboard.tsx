@@ -52,7 +52,7 @@ function DashboardLayout({ children }: { children: React.ReactNode; }) {
 }
 
 export function Dashboard() {
-  const { details, session, blocks, clients } = useBlockExplorer();
+  const { details, session, blocks } = useBlockExplorer();
   const { eth } = useEthereum();
   const { isMobile } = useMobileDetector();
 
@@ -71,9 +71,9 @@ export function Dashboard() {
         <CardDonate type={CardDonateType.TopSideBar} />
         {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock} />}
         {activated && <CardLiveChart blocks={blocks} />}
-        <CardTotalBurned totalBurned={details.totalBurned} amount={amount} />
+        <CardTotalBurned totalBurned={details.totals.burned} amount={amount} />
         <CardCurrentSession session={session} amount={amount} />
-        <CardLatestStats details={details} clients={clients} />
+        <CardLatestStats details={details} clients={details.clients} />
         <CardBlocks activated={activated} />
         <CardDonate type={CardDonateType.BottomSideBar}/>
       </DashboardLayout>
@@ -85,9 +85,9 @@ export function Dashboard() {
       <Flex flex={1} direction="row" gridGap={layoutConfig.gap}>
         <Flex direction="column" w={300} flexShrink={0} gridGap={layoutConfig.gap}>
           <CardDonate type={CardDonateType.TopSideBar} />
-          <CardTotalBurned totalBurned={details.totalBurned} amount={amount} />
+          <CardTotalBurned totalBurned={details.totals.burned} amount={amount} />
           <CardCurrentSession session={session} amount={amount} />
-          <CardLatestStats details={details} clients={clients} />
+          <CardLatestStats details={details} clients={details.clients} />
           <CardDonate type={CardDonateType.BottomSideBar}/>
         </Flex>
         <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>

@@ -17,6 +17,7 @@
 		}
 	],
 	"settings": {
-		"files.insertFinalNewline": true
+		"files.insertFinalNewline": true,
+		"editor.renderWhitespace": "all"
 	}
 }
