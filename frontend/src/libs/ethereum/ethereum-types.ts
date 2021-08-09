@@ -74,4 +74,11 @@ export interface Transaction {
 export interface Totals {
   burned: BigNumber
   tipped: BigNumber
+  issuance: BigNumber
+}
+
+export interface Data {
+  blockStats: BlockStats
+  clients: number
+  totals: Totals
 }

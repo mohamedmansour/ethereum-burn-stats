@@ -1,5 +1,5 @@
 import { HexToBigNumber, HexToNumber } from "../../utils/number"
-import { BaseBlock, BlockStats, BlockWithTransactions, EthereumSyncing, Totals, Transaction } from "./ethereum-types"
+import { BaseBlock, BlockStats, BlockWithTransactions, Data, EthereumSyncing, Totals, Transaction } from "./ethereum-types"
 
 export class EthereumApiFormatters {
   static FormatTransaction(t: Transaction): Transaction {
@@ -66,5 +66,14 @@ export class EthereumApiFormatters {
     s.burned = HexToBigNumber(s.burned)
     s.tipped = HexToBigNumber(s.tipped)
     return s
+  }
+
+  static FormatData(d: Data): Data {
+    console.log(d);
+    const blockStats = this.FormatBlockStats(d.blockStats)
+    if (blockStats)
+      d.blockStats = blockStats
+    d.totals = this.FormatTotals(d.totals)
+    return d
   }
 }

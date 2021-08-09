@@ -1,5 +1,7 @@
 package hub
 
+import "github.com/mohamedmansour/ethereum-burn-stats/daemon/sql"
+
 // Block type represents a single ethereum Block.
 type Block struct {
 	BaseFeePerGas    string        `json:"baseFeePerGas"`
@@ -51,4 +53,18 @@ type TransactionReceipt struct {
 	TransactionHash  string `json:"transactionHash"`
 	TransactionIndex string `json:"transactionIndex"`
 	Type             string `json:"type"`
+}
+
+// Totals type represents a single aggregate of all the data.
+type Totals struct {
+	Burned   string `json:"burned"`
+	Tipped   string `json:"tipped"`
+	Issuance string `json:"issuance"`
+}
+
+// BlockData type represents a new block event.
+type Data struct {
+	BlockStats sql.BlockStats `json:"stats"`
+	Clients    int16          `json:"clients"`
+	Totals     Totals         `json:"totals"`
 }

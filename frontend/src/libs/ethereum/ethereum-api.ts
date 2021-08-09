@@ -3,11 +3,12 @@ import { EthereumNetwork } from "../../config";
 import { HexToBigNumber, HexToNumber } from "../../utils/number";
 import { WebSocketProvider, WebSocketEventMap } from "./websocket-provider";
 import { EthereumApiFormatters } from "./ethereum-api-formatters";
-import { Block, BlockStats, BlockWithTransactions, EthereumSyncing, Totals, Transaction } from "./ethereum-types";
+import { Block, BlockStats, BlockWithTransactions, Data, EthereumSyncing, Totals, Transaction } from "./ethereum-types";
 
 interface EthereumWebSocketEventMap extends WebSocketEventMap {
   "block": BlockStats
   "client": number
+  "data": Data
 }
 
 /**
@@ -23,6 +24,7 @@ export class EthereumApi extends WebSocketProvider<EthereumWebSocketEventMap> {
     super(url, maxReconnectionAttempts, [
       { channel: 'blockStats', event: 'block', formatter: (b: any) => EthereumApiFormatters.FormatBlockStats(b) },
       { channel: 'clientsCount', event: 'client' },
+      { channel: 'data', event: 'data', formatter: (d: any) => EthereumApiFormatters.FormatData(d) },
     ])
   }
 

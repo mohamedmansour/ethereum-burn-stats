@@ -25,6 +25,7 @@ var log = logrus.StandardLogger()
 var allowedEthSubscriptions = map[string]bool{
 	"blockStats":   true,
 	"clientsCount": true,
+	"data":         true,
 }
 
 type blockStatsMap struct {
@@ -189,7 +190,7 @@ func (h *Hub) initializeWebSocketHandlers() {
 		"eth_getBalance":           h.handleFunc(),
 
 		"internal_getBlockStats": h.getBlockStats(),
-		"internal_getTotals":     h.getTotals(),
+		"internal_getTotals":     h.handleTotals(),
 
 		"eth_subscribe":   h.ethSubscribe(),
 		"eth_unsubscribe": h.ethUnsubscribe(),
@@ -233,9 +234,15 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 
 				latestBlock.updateBlockNumber(blockNumber)
 
+				totals := h.getTotals()
 				h.subscription <- map[string]interface{}{
 					"blockStats":   blockStats,
 					"clientsCount": clientsCount,
+					"data":         &Data{
+						BlockStats: blockStats,
+						Clients: int16(clientsCount),
+						Totals: *totals,
+					},
 				}
 			}
 		}
@@ -591,21 +598,34 @@ func toBlockNumArg(number *big.Int) string {
 	return hexutil.EncodeBig(number)
 }
 
-func (h *Hub) getTotals() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+func (h *Hub) handleTotals() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
-		globalTotalBurned.mu.Lock()
-		burned := hexutil.EncodeBig(globalTotalBurned.v)
-		globalTotalBurned.mu.Unlock()
+		totalsJSON, err := json.Marshal(h.getTotals())
+		if err != nil {
+			log.Errorf("Error marshaling block stats: %vn", err)
+		}
 
-		globalTotalIssuance.mu.Lock()
-		issuance := hexutil.EncodeBig(globalTotalIssuance.v)
-		globalTotalIssuance.mu.Unlock()
+		return json.RawMessage(totalsJSON), nil
+	}
+}
 
-		globalTotalTips.mu.Lock()
-		tipped := hexutil.EncodeBig(globalTotalTips.v)
-		globalTotalTips.mu.Unlock()
+func (h *Hub) getTotals() *Totals {
+	globalTotalBurned.mu.Lock()
+	burned := hexutil.EncodeBig(globalTotalBurned.v)
+	globalTotalBurned.mu.Unlock()
 
-		return json.RawMessage(fmt.Sprintf("{\"burned\": \"%s\", \"issuance\": \"%s\", \"tipped\": \"%s\"}", burned, issuance, tipped)), nil
+	globalTotalIssuance.mu.Lock()
+	issuance := hexutil.EncodeBig(globalTotalIssuance.v)
+	globalTotalIssuance.mu.Unlock()
+
+	globalTotalTips.mu.Lock()
+	tipped := hexutil.EncodeBig(globalTotalTips.v)
+	globalTotalTips.mu.Unlock()
+
+	return &Totals{
+		Burned:    burned,
+		Issuance:  issuance,
+		Tipped:    tipped,
 	}
 }
 
