@@ -191,8 +191,8 @@ func (h *Hub) initializeLatest50Blocks() {
 	latestBlockNumber := h.latestBlock.getBlockNumber()
 
 	blockCount := min(50, len(globalBlockStats.v))
-	for i := latestBlockNumber; i >= latestBlockNumber - uint64(blockCount); i-- {
-		if blockStat, ok := globalBlockStats.v[latestBlockNumber]; ok {
+	for i := latestBlockNumber - uint64(blockCount); i <= latestBlockNumber; i++ {
+		if blockStat, ok := globalBlockStats.v[i]; ok {
 			h.latestBlocks.addBlock(blockStat)
 		}
 	}
@@ -201,9 +201,9 @@ func (h *Hub) initializeLatest50Blocks() {
 func (h *Hub) initializeWebSocketHandlers() {
 	h.handlers = map[string]func(c *Client, message jsonrpcMessage) (json.RawMessage, error){
 		// deprecated
-		"internal_getTotals":      h.handleTotals(), 
-		"eth_blockNumber":          h.ethBlockNumber(),
-		"eth_chainId":              h.handleFunc(),
+		"internal_getTotals": h.handleTotals(),
+		"eth_blockNumber":    h.ethBlockNumber(),
+		"eth_chainId":        h.handleFunc(),
 
 		// internal custom geth commands.
 		"internal_getBlockStats":  h.getBlockStats(),
@@ -263,10 +263,10 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 				h.subscription <- map[string]interface{}{
 					"blockStats":   blockStats,
 					"clientsCount": clientsCount,
-					"data":         &BlockData{
-						Block: blockStats,
+					"data": &BlockData{
+						Block:   blockStats,
 						Clients: int16(clientsCount),
-						Totals: *totals,
+						Totals:  *totals,
 					},
 				}
 			}
@@ -640,9 +640,9 @@ func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.
 
 		data := &InitialData{
 			BlockNumber: h.latestBlock.getBlockNumber(),
-			Blocks: h.latestBlocks.getBlocks(),
-			Clients: int16(len(h.clients)),
-			Totals: *totals,
+			Blocks:      h.latestBlocks.getBlocks(),
+			Clients:     int16(len(h.clients)),
+			Totals:      *totals,
 		}
 
 		dataJSON, err := json.Marshal(data)
@@ -668,9 +668,9 @@ func (h *Hub) getTotals() *Totals {
 	globalTotalTips.mu.Unlock()
 
 	return &Totals{
-		Burned:    burned,
-		Issuance:  issuance,
-		Tipped:    tipped,
+		Burned:   burned,
+		Issuance: issuance,
+		Tipped:   tipped,
 	}
 }
 
@@ -1004,8 +1004,8 @@ func getBaseReward(blockNum uint64) big.Int {
 }
 
 func min(x, y int) int {
-    if x < y {
-        return x
-    }
-    return y
+	if x < y {
+		return x
+	}
+	return y
 }
