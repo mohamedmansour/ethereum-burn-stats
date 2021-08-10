@@ -1,4 +1,4 @@
-import { Center, VStack, Text } from '@chakra-ui/react';
+import { Center, Text, Box } from '@chakra-ui/react';
 import React from 'react';
 import { FirePit } from '../atoms/FirePit';
 
@@ -9,10 +9,10 @@ interface LoaderProps {
 export function Loader(props: LoaderProps) {
   return (
     <Center h="100vh" color="brand.primaryText">
-      <VStack>
-        <FirePit size="50px"/>
-        <Text>{props.children}</Text>
-      </VStack>
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <FirePit size="100px" animate={true} />
+        <Text mt="40px">{props.children}</Text>
+      </Box>
     </Center>
   );
 }
