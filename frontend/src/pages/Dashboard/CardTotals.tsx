@@ -7,7 +7,7 @@ import { Totals } from '../../libs/ethereum';
 export function CardTotals({ totals, amount }: { totals: Totals; amount: number; }) {
   return (
     <Card 
-        title="Totals Since 1559"
+        title="Totals since EIP-1559"
         icon={FaBurn}
         w={["100%", "100%", 300]}>
           

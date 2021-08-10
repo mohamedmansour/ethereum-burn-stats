@@ -1,4 +1,4 @@
-import { Box, Button, Divider, HStack, HTMLChakraProps, Icon, Spacer, Text, useStyleConfig } from "@chakra-ui/react";
+import { Box, Button, Divider, HStack, HTMLChakraProps, Icon, Spacer, Text, Tooltip, useStyleConfig } from "@chakra-ui/react";
 import { useState } from "react";
 import { IconType } from "react-icons"
 import { VscChevronDown, VscChevronUp } from "react-icons/vsc";
@@ -6,9 +6,14 @@ import { VscChevronDown, VscChevronUp } from "react-icons/vsc";
 interface CardProps extends HTMLChakraProps<"div"> {
   variant?: string
   title?: string
+  tooltip?: string
   icon?: IconType
   collapsible?: boolean
   onCollapsed?: (collapsed: boolean) => void
+}
+
+function CardTooltip({label}: {label: string}) {
+  return <Box p={2}><Text>{label}</Text></Box>
 }
 
 export function Card(props: CardProps) {
@@ -30,9 +35,10 @@ export function Card(props: CardProps) {
         <>
         <HStack>
           {icon && <Icon as={icon} />}
-          <Text fontSize="md" fontWeight="bold">
-            {title}
-          </Text>
+          <HStack>
+          {!props.tooltip && <Text fontSize="md" fontWeight="bold">{title}</Text>}
+          {props.tooltip && <Tooltip placement="right" label={<CardTooltip label={props.tooltip} />}><Text fontSize="md" fontWeight="bold">{title}</Text></Tooltip>}
+          </HStack>
           {collapsible !== undefined && (
             <>
               <Spacer />
