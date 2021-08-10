@@ -1,7 +1,7 @@
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { BigNumber, utils } from "ethers";
 import React, { useEffect, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, Area, AreaChart } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, Area, AreaChart } from 'recharts';
 import { BlockStats } from "../libs/ethereum";
 import { Zero } from "../utils/number";
 import { BigNumberFormat, BigNumberText } from "./BigNumberText";
@@ -81,7 +81,7 @@ interface ChartData {
   chartType: ChartType
 }
 
-const maxItemsInChart = 20;
+const maxItemsInChart = 100;
 
 function LiveChart(props: BaseFeeChartProps) {
   const [data, setData] = useState<ChartData>()
@@ -188,12 +188,12 @@ function LiveChart(props: BaseFeeChartProps) {
   return (
     <Box flex="1" w="99%" overflow="hidden">
       <ResponsiveContainer>
-        <LineChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }}>
+        <BarChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }}>
           <YAxis yAxisId="left" type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
-          <XAxis hide dataKey="block" angle={30} dx={20} dy={10} fontSize={10} tickCount={10}/>
+          <XAxis hide dataKey="block" angle={30} dx={50} dy={10} fontSize={10} tickCount={10}/>
           <Tooltip content={<CustomTooltip />} />
-          <Line yAxisId="left" type="monotone" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" strokeWidth={2} dot={false} isAnimationActive={false} />
-        </LineChart>
+          <Bar yAxisId="left" type="monotone" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" fill="#FF7B24" strokeWidth={1} isAnimationActive={false} />
+        </BarChart>
       </ResponsiveContainer>
     </Box>
   )
