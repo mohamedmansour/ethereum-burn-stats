@@ -23,7 +23,8 @@ const theme = extendTheme({
     },
     Tooltip: {
       baseStyle: {
-        bg: 'brand.subheader'
+        bg: 'brand.orange',
+        rounded: "lg"
       }
     },
     Link: {
