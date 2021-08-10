@@ -2,14 +2,13 @@ import { Text, HStack, Icon, Box, Link, Tbody, Thead, Tooltip, Tr, VStack, Headi
 import { Link as ReactLink } from "react-router-dom";
 import { FaCubes } from 'react-icons/fa';
 import { VscInfo } from "react-icons/vsc";
-import { BlockProgress } from "../../atoms/BlockProgress";
+import { Progress } from "../../atoms/Progress";
 import { Card } from "../../atoms/Card";
 import { FirePit } from "../../atoms/FirePit";
 import { TablePlus, TdPlus, ThPlus } from "../../atoms/TablePlus";
 import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { BigNumberText } from "../../organisms/BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
-import { Loader } from "../../organisms/Loader";
 import { timeSince } from "../../utils/time";
 import { BlockStats } from "../../libs/ethereum";
 
@@ -52,12 +51,9 @@ function BlockItem({ activated, block }: { activated: boolean, block: BlockStats
 
 export function BlockList({ activated }: { activated: boolean; }) {
   const { details, blocks } = useBlockExplorer();
-
-  if (!details)
-    return <Loader>loading block details ...</Loader>;
-
-  if (!blocks)
-    return <Loader>loading blocks ...</Loader>;
+  if (!details || !blocks) {
+    return null;
+  }
 
   return (
     <Box position="relative" h="100%" flex={1} overflow="auto" whiteSpace="nowrap" ml="-10px" mr="-10px">
@@ -80,12 +76,12 @@ export function BlockList({ activated }: { activated: boolean; }) {
           <Tr>
             <TdPlus textAlign="left">{details.currentBlock + 1}</TdPlus>
             <TdPlus colSpan={9}>
-              <BlockProgress />
+              <Progress />
             </TdPlus>
           </Tr>
-          {blocks.map((block, idx) => (
+          {blocks.map((block) => (
             <BlockItem
-              key={idx}
+              key={block.number}
               block={block}
               activated={activated} />
           ))}

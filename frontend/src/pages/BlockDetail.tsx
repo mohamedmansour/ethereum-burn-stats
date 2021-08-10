@@ -247,8 +247,8 @@ export function EthBlockDetail() {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {state.transactions.map((t, idx) => (
-                        <Tr key={idx}>
+                      {state.transactions.map((t) => (
+                        <Tr key={t.hash}>
                           <Td w="10%">{t.confirmations}</Td>
                           <Td
                             w="100%"

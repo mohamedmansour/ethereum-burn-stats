@@ -4,20 +4,20 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { BigNumber, utils } from "ethers";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useMemo } from "react";
 import { Zero } from "../utils/number";
 import { autoFormatBigNumber } from "../utils/wei";
+
+export type BigNumberType = 'ether' | 'gwei' | 'wei' | 'auto'
 
 export interface BigNumberProps extends HTMLChakraProps<"div"> {
   number: BigNumber | undefined;
   usdConversion?: number;
   label?: JSX.Element;
-  disableTooltip?: boolean
   doNotShowDecimals?: boolean
   hideCurrency?: boolean;
   removeCurrencyColor?: boolean
-  forced?: 'ether' | 'gwei' | 'wei' | 'auto'
+  forced?: BigNumberType
 }
 
 interface BigNumberState {
@@ -26,7 +26,13 @@ interface BigNumberState {
   currency: string
 }
 
-export function BigNumberFormat(props: BigNumberProps) {
+interface BigNumberFormatProps {
+  number: BigNumber | undefined;
+  forced?: BigNumberType
+  usdConversion?: number;
+}
+
+export function BigNumberFormat(props: BigNumberFormatProps) {
   let bignumber = props.number || Zero();
   let value = '';
   let currency = ''
@@ -57,12 +63,8 @@ export function BigNumberFormat(props: BigNumberProps) {
 }
 
 export function BigNumberText(props: BigNumberProps) {
-  const { number, usdConversion, label, disableTooltip, removeCurrencyColor, doNotShowDecimals, forced, hideCurrency, ...rest } = props;
-  const [state, setState] = useState<BigNumberState | undefined>()
-
-  useEffect(() => {
-    setState(BigNumberFormat(props))
-  }, [props]);
+  const { number, usdConversion, label, removeCurrencyColor, doNotShowDecimals, forced, hideCurrency, ...rest } = props;
+  const state = useMemo<BigNumberState>(() => BigNumberFormat({number: props.number, forced: props.forced, usdConversion: props.usdConversion}), [props.number, props.forced, props.usdConversion]);
 
   if (!state) {
     return (
@@ -73,15 +75,6 @@ export function BigNumberText(props: BigNumberProps) {
   }
 
   const currencyColor = removeCurrencyColor !== undefined && removeCurrencyColor ? undefined : "brand.secondaryText"
-  if (disableTooltip !== undefined && disableTooltip) {
-    return (
-      <HStack display="inline-flex" {...rest} >
-        <Text>{state.prettyValue}</Text>
-        {!hideCurrency && <Text color={currencyColor}>{state.currency}</Text>}
-      </HStack>
-    )
-  }
-
   return (
     <HStack display="inline-flex" {...rest} position="relative">
       <Text>{state.prettyValue}</Text>
