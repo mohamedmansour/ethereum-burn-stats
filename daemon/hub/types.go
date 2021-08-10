@@ -67,17 +67,18 @@ type Totals struct {
 
 // InitialData type represents the initial data that the client requests.
 type InitialData struct {
-	Blocks            []sql.BlockStats `json:"blocks"`
-	Clients           int16            `json:"clients"`
-	Totals            Totals           `json:"totals"`
-	BlockNumber       uint64           `json:"blockNumber"`
-	Version           string           `json:"version"`
+	Blocks      []sql.BlockStats `json:"blocks"`
+	Clients     int16            `json:"clients"`
+	Totals      Totals           `json:"totals"`
+	BlockNumber uint64           `json:"blockNumber"`
+	Version     string           `json:"version"`
 }
 
 // ClientData type represents the data that the server sends at every new block.
 type BlockData struct {
-	Block      sql.BlockStats   `json:"block"`
-	Clients    int16            `json:"clients"`
-	Totals     Totals           `json:"totals"`
-	Version    string           `json:"version"`
+	BaseFeeNext string         `json:"baseFeeNext"`
+	Block       sql.BlockStats `json:"block"`
+	Clients     int16          `json:"clients"`
+	Totals      Totals         `json:"totals"`
+	Version     string         `json:"version"`
 }
