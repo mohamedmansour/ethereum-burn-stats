@@ -14,15 +14,15 @@ export function CardCurrentSession({ session, amount }: { session: BlockExplorer
       icon={FaWaveSquare}>
       <HStack>
         <Text flex={1}>Burned</Text>
-        <BigNumberText number={session.burned} usdConversion={amount} fontSize={16} />
+        <BigNumberText number={session.burned} usdConversion={amount} fontSize={16} maximumFractionDigits={2} />
       </HStack>
       <HStack>
         <Text flex={1}>Rewards</Text>
-        <BigNumberText number={session.rewards} usdConversion={amount} fontSize={16} />
+        <BigNumberText number={session.rewards} usdConversion={amount} fontSize={16} maximumFractionDigits={2} />
       </HStack>
       <HStack>
         <Text flex={1}>Tips</Text>
-        <BigNumberText number={session.tips} usdConversion={amount} fontSize={16} />
+        <BigNumberText number={session.tips} usdConversion={amount} fontSize={16}  maximumFractionDigits={2} />
       </HStack>
       <HStack>
         <HStack flex={1}><Text>Base Fee</Text><Text fontSize={12} color="brand.secondaryText">(min/max)</Text></HStack>

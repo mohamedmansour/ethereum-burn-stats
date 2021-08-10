@@ -13,11 +13,11 @@ export function CardTotals({ totals, amount }: { totals: Totals; amount: number;
           
       <HStack>
         <Text flex={1}>Burned</Text>
-        <BigNumberText number={totals.burned} usdConversion={amount} fontSize={16} textAlign="right" />
+        <BigNumberText number={totals.burned} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={2} />
       </HStack>
       <HStack>
         <Text flex={1}>Issued</Text>
-        <BigNumberText number={totals.issuance} usdConversion={amount} fontSize={16} textAlign="right" />
+        <BigNumberText number={totals.issuance} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={2} />
       </HStack>
     </Card>
   );
