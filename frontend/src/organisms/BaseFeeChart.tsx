@@ -17,7 +17,7 @@ function CustomTooltip(props: TooltipProps<string, string>) {
   if (props.active && props.payload && props.payload.length) {
     const payload = props.payload[0].payload as BlockStats
     return (
-      <Box bg="brand.subheader" p="4" rounded="lg" fontSize={12}>
+      <Box bg="brand.subheader" p="4" rounded="lg" fontSize={12} opacity={0.95}>
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Block:</Text><Text>{payload.number}</Text></HStack>
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Burned:</Text><BigNumberText number={payload.burned} /></HStack>
         <HStack><Text color="brand.secondaryText" fontWeight="bold">Rewards:</Text><BigNumberText number={payload.rewards} /></HStack>

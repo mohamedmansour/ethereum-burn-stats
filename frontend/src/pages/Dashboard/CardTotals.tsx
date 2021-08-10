@@ -8,9 +8,7 @@ export function CardTotals({ totals, amount }: { totals: Totals; amount: number;
   return (
     <Card 
         title="Totals since EIP-1559"
-        icon={FaBurn}
-        w={["100%", "100%", 300]}>
-          
+        icon={FaBurn}>
       <HStack>
         <Text flex={1}>Burned</Text>
         <BigNumberText number={totals.burned} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={2} />

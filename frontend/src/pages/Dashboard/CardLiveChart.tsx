@@ -75,8 +75,8 @@ export function CardLiveChart(props: RadioCardProps) {
       icon={FaChartLine}
       collapsible={doNotShowChart}
       onCollapsed={(collapsed) => setDoNotShowChart(collapsed)}
-      minH={doNotShowChart ? 0 : 300}
-      h={["auto", "auto", doNotShowChart ? "auto" : 300]} flexShrink={0}
+      minH={doNotShowChart ? 0 : 400}
+      h={["auto", "auto", doNotShowChart ? "auto" : 400]} flexShrink={0}
     >
       <Flex justifyContent={["center", "center", "flex-end"]}>
         <Grid {...group} templateColumns={["repeat(2, 1fr)", "repeat(2, 1fr)", "repeat(4, 1fr)"]} display="inline-grid" gridGap={2} mt={2} mb={2}>
