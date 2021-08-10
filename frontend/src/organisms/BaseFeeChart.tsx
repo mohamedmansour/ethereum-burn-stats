@@ -1,7 +1,7 @@
 import { Box, HStack, Text } from "@chakra-ui/react";
-import { BigNumber, utils } from "ethers";
+import { utils } from "ethers";
 import React, { useEffect, useState } from "react";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, Area, AreaChart } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, Area, AreaChart } from 'recharts';
 import { BlockStats } from "../libs/ethereum";
 import { Zero } from "../utils/number";
 import { BigNumberFormat, BigNumberText } from "./BigNumberText";
@@ -112,11 +112,11 @@ function LiveChart(props: BaseFeeChartProps) {
 
       switch (props.chartType) {
         case "tips & burned":
-          chartData.tipsFormatted = utils.formatUnits(block.tips, 'ether')
-          chartData.burnedFormatted = utils.formatUnits(block.burned, 'ether')
+          chartData.tipsFormatted = parseFloat(utils.formatUnits(block.tips, 'ether'))
+          chartData.burnedFormatted = parseFloat(utils.formatUnits(block.burned, 'ether'))
           break;
         case "basefee":
-          chartData.baseFeeFormatted = utils.formatUnits(block.baseFee, 'gwei')
+          chartData.baseFeeFormatted = parseFloat(utils.formatUnits(block.baseFee, 'gwei'))
           break;
         case "gas":
           chartData.gasUsedFormatted = block.gasUsed.toNumber()
@@ -141,8 +141,9 @@ function LiveChart(props: BaseFeeChartProps) {
           return "0"
         }
         const formatter = BigNumberFormat({
-          number: BigNumber.from((realNumber * 1000000000).toFixed(0))
+          number: utils.parseUnits(realNumber.toString(), 'gwei')
         })
+
         return formatter.prettyValue + ' ' + formatter.currency
       }
       case "tips & burned": {
@@ -190,7 +191,7 @@ function LiveChart(props: BaseFeeChartProps) {
       <ResponsiveContainer>
         <BarChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }}>
           <YAxis yAxisId="left" type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
-          <XAxis hide dataKey="block" angle={30} dx={50} dy={10} fontSize={10} tickCount={10}/>
+          <XAxis hide dataKey="block" angle={30} dx={50} dy={10} fontSize={10} tickCount={10} />
           <Tooltip content={<CustomTooltip />} />
           <Bar yAxisId="left" type="monotone" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" fill="#FF7B24" strokeWidth={1} isAnimationActive={false} />
         </BarChart>
