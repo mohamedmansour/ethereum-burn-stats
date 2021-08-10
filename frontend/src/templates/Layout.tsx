@@ -44,7 +44,7 @@ export function Layout(props: LayoutProps) {
             }}
           >
             <HStack cursor="pointer">
-              <FirePit sparkCount={12} size="24px" />
+              <FirePit size="24px" />
               <Heading size="lg" color="white">Watch The <Box display="inline" color="brand.orange">Burn</Box></Heading>
             </HStack>
           </Link>

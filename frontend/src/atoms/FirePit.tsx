@@ -1,39 +1,34 @@
-import { Box, forwardRef, HTMLChakraProps } from '@chakra-ui/react'
+import { Box, HTMLChakraProps, useStyleConfig } from '@chakra-ui/react'
 import * as CSS from "csstype";
+import React from 'react';
 import './FirePit.scss'
 
 export interface FirePitProps extends HTMLChakraProps<"div">  {
-  sparkCount?: number
   size?: CSS.Property.Width;
+  variant?: string
 }
 
-export const FirePit = forwardRef<FirePitProps, "div">(
-    (props: FirePitProps, ref: React.ForwardedRef<any>) => {
-  const {
-    sparkCount,
+function FirePitBase(props: FirePitProps) {
+  console.log("FirePit")
+  let {
     size,
+    variant,
     ...rest
-  } = props
+  } = props;
+  const styles = useStyleConfig("FirePit", { variant })
 
-  const styles = {
-    sparkCount: sparkCount || 0,
-    size: size || '40px'
-  }
-
-  const sparks = []
-  for (let i = 0; i < styles.sparkCount; i++) {
-    sparks.push(<Box key={i} className="spark" />)
-  }
+  size = size || '40px'
 
   return (
-    <Box className="firepit" fontSize={styles.size} {...rest}>
+    <Box className="firepit" fontSize={size} __css={styles} {...rest}>
       <Box className="fire">
         <Box className="flame" />
         <Box className="flame" />
         <Box className="flame" />
         <Box className="flame" />
-        {sparks}
       </Box>
     </Box>
   )
-})
+}
+
+export const FirePit = React.memo(FirePitBase);
