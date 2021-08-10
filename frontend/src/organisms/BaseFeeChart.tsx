@@ -192,7 +192,7 @@ function LiveChart(props: BaseFeeChartProps) {
         <BarChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }}>
           <YAxis yAxisId="left" type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
           <XAxis hide dataKey="block" angle={30} dx={50} dy={10} fontSize={10} tickCount={10} />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
           <Bar yAxisId="left" type="monotone" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" fill="#FF7B24" strokeWidth={1} isAnimationActive={false} />
         </BarChart>
       </ResponsiveContainer>
