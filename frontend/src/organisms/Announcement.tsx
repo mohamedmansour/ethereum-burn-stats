@@ -1,12 +1,18 @@
 import { Button, HStack, Icon, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { VscDebugDisconnect } from "react-icons/vsc";
+import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { useEthereum } from "../contexts/EthereumContext";
 import { layoutConfig } from "../layoutConfig";
 
-export function Announcement() {
+export interface AnnouncementProps {
+  isOverlay?: boolean;
+}
+
+export function Announcement(props: AnnouncementProps) {
   const { eth } = useEthereum()
-  const [attempts, setAttempts] = useState(0);
+  const { error } = useBlockExplorer()
+  const [message, setMessage] = useState<string>();
 
   useEffect(() => {
     if (!eth) {
@@ -14,7 +20,7 @@ export function Announcement() {
     }
 
     const onRetryMaxAttemptsReached = (attempts: number) => {
-      setAttempts(attempts);
+      setMessage(`Disconnected from the server, tried ${attempts} attempts. Please refresh!`);
       eth.disconnect();
     }
 
@@ -25,16 +31,28 @@ export function Announcement() {
     }
   }, [eth])
 
+  useEffect(() => {
+    if (!error || !eth) {
+      return
+    }
+
+    setMessage(error);
+    eth.disconnect();
+  }, [error, eth])
+
   const onRefresh = () => {
     window.location.reload();
   }
 
-  if (!attempts || attempts === 0) {
+  if (!message) {
     return null;
   }
 
   return (
     <HStack
+        position={props.isOverlay ? 'fixed' : 'unset'}
+        left={0}
+        right={0}
         rounded="md"
         shadow="dark-lg"
         mt={layoutConfig.gap} 
@@ -47,7 +65,7 @@ export function Announcement() {
         textAlign="center"
         bg="tomato">
       <Icon as={VscDebugDisconnect} fontSize={32} />
-      <Text>Disconnected from the server, tried {attempts} attempts. Please refresh!</Text>
+      <Text>{message}</Text>
       <Button colorScheme="blackAlpha" onClick={onRefresh}>Refresh</Button>
     </HStack>
   )

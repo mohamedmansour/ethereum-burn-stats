@@ -1,4 +1,4 @@
-import { Text, HStack, Icon, Box, Link, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList, Progress } from "@chakra-ui/react";
+import { Text, HStack, Icon, Box, Link, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList } from "@chakra-ui/react";
 import { Link as ReactLink } from "react-router-dom";
 import { FaCubes } from 'react-icons/fa';
 import { VscInfo } from "react-icons/vsc";

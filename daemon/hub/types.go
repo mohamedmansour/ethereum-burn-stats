@@ -71,6 +71,7 @@ type InitialData struct {
 	Clients           int16            `json:"clients"`
 	Totals            Totals           `json:"totals"`
 	BlockNumber       uint64           `json:"blockNumber"`
+	Version           string           `json:"version"`
 }
 
 // ClientData type represents the data that the server sends at every new block.
@@ -78,4 +79,5 @@ type BlockData struct {
 	Block      sql.BlockStats   `json:"block"`
 	Clients    int16            `json:"clients"`
 	Totals     Totals           `json:"totals"`
+	Version    string           `json:"version"`
 }

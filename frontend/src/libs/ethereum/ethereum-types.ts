@@ -82,10 +82,12 @@ export interface InitialData {
   blocks: BlockStats[]
   clients: number
   totals: Totals
+  version: string
 }
 
 export interface BlockData {
   block: BlockStats
   clients: number
   totals: Totals
+  version: string
 }

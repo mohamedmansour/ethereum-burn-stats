@@ -4,9 +4,10 @@ import { BigNumber } from 'ethers'
 import { useSetting } from "../hooks/useSetting";
 import { Loader } from "../organisms/Loader";
 import { useReducer } from "react";
-import { Setting } from "../config";
+import { serverVersion, Setting } from "../config";
 import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
 import { BlockData, BlockStats, BlockWithTransactions, Totals } from "../libs/ethereum";
+import { Announcement } from "../organisms/Announcement";
 
 export interface BurnedBlockTransaction extends BlockWithTransactions {
   stats?: BlockStats
@@ -34,6 +35,13 @@ type BlockExplorerContextType = {
   details?: BlockExplorerDetails
   blocks?: BlockStats[]
   session?: BlockExplorerSession
+  error?: string
+}
+
+interface NewVersionAction {
+  type: 'NEW_VERSION'
+  currentVersion: string
+  serverVersion: string
 }
 
 interface NewDataAction {
@@ -49,6 +57,7 @@ interface InitAction {
 }
 
 type ActionType =
+  | NewVersionAction
   | NewDataAction
   | InitAction
 
@@ -61,11 +70,18 @@ const useBlockExplorer = () => useContext(BlockExplorerContext);
 
 const blockExplorerReducer = (state: BlockExplorerContextType, action: ActionType): BlockExplorerContextType => {
   switch (action.type) {
+    case 'NEW_VERSION': {
+      return {...state, error: `New website update available, please refresh to get the new updates.`}
+    }
     case 'NEW_DATA': {
       if (!state.details || !state.session)
         return state
 
-      const { block, totals, clients } = action.data
+      const { block, totals, clients, version } = action.data
+
+      if (serverVersion !== version) {
+        return {...state, error: `New website update available, please refresh to get the new updates.`}
+      }
 
       if (!block.burned.isZero()) {
         state.session.burned = state.session.burned.add(block.burned)
@@ -134,7 +150,15 @@ const BlockExplorerProvider = ({
 
     const init = async () => {
       const initialData = await eth.getInitialData()
-      
+      if (serverVersion !== initialData.version) {
+        dispatch({
+          type: 'NEW_VERSION',
+          currentVersion: serverVersion,
+          serverVersion: initialData.version
+        })
+        return;
+      }
+
       let currentBaseFee = Zero()
       if (initialData.blocks.length) {
         const block = initialData.blocks[0]
@@ -163,10 +187,10 @@ const BlockExplorerProvider = ({
   return (
     <BlockExplorerContext.Provider
       value={state}>
+      {!state.blocks && state.error ? <Announcement isOverlay /> : null }
       {state.blocks ? children : <Loader>retrieving latest blocks on {eth?.connectedNetwork.name}</Loader>}
     </BlockExplorerContext.Provider>
   )
 }
-
 
 export { useBlockExplorer, BlockExplorerProvider }

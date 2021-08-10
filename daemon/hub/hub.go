@@ -17,6 +17,7 @@ import (
 	gethRPC "github.com/ethereum/go-ethereum/rpc"
 	"github.com/gorilla/websocket"
 	"github.com/mohamedmansour/ethereum-burn-stats/daemon/sql"
+	"github.com/mohamedmansour/ethereum-burn-stats/daemon/version"
 	"github.com/sirupsen/logrus"
 )
 
@@ -267,6 +268,7 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 						Block:   blockStats,
 						Clients: int16(clientsCount),
 						Totals:  *totals,
+						Version: version.Version,
 					},
 				}
 			}
@@ -643,6 +645,7 @@ func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.
 			Blocks:      h.latestBlocks.getBlocks(),
 			Clients:     int16(len(h.clients)),
 			Totals:      *totals,
+			Version:     version.Version,
 		}
 
 		dataJSON, err := json.Marshal(data)
