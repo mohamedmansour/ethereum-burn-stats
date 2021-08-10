@@ -74,14 +74,15 @@ export function BlockList({ activated }: { activated: boolean; }) {
         <Tbody>
           <Tr>
             <TdPlus textAlign="left">{details.currentBlock + 1}</TdPlus>
-            <TdPlus colSpan={9}>
-              <Progress
-                size="xs"
-                colorScheme="orange"
-                rounded="full"
-                isIndeterminate
-              />
-            </TdPlus>
+            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
+            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
+            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
+            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
+            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
+            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
+            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
+            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
+            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
           </Tr>
           {blocks.map((block) => (
             <BlockItem
