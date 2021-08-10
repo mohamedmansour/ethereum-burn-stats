@@ -1,8 +1,7 @@
-import { Text, HStack, Icon, Box, Link, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList } from "@chakra-ui/react";
+import { Text, HStack, Icon, Box, Link, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList, Progress } from "@chakra-ui/react";
 import { Link as ReactLink } from "react-router-dom";
 import { FaCubes } from 'react-icons/fa';
 import { VscInfo } from "react-icons/vsc";
-import { Progress } from "../../atoms/Progress";
 import { Card } from "../../atoms/Card";
 import { FirePit } from "../../atoms/FirePit";
 import { TablePlus, TdPlus, ThPlus } from "../../atoms/TablePlus";
@@ -76,7 +75,12 @@ export function BlockList({ activated }: { activated: boolean; }) {
           <Tr>
             <TdPlus textAlign="left">{details.currentBlock + 1}</TdPlus>
             <TdPlus colSpan={9}>
-              <Progress />
+              <Progress
+                size="xs"
+                colorScheme="orange"
+                rounded="full"
+                isIndeterminate
+              />
             </TdPlus>
           </Tr>
           {blocks.map((block) => (
