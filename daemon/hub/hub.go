@@ -248,7 +248,7 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 
 				blockNumber := header.Number.Uint64()
 
-				blockStats, blockStatsPercentiles, err := h.updateBlockStats(blockNumber)
+				blockStats, blockStatsPercentiles, baseFeeNext, err := h.updateBlockStats(blockNumber)
 				if err != nil {
 					log.Errorf("Error getting block stats: %v", err)
 				} else {
@@ -265,10 +265,11 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 					"blockStats":   blockStats,
 					"clientsCount": clientsCount,
 					"data": &BlockData{
-						Block:   blockStats,
-						Clients: int16(clientsCount),
-						Totals:  *totals,
-						Version: version.Version,
+						BaseFeeNext: baseFeeNext,
+						Block:       blockStats,
+						Clients:     int16(clientsCount),
+						Totals:      *totals,
+						Version:     version.Version,
 					},
 				}
 			}
@@ -417,7 +418,7 @@ func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint
 	}
 
 	for _, n := range missingBlockNumbers {
-		blockStats, blockStatsPercentiles, err := h.updateBlockStats(n)
+		blockStats, blockStatsPercentiles, _, err := h.updateBlockStats(n)
 		if err != nil {
 			return fmt.Errorf("cannot update block state for '%d',  %v", n, err)
 		}
@@ -467,7 +468,7 @@ func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint
 
 	if latestBlockNumber > currentBlock {
 		for {
-			blockStats, blockStatsPercentiles, err := h.updateBlockStats(currentBlock)
+			blockStats, blockStatsPercentiles, _, err := h.updateBlockStats(currentBlock)
 			if err != nil {
 				return fmt.Errorf("cannot update block state for '%d',  %v", currentBlock, err)
 			}
@@ -730,9 +731,9 @@ func (h *Hub) getBlockStats() func(c *Client, message jsonrpcMessage) (json.RawM
 	}
 }
 
-func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockStatsPercentiles, error) {
+func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockStatsPercentiles, string, error) {
 	start := time.Now()
-	var blockNumberHex string
+	var blockNumberHex, baseFeeNextHex string
 	var blockStats sql.BlockStats
 	var blockStatsPercentiles []sql.BlockStatsPercentiles
 	var rawResponse json.RawMessage
@@ -748,29 +749,29 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 	)
 	if err != nil {
 		log.Errorf("error getting block details from geth: %v", err)
-		return blockStats, blockStatsPercentiles, err
+		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 	}
 
 	block := Block{}
 	err = json.Unmarshal(rawResponse, &block)
 	if err != nil {
-		return blockStats, blockStatsPercentiles, err
+		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 	}
 
 	header := types.Header{}
 	err = json.Unmarshal(rawResponse, &header)
 	if err != nil {
-		return blockStats, blockStatsPercentiles, err
+		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 	}
 
 	gasUsed, err := hexutil.DecodeBig(block.GasUsed)
 	if err != nil {
-		return blockStats, blockStatsPercentiles, err
+		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 	}
 
 	gasTarget, err := hexutil.DecodeBig(block.GasLimit)
 	if err != nil {
-		return blockStats, blockStatsPercentiles, err
+		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 	}
 
 	if blockNumber > londonBlock {
@@ -782,7 +783,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 	if block.BaseFeePerGas != "" {
 		baseFee, err = hexutil.DecodeBig(block.BaseFeePerGas)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 		}
 	}
 
@@ -792,6 +793,16 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 	blockTips := big.NewInt(0)
 
 	blockReward := getBaseReward(blockNumber)
+
+	baseFeeNext := big.NewInt(0)
+	baseFeeNext.Add(baseFeeNext, gasUsed)
+	baseFeeNext.Sub(baseFeeNext, gasTarget)
+	baseFeeNext.Mul(baseFeeNext, baseFee)
+	baseFeeNext.Quo(baseFeeNext, gasTarget)
+	baseFeeNext.Quo(baseFeeNext, big.NewInt(8))
+	baseFeeNext.Add(baseFeeNext, baseFee)
+
+	baseFeeNextHex = hexutil.EncodeBig(baseFeeNext)
 
 	for n, uncleHash := range block.Uncles {
 		var raw json.RawMessage
@@ -803,22 +814,22 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 			hexutil.EncodeUint64(uint64(n)),
 		)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 		}
 
 		uncle := Block{}
 		err = json.Unmarshal(raw, &uncle)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 		}
 		if uncleHash != uncle.Hash {
 			err = fmt.Errorf("uncle hash doesn't match: have %s and want %s", uncleHash, uncle.Hash)
-			return blockStats, blockStatsPercentiles, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 		}
 
 		uncleBlockNumber, err := hexutil.DecodeUint64(uncle.Number)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 		}
 
 		uncleMinerReward := getBaseReward(blockNumber)
@@ -844,13 +855,13 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 			tHash,
 		)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 		}
 
 		receipt := TransactionReceipt{}
 		err = json.Unmarshal(raw, &receipt)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 		}
 
 		if receipt.BlockNumber == "" {
@@ -860,7 +871,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 		}
 		gasUsed, err := hexutil.DecodeBig(receipt.GasUsed)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 		}
 
 		effectiveGasPrice := big.NewInt(0)
@@ -868,7 +879,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 		if receipt.EffectiveGasPrice != "" {
 			effectiveGasPrice, err = hexutil.DecodeBig(receipt.EffectiveGasPrice)
 			if err != nil {
-				return blockStats, blockStatsPercentiles, err
+				return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 			}
 		}
 
@@ -940,7 +951,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 	duration := time.Since(start) / time.Millisecond
 	log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
 
-	return blockStats, blockStatsPercentiles, nil
+	return blockStats, blockStatsPercentiles, baseFeeNextHex, nil
 }
 
 func getPercentileSortedUint64(values []uint64, perc int) uint64 {
