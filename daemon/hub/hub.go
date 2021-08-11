@@ -121,8 +121,6 @@ func New(
 		httpClient: new(http.Client),
 	}
 
-	log.Infof("Get latest block...")
-
 	latestBlock := newLatestBlock()
 	latestBlocks := newLatestBlocks(150)
 
@@ -925,14 +923,14 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 
 	blockStats.Number = uint(blockNumber)
 	blockStats.Timestamp = header.Time
-	blockStats.BaseFee = hexutil.EncodeBig(baseFee)
-	blockStats.Burned = hexutil.EncodeBig(blockBurned)
-	blockStats.GasTarget = hexutil.EncodeBig(gasTarget)
-	blockStats.GasUsed = hexutil.EncodeBig(gasUsed)
-	blockStats.PriorityFee = hexutil.EncodeBig(priorityFee)
-	blockStats.Rewards = hexutil.EncodeBig(&blockReward)
-	blockStats.Tips = hexutil.EncodeBig(blockTips)
-	blockStats.Transactions = hexutil.EncodeBig(transactionCount)
+	blockStats.BaseFee = sql.BigInt{Value: baseFee}
+	blockStats.Burned = sql.BigInt{Value: blockBurned}
+	blockStats.GasTarget = sql.BigInt{Value: gasTarget}
+	blockStats.GasUsed = sql.BigInt{Value: gasUsed}
+	blockStats.PriorityFee = sql.BigInt{Value: priorityFee}
+	blockStats.Rewards = sql.BigInt{Value: &blockReward}
+	blockStats.Tips = sql.BigInt{Value: blockTips}
+	blockStats.Transactions = sql.BigInt{Value: transactionCount}
 
 	globalBlockStats.mu.Lock()
 	globalBlockStats.v[blockNumber] = blockStats

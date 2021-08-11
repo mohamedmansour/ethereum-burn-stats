@@ -4,10 +4,8 @@ import (
 
 	//"github.com/ethereum/go-ethereum/core/types"
 
-	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -118,24 +116,12 @@ func (d *Database) GetTotals() (*big.Int, *big.Int, *big.Int, error) {
 	}
 
 	for _, block := range blockStats {
-		burned, err := hexutil.DecodeBig(block.Burned)
-		if err != nil {
-			return totalBurned, totalIssuance, totalTips, fmt.Errorf("block.Burned was not a hex - %s", block.Burned)
-		}
-		totalBurned.Add(totalBurned, burned)
+		totalBurned.Add(totalBurned, block.Burned.Value)
 
-		rewards, err := hexutil.DecodeBig(block.Rewards)
-		if err != nil {
-			return totalBurned, totalIssuance, totalTips, fmt.Errorf("block.Rewards was not a hex - %s", block.Rewards)
-		}
-		totalIssuance.Add(totalIssuance, rewards)
-		totalIssuance.Sub(totalIssuance, burned)
+		totalIssuance.Add(totalIssuance, block.Rewards.Value)
+		totalIssuance.Sub(totalIssuance, block.Burned.Value)
 
-		tips, err := hexutil.DecodeBig(block.Tips)
-		if err != nil {
-			return totalBurned, totalIssuance, totalTips, fmt.Errorf("block.Burned was not a hex - %s", block.Tips)
-		}
-		totalTips.Add(totalBurned, tips)
+		totalTips.Add(totalBurned, block.Tips.Value)
 	}
 
 	return totalBurned, totalIssuance, totalTips, nil
