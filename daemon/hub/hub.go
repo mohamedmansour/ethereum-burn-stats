@@ -243,10 +243,15 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 			case header := <-headers:
 				latestBlockNumber := latestBlock.getBlockNumber()
 				if latestBlockNumber == header.Number.Uint64() {
+					log.Warnf("block repeated: %s", header.Number.String())
 					continue
 				}
 
 				blockNumber := header.Number.Uint64()
+
+				// sleep for 2 seconds before processing new block
+				// this is temporary to fix processing invalid block
+				time.Sleep(2 * time.Second)
 
 				blockStats, blockStatsPercentiles, baseFeeNext, err := h.updateBlockStats(blockNumber)
 				if err != nil {
@@ -865,7 +870,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 		}
 
 		if receipt.BlockNumber == "" {
-			log.Warnf("block %d: found empty transaction receipt", blockNumber)
+			log.Warnf("block %d, transaction %s: found empty transaction receipt", blockNumber, tHash)
 			continue
 			//break
 		}
