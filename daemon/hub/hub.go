@@ -147,7 +147,7 @@ func New(
 
 	err = h.initialize(initializedb, gethEndpointWebsocket)
 	if err != nil {
-		return h, nil
+		return nil, err
 	}
 
 	return h, nil
