@@ -31,6 +31,7 @@ export class EthereumApiFormatters {
   static FormatBlockStats(b: BlockStats): BlockStats | undefined {
     if (!b) return undefined;
     b.baseFee = HexToBigNumber(b.baseFee)
+    b.priorityFee = HexToBigNumber(b.priorityFee)
     b.burned = HexToBigNumber(b.burned)
     b.gasTarget = HexToBigNumber(b.gasTarget)
     b.gasUsed = HexToBigNumber(b.gasUsed)

@@ -27,6 +27,7 @@ export interface BlockExplorerDetails {
   totals: Totals
   currentBlock: number
   currentBaseFee: BigNumber
+  currentPriorityFee: BigNumber
   clients: number
   version: string
 }
@@ -50,9 +51,11 @@ const DefaultExplorerData = {
       burned: Zero(),
       tipped: Zero(),
       issuance: Zero(),
+      netReduction: 0,
     },
     currentBlock: 0,
     currentBaseFee: Zero(),
+    currentPriorityFee: Zero(),
     clients: 0,
     version: 'NA',
   },
@@ -86,6 +89,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
   const details: BlockExplorerDetails = {
     currentBlock: initialData.blockNumber,
     currentBaseFee: initialData.blocks.length ? initialData.blocks[0].baseFee : Zero(),
+    currentPriorityFee: initialData.blocks.length ? initialData.blocks[0].priorityFee : Zero(),
     totals: initialData.totals,
     clients: initialData.clients,
     version: initialData.version
@@ -114,6 +118,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
 
   const insert = (data: BlockData) => {
     const { block, totals, clients, version } = data
+    var netReduction = Zero()
 
     if (!block.burned.isZero()) {
       session.burned = session.burned.add(block.burned)
@@ -128,8 +133,11 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
     }
 
     details.currentBaseFee = block.baseFee
+    details.currentPriorityFee = block.priorityFee
     details.currentBlock = block.number
     details.totals = totals
+    netReduction = totals.burned.mul(BigNumber.from(10000))
+    details.totals.netReduction = netReduction.div(totals.burned.add(totals.issuance)).toNumber() / 100
     details.clients = clients
     details.version = version
     session.blockCount = session.blockCount + 1
