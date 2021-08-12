@@ -1,7 +1,7 @@
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { utils } from "ethers";
 import React, { useEffect, useState } from "react";
-import { Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, ComposedChart } from 'recharts';
+import { Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, ComposedChart, Cell } from 'recharts';
 import { maxBlocksToRenderInChart, maxBlocksToRenderInChartMobile } from "../config";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { useMobileDetector } from "../contexts/MobileDetectorContext";
@@ -180,7 +180,14 @@ function LiveChart(props: BaseFeeChartProps) {
           <XAxis dataKey="number" angle={-30} dx={50} dy={10} fontSize={10} tickCount={10} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
           {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{fontSize: "10px"}} />}
-          <Bar type="monotone"stackId="stack" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" fill="#FF7B24" strokeWidth={1} isAnimationActive={false} name={typeMapping.primary.name} />
+          <Bar type="monotone"stackId="stack" dataKey={typeMapping.primary.dataKey} isAnimationActive={false} name={typeMapping.primary.name}>
+            {data.points.map((entry, index) => {
+              const isNegative = entry[typeMapping.primary.dataKey] < 0;
+              return (
+                  <Cell key={`cell-${index}`} fill={isNegative? "#FFC40C" : "#FF7B24"} />
+              )
+            })}
+          </Bar>
           {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFC40C" isAnimationActive={false} name={typeMapping.secondary.name}/>}
         </ComposedChart>
       </ResponsiveContainer>
