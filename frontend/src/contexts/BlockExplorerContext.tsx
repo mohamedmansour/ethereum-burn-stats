@@ -32,9 +32,9 @@ export interface BlockExplorerDetails {
 }
 
 interface BlocksChanged {
-  details?: BlockExplorerDetails
-  blocks?: BlockStats[]
-  session?: BlockExplorerSession
+  details: BlockExplorerDetails
+  blocks: BlockStats[]
+  session: BlockExplorerSession
 }
 
 type BlockExplorerContextType = {
@@ -43,7 +43,32 @@ type BlockExplorerContextType = {
   getBlockStats?(index: number): BlockStats | undefined
 }
 
-const BlockExplorerContext = createContext<BlockExplorerContextType>({ data: {}})
+const DefaultExplorerData = {
+  blocks: [],
+  details: {
+    totals: {
+      burned: Zero(),
+      tipped: Zero(),
+      issuance: Zero(),
+    },
+    currentBlock: 0,
+    currentBaseFee: Zero(),
+    clients: 0,
+    version: 'NA',
+  },
+  session: {
+    burned: Zero(),
+    tips: Zero(),
+    blockCount: 0,
+    transactionCount: 0,
+    rewards: Zero(),
+    minBaseFee: Zero(),
+    maxBaseFee: Zero(),
+    since: Date.now()
+  }
+}
+
+const BlockExplorerContext = createContext<BlockExplorerContextType>({ data: DefaultExplorerData})
 
 const useBlockExplorer = () => useContext(BlockExplorerContext);
 
@@ -143,7 +168,7 @@ const BlockExplorerProvider = ({
   const settings = useSettings()
   const [db, setDb] = useState<InMemoryIndex>()
   const [error, setError] = useState<string>()
-  const [data, setData] = useState<BlocksChanged>({})
+  const [data, setData] = useState<BlocksChanged>(DefaultExplorerData)
 
   useEffect(() => {
     if (!eth)

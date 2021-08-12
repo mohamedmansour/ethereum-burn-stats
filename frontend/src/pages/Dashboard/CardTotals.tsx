@@ -5,12 +5,7 @@ import { BigNumberText } from "../../organisms/BigNumberText";
 import { useBlockExplorer } from '../../contexts/BlockExplorerContext';
 
 export function CardTotals() {
-  const { data: { details } } = useBlockExplorer();
-  if (!details) {
-    return null;
-  }
-
-  const totals = details.totals;
+  const { data: { details: { totals } } } = useBlockExplorer();
   const amount = 1
 
   return (

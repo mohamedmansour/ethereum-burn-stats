@@ -52,10 +52,6 @@ function BlockItem({ block }: { block: BlockStats }) {
 export function BlockList() {
   const { data: { details, blocks } } = useBlockExplorer();
 
-  if (!details || !blocks) {
-    return null;
-  }
-
   return (
     <Box position="relative" h="100%" flex={1} overflow="auto" whiteSpace="nowrap" ml="-10px" mr="-10px">
       <TablePlus colorScheme="whiteAlpha">

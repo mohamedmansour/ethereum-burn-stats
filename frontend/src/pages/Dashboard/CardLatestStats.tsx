@@ -8,19 +8,11 @@ import { FirePit } from "../../atoms/FirePit";
 
 export function CardLatestStats() {
   const {data: {details}} = useBlockExplorer();
-  const [count, setCount] = useState<number | undefined>(details?.clients);
+  const [count, setCount] = useState<number | undefined>(details.clients);
 
   useEffect(() => {
-    if (!details?.clients) {
-      return;
-    }
-
     setCount(details.clients);
-  }, [details?.clients]);
-
-  if (!details) {
-    return null;
-  }
+  }, [details.clients]);
 
   return (
     <Card 

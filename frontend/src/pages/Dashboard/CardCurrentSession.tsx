@@ -9,24 +9,10 @@ import { timeSince } from "../../utils/time";
 export function CardCurrentSession() {
   const { data: { session } } = useBlockExplorer();
 
-  const since = useMemo(() => {
-    if (!session?.since) {
-      return {
-        fullText: '',
-        timeAgo: ''
-      }
-    }
-
-    return {
-      fullText: new Intl.DateTimeFormat(navigator.language, { dateStyle: 'long', timeStyle: 'long' }).format(session.since),
-      timeAgo: timeSince(session.since / 1000)
-    }
-  }, [session?.since])
-
-  
-  if (!session) {
-    return null;
-  }
+  const since = {
+    fullText: new Intl.DateTimeFormat(navigator.language, { dateStyle: 'long', timeStyle: 'long' }).format(session.since),
+    timeAgo: timeSince(session.since / 1000)
+  };
 
   const amount = 1
   return (

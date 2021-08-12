@@ -11,7 +11,6 @@ export function CardCountdown({ genesisBlock, currentBlock }: { genesisBlock: nu
   const [activation, setActivation] = useState<ActivationObj>();
   const numberOfBlocksToLookback = 6500; // ~6500 blocks in 24 hours
 
-
   // To save on number of calls to geth, just cache the seconds per block.
   useEffect(() => {
     if (!eth)
