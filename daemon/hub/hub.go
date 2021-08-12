@@ -249,9 +249,9 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 
 				blockNumber := header.Number.Uint64()
 
-				// sleep for 2 seconds before processing new block
+				// sleep for 5 seconds before processing new block
 				// this is temporary to fix processing invalid block
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 
 				blockStats, blockStatsPercentiles, baseFeeNext, err := h.updateBlockStats(blockNumber)
 				if err != nil {
@@ -954,7 +954,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 	globalTotalTips.mu.Unlock()
 
 	duration := time.Since(start) / time.Millisecond
-	log.Printf("block: %d, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
+	log.Printf("block: %d, blockHex: %s, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, blockNumberHex, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
 
 	return blockStats, blockStatsPercentiles, baseFeeNextHex, nil
 }
