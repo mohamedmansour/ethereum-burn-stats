@@ -1,5 +1,4 @@
 import { HStack, Text } from '@chakra-ui/react';
-import { BigNumber } from 'ethers'
 import { FaBurn } from 'react-icons/fa';
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";

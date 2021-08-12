@@ -82,9 +82,15 @@ interface InMemoryIndex {
   getData: () => BlocksChanged
 }
 
+const caclulateNetReduction = (burned: BigNumber, issuance: BigNumber): number => {
+  return burned.mul(BigNumber.from(10000)).div(burned.add(issuance)).toNumber() / 100
+}
+
 const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
   const blockIndex: {[blockNumber: number]: BlockStats} = {}
   let blocks: number[] = []
+
+  initialData.totals.netReduction = caclulateNetReduction(initialData.totals.burned, initialData.totals.issuance);
 
   const details: BlockExplorerDetails = {
     currentBlock: initialData.blockNumber,
@@ -118,7 +124,6 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
 
   const insert = (data: BlockData) => {
     const { block, totals, clients, version } = data
-    var netReduction = Zero()
 
     if (!block.burned.isZero()) {
       session.burned = session.burned.add(block.burned)
@@ -136,8 +141,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
     details.currentPriorityFee = block.priorityFee
     details.currentBlock = block.number
     details.totals = totals
-    netReduction = totals.burned.mul(BigNumber.from(10000))
-    details.totals.netReduction = netReduction.div(totals.burned.add(totals.issuance)).toNumber() / 100
+    details.totals.netReduction = caclulateNetReduction(totals.burned, totals.issuance)
     details.clients = clients
     details.version = version
     session.blockCount = session.blockCount + 1
