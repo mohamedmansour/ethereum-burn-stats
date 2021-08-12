@@ -50,6 +50,7 @@ const DefaultExplorerData = {
       burned: Zero(),
       tipped: Zero(),
       issuance: Zero(),
+      netReduction: 0,
     },
     currentBlock: 0,
     currentBaseFee: Zero(),
@@ -114,6 +115,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
 
   const insert = (data: BlockData) => {
     const { block, totals, clients, version } = data
+    var netReduction = Zero()
 
     if (!block.burned.isZero()) {
       session.burned = session.burned.add(block.burned)
@@ -130,6 +132,8 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
     details.currentBaseFee = block.baseFee
     details.currentBlock = block.number
     details.totals = totals
+    netReduction = totals.burned.mul(BigNumber.from(10000))
+    details.totals.netReduction = netReduction.div(totals.burned.add(totals.issuance)).toNumber() / 100
     details.clients = clients
     details.version = version
     session.blockCount = session.blockCount + 1

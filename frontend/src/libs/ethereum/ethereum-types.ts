@@ -75,6 +75,7 @@ export interface Totals {
   burned: BigNumber
   tipped: BigNumber
   issuance: BigNumber
+  netReduction: number
 }
 
 export interface InitialData {

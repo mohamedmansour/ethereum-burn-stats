@@ -1,4 +1,5 @@
 import { HStack, Text } from '@chakra-ui/react';
+import { BigNumber } from 'ethers'
 import { FaBurn } from 'react-icons/fa';
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
@@ -17,8 +18,14 @@ export function CardTotals() {
         <BigNumberText number={totals.burned} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={2} />
       </HStack>
       <HStack>
-        <Text flex={1}>Issuance</Text>
+        <Text flex={1}>Net Issuance</Text>
         <BigNumberText number={totals.issuance} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={2} />
+      </HStack>
+      <HStack>
+        <Text flex={1}>Net Reduction</Text>
+        <HStack display="inline-flex">
+        <Text>{totals.netReduction} %</Text>
+        </HStack>
       </HStack>
     </Card>
   );
