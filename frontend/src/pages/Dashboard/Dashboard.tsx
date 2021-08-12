@@ -6,11 +6,6 @@ import {
   Text
 } from "@chakra-ui/react";
 import { Link as ReactLink } from "react-router-dom";
-import {
-  useBlockExplorer,
-} from "../../contexts/BlockExplorerContext";
-import { Loader } from "../../organisms/Loader";
-import { useEthereum } from "../../contexts/EthereumContext";
 import { layoutConfig } from "../../layoutConfig";
 import { useMobileDetector } from "../../contexts/MobileDetectorContext";
 import { CardBlocks } from "./CardBlocks";
@@ -18,7 +13,6 @@ import { CardLiveChart } from "./CardLiveChart";
 import { CardLatestStats } from "./CardLatestStats";
 import { CardCurrentSession } from "./CardCurrentSession";
 import { CardTotals } from "./CardTotals";
-import { CardCountdown } from "./CardCountdown";
 import { CardDonate, CardDonateType } from "./CardDonate";
 
 export interface ActivationObj {
@@ -52,30 +46,18 @@ function DashboardLayout({ children }: { children: React.ReactNode; }) {
 }
 
 export function Dashboard() {
-  const { details, session, blocks } = useBlockExplorer();
-  const { eth } = useEthereum();
   const { isMobile } = useMobileDetector();
-
-  if (!eth) return <Loader>connecting to network ...</Loader>;
-  if (!details) return <Loader>Loading Details</Loader>
-  if (!session) return <Loader>Loading Session</Loader>
-  if (!blocks) return <Loader>Waiting for new blocks...</Loader>
-
-  const amount = 1;
-  const latestBlock = details.currentBlock;
-  const activated = latestBlock > eth.connectedNetwork.genesis
 
   if (isMobile) {
     return (
       <DashboardLayout>
         <CardDonate type={CardDonateType.TopSideBar} />
-        {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock} />}
-        {activated && <CardLiveChart blocks={blocks} />}
-        <CardTotals totals={details.totals} amount={amount} />
-        <CardCurrentSession session={session} amount={amount} />
-        <CardLatestStats details={details} clients={details.clients} />
-        <CardBlocks activated={activated} />
-        <CardDonate type={CardDonateType.BottomSideBar}/>
+        <CardLiveChart />
+        <CardTotals />
+        <CardCurrentSession />
+        <CardLatestStats />
+        <CardBlocks />
+        <CardDonate type={CardDonateType.BottomSideBar} />
       </DashboardLayout>
     )
   }
@@ -85,15 +67,14 @@ export function Dashboard() {
       <Flex flex={1} direction="row" gridGap={layoutConfig.gap}>
         <Flex direction="column" w={300} flexShrink={0} gridGap={layoutConfig.gap}>
           <CardDonate type={CardDonateType.TopSideBar} />
-          <CardTotals totals={details.totals} amount={amount} />
-          <CardCurrentSession session={session} amount={amount} />
-          <CardLatestStats details={details} clients={details.clients} />
+          <CardTotals />
+          <CardCurrentSession />
+          <CardLatestStats />
           <CardDonate type={CardDonateType.BottomSideBar}/>
         </Flex>
         <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>
-          {!activated && <CardCountdown genesisBlock={eth.connectedNetwork.genesis} currentBlock={latestBlock} />}
-          {activated && <CardLiveChart blocks={blocks} />}
-          <CardBlocks activated={activated} />
+          <CardLiveChart />
+          <CardBlocks />
         </Flex>
       </Flex>
     </DashboardLayout>

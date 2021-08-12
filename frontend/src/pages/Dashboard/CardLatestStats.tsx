@@ -1,21 +1,26 @@
 import { Text, HStack } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { FaGlasses } from 'react-icons/fa';
-import { BlockExplorerDetails } from "../../contexts/BlockExplorerContext";
+import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
 import { FirePit } from "../../atoms/FirePit";
 
-export function CardLatestStats({ details, clients }: { details: BlockExplorerDetails; clients: number | undefined }) {
-  const [count, setCount] = useState<number | undefined>(clients);
+export function CardLatestStats() {
+  const {data: {details}} = useBlockExplorer();
+  const [count, setCount] = useState<number | undefined>(details?.clients);
 
   useEffect(() => {
-    if (!clients) {
+    if (!details?.clients) {
       return;
     }
 
-    setCount(clients);
-  }, [clients]);
+    setCount(details.clients);
+  }, [details?.clients]);
+
+  if (!details) {
+    return null;
+  }
 
   return (
     <Card 

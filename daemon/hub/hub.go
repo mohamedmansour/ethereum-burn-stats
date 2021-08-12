@@ -124,7 +124,7 @@ func New(
 	log.Infof("Get latest block...")
 
 	latestBlock := newLatestBlock()
-	latestBlocks := newLatestBlocks(50)
+	latestBlocks := newLatestBlocks(150)
 
 	db, err := sql.ConnectDatabase(dbPath)
 	if err != nil {
@@ -166,7 +166,7 @@ func (h *Hub) initialize(initializedb bool, gethEndpointWebsocket string) error 
 		}
 	}
 
-	h.initializeLatest50Blocks()
+	h.initializeLatestBlocks()
 	h.initializeWebSocketHandlers()
 
 	err = h.initializeGrpcWebSocket(gethEndpointWebsocket)
@@ -185,13 +185,14 @@ func (h *Hub) initializeLatestBlock() (uint64, error) {
 	return latestBlockNumber, nil
 }
 
-func (h *Hub) initializeLatest50Blocks() {
+func (h *Hub) initializeLatestBlocks() {
 	globalBlockStats.mu.Lock()
 	defer globalBlockStats.mu.Unlock()
 
 	latestBlockNumber := h.latestBlock.getBlockNumber()
 
-	blockCount := min(50, len(globalBlockStats.v))
+	blockCount := min(h.latestBlocks.maxBlocks, len(globalBlockStats.v))
+	log.Infof("Initialize latest %d blocks", blockCount)
 	for i := latestBlockNumber - uint64(blockCount); i <= latestBlockNumber; i++ {
 		if blockStat, ok := globalBlockStats.v[i]; ok {
 			h.latestBlocks.addBlock(blockStat)

@@ -50,3 +50,8 @@ export const maxReconnectionAttempts = 5;
 
 // Sync version with server.
 export const serverVersion = "1.0.0";
+
+export const maxBlocksToRenderInTable = 50;
+export const maxBlocksToRenderInChart = 150;
+export const maxBlocksToRenderInTableMobile = 25;
+export const maxBlocksToRenderInChartMobile = 75;

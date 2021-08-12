@@ -9,7 +9,6 @@ import * as CSS from "csstype";
 import { Link as ReactLink } from "react-router-dom";
 import { FirePit } from "../atoms/FirePit";
 import { Footer } from "../organisms/Footer";
-import { EthereumNetworkBadge } from "../organisms/Network";
 import { layoutConfig } from "../layoutConfig";
 import { Announcement } from "../organisms/Announcement";
 
@@ -49,7 +48,6 @@ export function Layout(props: LayoutProps) {
             </HStack>
           </Link>
         </HStack>
-        <EthereumNetworkBadge marginLeft="auto" />
       </Flex>
       <Announcement />
       <Flex

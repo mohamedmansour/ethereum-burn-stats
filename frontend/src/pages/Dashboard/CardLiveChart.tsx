@@ -49,7 +49,7 @@ function RadioCard(props: RadioCardProps) {
   )
 }
 
-export function CardLiveChart(props: RadioCardProps) {
+export function CardLiveChart() {
   const settings = useSettings();
   const [doNotShowChart, setDoNotShowChart] = useState<boolean>(
     settings.get(Setting.doNotShowChart)
@@ -59,11 +59,11 @@ export function CardLiveChart(props: RadioCardProps) {
     settings.set(Setting.doNotShowChart, doNotShowChart);
   }, [settings, doNotShowChart]);
 
-  const [chartType, setChartType] = useState<ChartType>('basefee')
-  const options: ChartType[] = ["tips & burned", "basefee", "transactions", "gas"]
+  const [chartType, setChartType] = useState<ChartType>('issuance')
+  const options: ChartType[] = ["issuance", "basefee", "tips & burned", "gas"]
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: "chart",
-    defaultValue: "basefee",
+    defaultValue: "issuance",
     onChange: (value: ChartType) => setChartType(value),
   })
 
@@ -90,7 +90,7 @@ export function CardLiveChart(props: RadioCardProps) {
           })}
         </Grid>
       </Flex>
-      <BaseFeeChart data={props.blocks || []} chartType={chartType} />
+      <BaseFeeChart chartType={chartType} />
     </Card>
   );
 }

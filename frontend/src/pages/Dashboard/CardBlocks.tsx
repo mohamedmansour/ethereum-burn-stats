@@ -10,6 +10,7 @@ import { BigNumberText } from "../../organisms/BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
 import { timeSince } from "../../utils/time";
 import { BlockStats } from "../../libs/ethereum";
+import { maxBlocksToRenderInTable } from "../../config";
 
 function GasUsedInfo() {
   return (
@@ -24,7 +25,7 @@ function GasUsedInfo() {
   );
 }
 
-function BlockItem({ activated, block }: { activated: boolean, block: BlockStats }) {
+function BlockItem({ block }: { block: BlockStats }) {
   return (
     <Tr>
       <TdPlus>
@@ -48,8 +49,9 @@ function BlockItem({ activated, block }: { activated: boolean, block: BlockStats
   );
 }
 
-export function BlockList({ activated }: { activated: boolean; }) {
-  const { details, blocks } = useBlockExplorer();
+export function BlockList() {
+  const { data: { details, blocks } } = useBlockExplorer();
+
   if (!details || !blocks) {
     return null;
   }
@@ -59,7 +61,7 @@ export function BlockList({ activated }: { activated: boolean; }) {
       <TablePlus colorScheme="whiteAlpha">
         <Thead>
           <Tr>
-            <ThPlus textAlign="left" width="0.1%">Block</ThPlus>
+            <ThPlus textAlign="left" width="0.1%">Latest Block</ThPlus>
             <ThPlus>Burned</ThPlus>
             <ThPlus>Tips</ThPlus>
             <ThPlus>Base Fee</ThPlus>
@@ -84,11 +86,10 @@ export function BlockList({ activated }: { activated: boolean; }) {
             <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
             <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
           </Tr>
-          {blocks.map((block) => (
+          {blocks.slice(0, maxBlocksToRenderInTable).map((block) => (
             <BlockItem
               key={block.number}
-              block={block}
-              activated={activated} />
+              block={block} />
           ))}
         </Tbody>
       </TablePlus>
@@ -96,7 +97,7 @@ export function BlockList({ activated }: { activated: boolean; }) {
   );
 }
 
-export function CardBlocks({ activated }: { activated: boolean; }) {
+export function CardBlocks() {
   return (
     <Card
       title="Blocks"
@@ -104,7 +105,7 @@ export function CardBlocks({ activated }: { activated: boolean; }) {
       flex={['auto', 'auto', 1]}
       h={[600, 600, "auto"]}
     >
-      <BlockList activated={activated} />
+      <BlockList />
     </Card>
   );
 }

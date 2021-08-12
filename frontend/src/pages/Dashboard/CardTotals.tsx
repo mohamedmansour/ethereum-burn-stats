@@ -2,9 +2,17 @@ import { HStack, Text } from '@chakra-ui/react';
 import { FaBurn } from 'react-icons/fa';
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
-import { Totals } from '../../libs/ethereum';
+import { useBlockExplorer } from '../../contexts/BlockExplorerContext';
 
-export function CardTotals({ totals, amount }: { totals: Totals; amount: number; }) {
+export function CardTotals() {
+  const { data: { details } } = useBlockExplorer();
+  if (!details) {
+    return null;
+  }
+
+  const totals = details.totals;
+  const amount = 1
+
   return (
     <Card 
         title="Totals since EIP-1559"
