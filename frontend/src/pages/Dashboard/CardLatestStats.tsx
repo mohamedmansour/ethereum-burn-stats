@@ -23,6 +23,10 @@ export function CardLatestStats() {
         <BigNumberText number={details.currentBaseFee} fontSize={16} textAlign="right" />
       </HStack>
       <HStack>
+        <Text flex={1}>Priority Fee</Text>
+        <BigNumberText number={details.currentPriorityFee} fontSize={16} textAlign="right" />
+      </HStack>
+      <HStack>
         <HStack flex={1}><Text>Watching the Burn</Text> <FirePit size="12px" /></HStack>
         {count === undefined && <Text>calculating ...</Text>}
         {count !== undefined && <Text>{count} users</Text>}

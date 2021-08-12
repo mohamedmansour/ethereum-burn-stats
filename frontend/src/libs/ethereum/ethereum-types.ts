@@ -10,6 +10,7 @@ export interface EthereumSyncing {
 
 export interface BlockStats {
   baseFee: BigNumber
+  priorityFee: BigNumber
   burned: BigNumber
   gasTarget: BigNumber
   gasUsed: BigNumber
