@@ -39,7 +39,7 @@ export enum Setting {
   chartType = "chartType"
 }
 
-export const ChartTypes: ChartType[] = ["issuance", "basefee", "tips & burned", "gas"]
+export const ChartTypes: ChartType[] = ["issuance", "basefee", "tips", "gas"]
 
 export const defaultNetwork = EthereumNetworkOptions['mainnet']
 export const defaultSettings: { [key: string]: DefaultSettingValue } =
@@ -54,7 +54,7 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
     },
     [Setting.chartType]: {
       config: ChartSetting,
-      defaultValue: 'issuance',
+      defaultValue: 'basefee',
     },
   };
 

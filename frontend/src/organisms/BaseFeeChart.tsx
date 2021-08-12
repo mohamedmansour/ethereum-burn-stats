@@ -1,7 +1,7 @@
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { utils } from "ethers";
 import React, { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend } from 'recharts';
+import { Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, ComposedChart } from 'recharts';
 import { maxBlocksToRenderInChart, maxBlocksToRenderInChartMobile } from "../config";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { useMobileDetector } from "../contexts/MobileDetectorContext";
@@ -12,17 +12,17 @@ interface BaseFeeChartProps {
   chartType: ChartType
 }
 
-export type ChartType = "tips & burned" | "issuance" | "basefee" | "gas"
+export type ChartType = "tips" | "issuance" | "basefee" | "gas"
 
 const chartTypeMapping = {
-  "tips & burned": {
+  tips: {
     primary: {
       dataKey: 'tipsFormatted',
       name: 'tips'
     },
     secondary: {
-      dataKey: 'burnedFormatted',
-      name: 'burned'
+      dataKey: 'rewardFormatted',
+      name: 'reward'
     },
   },
   basefee: {
@@ -44,8 +44,8 @@ const chartTypeMapping = {
   },
   issuance: {
     primary: {
-      dataKey: 'rewardsFormatted',
-      name: 'rewards'
+      dataKey: 'burnedFormatted',
+      name: 'burned'
     },
     secondary: {
       dataKey: 'issuanceFormatted',
@@ -88,13 +88,13 @@ function LiveChart(props: BaseFeeChartProps) {
       const block = blocks[blocks.length - (i - minBounds) - 1]
       const chartData: { [key: string]: any } = {
         number: block.number,
-        issuance: block.burned.sub(block.rewards)
+        issuance: block.rewards.sub(block.burned.mul(5))
       }
 
       switch (props.chartType) {
-        case "tips & burned":
+        case "tips":
           chartData.tipsFormatted = parseFloat(utils.formatUnits(block.tips, 'ether'))
-          chartData.burnedFormatted = parseFloat(utils.formatUnits(block.burned, 'ether'))
+          chartData.rewardFormatted = parseFloat(utils.formatUnits(block.rewards, 'ether'))
           break;
         case "basefee":
           chartData.baseFeeFormatted = parseFloat(utils.formatUnits(block.baseFee, 'gwei'))
@@ -104,7 +104,7 @@ function LiveChart(props: BaseFeeChartProps) {
           chartData.gasTargetFormatted = block.gasTarget.toNumber()
           break;
         case "issuance":
-          chartData.rewardsFormatted = parseFloat(utils.formatUnits(block.rewards, 'ether'))
+          chartData.burnedFormatted = parseFloat(utils.formatUnits(block.burned.mul(5), 'ether'))
           chartData.issuanceFormatted = parseFloat(utils.formatUnits(chartData.issuance, 'ether'))
           break;
       }
@@ -140,7 +140,7 @@ function LiveChart(props: BaseFeeChartProps) {
           <HStack><Text color="brand.secondaryText" fontWeight="bold">Tips:</Text><BigNumberText number={block.tips} /></HStack>
           <HStack><Text color="brand.secondaryText" fontWeight="bold">Basefee:</Text><BigNumberText number={block.baseFee} /></HStack>
           <HStack><Text color="brand.secondaryText" fontWeight="bold">Txs:</Text><Text>{block.transactions}</Text></HStack>
-          {item.name === "gas" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Used:</Text><BigNumberText number={block.gasUsed} /></HStack>}
+          {item.name === "gas target" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Used:</Text><BigNumberText number={block.gasUsed} forced="wei" /></HStack>}
         </Box>
       );
     }
@@ -165,8 +165,8 @@ function LiveChart(props: BaseFeeChartProps) {
         return utils.commify(Number(value))
       }
       case "issuance":
-      case "tips & burned": {
-        return Math.abs(parseFloat(value)) + ' ETH'
+      case "tips": {
+        return parseFloat(value) + ' ETH'
       }
     }
   }
@@ -179,16 +179,14 @@ function LiveChart(props: BaseFeeChartProps) {
   return (
     <Box flex="1" w="99%" overflow="hidden">
       <ResponsiveContainer>
-        <BarChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }}
-          stackOffset="sign">
+        <ComposedChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }} reverseStackOrder stackOffset="sign">
           <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat}  width={75} />
           <XAxis dataKey="number" angle={-30} dx={50} dy={10} fontSize={10} tickCount={10} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
-
           {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{fontSize: "10px"}} />}
-          {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFA970" strokeWidth={1} isAnimationActive={false} name={typeMapping.secondary.name}/>}
-          <Bar type="monotone" stackId="stack" dataKey={typeMapping.primary.dataKey} fill="#FF7B24" strokeWidth={1} isAnimationActive={false} name={typeMapping.primary.name}/>
-        </BarChart>
+          <Bar type="monotone"stackId="stack"  dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" fill="#FF7B24" strokeWidth={1} isAnimationActive={false} name={typeMapping.primary.name} />
+          {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFA970" isAnimationActive={false} name={typeMapping.secondary.name}/>}
+        </ComposedChart>
       </ResponsiveContainer>
     </Box>
   )

@@ -1,6 +1,5 @@
 import { Text, HStack, Divider } from "@chakra-ui/react";
 import { FaWaveSquare } from 'react-icons/fa';
-import { useMemo, } from "react";
 import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
