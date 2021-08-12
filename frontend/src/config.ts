@@ -54,7 +54,7 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
     },
     [Setting.chartType]: {
       config: ChartSetting,
-      defaultValue: 'basefee',
+      defaultValue: 'issuance',
     },
   };
 
