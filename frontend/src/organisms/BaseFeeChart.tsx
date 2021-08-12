@@ -181,7 +181,7 @@ function LiveChart(props: BaseFeeChartProps) {
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
           {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{fontSize: "10px"}} />}
           <Bar type="monotone"stackId="stack" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" fill="#FF7B24" strokeWidth={1} isAnimationActive={false} name={typeMapping.primary.name} />
-          {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFA970" isAnimationActive={false} name={typeMapping.secondary.name}/>}
+          {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFC40C" isAnimationActive={false} name={typeMapping.secondary.name}/>}
         </ComposedChart>
       </ResponsiveContainer>
     </Box>
