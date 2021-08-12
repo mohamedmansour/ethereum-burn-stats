@@ -44,13 +44,10 @@ const chartTypeMapping = {
   },
   issuance: {
     primary: {
-      dataKey: 'burnedFormatted',
-      name: 'burned'
-    },
-    secondary: {
       dataKey: 'issuanceFormatted',
       name: 'issuance'
-    }
+    },
+    secondary: null
   }
 }
 
@@ -104,7 +101,6 @@ function LiveChart(props: BaseFeeChartProps) {
           chartData.gasTargetFormatted = block.gasTarget.toNumber()
           break;
         case "issuance":
-          chartData.burnedFormatted = -1*parseFloat(utils.formatUnits(block.burned, 'ether'))
           chartData.issuanceFormatted = parseFloat(utils.formatUnits(chartData.issuance, 'ether'))
           break;
       }
