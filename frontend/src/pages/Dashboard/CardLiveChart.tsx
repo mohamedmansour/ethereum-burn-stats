@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card } from "../../atoms/Card";
 import { BaseFeeChart, ChartType } from "../../organisms/BaseFeeChart";
 import { BlockStats } from "../../libs/ethereum";
-import { Setting } from "../../config";
+import { ChartTypes, Setting } from "../../config";
 import { useSettings } from "../../contexts/SettingsContext";
 
 interface RadioCardProps extends UseRadioProps {
@@ -54,16 +54,22 @@ export function CardLiveChart() {
   const [doNotShowChart, setDoNotShowChart] = useState<boolean>(
     settings.get(Setting.doNotShowChart)
   );
+  
+  const [chartType, setChartType] = useState<ChartType>(
+    settings.get(Setting.chartType)
+  );
 
   useEffect(() => {
     settings.set(Setting.doNotShowChart, doNotShowChart);
   }, [settings, doNotShowChart]);
 
-  const [chartType, setChartType] = useState<ChartType>('issuance')
-  const options: ChartType[] = ["issuance", "basefee", "tips & burned", "gas"]
+  useEffect(() => {
+    settings.set(Setting.chartType, chartType);
+  }, [settings, chartType]);
+
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: "chart",
-    defaultValue: "issuance",
+    defaultValue: chartType,
     onChange: (value: ChartType) => setChartType(value),
   })
 
@@ -80,7 +86,7 @@ export function CardLiveChart() {
     >
       <Flex justifyContent={["center", "center", "flex-end"]}>
         <Grid {...group} templateColumns={["repeat(2, 1fr)", "repeat(2, 1fr)", "repeat(4, 1fr)"]} display="inline-grid" gridGap={2} mt={2} mb={2}>
-          {options.map((value) => {
+          {ChartTypes.map((value) => {
             const radio = getRadioProps({ value })
             return (
               <RadioCard key={value} {...radio}>

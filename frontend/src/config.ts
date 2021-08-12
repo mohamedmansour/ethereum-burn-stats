@@ -2,6 +2,7 @@ import {
   DefaultSettingValue,
   SettingConfig,
 } from "./contexts/SettingsContext";
+import { ChartType } from "./organisms/BaseFeeChart";
 
 export const BooleanSetting: SettingConfig = {
   verify: (value: any): boolean => (value === "true" || value === "false" || value === true || value === false),
@@ -11,6 +12,11 @@ export const BooleanSetting: SettingConfig = {
 export const IntegerSetting: SettingConfig = {
   verify: (value: any): boolean => !isNaN(value),
   convert: (value: string): number => parseInt(value)
+}
+
+export const ChartSetting: SettingConfig = {
+  verify: (value: any): boolean => ChartTypes.indexOf(value) !== -1,
+  convert: (value: string): string => value
 }
 
 export interface EthereumNetwork {
@@ -29,8 +35,11 @@ export const EthereumNetworkOptions: {
 
 export enum Setting {
   maxBlocksToRender = "maxBlocksToRender",
-  doNotShowChart = "doNotShowChart"
+  doNotShowChart = "doNotShowChart",
+  chartType = "chartType"
 }
+
+export const ChartTypes: ChartType[] = ["issuance", "basefee", "tips & burned", "gas"]
 
 export const defaultNetwork = EthereumNetworkOptions['mainnet']
 export const defaultSettings: { [key: string]: DefaultSettingValue } =
@@ -42,6 +51,10 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
     [Setting.doNotShowChart]: {
       config: BooleanSetting,
       defaultValue: false,
+    },
+    [Setting.chartType]: {
+      config: ChartSetting,
+      defaultValue: 'issuance',
     },
   };
 
