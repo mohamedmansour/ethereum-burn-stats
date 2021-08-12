@@ -17,7 +17,7 @@ export function CardTotals() {
         <BigNumberText number={totals.burned} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={2} />
       </HStack>
       <HStack>
-        <Text flex={1}>Issued</Text>
+        <Text flex={1}>Issuance</Text>
         <BigNumberText number={totals.issuance} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={2} />
       </HStack>
     </Card>
