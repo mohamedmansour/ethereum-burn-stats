@@ -104,7 +104,7 @@ function LiveChart(props: BaseFeeChartProps) {
           chartData.gasTargetFormatted = block.gasTarget.toNumber()
           break;
         case "issuance":
-          chartData.burnedFormatted = parseFloat(utils.formatUnits(block.burned, 'ether'))
+          chartData.burnedFormatted = -1*parseFloat(utils.formatUnits(block.burned, 'ether'))
           chartData.issuanceFormatted = parseFloat(utils.formatUnits(chartData.issuance, 'ether'))
           break;
       }
@@ -179,12 +179,12 @@ function LiveChart(props: BaseFeeChartProps) {
   return (
     <Box flex="1" w="99%" overflow="hidden">
       <ResponsiveContainer>
-        <ComposedChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }} reverseStackOrder stackOffset="sign">
+        <ComposedChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }} stackOffset="sign">
           <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat}  width={75} />
           <XAxis dataKey="number" angle={-30} dx={50} dy={10} fontSize={10} tickCount={10} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
           {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{fontSize: "10px"}} />}
-          <Bar type="monotone"stackId="stack"  dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" fill="#FF7B24" strokeWidth={1} isAnimationActive={false} name={typeMapping.primary.name} />
+          <Bar type="monotone"stackId="stack" dataKey={typeMapping.primary.dataKey} stroke="#FF7B24" fill="#FF7B24" strokeWidth={1} isAnimationActive={false} name={typeMapping.primary.name} />
           {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFA970" isAnimationActive={false} name={typeMapping.secondary.name}/>}
         </ComposedChart>
       </ResponsiveContainer>
