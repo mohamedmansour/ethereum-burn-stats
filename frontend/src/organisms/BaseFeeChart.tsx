@@ -88,7 +88,7 @@ function LiveChart(props: BaseFeeChartProps) {
       const block = blocks[blocks.length - (i - minBounds) - 1]
       const chartData: { [key: string]: any } = {
         number: block.number,
-        issuance: block.rewards.sub(block.burned.mul(5))
+        issuance: block.rewards.sub(block.burned)
       }
 
       switch (props.chartType) {
@@ -104,7 +104,7 @@ function LiveChart(props: BaseFeeChartProps) {
           chartData.gasTargetFormatted = block.gasTarget.toNumber()
           break;
         case "issuance":
-          chartData.burnedFormatted = parseFloat(utils.formatUnits(block.burned.mul(5), 'ether'))
+          chartData.burnedFormatted = parseFloat(utils.formatUnits(block.burned, 'ether'))
           chartData.issuanceFormatted = parseFloat(utils.formatUnits(chartData.issuance, 'ether'))
           break;
       }
