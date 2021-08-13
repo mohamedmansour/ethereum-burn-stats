@@ -44,16 +44,22 @@ export function CardDonate({ type }: { type: CardDonateType }) {
       )
     }
 
-    const title = "indexed.finance: defi investing made easy, crypto indexes and yield aggregators"
+    const indexedTitle = "indexed.finance: defi investing made easy, crypto indexes and yield aggregators"
+    const unicornCircleTitle = "The one and only Unicorn Circle 🦄⭕️ | Always on the hunt for new Business Unicorns!"
     return (
       <Card 
           title="Patrons"
           icon={VscHeart}>
         <Box>
-          <SimpleGrid columns={2} gridGap={2} mt={2}>
-            <LinkBox title={title}>
+          <SimpleGrid columns={2} gridGap={2} mt={2} alignItems="center" justifyContent="center">
+            <LinkBox title={indexedTitle}>
               <LinkOverlay href="https://indexed.finance" target="_blank">
-                <Image srcSet="/sponsor_indexed.png" title={title} />
+                <Image srcSet="/sponsor_indexed.png" title={indexedTitle} />
+              </LinkOverlay>
+            </LinkBox>
+            <LinkBox title={unicornCircleTitle}>
+              <LinkOverlay href="https://twitter.com/unicorncircle" target="_blank">
+                <Image srcSet="/sponsor_unicorn_circle.png" title={unicornCircleTitle} />
               </LinkOverlay>
             </LinkBox>
           </SimpleGrid>
