@@ -63,7 +63,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
               </LinkOverlay>
             </LinkBox>
           </SimpleGrid>
-          <Text fontSize={12} mt={4} mb={2}>Thanks to these patrons who has offered to help support the expensive server costs!</Text>
+          <Text fontSize={12} mt={4} mb={2}>Thanks to these patrons who has offered to help support the server costs and development!</Text>
           <Text fontSize={12} textAlign="right"><Link href="https://twitter.com/mohamedmansour" target="_blank">Become a patron!</Link></Text>
         </Box>
       </Card>
