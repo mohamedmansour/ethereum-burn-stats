@@ -77,9 +77,7 @@ function LiveChart(props: BaseFeeChartProps) {
       priorityFeeFormatted: 0,
       priorityFee: Zero(),
       gasUsedFormatted: 0,
-      gasUsed: Zero(),
-      gasTargetFormatted: 0,
-      gasTarget: Zero(),
+      gasUsed: Zero()
     })
 
     // Fill up the data for the last |maxItemsInChart| blocks,

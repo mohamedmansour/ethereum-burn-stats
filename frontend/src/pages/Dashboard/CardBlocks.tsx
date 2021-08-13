@@ -7,7 +7,7 @@ import { FirePit } from "../../atoms/FirePit";
 import { TablePlus, TdPlus, ThPlus } from "../../atoms/TablePlus";
 import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { BigNumberText } from "../../organisms/BigNumberText";
-import { GasTarget, GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
+import { GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
 import { timeSince } from "../../utils/time";
 import { BlockStats } from "../../libs/ethereum";
 import { maxBlocksToRenderInTable } from "../../config";
@@ -39,7 +39,6 @@ function BlockItem({ block }: { block: BlockStats }) {
       <TdPlus><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.tips} /></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.baseFee} /></TdPlus>
-      <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasTarget gasTarget={block.gasTarget} /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsed gasUsed={block.gasUsed} /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.rewards} /></TdPlus>
@@ -61,7 +60,6 @@ export function BlockList() {
             <ThPlus>Burned</ThPlus>
             <ThPlus>Tips</ThPlus>
             <ThPlus>Base Fee</ThPlus>
-            <ThPlus>Gas Target</ThPlus>
             <ThPlus><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
             <ThPlus>% Target</ThPlus>
             <ThPlus>Rewards</ThPlus>
