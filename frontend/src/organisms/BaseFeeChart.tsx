@@ -180,7 +180,7 @@ function LiveChart(props: BaseFeeChartProps) {
           <XAxis dataKey="number" angle={-30} dx={50} dy={10} fontSize={10} tickCount={10} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
           {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{fontSize: "10px"}} />}
-          <Bar type="monotone"stackId="stack" dataKey={typeMapping.primary.dataKey} isAnimationActive={false} name={typeMapping.primary.name}>
+          <Bar type="monotone"stackId="stack" dataKey={typeMapping.primary.dataKey} fill="#FF7B24" isAnimationActive={false} name={typeMapping.primary.name}>
             {data.points.map((entry, index) => {
               const isNegative = entry[typeMapping.primary.dataKey] < 0;
               return (
