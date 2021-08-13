@@ -19,6 +19,9 @@ sub vcl_recv {
         if (req.http.X-Body-Len == "-1") {
             return(synth(400, "The request body size exceeds the limit"));
         }
+        if (req.http.X-Custom-Update-Cache == "true") {
+            set req.hash_always_miss = true;
+        }
         return (hash);
     }
 }
@@ -72,7 +75,7 @@ sub vcl_backend_response {
                 set beresp.ttl = 0s;
                 return (deliver);
             }
-            set beresp.ttl = 7d;
+            set beresp.ttl = 1d;
             return (deliver);
         }
 
@@ -84,7 +87,7 @@ sub vcl_backend_response {
                 set beresp.ttl = 0s;
                 return (deliver);
             }
-            set beresp.ttl = 7d;
+            set beresp.ttl = 1d;
             return (deliver);
         }
 
