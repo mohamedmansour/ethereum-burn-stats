@@ -7,6 +7,7 @@ import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { useMobileDetector } from "../contexts/MobileDetectorContext";
 import { Zero } from "../utils/number";
 import { BigNumberFormat, BigNumberText } from "./BigNumberText";
+import { GasUsedPercent } from "../organisms/GasUsed";
 
 interface BaseFeeChartProps {
   chartType: ChartType
@@ -17,12 +18,12 @@ export type ChartType = "tips" | "issuance" | "basefee" | "gas"
 const chartTypeMapping = {
   tips: {
     primary: {
-      dataKey: 'tipsFormatted',
-      name: 'tips'
-    },
-    secondary: {
       dataKey: 'rewardFormatted',
       name: 'reward'
+    },
+    secondary: {
+      dataKey: 'tipsFormatted',
+      name: 'tips'
     },
   },
   basefee: {
@@ -30,17 +31,17 @@ const chartTypeMapping = {
       dataKey: 'baseFeeFormatted',
       name: 'basefee'
     },
-    secondary: null
+    secondary: {
+      dataKey: 'priorityFeeFormatted',
+      name: 'priorityfee'
+    },
   },
   gas: {
     primary: {
       dataKey: 'gasUsedFormatted',
       name: 'gas used'
     },
-    secondary: {
-      dataKey: 'gasTargetFormatted',
-      name: 'gas target'
-    },
+    secondary: null
   },
   issuance: {
     primary: {
@@ -73,6 +74,8 @@ function LiveChart(props: BaseFeeChartProps) {
       burned: Zero(),
       baseFeeFormatted: 0,
       baseFee: Zero(),
+      priorityFeeFormatted: 0,
+      priorityFee: Zero(),
       gasUsedFormatted: 0,
       gasUsed: Zero(),
       gasTargetFormatted: 0,
@@ -95,10 +98,10 @@ function LiveChart(props: BaseFeeChartProps) {
           break;
         case "basefee":
           chartData.baseFeeFormatted = parseFloat(utils.formatUnits(block.baseFee, 'gwei'))
+          chartData.priorityFeeFormatted = parseFloat(utils.formatUnits(block.priorityFee, 'gwei'))
           break;
         case "gas":
           chartData.gasUsedFormatted = block.gasUsed.toNumber()
-          chartData.gasTargetFormatted = block.gasTarget.toNumber()
           break;
         case "issuance":
           chartData.issuanceFormatted = parseFloat(utils.formatUnits(chartData.issuance, 'ether'))
@@ -134,9 +137,10 @@ function LiveChart(props: BaseFeeChartProps) {
           <HStack><Text color="brand.secondaryText" fontWeight="bold">Rewards:</Text><BigNumberText number={block.rewards} /></HStack>
           {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Issuance:</Text><BigNumberText number={payload.issuance.abs()} /></HStack>}
           <HStack><Text color="brand.secondaryText" fontWeight="bold">Tips:</Text><BigNumberText number={block.tips} /></HStack>
-          <HStack><Text color="brand.secondaryText" fontWeight="bold">Basefee:</Text><BigNumberText number={block.baseFee} /></HStack>
+          <HStack><Text color="brand.secondaryText" fontWeight="bold">BaseFee:</Text><BigNumberText number={block.baseFee} /></HStack>
+          <HStack><Text color="brand.secondaryText" fontWeight="bold">PriorityFee:</Text><BigNumberText number={block.priorityFee} /></HStack>
           <HStack><Text color="brand.secondaryText" fontWeight="bold">Txs:</Text><Text>{block.transactions}</Text></HStack>
-          {item.name === "gas target" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Used:</Text><BigNumberText number={block.gasUsed} forced="wei" /></HStack>}
+          <HStack><Text color="brand.secondaryText" fontWeight="bold">GasUsedPct:</Text><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack>
         </Box>
       );
     }
