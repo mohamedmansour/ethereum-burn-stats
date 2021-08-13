@@ -59,7 +59,7 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
   };
 
 // Max WebSocket Reconnection Attempts.
-export const maxReconnectionAttempts = 5;
+export const maxReconnectionAttempts = 10;
 
 // Sync version with server.
 export const serverVersion = "1.0.0";
