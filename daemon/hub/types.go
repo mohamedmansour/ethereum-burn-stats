@@ -61,8 +61,9 @@ type TransactionReceipt struct {
 // Totals type represents a single aggregate of all the data.
 type Totals struct {
 	Burned   string `json:"burned"`
-	Tipped   string `json:"tipped"`
 	Issuance string `json:"issuance"`
+	Rewards  string `json:"rewards"`
+	Tips     string `json:"tipped"`
 }
 
 // InitialData type represents the initial data that the client requests.
