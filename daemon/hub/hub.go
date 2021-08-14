@@ -250,13 +250,10 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 
 				blockNumber := header.Number.Uint64()
 
-				// sleep for 5 seconds before processing new block
-				// this is temporary to fix processing invalid block
-				time.Sleep(5 * time.Second)
-
 				blockStats, blockStatsPercentiles, baseFeeNext, err := h.updateBlockStats(blockNumber)
 				if err != nil {
 					log.Errorf("Error getting block stats: %v", err)
+					continue
 				} else {
 					latestBlocks.addBlock(blockStats)
 				}
