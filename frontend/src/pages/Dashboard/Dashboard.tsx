@@ -54,8 +54,8 @@ export function Dashboard() {
         <CardDonate type={CardDonateType.TopSideBar} />
         <CardLiveChart />
         <CardTotals />
-        <CardCurrentSession />
         <CardLatestStats />
+        <CardCurrentSession />
         <CardBlocks />
         <CardDonate type={CardDonateType.BottomSideBar} />
       </DashboardLayout>
@@ -68,8 +68,8 @@ export function Dashboard() {
         <Flex direction="column" w={300} flexShrink={0} gridGap={layoutConfig.gap}>
           <CardDonate type={CardDonateType.TopSideBar} />
           <CardTotals />
-          <CardCurrentSession />
           <CardLatestStats />
+          <CardCurrentSession />
           <CardDonate type={CardDonateType.BottomSideBar}/>
         </Flex>
         <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>
