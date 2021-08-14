@@ -872,6 +872,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 		gasTarget.Div(gasTarget, big.NewInt(2))
 	}
 
+	//initial london block is 1Gwei baseFee
 	baseFee := big.NewInt(1_000_000_000)
 
 	if block.BaseFeePerGas != "" {
@@ -1016,38 +1017,6 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 	priorityFee := big.NewInt(int64(getPercentileSortedUint64(allPriorityFeePerGasMwei, 50)))
 	priorityFee.Mul(priorityFee, big.NewInt(1_000_000))
 
-	totalBurned := big.NewInt(0)
-	totalIssuance := big.NewInt(0)
-	totalRewards := big.NewInt(0)
-	totalTips := big.NewInt(0)
-
-	globalTotals.mu.Lock()
-	if prevTotals, ok := globalBlockStats.v[blockNumber-1]; ok {
-		prevTotalBurned, err := hexutil.DecodeBig(prevTotals.Burned)
-		if err != nil {
-			globalTotals.mu.Unlock()
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("TotalBurned is not a hex - %s", prevTotals.Burned)
-		}
-		prevTotalRewards, err := hexutil.DecodeBig(prevTotals.Rewards)
-		if err != nil {
-			globalTotals.mu.Unlock()
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("TotalRewards is not a hex - %s", prevTotals.Rewards)
-		}
-		prevTotalTips, err := hexutil.DecodeBig(prevTotals.Tips)
-		if err != nil {
-			globalTotals.mu.Unlock()
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("TotalTips is not a hex - %s", prevTotals.Tips)
-		}
-		totalBurned.Add(totalBurned, prevTotalBurned)
-		totalRewards.Add(totalRewards, prevTotalRewards)
-		totalTips.Add(totalTips, prevTotalTips)
-	}
-	totalBurned.Add(totalBurned, blockBurned)
-	totalRewards.Add(totalRewards, &blockReward)
-	totalIssuance.Sub(totalRewards, totalBurned)
-	totalTips.Add(totalTips, blockTips)
-	globalTotals.mu.Unlock()
-
 	blockStats.Number = uint(blockNumber)
 	blockStats.Timestamp = header.Time
 	blockStats.BaseFee = hexutil.EncodeBig(baseFee)
@@ -1062,30 +1031,6 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 	globalBlockStats.mu.Lock()
 	globalBlockStats.v[blockNumber] = blockStats
 	globalBlockStats.mu.Unlock()
-
-	totals := Totals{
-		Burned:   hexutil.EncodeBig(totalBurned),
-		Issuance: hexutil.EncodeBig(totalIssuance),
-		Rewards:  hexutil.EncodeBig(totalRewards),
-		Tips:     hexutil.EncodeBig(totalTips),
-	}
-
-	globalTotals.mu.Lock()
-	globalTotals.v[blockNumber] = totals
-	globalTotals.mu.Unlock()
-
-	//globalTotalBurned.mu.Lock()
-	//globalTotalBurned.v.Add(globalTotalBurned.v, blockBurned)
-	//globalTotalBurned.mu.Unlock()
-
-	//globalTotalIssuance.mu.Lock()
-	//globalTotalIssuance.v.Add(globalTotalIssuance.v, &blockReward)
-	//globalTotalIssuance.v.Sub(globalTotalIssuance.v, blockBurned)
-	//globalTotalIssuance.mu.Unlock()
-
-	//globalTotalTips.mu.Lock()
-	//globalTotalTips.v.Add(globalTotalTips.v, blockTips)
-	//globalTotalTips.mu.Unlock()
 
 	duration := time.Since(start) / time.Millisecond
 	log.Printf("block: %d, blockHex: %s, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms", blockNumber, blockNumberHex, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
