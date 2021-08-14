@@ -1,13 +1,14 @@
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { utils } from "ethers";
 import React, { useEffect, useState } from "react";
-import { Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend, ComposedChart, Cell } from 'recharts';
+import { Bar, XAxis, YAxis, Tooltip, TooltipProps, Legend, ComposedChart, Cell } from 'recharts';
 import { maxBlocksToRenderInChart, maxBlocksToRenderInChartMobile } from "../config";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { useMobileDetector } from "../contexts/MobileDetectorContext";
 import { Zero } from "../utils/number";
 import { BigNumberFormat, BigNumberText } from "./BigNumberText";
 import { GasUsedPercent } from "../organisms/GasUsed";
+import { CustomResponsiveContainer } from "../atoms/CustomResponsiveContainer";
 
 interface BaseFeeChartProps {
   chartType: ChartType
@@ -175,13 +176,13 @@ function LiveChart(props: BaseFeeChartProps) {
 
   const typeMapping = chartTypeMapping[data.chartType]
   return (
-    <Box flex="1" w="99%" overflow="hidden">
-      <ResponsiveContainer>
-        <ComposedChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }} stackOffset="sign">
+    <Box flex="1" w="99%" overflow="hidden" position="relative">
+      <CustomResponsiveContainer>
+        <ComposedChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }}stackOffset="sign">
           <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat}  width={75} />
           <XAxis dataKey="number" angle={-30} dx={50} dy={10} fontSize={10} tickCount={10} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
-          {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{fontSize: "10px"}} />}
+          {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{fontSize: "14px"}} />}
           <Bar type="monotone"stackId="stack" dataKey={typeMapping.primary.dataKey} fill="#FF7B24" isAnimationActive={false} name={typeMapping.primary.name}>
             {data.points.map((entry, index) => {
               const isNegative = entry[typeMapping.primary.dataKey] < 0;
@@ -192,7 +193,7 @@ function LiveChart(props: BaseFeeChartProps) {
           </Bar>
           {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFC40C" isAnimationActive={false} name={typeMapping.secondary.name}/>}
         </ComposedChart>
-      </ResponsiveContainer>
+      </CustomResponsiveContainer>
     </Box>
   )
 }
