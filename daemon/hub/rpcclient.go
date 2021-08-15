@@ -67,6 +67,8 @@ func (c *RPCClient) CallContext(
 	}
 	if updateCache {
 		request.Header.Add("X-Custom-Update-Cache", "true")
+	} else {
+		request.Header.Add("X-Custom-Update-Cache", "false")
 	}
 
 	//Firing the request and receiving response
