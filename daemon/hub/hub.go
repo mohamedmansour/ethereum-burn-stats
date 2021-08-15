@@ -486,7 +486,7 @@ func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint
 		currentBlock = londonBlock
 	}
 
-	if latestBlockNumber > currentBlock {
+	if latestBlockNumber >= currentBlock {
 		for {
 			blockStats, blockStatsPercentiles, _, err := h.updateBlockStats(currentBlock, true)
 			if err != nil {
@@ -804,8 +804,6 @@ func (h *Hub) updateTotals(blockNumber uint64) (Totals, error) {
 	totals.Tips = hexutil.EncodeBig(totalTips)
 
 	globalTotals.v[blockNumber] = totals
-
-	log.Infof("Totals: %s burned, %s issuance, and %s tips", totalBurned.String(), totalIssuance.String(), totalTips.String())
 
 	return totals, nil
 }
