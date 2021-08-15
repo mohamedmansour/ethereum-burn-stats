@@ -15,15 +15,9 @@ type TransactionReceiptWorker struct {
 	Endpoint   string
 
 	jobs       chan transactionReceiptJob
-	rpcClient  *RPCClient
 }
 
 func (h *TransactionReceiptWorker) Initialize() {
-	h.rpcClient = &RPCClient{
-		endpoint:   h.Endpoint,
-		httpClient: new(http.Client),
-	}
-
 	h.jobs = make(chan transactionReceiptJob)
 
 	for w := 1; w <= h.NumWorkers; w++ {
@@ -69,14 +63,19 @@ func (h *TransactionReceiptWorker) QueueJob(transactions []string, blockNumber u
 }
 
 func (h *TransactionReceiptWorker) startWorker(id int, jobs <-chan transactionReceiptJob) {
+	rpcClient := &RPCClient{
+		endpoint:   h.Endpoint,
+		httpClient: new(http.Client),
+	}
+
 	for j := range jobs {
-		response, err := h.processTransactionReceipt(j)
+		response, err := h.processTransactionReceipt(rpcClient, j)
 		j.Results <- transactionReceiptResult{Result: response, Error: err}
 	}
 }
 
-func (h *TransactionReceiptWorker) processTransactionReceipt(param transactionReceiptJob) (*transactionReceiptResponse, error) {
-	raw, err := h.rpcClient.CallContext(
+func (h *TransactionReceiptWorker) processTransactionReceipt(rpcClient *RPCClient, param transactionReceiptJob) (*transactionReceiptResponse, error) {
+	raw, err := rpcClient.CallContext(
 		"2.0",
 		"eth_getTransactionReceipt",
 		strconv.Itoa(int(param.BlockNumber)),
