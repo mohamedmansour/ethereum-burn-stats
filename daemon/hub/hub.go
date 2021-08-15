@@ -80,7 +80,6 @@ func New(
 	gethEndpointHTTP string,
 	gethEndpointWebsocket string,
 	dbPath string,
-	initializedb bool,
 	ropsten bool,
 ) (*Hub, error) {
 	upgrader := &websocket.Upgrader{
@@ -134,7 +133,7 @@ func New(
 		latestBlocks: latestBlocks,
 	}
 
-	err = h.initialize(initializedb, gethEndpointWebsocket)
+	err = h.initialize(gethEndpointWebsocket)
 	if err != nil {
 		return nil, err
 	}
@@ -142,17 +141,28 @@ func New(
 	return h, nil
 }
 
-func (h *Hub) initialize(initializedb bool, gethEndpointWebsocket string) error {
-	latestBlockNumber, err := h.initializeLatestBlock()
+func (h *Hub) initialize(gethEndpointWebsocket string) error {
+	_, err := h.updateLatestBlock()
 	if err != nil {
+		return fmt.Errorf("error updating latest block: %v", err)
+	}
+
+	highestBlockInDB, err := h.initGetBlocksFromDB()
+	if err != nil {
+		log.Errorf("error during initGetGetBlocksFromDB: %v", err)
 		return err
 	}
 
-	if initializedb {
-		err = h.initializeMissingBlocks(londonBlock, latestBlockNumber)
-		if err != nil && h.latestBlock.getBlockNumber() == 0 {
-			return err
-		}
+	err = h.initGetMissingBlocks()
+	if err != nil {
+		log.Errorf("error during initGetMissingBlocks: %v", err)
+		return err
+	}
+
+	err = h.initGetLatestBlocks(highestBlockInDB)
+	if err != nil {
+		log.Errorf("error during initGetLatestBlocks: %v", err)
+		return err
 	}
 
 	h.updateAllTotals(h.latestBlock.getBlockNumber())
@@ -163,17 +173,6 @@ func (h *Hub) initialize(initializedb bool, gethEndpointWebsocket string) error 
 	err = h.initializeGrpcWebSocket(gethEndpointWebsocket)
 
 	return err
-}
-
-func (h *Hub) initializeLatestBlock() (uint64, error) {
-	var latestBlockNumber uint64
-	latestBlockNumber, err := h.updateLatestBlock()
-	if err != nil {
-		return 0, fmt.Errorf("error updating latest block: %v", err)
-	}
-
-	log.Infof("Latest block: %d", latestBlockNumber)
-	return latestBlockNumber, nil
 }
 
 func (h *Hub) initializeLatestBlocks() {
@@ -442,21 +441,58 @@ func (h *Hub) handleFunc() func(c *Client, message jsonrpcMessage) (json.RawMess
 		return raw, nil
 	}
 }
-func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint64) error {
-	highestBlockInDb, err := h.db.GetHighestBlockNumber()
-	if err != nil {
-		return fmt.Errorf("highest block not found %v", err)
-	}
-	log.Infof("Highest stored block in DB: %d (%d blocks behind)", highestBlockInDb, latestBlockNumber-highestBlockInDb)
 
-	missingBlockNumbers, err := h.db.GetMissingBlockNumbers(londonBlock)
+func (h *Hub) initGetBlocksFromDB() (uint64, error) {
+	highestBlockInDB, err := h.db.GetHighestBlockNumber()
 	if err != nil {
-		return fmt.Errorf("error getting missing block numbers from database: %v", err)
+		return londonBlock, fmt.Errorf("highest block not found %v", err)
+	}
+	log.Infof("init: GetBlocksFromDB - Highest block is %d", highestBlockInDB)
+
+	allBlockStats, err := h.db.GetAllBlockStats()
+	if err != nil {
+		return londonBlock, fmt.Errorf("error getting totals from database: %v", err)
 	}
 
-	if len(missingBlockNumbers) > 0 {
-		log.Infof("Starting to fetch %d missing blocks", len(missingBlockNumbers))
+	for _, b := range allBlockStats {
+		globalBlockStats.mu.Lock()
+		globalBlockStats.v[uint64(b.Number)] = b
+		globalBlockStats.mu.Unlock()
 	}
+
+	log.Infof("init: GetBlocksFromDB - Imported %d blocks", len(allBlockStats))
+
+	if highestBlockInDB == 0 {
+		return londonBlock, nil
+	}
+
+	return highestBlockInDB, nil
+}
+
+func (h *Hub) initGetMissingBlocks() error {
+	var blockNumbers, missingBlockNumbers []uint64
+
+	globalBlockStats.mu.Lock()
+	for _, b := range globalBlockStats.v {
+		blockNumbers = append(blockNumbers, uint64(b.Number))
+	}
+	globalBlockStats.mu.Unlock()
+
+	// sort slice to find missing blocks
+	sort.Slice(blockNumbers, func(i, j int) bool { return blockNumbers[i] < blockNumbers[j] })
+
+	for i := 1; i < len(blockNumbers); i++ {
+		if blockNumbers[i]-blockNumbers[i-1] != 1 {
+			for x := uint64(1); x < blockNumbers[i]-blockNumbers[i-1]; x++ {
+				missingBlockNumber := blockNumbers[i-1] + x
+				if missingBlockNumber > londonBlock {
+					missingBlockNumbers = append(missingBlockNumbers, missingBlockNumber)
+				}
+			}
+		}
+	}
+
+	log.Infof("init: GetMissingBlocks - Fetching %d missing blocks", len(missingBlockNumbers))
 
 	for _, n := range missingBlockNumbers {
 		blockStats, blockStatsPercentiles, _, err := h.updateBlockStats(n, true)
@@ -470,23 +506,15 @@ func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint
 		log.Infof("Finished fetching missing blocks")
 	}
 
-	allBlockStats, err := h.db.GetAllBlockStats()
-	if err != nil {
-		return fmt.Errorf("error getting totals from database: %v", err)
-	}
+	return nil
+}
 
-	for _, b := range allBlockStats {
-		globalBlockStats.mu.Lock()
-		globalBlockStats.v[uint64(b.Number)] = b
-		globalBlockStats.mu.Unlock()
-	}
+func (h *Hub) initGetLatestBlocks(highestBlockInDB uint64) error {
+	currentBlock := highestBlockInDB + 1
+	latestBlock := h.latestBlock.getBlockNumber()
+	log.Infof("init: GetLatestBlocks - Fetching %d blocks (%d -> %d)", latestBlock-highestBlockInDB, currentBlock, latestBlock)
 
-	currentBlock := highestBlockInDb + 1
-	if currentBlock == 1 {
-		currentBlock = londonBlock
-	}
-
-	if latestBlockNumber >= currentBlock {
+	if latestBlock >= currentBlock {
 		for {
 			blockStats, blockStatsPercentiles, _, err := h.updateBlockStats(currentBlock, true)
 			if err != nil {
@@ -494,13 +522,13 @@ func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint
 			}
 			h.db.AddBlock(blockStats, blockStatsPercentiles)
 
-			if currentBlock == latestBlockNumber {
-				latestBlockNumber, err = h.updateLatestBlock()
+			if currentBlock == latestBlock {
+				latestBlock, err = h.updateLatestBlock()
 				if err != nil {
 					return fmt.Errorf("error updating latest block: %v", err)
 				}
-				log.Infof("Latest block: %d", latestBlockNumber)
-				if currentBlock == latestBlockNumber {
+				log.Infof("Latest block: %d", latestBlock)
+				if currentBlock == latestBlock {
 					break
 				}
 			}

@@ -13,7 +13,6 @@ func newRootCmd() *cobra.Command {
 	var gethEndpointHTTP string
 	var gethEndpointWebsocket string
 	var dbPath string
-	var initializedb bool
 	var ropsten bool
 
 	rootCmd := &cobra.Command{
@@ -44,7 +43,6 @@ func newRootCmd() *cobra.Command {
 				gethEndpointHTTP,
 				gethEndpointWebsocket,
 				dbPath,
-				initializedb,
 				ropsten,
 			)
 		},
@@ -55,7 +53,6 @@ func newRootCmd() *cobra.Command {
 	rootCmd.Flags().StringVar(&gethEndpointHTTP, "geth-endpoint-http", "", "Endpoint to geth for http")
 	rootCmd.Flags().StringVar(&gethEndpointWebsocket, "geth-endpoint-websocket", "", "Endpoint to geth for websocket")
 	rootCmd.Flags().StringVar(&dbPath, "db-path", "watchtheburn.db", "Path to the SQLite db")
-	rootCmd.Flags().BoolVar(&initializedb, "initializedb", false, "Initialize and Populate DB")
 	rootCmd.Flags().BoolVar(&ropsten, "ropsten", false, "Use ropsten block numbers")
 
 	return rootCmd
@@ -67,7 +64,6 @@ func root(
 	gethEndpointHTTP string,
 	gethEndpointWebsocket string,
 	dbPath string,
-	initializedb bool,
 	ropsten bool,
 ) error {
 	hub, err := hub.New(
@@ -75,7 +71,6 @@ func root(
 		gethEndpointHTTP,
 		gethEndpointWebsocket,
 		dbPath,
-		initializedb,
 		ropsten,
 	)
 	if err != nil {
