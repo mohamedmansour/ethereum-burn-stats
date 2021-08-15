@@ -5,7 +5,9 @@ import (
 	//"github.com/ethereum/go-ethereum/core/types"
 
 	"math/big"
+	"strings"
 
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -14,8 +16,16 @@ type Database struct {
 	db *gorm.DB
 }
 
-func ConnectDatabase(dbPath string) (*Database, error) {
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+func ConnectDatabase(connectionString string) (*Database, error) {
+	var dialector gorm.Dialector
+	
+	if strings.HasSuffix(connectionString, ".db") {
+		dialector = sqlite.Open(connectionString)
+	} else {
+		dialector = mysql.Open(connectionString)
+	}
+
+	db, err := gorm.Open(dialector, &gorm.Config{
 		CreateBatchSize: 100,
 	})
 	if err != nil {

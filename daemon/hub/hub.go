@@ -78,7 +78,7 @@ func New(
 	development bool,
 	gethEndpointHTTP string,
 	gethEndpointWebsocket string,
-	dbPath string,
+	connectionString string,
 	initializedb bool,
 	ropsten bool,
 ) (*Hub, error) {
@@ -124,7 +124,7 @@ func New(
 	latestBlock := newLatestBlock()
 	latestBlocks := newLatestBlocks(150)
 
-	db, err := sql.ConnectDatabase(dbPath)
+	db, err := sql.ConnectDatabase(connectionString)
 	if err != nil {
 		return nil, err
 	}

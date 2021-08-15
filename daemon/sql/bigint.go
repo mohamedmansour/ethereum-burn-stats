@@ -13,7 +13,7 @@ type BigInt struct {
 }
 
 func (b BigInt) GormDataType() string {
-	return "bigint"
+	return "BIGINT"
 }
 
 func (b BigInt) GormValue(ctx context.Context, db *gorm.DB) clause.Expr {

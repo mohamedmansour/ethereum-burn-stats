@@ -12,7 +12,7 @@ func newRootCmd() *cobra.Command {
 	var development bool
 	var gethEndpointHTTP string
 	var gethEndpointWebsocket string
-	var dbPath string
+	var connectionString string
 	var initializedb bool
 	var ropsten bool
 
@@ -33,9 +33,9 @@ func newRootCmd() *cobra.Command {
 				return fmt.Errorf("--geth-endpoint-websocket is required")
 			}
 
-			if dbPath == "" {
+			if connectionString == "" {
 				cmd.Help()
-				return fmt.Errorf("--geth-endpoint-websocket is required")
+				return fmt.Errorf("--connection-string is required")
 			}
 
 			return root(
@@ -43,7 +43,7 @@ func newRootCmd() *cobra.Command {
 				development,
 				gethEndpointHTTP,
 				gethEndpointWebsocket,
-				dbPath,
+				connectionString,
 				initializedb,
 				ropsten,
 			)
@@ -54,7 +54,8 @@ func newRootCmd() *cobra.Command {
 	rootCmd.Flags().BoolVar(&development, "development", false, "enable for development mode")
 	rootCmd.Flags().StringVar(&gethEndpointHTTP, "geth-endpoint-http", "", "Endpoint to geth for http")
 	rootCmd.Flags().StringVar(&gethEndpointWebsocket, "geth-endpoint-websocket", "", "Endpoint to geth for websocket")
-	rootCmd.Flags().StringVar(&dbPath, "db-path", "watchtheburn.db", "Path to the SQLite db")
+	rootCmd.Flags().StringVar(&connectionString, "db-path", "watchtheburn.db", "Path to the SQLite db or MySQL connection string.")
+	rootCmd.Flags().StringVar(&connectionString, "connection-string", "watchtheburn:watchtheburn@tcp(127.0.0.1:3306)/watchtheburn?charset=utf8mb4&parseTime=True&loc=Local", "Path to the SQLite db or MySQL connection string.")
 	rootCmd.Flags().BoolVar(&initializedb, "initializedb", false, "Initialize and Populate DB")
 	rootCmd.Flags().BoolVar(&ropsten, "ropsten", false, "Use ropsten block numbers")
 
