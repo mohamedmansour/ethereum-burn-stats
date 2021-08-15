@@ -1010,7 +1010,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 	var allPriorityFeePerGasMwei []uint64
 
 	// Fetch all transaction receipts to calculate burned, and tips.
-	batchPriorityFee, batchBurned, batchTips := h.batchTransactionReceiptJobs(block.Transactions, blockNumber, baseFee); 
+	batchPriorityFee, batchBurned, batchTips := h.batchTransactionReceiptJobs(block.Transactions, blockNumber, baseFee, updateCache); 
 	allPriorityFeePerGasMwei = append(batchPriorityFee[:], allPriorityFeePerGasMwei[:]...)
 	blockBurned.Add(blockBurned, batchBurned)
 	blockTips.Add(blockTips, batchTips)
