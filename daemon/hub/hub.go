@@ -923,14 +923,14 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 
 	blockStats.Number = uint(blockNumber)
 	blockStats.Timestamp = header.Time
-	blockStats.BaseFee = sql.BigInt{Value: baseFee}
-	blockStats.Burned = sql.BigInt{Value: blockBurned}
-	blockStats.GasTarget = sql.BigInt{Value: gasTarget}
-	blockStats.GasUsed = sql.BigInt{Value: gasUsed}
-	blockStats.PriorityFee = sql.BigInt{Value: priorityFee}
-	blockStats.Rewards = sql.BigInt{Value: &blockReward}
-	blockStats.Tips = sql.BigInt{Value: blockTips}
-	blockStats.Transactions = sql.BigInt{Value: transactionCount}
+	blockStats.BaseFee = sql.BigInt{Int: baseFee}
+	blockStats.Burned = sql.BigInt{Int: blockBurned}
+	blockStats.GasTarget = sql.BigInt{Int: gasTarget}
+	blockStats.GasUsed = sql.BigInt{Int: gasUsed}
+	blockStats.PriorityFee = sql.BigInt{Int: priorityFee}
+	blockStats.Rewards = sql.BigInt{Int: &blockReward}
+	blockStats.Tips = sql.BigInt{Int: blockTips}
+	blockStats.Transactions = sql.BigInt{Int: transactionCount}
 
 	globalBlockStats.mu.Lock()
 	globalBlockStats.v[blockNumber] = blockStats

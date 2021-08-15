@@ -51,10 +51,9 @@ func newRootCmd() *cobra.Command {
 	}
 
 	rootCmd.Flags().StringVar(&addr, "addr", ":8080", "HTTP service address")
-	rootCmd.Flags().BoolVar(&development, "development", false, "enable for development mode")
-	rootCmd.Flags().StringVar(&gethEndpointHTTP, "geth-endpoint-http", "", "Endpoint to geth for http")
-	rootCmd.Flags().StringVar(&gethEndpointWebsocket, "geth-endpoint-websocket", "", "Endpoint to geth for websocket")
-	rootCmd.Flags().StringVar(&connectionString, "db-path", "watchtheburn.db", "Path to the SQLite db or MySQL connection string.")
+	rootCmd.Flags().BoolVar(&development, "development", true, "enable for development mode")
+	rootCmd.Flags().StringVar(&gethEndpointHTTP, "geth-endpoint-http", "http://localhost:8545", "Endpoint to geth for http")
+	rootCmd.Flags().StringVar(&gethEndpointWebsocket, "geth-endpoint-websocket", "ws://localhost:8546", "Endpoint to geth for websocket")
 	rootCmd.Flags().StringVar(&connectionString, "connection-string", "watchtheburn:watchtheburn@tcp(127.0.0.1:3306)/watchtheburn?charset=utf8mb4&parseTime=True&loc=Local", "Path to the SQLite db or MySQL connection string.")
 	rootCmd.Flags().BoolVar(&initializedb, "initializedb", false, "Initialize and Populate DB")
 	rootCmd.Flags().BoolVar(&ropsten, "ropsten", false, "Use ropsten block numbers")
@@ -67,7 +66,7 @@ func root(
 	development bool,
 	gethEndpointHTTP string,
 	gethEndpointWebsocket string,
-	dbPath string,
+	connectionString string,
 	initializedb bool,
 	ropsten bool,
 ) error {
@@ -75,7 +74,7 @@ func root(
 		development,
 		gethEndpointHTTP,
 		gethEndpointWebsocket,
-		dbPath,
+		connectionString,
 		initializedb,
 		ropsten,
 	)

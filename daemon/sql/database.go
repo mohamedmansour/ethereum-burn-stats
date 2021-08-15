@@ -126,12 +126,12 @@ func (d *Database) GetTotals() (*big.Int, *big.Int, *big.Int, error) {
 	}
 
 	for _, block := range blockStats {
-		totalBurned.Add(totalBurned, block.Burned.Value)
+		totalBurned.Add(totalBurned, block.Burned.Int)
 
-		totalIssuance.Add(totalIssuance, block.Rewards.Value)
-		totalIssuance.Sub(totalIssuance, block.Burned.Value)
+		totalIssuance.Add(totalIssuance, block.Rewards.Int)
+		totalIssuance.Sub(totalIssuance, block.Burned.Int)
 
-		totalTips.Add(totalBurned, block.Tips.Value)
+		totalTips.Add(totalBurned, block.Tips.Int)
 	}
 
 	return totalBurned, totalIssuance, totalTips, nil
