@@ -14,20 +14,24 @@ type TransactionReceiptWorker struct {
 	NumWorkers int
 	Endpoint   string
 
+	// The channel to receive the jobs. All the workers will block until it receives a job.
 	jobs       chan transactionReceiptJob
 }
 
 func (h *TransactionReceiptWorker) Initialize() {
 	h.jobs = make(chan transactionReceiptJob)
 
+	// Start all the workers.
 	for w := 1; w <= h.NumWorkers; w++ {
 		go h.startWorker(w, h.jobs)
 	}
 }
 
 func (h *TransactionReceiptWorker) QueueJob(transactions []string, blockNumber uint64, baseFee *big.Int, updateCache bool) ([]uint64, *big.Int, *big.Int) {
+	// Open a channel to maka sure all the receipts are processed and we block on the result.
 	results := make(chan transactionReceiptResult, len(transactions))
 
+	// Enqueue the jobs.
 	for _, tHash := range transactions {
 		h.jobs <- transactionReceiptJob{
 			Results:         results,
@@ -42,6 +46,7 @@ func (h *TransactionReceiptWorker) QueueJob(transactions []string, blockNumber u
 	blockBurned := big.NewInt(0)
 	blockTips := big.NewInt(0)
 
+	// Wait for all the jobs to be processed.
 	for a := 0; a < len(transactions); a++ {
 		response := <-results
 
@@ -59,18 +64,20 @@ func (h *TransactionReceiptWorker) QueueJob(transactions []string, blockNumber u
 		blockTips.Add(blockTips, response.Result.Tips)
 	}
 
+	// Return the aggregated results.
 	return allPriorityFeePerGasMwei, blockBurned, blockTips
 }
 
 func (h *TransactionReceiptWorker) startWorker(id int, jobs <-chan transactionReceiptJob) {
+	// Reuse the transport for each worker.
 	tr := &http.Transport{}
 	client := &http.Client{Transport: tr}
 	rpcClient := &RPCClient{
 		endpoint:   h.Endpoint,
 		httpClient: client,
 	}
-	log.Infof("worker %d started", id)
 
+	// Listen for jobs and process them.
 	for j := range jobs {
 		response, err := h.processTransactionReceipt(rpcClient, j)
 		j.Results <- transactionReceiptResult{Result: response, Error: err}
