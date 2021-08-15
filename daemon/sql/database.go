@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Database struct {
@@ -45,9 +46,13 @@ func (d *Database) AddBlock(blockStats BlockStats, blockStatsPercentiles []Block
 	if blockStats.Number == 0 {
 		return
 	}
-	d.db.Create(blockStats)
+	d.db.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(blockStats)
 	for _, b := range blockStatsPercentiles {
-		d.db.Create(b)
+		d.db.Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).Create(b)
 	}
 }
 
