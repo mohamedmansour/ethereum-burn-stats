@@ -123,7 +123,7 @@ func New(
 	}
 
 	transactionReceiptWorker := &TransactionReceiptWorker{
-		NumWorkers: 10,
+		NumWorkers: 20,
 		Endpoint: gethEndpointHTTP,
 	}
 
