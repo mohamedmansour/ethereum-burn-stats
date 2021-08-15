@@ -63,6 +63,9 @@ type Hub struct {
 	// Unregister requests from clients.
 	unregister chan *Client
 
+	// used to track new, duplicate blocks
+	duplicateBlock bool
+
 	handlers map[string]func(c *Client, message jsonrpcMessage) (json.RawMessage, error)
 
 	rpcClient    *RPCClient
@@ -152,7 +155,7 @@ func (h *Hub) initialize(initializedb bool, gethEndpointWebsocket string) error 
 		}
 	}
 
-	h.updateAllTotals(latestBlockNumber)
+	h.updateAllTotals(h.latestBlock.getBlockNumber())
 
 	h.initializeLatestBlocks()
 	h.initializeWebSocketHandlers()
@@ -230,16 +233,56 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 			case err := <-sub.Err():
 				log.Errorln("Error: ", err)
 			case header := <-headers:
-				var updateCache bool
 				latestBlockNumber := latestBlock.getBlockNumber()
-				if latestBlockNumber == header.Number.Uint64() {
-					log.Warnf("block repeated: %s", header.Number.String())
-					updateCache = true
-				}
-
 				blockNumber := header.Number.Uint64()
 
-				blockStats, blockStatsPercentiles, baseFeeNext, err := h.updateBlockStats(blockNumber, updateCache)
+				if latestBlockNumber == blockNumber {
+					h.duplicateBlock = true
+					log.Warnf("block repeated: %s", header.Number.String())
+					continue
+				}
+
+				for h.duplicateBlock {
+					previousBlock := blockNumber - 1
+					blockStats, blockStatsPercentiles, baseFeeNext, err := h.updateBlockStats(previousBlock, h.duplicateBlock)
+					if err != nil {
+						log.Errorf("Error getting block stats for block %d: %v", previousBlock, err)
+						h.duplicateBlock = false
+						continue
+					} else {
+						latestBlocks.addBlock(blockStats)
+					}
+
+					totals, err := h.updateTotals(previousBlock)
+					if err != nil {
+						log.Errorf("Error updating totals for block %d: %v", previousBlock, err)
+						h.duplicateBlock = false
+						continue
+					}
+
+					h.db.AddBlock(blockStats, blockStatsPercentiles)
+					latestBlock.updateBlockNumber(previousBlock)
+
+					clientsCount := len(h.clients)
+
+					h.subscription <- map[string]interface{}{
+						"blockStats":   blockStats,
+						"clientsCount": clientsCount,
+						"data": &BlockData{
+							BaseFeeNext: baseFeeNext,
+							Block:       blockStats,
+							Clients:     int16(clientsCount),
+							Totals:      totals,
+							Version:     version.Version,
+						},
+					}
+
+					h.duplicateBlock = false
+					time.Sleep(500 * time.Millisecond)
+					continue
+				}
+
+				blockStats, blockStatsPercentiles, baseFeeNext, err := h.updateBlockStats(blockNumber, h.duplicateBlock)
 				if err != nil {
 					log.Errorf("Error getting block stats: %v", err)
 					continue
@@ -404,7 +447,7 @@ func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint
 	if err != nil {
 		return fmt.Errorf("highest block not found %v", err)
 	}
-	log.Infof("Highest stored block in DB: %d", highestBlockInDb)
+	log.Infof("Highest stored block in DB: %d (%d blocks behind)", highestBlockInDb, latestBlockNumber-highestBlockInDb)
 
 	missingBlockNumbers, err := h.db.GetMissingBlockNumbers(londonBlock)
 	if err != nil {
