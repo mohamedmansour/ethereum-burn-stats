@@ -1094,7 +1094,7 @@ func (h *Hub) updateLatestBlock() (uint64, error) {
 	)
 
 	if err != nil {
-		return 0, fmt.Errorf("failed to fetch latest block number from geth")
+		return 0, fmt.Errorf("failed to fetch latest block number from geth: %v", err)
 	}
 
 	var hexBlockNumber string

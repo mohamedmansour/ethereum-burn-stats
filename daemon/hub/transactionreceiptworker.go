@@ -63,9 +63,11 @@ func (h *TransactionReceiptWorker) QueueJob(transactions []string, blockNumber u
 }
 
 func (h *TransactionReceiptWorker) startWorker(id int, jobs <-chan transactionReceiptJob) {
+	tr := &http.Transport{}
+	client := &http.Client{Transport: tr}
 	rpcClient := &RPCClient{
 		endpoint:   h.Endpoint,
-		httpClient: new(http.Client),
+		httpClient: client,
 	}
 	log.Infof("worker %d started", id)
 
