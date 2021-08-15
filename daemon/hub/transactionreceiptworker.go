@@ -67,6 +67,7 @@ func (h *TransactionReceiptWorker) startWorker(id int, jobs <-chan transactionRe
 		endpoint:   h.Endpoint,
 		httpClient: new(http.Client),
 	}
+	log.Infof("worker %d started", id)
 
 	for j := range jobs {
 		response, err := h.processTransactionReceipt(rpcClient, j)
