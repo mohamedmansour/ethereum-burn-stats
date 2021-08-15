@@ -1095,8 +1095,8 @@ func (h *Hub) batchTransactionReceiptJobs(transactions []string, blockNumber uin
 	close(jobs)
 
 	var allPriorityFeePerGasMwei []uint64
-	var blockBurned *big.Int
-	var blockTips *big.Int
+	blockBurned := big.NewInt(0)
+	blockTips := big.NewInt(0)
 
 	for a := 0; a < numJobs; a++ {
 		response := <-results
