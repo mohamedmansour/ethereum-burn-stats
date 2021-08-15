@@ -438,15 +438,6 @@ func (h *Hub) initializeMissingBlocks(londonBlock uint64, latestBlockNumber uint
 		globalBlockStats.mu.Unlock()
 	}
 
-	allBlockStats = []sql.BlockStats{}
-
-	burned, issuance, tips, err := h.db.GetTotals()
-	if err != nil {
-		return fmt.Errorf("error getting totals from database:%v", err)
-	}
-
-	log.Printf("Totals: %s burned, %s issuance, and %s tips\n", burned.String(), issuance.String(), tips.String())
-
 	currentBlock := highestBlockInDb + 1
 	if currentBlock == 1 {
 		currentBlock = londonBlock
@@ -771,13 +762,16 @@ func (h *Hub) updateTotals(blockNumber uint64) (Totals, error) {
 
 	globalTotals.v[blockNumber] = totals
 
-	log.Infof("Totals: %s burned, %s issuance, and %s tips\n", totalBurned.String(), totalIssuance.String(), totalTips.String())
+	log.Infof("Totals: %s burned, %s issuance, and %s tips", totalBurned.String(), totalIssuance.String(), totalTips.String())
 
 	return totals, nil
 }
 
 func (h *Hub) updateAllTotals(blockNumber uint64) (Totals, error) {
+	start := time.Now()
 	var totals Totals
+
+	log.Infof("Updating totals for every block from %d to %d (%d blocks)", londonBlock, blockNumber, blockNumber-londonBlock)
 
 	totalBurned := big.NewInt(0)
 	totalIssuance := big.NewInt(0)
@@ -787,26 +781,26 @@ func (h *Hub) updateAllTotals(blockNumber uint64) (Totals, error) {
 	globalBlockStats.mu.Lock()
 	defer globalBlockStats.mu.Unlock()
 
-	for _, block := range globalBlockStats.v {
-		if block.Number <= uint(blockNumber) {
-			burned, err := hexutil.DecodeBig(block.Burned)
-			if err != nil {
-				return totals, fmt.Errorf("block.Burned was not a hex - %s", block.Burned)
-			}
-			totalBurned.Add(totalBurned, burned)
+	for i := londonBlock; i <= blockNumber; i++ {
+		block := globalBlockStats.v[i]
 
-			rewards, err := hexutil.DecodeBig(block.Rewards)
-			if err != nil {
-				return totals, fmt.Errorf("block.Rewards was not a hex - %s", block.Rewards)
-			}
-			totalRewards.Add(totalRewards, rewards)
-
-			tips, err := hexutil.DecodeBig(block.Tips)
-			if err != nil {
-				return totals, fmt.Errorf("block.Burned was not a hex - %s", block.Tips)
-			}
-			totalTips.Add(totalBurned, tips)
+		burned, err := hexutil.DecodeBig(block.Burned)
+		if err != nil {
+			return totals, fmt.Errorf("block.Burned was not a hex - %s", block.Burned)
 		}
+		totalBurned.Add(totalBurned, burned)
+
+		rewards, err := hexutil.DecodeBig(block.Rewards)
+		if err != nil {
+			return totals, fmt.Errorf("block.Rewards was not a hex - %s", block.Rewards)
+		}
+		totalRewards.Add(totalRewards, rewards)
+
+		tips, err := hexutil.DecodeBig(block.Tips)
+		if err != nil {
+			return totals, fmt.Errorf("block.Burned was not a hex - %s", block.Tips)
+		}
+		totalTips.Add(totalBurned, tips)
 		totalIssuance.Sub(totalRewards, totalBurned)
 
 		totals.Burned = hexutil.EncodeBig(totalBurned)
@@ -817,9 +811,13 @@ func (h *Hub) updateAllTotals(blockNumber uint64) (Totals, error) {
 		globalTotals.mu.Lock()
 		globalTotals.v[uint64(block.Number)] = totals
 		globalTotals.mu.Unlock()
+		if block.Number%5000 == 0 {
+			log.Infof("block %d totals: %s burned, %s issuance, %s rewards, and %s tips", block.Number, totalBurned.String(), totalIssuance.String(), totalRewards.String(), totalTips.String())
+		}
 	}
 
-	log.Infof("Totals: %s burned, %s issuance, and %s tips\n", totalBurned.String(), totalIssuance.String(), totalTips.String())
+	duration := time.Since(start) / time.Millisecond
+	log.Infof("block %d totals: %s burned, %s issuance, %s rewards, and %s tips (ptime: %dms)", blockNumber, totalBurned.String(), totalIssuance.String(), totalRewards.String(), totalTips.String(), duration)
 
 	return totals, nil
 }
