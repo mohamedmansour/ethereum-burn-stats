@@ -849,60 +849,12 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 
 	var allPriorityFeePerGasMwei []uint64
 
-	for _, tHash := range block.Transactions {
-		var raw json.RawMessage
-		raw, err := h.rpcClient.CallContext(
-			"2.0",
-			"eth_getTransactionReceipt",
-			strconv.Itoa(int(blockNumber)),
-			tHash,
-		)
-		if err != nil {
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
-		}
-
-		receipt := TransactionReceipt{}
-		err = json.Unmarshal(raw, &receipt)
-		if err != nil {
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
-		}
-
-		if receipt.BlockNumber == "" {
-			log.Warnf("block %d, transaction %s: found empty transaction receipt", blockNumber, tHash)
-			continue
-			//break
-		}
-		gasUsed, err := hexutil.DecodeBig(receipt.GasUsed)
-		if err != nil {
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
-		}
-
-		effectiveGasPrice := big.NewInt(0)
-
-		if receipt.EffectiveGasPrice != "" {
-			effectiveGasPrice, err = hexutil.DecodeBig(receipt.EffectiveGasPrice)
-			if err != nil {
-				return blockStats, blockStatsPercentiles, baseFeeNextHex, err
-			}
-		}
-
-		burned := big.NewInt(0)
-		burned.Mul(gasUsed, baseFee)
-
-		tips := big.NewInt(0)
-		tips.Mul(gasUsed, effectiveGasPrice)
-		tips.Sub(tips, burned)
-
-		priorityFeePerGas := big.NewInt(0)
-		priorityFeePerGas.Div(tips, gasUsed)
-		priorityFeePerGasMwei := priorityFeePerGas.Div(priorityFeePerGas, big.NewInt(1_000_000)).Uint64()
-
-		allPriorityFeePerGasMwei = append(allPriorityFeePerGasMwei, priorityFeePerGasMwei)
-
-		blockBurned.Add(blockBurned, burned)
-		blockTips.Add(blockTips, tips)
-	}
-
+	// Fetch all transaction receipts to calculate burned, and tips.
+	batchPriorityFee, batchBurned, batchTips := h.batchTransactionReceiptJobs(block.Transactions, blockNumber, baseFee); 
+	allPriorityFeePerGasMwei = append(batchPriorityFee[:], allPriorityFeePerGasMwei[:]...)
+	blockBurned.Add(blockBurned, batchBurned)
+	blockTips.Add(blockTips, batchTips)
+	
 	// sort slices that will be used for percentile calculations later
 	sort.Slice(allPriorityFeePerGasMwei, func(i, j int) bool { return allPriorityFeePerGasMwei[i] < allPriorityFeePerGasMwei[j] })
 
@@ -955,6 +907,129 @@ func (h *Hub) updateBlockStats(blockNumber uint64) (sql.BlockStats, []sql.BlockS
 	log.Printf("block: %d, blockHex: %s, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms\n", blockNumber, blockNumberHex, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
 
 	return blockStats, blockStatsPercentiles, baseFeeNextHex, nil
+}
+
+type TransactionRequest struct {
+	TransactionHash string
+	BlockNumber     uint64
+	BaseFee         *big.Int
+}
+
+type TransactionResponse struct {
+	Burned            *big.Int
+	Tips              *big.Int
+	PriorityFeePerGas *big.Int
+}
+
+type WorkerTransactionResponse struct {
+	Result *TransactionResponse
+	Error  error
+}
+
+func (h *Hub) batchTransactionReceiptJobs(transactions []string, blockNumber uint64, baseFee *big.Int) ([]uint64, *big.Int, *big.Int) {
+	var numJobs = len(transactions)
+	var numWorkers = 10
+	jobs := make(chan TransactionRequest, numJobs)
+	results := make(chan WorkerTransactionResponse, numJobs)
+
+	for w := 1; w <= numWorkers; w++ {
+		go h.processTransactionWorker(w, jobs, results)
+	}
+
+	for _, tHash := range transactions {
+		jobs <- TransactionRequest{
+			BlockNumber: blockNumber,
+			TransactionHash: tHash,
+			BaseFee: baseFee,
+		}
+	}
+	close(jobs)
+
+	var allPriorityFeePerGasMwei []uint64
+	var blockBurned *big.Int
+	var blockTips *big.Int
+
+	for a := 0; a < numJobs; a++ {
+		response := <-results
+
+		if response.Error != nil {
+			log.Errorln(response.Error)
+			continue
+		}
+
+		if response.Result == nil {
+			continue
+		}
+
+		allPriorityFeePerGasMwei = append(allPriorityFeePerGasMwei, response.Result.PriorityFeePerGas.Uint64())
+		blockBurned.Add(blockBurned, response.Result.Burned)
+		blockTips.Add(blockTips, response.Result.Tips)
+	}
+
+	return allPriorityFeePerGasMwei, blockBurned, blockTips
+}
+
+func (h *Hub) processTransactionWorker(id int, jobs <-chan TransactionRequest, results chan<- WorkerTransactionResponse) {
+	for j := range jobs {
+		response, err := h.processTransactionReceipt(j)
+		results <- WorkerTransactionResponse{Result: response, Error: err}
+	}
+}
+
+func (h *Hub) processTransactionReceipt(param TransactionRequest) (*TransactionResponse, error) {
+	raw, err := h.rpcClient.CallContext(
+		"2.0",
+		"eth_getTransactionReceipt",
+		strconv.Itoa(int(param.BlockNumber)),
+		param.TransactionHash,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting transaction receipt: %v", err)
+	}
+
+	receipt := TransactionReceipt{}
+	err = json.Unmarshal(raw, &receipt)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling transaction receipt: %v", err)
+	}
+
+	if receipt.BlockNumber == "" {
+		log.Warnf("block %d, transaction %s: found empty transaction receipt", param.BlockNumber, param.TransactionHash)
+		return nil, nil
+	}
+
+	gasUsed, err := hexutil.DecodeBig(receipt.GasUsed)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding gas used: %v", err)
+	}
+
+	effectiveGasPrice := big.NewInt(0)
+
+	if receipt.EffectiveGasPrice != "" {
+		effectiveGasPrice, err = hexutil.DecodeBig(receipt.EffectiveGasPrice)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding effective gas price: %v", err)
+		}
+	}
+
+
+	burned := big.NewInt(0)
+	burned.Mul(gasUsed, param.BaseFee)
+
+	tips := big.NewInt(0)
+	tips.Mul(gasUsed, effectiveGasPrice)
+	tips.Sub(tips, burned)
+
+	priorityFeePerGas := big.NewInt(0)
+	priorityFeePerGas.Div(tips, gasUsed)
+	priorityFeePerGasMwei := priorityFeePerGas.Div(priorityFeePerGas, big.NewInt(1_000_000))
+
+	return &TransactionResponse{
+		Burned:            burned,
+		Tips:              tips,
+		PriorityFeePerGas: priorityFeePerGasMwei,
+	}, nil
 }
 
 func getPercentileSortedUint64(values []uint64, perc int) uint64 {
