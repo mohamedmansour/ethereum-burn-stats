@@ -24,6 +24,7 @@ func (c *RPCClient) CallContext(
 	version string,
 	method string,
 	blockNumber string,
+	updateCache bool,
 	args ...interface{},
 ) (json.RawMessage, error) {
 
@@ -63,6 +64,11 @@ func (c *RPCClient) CallContext(
 	request.Header.Add("X-Custom-Method", method)
 	if blockNumber != "" {
 		request.Header.Add("X-Custom-Block-Number", blockNumber)
+	}
+	if updateCache {
+		request.Header.Add("X-Custom-Update-Cache", "true")
+	} else {
+		request.Header.Add("X-Custom-Update-Cache", "false")
 	}
 
 	//Firing the request and receiving response
