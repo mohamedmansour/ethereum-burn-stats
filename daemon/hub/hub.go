@@ -72,6 +72,9 @@ type Hub struct {
 	db           *sql.Database
 	latestBlock  *LatestBlock
 	latestBlocks *LatestBlocks
+
+	// Used to perform the transaction receipt fetching within a worker
+	transactionReceiptWorker *TransactionReceiptWorker
 }
 
 // New initializes a Hub instance.
@@ -119,6 +122,11 @@ func New(
 		return nil, err
 	}
 
+	transactionReceiptWorker := &TransactionReceiptWorker{
+		NumWorkers: 10,
+		Endpoint: gethEndpointHTTP,
+	}
+
 	h := &Hub{
 		upgrader: upgrader,
 
@@ -130,8 +138,11 @@ func New(
 		rpcClient:    rpcClient,
 		db:           db,
 		latestBlock:  latestBlock,
-		latestBlocks: latestBlocks,
+		latestBlocks:             latestBlocks,
+		transactionReceiptWorker: transactionReceiptWorker,
 	}
+
+	transactionReceiptWorker.Initialize()
 
 	err = h.initialize(gethEndpointWebsocket)
 	if err != nil {
@@ -1010,7 +1021,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 	var allPriorityFeePerGasMwei []uint64
 
 	// Fetch all transaction receipts to calculate burned, and tips.
-	batchPriorityFee, batchBurned, batchTips := h.batchTransactionReceiptJobs(block.Transactions, blockNumber, baseFee, updateCache); 
+	batchPriorityFee, batchBurned, batchTips := h.transactionReceiptWorker.QueueJob(block.Transactions, blockNumber, baseFee, updateCache); 
 	allPriorityFeePerGasMwei = append(batchPriorityFee[:], allPriorityFeePerGasMwei[:]...)
 	blockBurned.Add(blockBurned, batchBurned)
 	blockTips.Add(blockTips, batchTips)
@@ -1056,131 +1067,6 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 	return blockStats, blockStatsPercentiles, baseFeeNextHex, nil
 }
 
-type TransactionRequest struct {
-	TransactionHash string
-	BlockNumber     uint64
-	BaseFee         *big.Int
-	UpdateCache     bool
-}
-
-type TransactionResponse struct {
-	Burned            *big.Int
-	Tips              *big.Int
-	PriorityFeePerGas *big.Int
-}
-
-type WorkerTransactionResponse struct {
-	Result *TransactionResponse
-	Error  error
-}
-
-func (h *Hub) batchTransactionReceiptJobs(transactions []string, blockNumber uint64, baseFee *big.Int, updateCache bool) ([]uint64, *big.Int, *big.Int) {
-	var numJobs = len(transactions)
-	var numWorkers = 10
-	jobs := make(chan TransactionRequest, numJobs)
-	results := make(chan WorkerTransactionResponse, numJobs)
-
-	for w := 1; w <= numWorkers; w++ {
-		go h.processTransactionWorker(w, jobs, results)
-	}
-
-	for _, tHash := range transactions {
-		jobs <- TransactionRequest{
-			BlockNumber: blockNumber,
-			TransactionHash: tHash,
-			BaseFee: baseFee,
-			UpdateCache: updateCache,
-		}
-	}
-	close(jobs)
-
-	var allPriorityFeePerGasMwei []uint64
-	blockBurned := big.NewInt(0)
-	blockTips := big.NewInt(0)
-
-	for a := 0; a < numJobs; a++ {
-		response := <-results
-
-		if response.Error != nil {
-			log.Errorln(response.Error)
-			continue
-		}
-
-		if response.Result == nil {
-			continue
-		}
-
-		allPriorityFeePerGasMwei = append(allPriorityFeePerGasMwei, response.Result.PriorityFeePerGas.Uint64())
-		blockBurned.Add(blockBurned, response.Result.Burned)
-		blockTips.Add(blockTips, response.Result.Tips)
-	}
-
-	return allPriorityFeePerGasMwei, blockBurned, blockTips
-}
-
-func (h *Hub) processTransactionWorker(id int, jobs <-chan TransactionRequest, results chan<- WorkerTransactionResponse) {
-	for j := range jobs {
-		response, err := h.processTransactionReceipt(j)
-		results <- WorkerTransactionResponse{Result: response, Error: err}
-	}
-}
-
-func (h *Hub) processTransactionReceipt(param TransactionRequest) (*TransactionResponse, error) {
-	raw, err := h.rpcClient.CallContext(
-		"2.0",
-		"eth_getTransactionReceipt",
-		strconv.Itoa(int(param.BlockNumber)),
-		param.UpdateCache,
-		param.TransactionHash,
-	)
-
-	if err != nil {
-		return nil, fmt.Errorf("error getting transaction receipt: %v", err)
-	}
-
-	receipt := TransactionReceipt{}
-	err = json.Unmarshal(raw, &receipt)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling transaction receipt: %v", err)
-	}
-
-	if receipt.BlockNumber == "" {
-		log.Warnf("block %d, transaction %s: found empty transaction receipt", param.BlockNumber, param.TransactionHash)
-		return nil, nil
-	}
-
-	gasUsed, err := hexutil.DecodeBig(receipt.GasUsed)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding gas used: %v", err)
-	}
-
-	effectiveGasPrice := big.NewInt(0)
-
-	if receipt.EffectiveGasPrice != "" {
-		effectiveGasPrice, err = hexutil.DecodeBig(receipt.EffectiveGasPrice)
-		if err != nil {
-			return nil, fmt.Errorf("error decoding effective gas price: %v", err)
-		}
-	}
-
-
-	burned := big.NewInt(0)
-	burned.Mul(gasUsed, param.BaseFee)
-
-	tips := big.NewInt(0)
-	tips.Mul(gasUsed, effectiveGasPrice)
-	tips.Sub(tips, burned)
-
-	priorityFeePerGas := big.NewInt(0)
-	priorityFeePerGas.Div(tips, gasUsed)
-	priorityFeePerGasMwei := priorityFeePerGas.Div(priorityFeePerGas, big.NewInt(1_000_000))
-
-	return &TransactionResponse{
-		Burned:            burned,
-		Tips:              tips,
-		PriorityFeePerGas: priorityFeePerGasMwei,
-	}, nil
-}
 
 func getPercentileSortedUint64(values []uint64, perc int) uint64 {
 	if len(values) == 0 {
