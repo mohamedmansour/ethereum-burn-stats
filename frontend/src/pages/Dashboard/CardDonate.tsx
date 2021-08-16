@@ -46,6 +46,8 @@ export function CardDonate({ type }: { type: CardDonateType }) {
 
     const indexedTitle = "indexed.finance: defi investing made easy, crypto indexes and yield aggregators"
     const unicornCircleTitle = "The one and only Unicorn Circle 🦄⭕️ | Always on the hunt for new Business Unicorns!"
+    const goodghostingTitle = "The new addictive way to save. Our savings pools reward regular savers with higher interest rates. Start building the financial habits you deserve."
+    
     return (
       <Card 
           title="Patrons"
@@ -60,6 +62,11 @@ export function CardDonate({ type }: { type: CardDonateType }) {
             <LinkBox title={unicornCircleTitle}>
               <LinkOverlay href="https://twitter.com/unicorncircle" target="_blank">
                 <Image srcSet="/sponsor_unicorn_circle.png" title={unicornCircleTitle} />
+              </LinkOverlay>
+            </LinkBox>
+            <LinkBox title={goodghostingTitle}>
+              <LinkOverlay href="https://goodghosting.com" target="_blank">
+                <Image srcSet="/sponsor_goodghosting.png" title={goodghostingTitle} />
               </LinkOverlay>
             </LinkBox>
           </SimpleGrid>
