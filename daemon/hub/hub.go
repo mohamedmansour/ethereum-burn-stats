@@ -72,6 +72,9 @@ type Hub struct {
 	db           *sql.Database
 	latestBlock  *LatestBlock
 	latestBlocks *LatestBlocks
+
+	// Used to perform the transaction receipt fetching within a worker
+	transactionReceiptWorker *TransactionReceiptWorker
 }
 
 // New initializes a Hub instance.
@@ -81,6 +84,7 @@ func New(
 	gethEndpointWebsocket string,
 	dbPath string,
 	ropsten bool,
+	workerCount int,
 ) (*Hub, error) {
 	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -119,6 +123,11 @@ func New(
 		return nil, err
 	}
 
+	transactionReceiptWorker := &TransactionReceiptWorker{
+		NumWorkers: workerCount,
+		Endpoint: gethEndpointHTTP,
+	}
+
 	h := &Hub{
 		upgrader: upgrader,
 
@@ -130,8 +139,11 @@ func New(
 		rpcClient:    rpcClient,
 		db:           db,
 		latestBlock:  latestBlock,
-		latestBlocks: latestBlocks,
+		latestBlocks:             latestBlocks,
+		transactionReceiptWorker: transactionReceiptWorker,
 	}
+
+	transactionReceiptWorker.Initialize()
 
 	err = h.initialize(gethEndpointWebsocket)
 	if err != nil {
@@ -1009,61 +1021,12 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 
 	var allPriorityFeePerGasMwei []uint64
 
-	for _, tHash := range block.Transactions {
-		var raw json.RawMessage
-		raw, err := h.rpcClient.CallContext(
-			"2.0",
-			"eth_getTransactionReceipt",
-			strconv.Itoa(int(blockNumber)),
-			updateCache,
-			tHash,
-		)
-		if err != nil {
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
-		}
-
-		receipt := TransactionReceipt{}
-		err = json.Unmarshal(raw, &receipt)
-		if err != nil {
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
-		}
-
-		if receipt.BlockNumber == "" {
-			log.Warnf("block %d, transaction %s: found empty transaction receipt", blockNumber, tHash)
-			continue
-			//break
-		}
-		gasUsed, err := hexutil.DecodeBig(receipt.GasUsed)
-		if err != nil {
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
-		}
-
-		effectiveGasPrice := big.NewInt(0)
-
-		if receipt.EffectiveGasPrice != "" {
-			effectiveGasPrice, err = hexutil.DecodeBig(receipt.EffectiveGasPrice)
-			if err != nil {
-				return blockStats, blockStatsPercentiles, baseFeeNextHex, err
-			}
-		}
-
-		burned := big.NewInt(0)
-		burned.Mul(gasUsed, baseFee)
-
-		tips := big.NewInt(0)
-		tips.Mul(gasUsed, effectiveGasPrice)
-		tips.Sub(tips, burned)
-
-		priorityFeePerGas := big.NewInt(0)
-		priorityFeePerGas.Div(tips, gasUsed)
-		priorityFeePerGasMwei := priorityFeePerGas.Div(priorityFeePerGas, big.NewInt(1_000_000)).Uint64()
-
-		allPriorityFeePerGasMwei = append(allPriorityFeePerGasMwei, priorityFeePerGasMwei)
-
-		blockBurned.Add(blockBurned, burned)
-		blockTips.Add(blockTips, tips)
-	}
-
+	// Fetch all transaction receipts to calculate burned, and tips.
+	batchPriorityFee, batchBurned, batchTips := h.transactionReceiptWorker.QueueJob(block.Transactions, blockNumber, baseFee, updateCache); 
+	allPriorityFeePerGasMwei = append(batchPriorityFee[:], allPriorityFeePerGasMwei[:]...)
+	blockBurned.Add(blockBurned, batchBurned)
+	blockTips.Add(blockTips, batchTips)
+	
 	// sort slices that will be used for percentile calculations later
 	sort.Slice(allPriorityFeePerGasMwei, func(i, j int) bool { return allPriorityFeePerGasMwei[i] < allPriorityFeePerGasMwei[j] })
 
@@ -1105,6 +1068,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 	return blockStats, blockStatsPercentiles, baseFeeNextHex, nil
 }
 
+
 func getPercentileSortedUint64(values []uint64, perc int) uint64 {
 	if len(values) == 0 {
 		return 0
@@ -1131,7 +1095,7 @@ func (h *Hub) updateLatestBlock() (uint64, error) {
 	)
 
 	if err != nil {
-		return 0, fmt.Errorf("failed to fetch latest block number from geth")
+		return 0, fmt.Errorf("failed to fetch latest block number from geth: %v", err)
 	}
 
 	var hexBlockNumber string

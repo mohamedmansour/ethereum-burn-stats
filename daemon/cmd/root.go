@@ -14,6 +14,7 @@ func newRootCmd() *cobra.Command {
 	var gethEndpointWebsocket string
 	var dbPath string
 	var ropsten bool
+	var workerCount int
 
 	rootCmd := &cobra.Command{
 		// TODO:
@@ -44,15 +45,17 @@ func newRootCmd() *cobra.Command {
 				gethEndpointWebsocket,
 				dbPath,
 				ropsten,
+				workerCount,
 			)
 		},
 	}
 
 	rootCmd.Flags().StringVar(&addr, "addr", ":8080", "HTTP service address")
-	rootCmd.Flags().BoolVar(&development, "development", false, "enable for development mode")
-	rootCmd.Flags().StringVar(&gethEndpointHTTP, "geth-endpoint-http", "", "Endpoint to geth for http")
-	rootCmd.Flags().StringVar(&gethEndpointWebsocket, "geth-endpoint-websocket", "", "Endpoint to geth for websocket")
+	rootCmd.Flags().BoolVar(&development, "development", true, "enable for development mode")
+	rootCmd.Flags().StringVar(&gethEndpointHTTP, "geth-endpoint-http", "http://localhost:8545", "Endpoint to geth for http")
+	rootCmd.Flags().StringVar(&gethEndpointWebsocket, "geth-endpoint-websocket", "ws://localhost:8546", "Endpoint to geth for websocket")
 	rootCmd.Flags().StringVar(&dbPath, "db-path", "watchtheburn.db", "Path to the SQLite db")
+	rootCmd.Flags().IntVar(&workerCount, "worker-count", 10, "Number of workers to spawn to parallelize http client")
 	rootCmd.Flags().BoolVar(&ropsten, "ropsten", false, "Use ropsten block numbers")
 
 	return rootCmd
@@ -65,6 +68,7 @@ func root(
 	gethEndpointWebsocket string,
 	dbPath string,
 	ropsten bool,
+	workerCount int,
 ) error {
 	hub, err := hub.New(
 		development,
@@ -72,6 +76,7 @@ func root(
 		gethEndpointWebsocket,
 		dbPath,
 		ropsten,
+		workerCount,
 	)
 	if err != nil {
 		return err
