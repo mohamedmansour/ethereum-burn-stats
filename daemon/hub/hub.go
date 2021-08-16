@@ -125,7 +125,7 @@ func New(
 
 	transactionReceiptWorker := &TransactionReceiptWorker{
 		NumWorkers: workerCount,
-		Endpoint: gethEndpointHTTP,
+		Endpoint:   gethEndpointHTTP,
 	}
 
 	h := &Hub{
@@ -136,9 +136,9 @@ func New(
 		unregister:   make(chan *Client),
 		clients:      clients,
 
-		rpcClient:    rpcClient,
-		db:           db,
-		latestBlock:  latestBlock,
+		rpcClient:                rpcClient,
+		db:                       db,
+		latestBlock:              latestBlock,
 		latestBlocks:             latestBlocks,
 		transactionReceiptWorker: transactionReceiptWorker,
 	}
@@ -1022,11 +1022,11 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 	var allPriorityFeePerGasMwei []uint64
 
 	// Fetch all transaction receipts to calculate burned, and tips.
-	batchPriorityFee, batchBurned, batchTips := h.transactionReceiptWorker.QueueJob(block.Transactions, blockNumber, baseFee, updateCache); 
+	batchPriorityFee, batchBurned, batchTips, type2count := h.transactionReceiptWorker.QueueJob(block.Transactions, blockNumber, baseFee, updateCache)
 	allPriorityFeePerGasMwei = append(batchPriorityFee[:], allPriorityFeePerGasMwei[:]...)
 	blockBurned.Add(blockBurned, batchBurned)
 	blockTips.Add(blockTips, batchTips)
-	
+
 	// sort slices that will be used for percentile calculations later
 	sort.Slice(allPriorityFeePerGasMwei, func(i, j int) bool { return allPriorityFeePerGasMwei[i] < allPriorityFeePerGasMwei[j] })
 
@@ -1057,17 +1057,17 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 	blockStats.Rewards = hexutil.EncodeBig(&blockReward)
 	blockStats.Tips = hexutil.EncodeBig(blockTips)
 	blockStats.Transactions = hexutil.EncodeBig(transactionCount)
+	blockStats.Type2Transactions = hexutil.EncodeBig(type2count)
 
 	globalBlockStats.mu.Lock()
 	globalBlockStats.v[blockNumber] = blockStats
 	globalBlockStats.mu.Unlock()
 
 	duration := time.Since(start) / time.Millisecond
-	log.Printf("block: %d, blockHex: %s, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, ptime: %dms", blockNumber, blockNumberHex, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), duration)
+	log.Printf("block: %d, blockHex: %s, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, type2: %s, ptime: %dms", blockNumber, blockNumberHex, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), type2count.String(), duration)
 
 	return blockStats, blockStatsPercentiles, baseFeeNextHex, nil
 }
-
 
 func getPercentileSortedUint64(values []uint64, perc int) uint64 {
 	if len(values) == 0 {

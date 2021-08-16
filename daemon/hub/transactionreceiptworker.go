@@ -15,7 +15,7 @@ type TransactionReceiptWorker struct {
 	Endpoint   string
 
 	// The channel to receive the jobs. All the workers will block until it receives a job.
-	jobs       chan transactionReceiptJob
+	jobs chan transactionReceiptJob
 }
 
 func (h *TransactionReceiptWorker) Initialize() {
@@ -27,7 +27,7 @@ func (h *TransactionReceiptWorker) Initialize() {
 	}
 }
 
-func (h *TransactionReceiptWorker) QueueJob(transactions []string, blockNumber uint64, baseFee *big.Int, updateCache bool) ([]uint64, *big.Int, *big.Int) {
+func (h *TransactionReceiptWorker) QueueJob(transactions []string, blockNumber uint64, baseFee *big.Int, updateCache bool) ([]uint64, *big.Int, *big.Int, *big.Int) {
 	// Open a channel to maka sure all the receipts are processed and we block on the result.
 	results := make(chan transactionReceiptResult, len(transactions))
 
@@ -46,6 +46,7 @@ func (h *TransactionReceiptWorker) QueueJob(transactions []string, blockNumber u
 	blockBurned := big.NewInt(0)
 	blockTips := big.NewInt(0)
 
+	type2count := int64(0)
 	// Wait for all the jobs to be processed.
 	for a := 0; a < len(transactions); a++ {
 		response := <-results
@@ -59,13 +60,17 @@ func (h *TransactionReceiptWorker) QueueJob(transactions []string, blockNumber u
 			continue
 		}
 
+		if response.Result.Type == "0x2" {
+			type2count++
+		}
+
 		allPriorityFeePerGasMwei = append(allPriorityFeePerGasMwei, response.Result.PriorityFeePerGas.Uint64())
 		blockBurned.Add(blockBurned, response.Result.Burned)
 		blockTips.Add(blockTips, response.Result.Tips)
 	}
 
 	// Return the aggregated results.
-	return allPriorityFeePerGasMwei, blockBurned, blockTips
+	return allPriorityFeePerGasMwei, blockBurned, blockTips, big.NewInt(type2count)
 }
 
 func (h *TransactionReceiptWorker) startWorker(id int, jobs <-chan transactionReceiptJob) {
@@ -135,23 +140,25 @@ func (h *TransactionReceiptWorker) processTransactionReceipt(rpcClient *RPCClien
 
 	return &transactionReceiptResponse{
 		Burned:            burned,
-		Tips:              tips,
 		PriorityFeePerGas: priorityFeePerGasMwei,
+		Tips:              tips,
+		Type:              receipt.Type,
 	}, nil
 }
 
 type transactionReceiptJob struct {
-	Results         chan transactionReceiptResult
-	TransactionHash string
 	BlockNumber     uint64
 	BaseFee         *big.Int
+	Results         chan transactionReceiptResult
+	TransactionHash string
 	UpdateCache     bool
 }
 
 type transactionReceiptResponse struct {
 	Burned            *big.Int
-	Tips              *big.Int
 	PriorityFeePerGas *big.Int
+	Tips              *big.Int
+	Type              string
 }
 
 type transactionReceiptResult struct {
