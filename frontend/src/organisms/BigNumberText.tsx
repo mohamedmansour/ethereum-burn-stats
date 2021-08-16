@@ -53,6 +53,7 @@ export function BigNumberFormat(props: BigNumberFormatProps) {
   if (props.maximumFractionDigits) maximumFractionDigits = props.maximumFractionDigits;
   else if (currency === 'ETH') maximumFractionDigits = 4;
   else if (currency === 'USD') maximumFractionDigits = 2;
+  if (maximumFractionDigits === -1) maximumFractionDigits = 0;
 
   const valueNumber = parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits});
 

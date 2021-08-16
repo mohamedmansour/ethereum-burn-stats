@@ -74,7 +74,8 @@ export interface Transaction {
 
 export interface Totals {
   burned: BigNumber
-  tipped: BigNumber
+  rewards: BigNumber
+  tips: BigNumber
   issuance: BigNumber
   netReduction: number
 }
