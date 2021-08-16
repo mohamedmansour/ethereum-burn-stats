@@ -165,19 +165,23 @@ func (h *Hub) initialize(gethEndpointWebsocket string) error {
 		return err
 	}
 
-	err = h.initGetMissingBlocks()
-	if err != nil {
-		log.Errorf("error during initGetMissingBlocks: %v", err)
-		return err
-	}
-
 	err = h.initGetLatestBlocks(highestBlockInDB)
 	if err != nil {
 		log.Errorf("error during initGetLatestBlocks: %v", err)
 		return err
 	}
 
-	h.updateAllTotals(h.latestBlock.getBlockNumber())
+	err = h.initGetMissingBlocks()
+	if err != nil {
+		log.Errorf("error during initGetMissingBlocks: %v", err)
+		return err
+	}
+
+	err = h.updateAllTotals(h.latestBlock.getBlockNumber())
+	if err != nil {
+		log.Errorf("error during updateAllTotals: %v", err)
+		return err
+	}
 
 	h.initializeLatestBlocks()
 	h.initializeWebSocketHandlers()
@@ -474,15 +478,15 @@ func (h *Hub) initGetBlocksFromDB() (uint64, error) {
 
 	log.Infof("init: GetBlocksFromDB - Imported %d blocks", len(allBlockStats))
 
-	if highestBlockInDB == 0 {
-		return londonBlock, nil
-	}
-
 	return highestBlockInDB, nil
 }
 
 func (h *Hub) initGetMissingBlocks() error {
 	var blockNumbers, missingBlockNumbers []uint64
+
+	if _, ok := globalBlockStats.v[londonBlock]; !ok {
+		missingBlockNumbers = append(missingBlockNumbers, londonBlock)
+	}
 
 	globalBlockStats.mu.Lock()
 	for _, b := range globalBlockStats.v {
@@ -523,6 +527,11 @@ func (h *Hub) initGetMissingBlocks() error {
 
 func (h *Hub) initGetLatestBlocks(highestBlockInDB uint64) error {
 	currentBlock := highestBlockInDB + 1
+
+	//set currentBlock to londonBlock if no blocks imported from DB
+	if currentBlock == 1 {
+		currentBlock = londonBlock
+	}
 	latestBlock := h.latestBlock.getBlockNumber()
 	log.Infof("init: GetLatestBlocks - Fetching %d blocks (%d -> %d)", latestBlock-highestBlockInDB, currentBlock, latestBlock)
 
@@ -848,7 +857,7 @@ func (h *Hub) updateTotals(blockNumber uint64) (Totals, error) {
 	return totals, nil
 }
 
-func (h *Hub) updateAllTotals(blockNumber uint64) (Totals, error) {
+func (h *Hub) updateAllTotals(blockNumber uint64) error {
 	start := time.Now()
 	var totals Totals
 
@@ -867,21 +876,21 @@ func (h *Hub) updateAllTotals(blockNumber uint64) (Totals, error) {
 
 		burned, err := hexutil.DecodeBig(block.Burned)
 		if err != nil {
-			return totals, fmt.Errorf("block.Burned was not a hex - %s", block.Burned)
+			return fmt.Errorf("block %d: block.Burned was not a hex - %s", i, block.Burned)
 		}
 		totalBurned.Add(totalBurned, burned)
 
 		rewards, err := hexutil.DecodeBig(block.Rewards)
 		if err != nil {
-			return totals, fmt.Errorf("block.Rewards was not a hex - %s", block.Rewards)
+			return fmt.Errorf("block %d: block.Rewards was not a hex - %s", i, block.Rewards)
 		}
 		totalRewards.Add(totalRewards, rewards)
 
 		tips, err := hexutil.DecodeBig(block.Tips)
 		if err != nil {
-			return totals, fmt.Errorf("block.Burned was not a hex - %s", block.Tips)
+			return fmt.Errorf("block %d: block.Burned was not a hex - %s", i, block.Tips)
 		}
-		totalTips.Add(totalBurned, tips)
+		totalTips.Add(totalTips, tips)
 		totalIssuance.Sub(totalRewards, totalBurned)
 
 		totals.Burned = hexutil.EncodeBig(totalBurned)
@@ -900,7 +909,7 @@ func (h *Hub) updateAllTotals(blockNumber uint64) (Totals, error) {
 	duration := time.Since(start) / time.Millisecond
 	log.Infof("block %d totals: %s burned, %s issuance, %s rewards, and %s tips (ptime: %dms)", blockNumber, totalBurned.String(), totalIssuance.String(), totalRewards.String(), totalTips.String(), duration)
 
-	return totals, nil
+	return nil
 }
 
 func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockStats, []sql.BlockStatsPercentiles, string, error) {
