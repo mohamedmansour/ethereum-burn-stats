@@ -535,13 +535,28 @@ func (h *Hub) initGetLatestBlocks(highestBlockInDB uint64) error {
 	latestBlock := h.latestBlock.getBlockNumber()
 	log.Infof("init: GetLatestBlocks - Fetching %d blocks (%d -> %d)", latestBlock-highestBlockInDB, currentBlock, latestBlock)
 
+	var batchBlockStats []sql.BlockStats
+	var batchBlockStatsPercentiles []sql.BlockStatsPercentiles
+
 	if latestBlock >= currentBlock {
 		for {
 			blockStats, blockStatsPercentiles, _, err := h.updateBlockStats(currentBlock, true)
 			if err != nil {
 				return fmt.Errorf("cannot update block state for '%d',  %v", currentBlock, err)
 			}
-			h.db.AddBlock(blockStats, blockStatsPercentiles)
+
+			batchBlockStats = append(batchBlockStats, blockStats)
+			for _, bsp := range blockStatsPercentiles {
+				batchBlockStatsPercentiles = append(batchBlockStatsPercentiles, bsp)
+			}
+
+			if currentBlock%100 == 0 || currentBlock == h.latestBlock.getBlockNumber() {
+				h.db.AddBlocks(batchBlockStats, batchBlockStatsPercentiles)
+				batchBlockStats = nil
+				batchBlockStatsPercentiles = nil
+			}
+
+			//h.db.AddBlock(blockStats, blockStatsPercentiles)
 
 			if currentBlock == latestBlock {
 				latestBlock, err = h.updateLatestBlock()

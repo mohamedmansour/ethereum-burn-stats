@@ -52,8 +52,9 @@ func (d *Database) AddBlock(blockStats BlockStats, blockStatsPercentiles []Block
 	}
 }
 
-func (d *Database) AddBlocks(blockStats []BlockStats) {
+func (d *Database) AddBlocks(blockStats []BlockStats, blockStatsPercentiles []BlockStatsPercentiles) {
 	d.db.CreateInBatches(blockStats, len(blockStats))
+	d.db.CreateInBatches(blockStatsPercentiles, len(blockStatsPercentiles))
 }
 
 func (d *Database) GetHighestBlockNumber() (uint64, error) {
