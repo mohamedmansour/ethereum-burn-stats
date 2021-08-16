@@ -49,7 +49,8 @@ const DefaultExplorerData = {
   details: {
     totals: {
       burned: Zero(),
-      tipped: Zero(),
+      rewards: Zero(),
+      tips: Zero(),
       issuance: Zero(),
       netReduction: 0,
     },

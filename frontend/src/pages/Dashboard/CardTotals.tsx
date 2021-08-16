@@ -13,12 +13,20 @@ export function CardTotals() {
         title="Totals since EIP-1559"
         icon={FaBurn}>
       <HStack>
+        <Text flex={1}>Rewards</Text>
+        <BigNumberText number={totals.rewards} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
+      </HStack>
+      <HStack>
         <Text flex={1}>Burned</Text>
-        <BigNumberText number={totals.burned} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={2} />
+        <BigNumberText number={totals.burned} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
+      </HStack>
+      <HStack>
+        <Text flex={1}>Tips</Text>
+        <BigNumberText number={totals.tips} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
       </HStack>
       <HStack>
         <Text flex={1}>Net Issuance</Text>
-        <BigNumberText number={totals.issuance} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={2} />
+        <BigNumberText number={totals.issuance} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
       </HStack>
       <HStack>
         <Text flex={1}>Net Reduction</Text>

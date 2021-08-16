@@ -63,7 +63,7 @@ type Totals struct {
 	Burned   string `json:"burned"`
 	Issuance string `json:"issuance"`
 	Rewards  string `json:"rewards"`
-	Tips     string `json:"tipped"`
+	Tips     string `json:"tips"`
 }
 
 // InitialData type represents the initial data that the client requests.

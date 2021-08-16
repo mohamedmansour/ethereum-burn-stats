@@ -65,7 +65,8 @@ export class EthereumApiFormatters {
 
   static FormatTotals(s: Totals): Totals {
     s.burned = HexToBigNumber(s.burned)
-    s.tipped = HexToBigNumber(s.tipped)
+    s.rewards = HexToBigNumber(s.rewards)
+    s.tips = HexToBigNumber(s.tips)
     s.issuance = HexToBigNumber(s.issuance)
     return s
   }
