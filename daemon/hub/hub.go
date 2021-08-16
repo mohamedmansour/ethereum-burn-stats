@@ -84,6 +84,7 @@ func New(
 	gethEndpointWebsocket string,
 	dbPath string,
 	ropsten bool,
+	workerCount int,
 ) (*Hub, error) {
 	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -123,7 +124,7 @@ func New(
 	}
 
 	transactionReceiptWorker := &TransactionReceiptWorker{
-		NumWorkers: 20,
+		NumWorkers: workerCount,
 		Endpoint: gethEndpointHTTP,
 	}
 
