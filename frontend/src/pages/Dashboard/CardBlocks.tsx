@@ -81,7 +81,6 @@ export function BlockList() {
             <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
             <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
             <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
           </Tr>
           {blocks.slice(0, maxBlocksToRenderInTable).map((block) => (
             <BlockItem
