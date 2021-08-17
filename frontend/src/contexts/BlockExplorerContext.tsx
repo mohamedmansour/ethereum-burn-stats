@@ -126,6 +126,11 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
   const insert = (data: BlockData) => {
     const { block, totals, clients, version } = data
 
+    if (blockIndex[block.number]) {
+      console.log('repeat', block.number);
+      return
+    }
+
     if (!block.burned.isZero()) {
       session.burned = session.burned.add(block.burned)
     }
@@ -160,6 +165,10 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
   }
 
   initialData.blocks.forEach((block: BlockStats) => {
+    if (blockIndex[block.number]) {
+      console.log('repeat', block.number);
+      return;
+    }
     blockIndex[block.number] = block
     blocks.push(block.number)
   })

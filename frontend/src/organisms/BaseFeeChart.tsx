@@ -84,7 +84,7 @@ function LiveChart(props: BaseFeeChartProps) {
     // Fill up the data for the last |maxItemsInChart| blocks,
     const minBounds = blocks.length > newData.length ? 0 : newData.length - blocks.length;
     for (var i = newData.length - 1; i >= minBounds; i--)  {
-      const block = blocks[newData.length - (i - minBounds) - 1]
+      const block = blocks[Math.min(newData.length, blocks.length) - (i - minBounds) - 1]
       const chartData: { [key: string]: any } = {
         number: block.number,
         issuance: block.rewards.sub(block.burned)
