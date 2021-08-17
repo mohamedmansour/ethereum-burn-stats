@@ -39,6 +39,7 @@ function BlockItem({ block }: { block: BlockStats }) {
       <TdPlus><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.tips} /></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.baseFee} /></TdPlus>
+      <TdPlus textAlign="right"><BigNumberText number={block.priorityFee} /></TdPlus>
       <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsed gasUsed={block.gasUsed} /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.rewards} /></TdPlus>
@@ -60,6 +61,7 @@ export function BlockList() {
             <ThPlus>Burned</ThPlus>
             <ThPlus>Tips</ThPlus>
             <ThPlus>Base Fee</ThPlus>
+            <ThPlus>Priority Fee</ThPlus>
             <ThPlus><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
             <ThPlus>% Target</ThPlus>
             <ThPlus>Rewards</ThPlus>
@@ -70,6 +72,7 @@ export function BlockList() {
         <Tbody>
           <Tr>
             <TdPlus textAlign="left">{details.currentBlock + 1}</TdPlus>
+            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
             <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
             <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
             <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
