@@ -7,6 +7,7 @@ import (
 	"math"
 	"math/big"
 	"net/http"
+	"reflect"
 	"sort"
 	"strconv"
 	"sync"
@@ -201,7 +202,7 @@ func (h *Hub) initializeLatestBlocks() {
 	log.Infof("Initialize latest %d blocks", blockCount)
 	for i := latestBlockNumber - uint64(blockCount); i <= latestBlockNumber; i++ {
 		if blockStat, ok := globalBlockStats.v[i]; ok {
-			h.latestBlocks.addBlock(blockStat)
+			h.latestBlocks.addBlock(blockStat, false)
 		}
 	}
 }
@@ -248,38 +249,55 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 			case err := <-sub.Err():
 				log.Errorln("Error: ", err)
 			case header := <-headers:
-				latestBlockNumber := latestBlock.getBlockNumber()
-				blockNumber := header.Number.Uint64()
+				// clientsCount is quantity of active subscriptions/users
+				clientsCount := len(h.clients)
 
+				// latestBlockNumber is highest processed block to date
+				latestBlockNumber := latestBlock.getBlockNumber()
+
+				// detect if new block message is repeated from previously processed block
+				blockNumber := header.Number.Uint64()
 				if latestBlockNumber == blockNumber {
 					h.duplicateBlock = true
-					log.Warnf("block repeated: %s", header.Number.String())
+					log.Warnf("block %s repeated", header.Number.String())
 					continue
 				}
 
+				// if duplicate block in subscription we need to fetch previous block again and update if changed
+				// this only works when a single block has to be replaced (there are rare occurrences where 2+ need to be replaced)
 				for h.duplicateBlock {
 					previousBlock := blockNumber - 1
+
+					// copy existing previous blockStats to oldBlockStats for comparison
+					globalBlockStats.mu.Lock()
+					oldBlockStats := globalBlockStats.v[previousBlock]
+					globalBlockStats.mu.Unlock()
+
+					// reprocess previous block in case it has changed
 					blockStats, blockStatsPercentiles, baseFeeNext, err := h.updateBlockStats(previousBlock, h.duplicateBlock)
+					h.duplicateBlock = false
 					if err != nil {
 						log.Errorf("Error getting block stats for block %d: %v", previousBlock, err)
-						h.duplicateBlock = false
 						continue
-					} else {
-						latestBlocks.addBlock(blockStats)
 					}
 
+					// compare updated block with existing and skip further processing if unchanged
+					if reflect.DeepEqual(blockStats, oldBlockStats) {
+						log.Infof("block %d unchanged", previousBlock)
+						continue
+					}
+
+					// update calculated totals for previous block because it was updated
 					totals, err := h.updateTotals(previousBlock)
 					if err != nil {
 						log.Errorf("Error updating totals for block %d: %v", previousBlock, err)
-						h.duplicateBlock = false
 						continue
 					}
 
-					h.db.AddBlock(blockStats, blockStatsPercentiles)
-					latestBlock.updateBlockNumber(previousBlock)
+					// add block to latestBlocks array
+					latestBlocks.addBlock(blockStats, true)
 
-					clientsCount := len(h.clients)
-
+					// broadcast updated block to subscribers
 					h.subscription <- map[string]interface{}{
 						"blockStats":   blockStats,
 						"clientsCount": clientsCount,
@@ -292,30 +310,35 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 						},
 					}
 
-					h.duplicateBlock = false
-					time.Sleep(500 * time.Millisecond)
+					// add to database after broadcasting to subscribers
+					h.db.AddBlock(blockStats, blockStatsPercentiles)
+
+					// temporarily sleep to avoid messages showing up concattenated
+					time.Sleep(250 * time.Millisecond)
 					continue
 				}
 
+				// fetch block, process stats, and update block stats maps
 				blockStats, blockStatsPercentiles, baseFeeNext, err := h.updateBlockStats(blockNumber, h.duplicateBlock)
 				if err != nil {
 					log.Errorf("Error getting block stats: %v", err)
 					continue
-				} else {
-					latestBlocks.addBlock(blockStats)
 				}
 
+				// calculate and update totals for block
 				totals, err := h.updateTotals(blockNumber)
 				if err != nil {
 					log.Errorf("Error updating totals for block %d: %v", blockNumber, err)
 					continue
 				}
 
-				h.db.AddBlock(blockStats, blockStatsPercentiles)
+				// add block to latestBlocks array
+				latestBlocks.addBlock(blockStats, false)
+
+				// update latestBlock after block has processed and stored for global access
 				latestBlock.updateBlockNumber(blockNumber)
 
-				clientsCount := len(h.clients)
-
+				// broadcast new block to subscribers
 				h.subscription <- map[string]interface{}{
 					"blockStats":   blockStats,
 					"clientsCount": clientsCount,
@@ -327,6 +350,9 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 						Version:     version.Version,
 					},
 				}
+
+				// add to database after broadcasting to subscribers
+				h.db.AddBlock(blockStats, blockStatsPercentiles)
 			}
 		}
 	}(h.latestBlock, h.latestBlocks)
@@ -511,7 +537,7 @@ func (h *Hub) initGetMissingBlocks() error {
 	log.Infof("init: GetMissingBlocks - Fetching %d missing blocks", len(missingBlockNumbers))
 
 	for _, n := range missingBlockNumbers {
-		blockStats, blockStatsPercentiles, _, err := h.updateBlockStats(n, true)
+		blockStats, blockStatsPercentiles, _, err := h.updateBlockStats(n, false)
 		if err != nil {
 			return fmt.Errorf("cannot update block state for '%d',  %v", n, err)
 		}
@@ -540,7 +566,7 @@ func (h *Hub) initGetLatestBlocks(highestBlockInDB uint64) error {
 
 	if latestBlock >= currentBlock {
 		for {
-			blockStats, blockStatsPercentiles, _, err := h.updateBlockStats(currentBlock, true)
+			blockStats, blockStatsPercentiles, _, err := h.updateBlockStats(currentBlock, false)
 			if err != nil {
 				return fmt.Errorf("cannot update block state for '%d',  %v", currentBlock, err)
 			}
@@ -1087,8 +1113,17 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 	globalBlockStats.v[blockNumber] = blockStats
 	globalBlockStats.mu.Unlock()
 
+	// for logging use practical units
+	gWEI := big.NewInt(1_000_000_000)
+	baseFee.Div(baseFee, gWEI)
+
+	mETH := big.NewInt(1_000_000_000_000_000)
+	blockReward.Div(&blockReward, mETH)
+	blockTips.Div(blockTips, mETH)
+	blockBurned.Div(blockBurned, mETH)
+
 	duration := time.Since(start) / time.Millisecond
-	log.Printf("block: %d, blockHex: %s, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s, tips: %s, baseFee: %s, burned: %s, transactions: %s, type2: %s, ptime: %dms", blockNumber, blockNumberHex, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), type2count.String(), duration)
+	log.Printf("block: %d, blockHex: %s, timestamp: %d, gas_target: %s, gas_used: %s, rewards: %s mETH, tips: %s mETH, baseFee: %s GWEI, burned: %s mETH, transactions: %s, type2: %s, ptime: %dms", blockNumber, blockNumberHex, header.Time, gasTarget.String(), gasUsed.String(), blockReward.String(), blockTips.String(), baseFee.String(), blockBurned.String(), transactionCount.String(), type2count.String(), duration)
 
 	return blockStats, blockStatsPercentiles, baseFeeNextHex, nil
 }
