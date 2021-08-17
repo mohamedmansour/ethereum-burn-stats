@@ -15,7 +15,7 @@ type LatestBlocks struct {
 
 func newLatestBlocks(maxBlocks int) *LatestBlocks {
 	return &LatestBlocks{
-		blocks: []sql.BlockStats{},
+		blocks:    []sql.BlockStats{},
 		maxBlocks: maxBlocks,
 	}
 }
@@ -27,9 +27,14 @@ func (lb *LatestBlocks) getBlocks() []sql.BlockStats {
 	return lb.blocks
 }
 
-func (lb *LatestBlocks) addBlock(block sql.BlockStats) {
+func (lb *LatestBlocks) addBlock(block sql.BlockStats, duplicateBlock bool) {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
+
+	if duplicateBlock {
+		log.Infof("block %d replaced", block.Number)
+		lb.blocks = lb.blocks[1:]
+	}
 
 	sliceEnd := lb.maxBlocks
 	if len(lb.blocks) < lb.maxBlocks {
