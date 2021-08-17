@@ -70,18 +70,6 @@ export function BlockList() {
           </Tr>
         </Thead>
         <Tbody>
-          <Tr>
-            <TdPlus textAlign="left">{details.currentBlock + 1}</TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-          </Tr>
           {blocks.slice(0, maxBlocksToRenderInTable).map((block) => (
             <BlockItem
               key={block.number}
