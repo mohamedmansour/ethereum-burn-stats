@@ -34,8 +34,14 @@ interface BigNumberFormatProps {
 
 export function BigNumberFormat(props: BigNumberFormatProps) {
   let bignumber = props.number || Zero();
+  let negative = ''
   let value = '';
   let currency = ''
+
+  if (bignumber.lte(BigNumber.from(0))) {
+    negative = '-'
+    bignumber = bignumber.abs()
+  }
 
   if (props.forced && props.forced !== 'auto') {
     value = utils.formatUnits(bignumber, props.forced)
@@ -55,7 +61,7 @@ export function BigNumberFormat(props: BigNumberFormatProps) {
   else if (currency === 'USD') maximumFractionDigits = 2;
   if (maximumFractionDigits === -1) maximumFractionDigits = 0;
 
-  const valueNumber = parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits});
+  const valueNumber = negative.concat(parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits}));
 
   return {
     prettyValue: valueNumber,
