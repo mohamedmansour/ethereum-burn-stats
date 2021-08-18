@@ -1,5 +1,5 @@
 import { Box, HStack, Text } from "@chakra-ui/react";
-import { utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 import React, { useEffect, useState } from "react";
 import { Bar, XAxis, YAxis, Tooltip, TooltipProps, Legend, ComposedChart, Cell } from 'recharts';
 import { maxBlocksToRenderInChart, maxBlocksToRenderInChartMobile } from "../config";
@@ -7,7 +7,7 @@ import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { useMobileDetector } from "../contexts/MobileDetectorContext";
 import { Zero } from "../utils/number";
 import { BigNumberFormat, BigNumberText } from "./BigNumberText";
-import { GasUsedPercent } from "../organisms/GasUsed";
+import { GasTarget, GasUsed, GasUsedPercent } from "../organisms/GasUsed";
 import { CustomResponsiveContainer } from "../atoms/CustomResponsiveContainer";
 
 interface BaseFeeChartProps {
@@ -49,7 +49,10 @@ const chartTypeMapping = {
       dataKey: 'issuanceFormatted',
       name: 'issuance'
     },
-    secondary: null
+    secondary: {
+      dataKey: 'burnedFormatted',
+      name: 'burned'
+    },
   }
 }
 
@@ -87,7 +90,8 @@ function LiveChart(props: BaseFeeChartProps) {
       const block = blocks[Math.min(newData.length, blocks.length) - (i - minBounds) - 1]
       const chartData: { [key: string]: any } = {
         number: block.number,
-        issuance: block.rewards.sub(block.burned)
+        issuance: block.rewards.sub(block.burned),
+        reduction: block.burned.mul(BigNumber.from(10000)).div(block.rewards).toNumber() / 100
       }
 
       switch (props.chartType) {
@@ -104,6 +108,7 @@ function LiveChart(props: BaseFeeChartProps) {
           break;
         case "issuance":
           chartData.issuanceFormatted = parseFloat(utils.formatUnits(chartData.issuance, 'ether'))
+          chartData.burnedFormatted = parseFloat(utils.formatUnits(block.burned, 'ether'))
           break;
       }
 
@@ -132,14 +137,16 @@ function LiveChart(props: BaseFeeChartProps) {
       return (
         <Box bg="brand.subheader" p="4" rounded="lg" fontSize={12} opacity={0.95}>
           <HStack><Text color="brand.secondaryText" fontWeight="bold">Block:</Text><Text>{payload.number}</Text></HStack>
-          <HStack><Text color="brand.secondaryText" fontWeight="bold">Burned:</Text><BigNumberText number={block.burned} /></HStack>
-          <HStack><Text color="brand.secondaryText" fontWeight="bold">Rewards:</Text><BigNumberText number={block.rewards} /></HStack>
-          {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Issuance:</Text><BigNumberText number={payload.issuance.abs()} /></HStack>}
-          <HStack><Text color="brand.secondaryText" fontWeight="bold">Tips:</Text><BigNumberText number={block.tips} /></HStack>
-          <HStack><Text color="brand.secondaryText" fontWeight="bold">BaseFee:</Text><BigNumberText number={block.baseFee} /></HStack>
-          <HStack><Text color="brand.secondaryText" fontWeight="bold">PriorityFee:</Text><BigNumberText number={block.priorityFee} /></HStack>
-          <HStack><Text color="brand.secondaryText" fontWeight="bold">Txs:</Text><Text>{block.transactions}</Text></HStack>
-          <HStack><Text color="brand.secondaryText" fontWeight="bold">GasUsedPct:</Text><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack>
+          {(item.name === "issuance" || item.name === "reward") && <HStack><Text color="brand.secondaryText" fontWeight="bold">Rewards:</Text><BigNumberText number={block.rewards} /></HStack>}
+          {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Burned:</Text><BigNumberText number={block.burned} /></HStack>}
+          {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Net Issuance:</Text><BigNumberText number={payload.issuance.abs()} /></HStack>}
+          {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Net Reduction:</Text><Text>{payload.reduction}%</Text></HStack>}
+          {item.name === "reward" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Tips:</Text><BigNumberText number={block.tips} /></HStack>}
+          {item.name === "basefee" && <HStack><Text color="brand.secondaryText" fontWeight="bold">BaseFee:</Text><BigNumberText number={block.baseFee} /></HStack>}
+          {item.name === "basefee" && <HStack><Text color="brand.secondaryText" fontWeight="bold">PriorityFee:</Text><BigNumberText number={block.priorityFee} /></HStack>}
+          {item.name === "gas used" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Target:</Text><GasTarget gasTarget={block.gasTarget} /></HStack>}
+          {item.name === "gas used" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Used:</Text><GasUsed gasUsed={block.gasUsed} /></HStack>}
+          {item.name === "gas used" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Used %:</Text><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack>}
         </Box>
       );
     }
