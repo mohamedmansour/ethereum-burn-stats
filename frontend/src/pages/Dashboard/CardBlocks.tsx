@@ -27,7 +27,18 @@ function GasUsedInfo() {
   );
 }
 
+function TxnInfo() {
+  return (
+    <Box>
+      <LightMode>
+        <Text>Total Transactions in this block (% type 2)</Text>
+      </LightMode>
+    </Box>
+  );
+}
+
 function BlockItem({ block }: { block: BlockStats }) {
+  const transactionPercentage = (block.type2transactions / block.transactions * 100).toFixed(0);
   return (
     <Tr>
       <TdPlus>
@@ -45,7 +56,7 @@ function BlockItem({ block }: { block: BlockStats }) {
       <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsed gasUsed={block.gasUsed} /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.rewards} /></TdPlus>
-      <TdPlus textAlign="right">{block.transactions}</TdPlus>
+      <TdPlus textAlign="right">{block.transactions} ({transactionPercentage}%)</TdPlus>
       <TdPlus textAlign="right">{timeSince(block.timestamp)}</TdPlus>
     </Tr>
   );
@@ -64,10 +75,10 @@ export function BlockList() {
             <ThPlus>Tips</ThPlus>
             <ThPlus>Base Fee</ThPlus>
             <ThPlus>Priority Fee</ThPlus>
-            <ThPlus><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" hasArrow label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
+            <ThPlus><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
             <ThPlus>% Target</ThPlus>
             <ThPlus>Rewards</ThPlus>
-            <ThPlus>Txn</ThPlus>
+            <ThPlus><VStack alignItems="flex-end"><HStack><Text>Txn</Text><Tooltip placement="top" label={<TxnInfo />}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
             <ThPlus>Age</ThPlus>
           </Tr>
         </Thead>

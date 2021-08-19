@@ -19,6 +19,7 @@ export interface BlockStats {
   number: number
   timestamp: number
   transactions: number
+  type2transactions: number
 }
 
 export interface BaseBlock {

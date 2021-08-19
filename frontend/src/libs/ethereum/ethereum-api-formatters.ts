@@ -40,6 +40,7 @@ export class EthereumApiFormatters {
     b.number = HexToNumber(b.number)
     b.timestamp = HexToNumber(b.timestamp)
     b.transactions = HexToNumber(b.transactions)
+    b.type2transactions = HexToNumber(b.type2transactions)
     return b
   }
 
