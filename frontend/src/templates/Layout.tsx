@@ -28,7 +28,7 @@ export function Layout(props: LayoutProps) {
         as="nav"
         align={["flex-start", "flex-start", "center"]}
         justify={"space-between"}
-        direction={layoutConfig.flexRow}
+        direction="row"
         pt={layoutConfig.gap}
         pl={layoutConfig.gap}
         pr={layoutConfig.gap}
