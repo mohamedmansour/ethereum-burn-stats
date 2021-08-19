@@ -1,5 +1,4 @@
-import { Text, HStack, Icon, Box, Link, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList, LightMode } from "@chakra-ui/react";
-import { Link as ReactLink } from "react-router-dom";
+import { Text, HStack, Icon, Box, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList, LightMode } from "@chakra-ui/react";
 import { FaCubes } from 'react-icons/fa';
 import { VscInfo } from "react-icons/vsc";
 import { Card } from "../../atoms/Card";
@@ -41,14 +40,7 @@ function BlockItem({ block }: { block: BlockStats }) {
   const transactionPercentage = (block.type2transactions / block.transactions * 100).toFixed(0);
   return (
     <Tr>
-      <TdPlus>
-        <Link
-          to={`/block/${block.number}`}
-          as={ReactLink}
-        >
-          {block.number}
-        </Link>
-      </TdPlus>
+      <TdPlus>{block.number}</TdPlus>
       <TdPlus><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.tips} /></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.baseFee} /></TdPlus>
@@ -70,7 +62,7 @@ export function BlockList() {
       <TablePlus>
         <Thead>
           <Tr>
-            <ThPlus textAlign="left" width="0.1%">Latest Block</ThPlus>
+            <ThPlus textAlign="left" width="0.1%">Block</ThPlus>
             <ThPlus>Burned</ThPlus>
             <ThPlus>Tips</ThPlus>
             <ThPlus>Base Fee</ThPlus>
