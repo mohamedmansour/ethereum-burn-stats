@@ -181,11 +181,7 @@
   <script>
     // To eliminate flashing a bit more.
     const storedColorMode = localStorage['chakra-ui-color-mode'] || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    if (storedColorMode) {
-      document.body.classList.add('chakra-ui-dark');
-    } else {
-      document.body.classList.add('chakra-ui-light');
-    }
+    document.body.classList.add(storedColorMode === 'dark' ? 'chakra-ui-dark' : 'chakra-ui-light');
   </script>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root">
