@@ -1,7 +1,6 @@
 import {
   Text,
   Link,
-  Image,
   HStack,
   Box,
   Icon,
@@ -10,12 +9,13 @@ import {
   LinkOverlay,
   LinkBox,
   Spacer,
-  SimpleGrid
+  SimpleGrid,
+  useColorModeValue
 } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
 import { ImHeart } from "react-icons/im";
 import { VscHeart } from "react-icons/vsc";
-
+import { LogoGoodGhosting, LogoIndexed, LogoNansen, LogoUnicornCircle } from "./Logos";
 
 export enum CardDonateType {
   TopSideBar,
@@ -23,6 +23,8 @@ export enum CardDonateType {
 }
 
 export function CardDonate({ type }: { type: CardDonateType }) {
+  const logoColor = useColorModeValue("#001D32", "white")
+  
   if (process.env.REACT_APP_SHOW_SERVER_SPONSOR === "true") {
     if (type === CardDonateType.TopSideBar) {
       const title = "nansen.ai: identify opportunities before everyone else. Analyses 90M+ labeled ethereum wallets and their activity.";
@@ -36,7 +38,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
                   Sponsored By
                 </Text>
                 <Spacer />
-                <Image w="87px" h="30px" srcSet="/sponsor_nansen.png" ml={4} alt={title} />
+                <LogoNansen color={logoColor} />
               </HStack>
             </LinkOverlay>
           </LinkBox>
@@ -56,21 +58,21 @@ export function CardDonate({ type }: { type: CardDonateType }) {
           <SimpleGrid columns={2} gridGap={2} mt={2} alignItems="center" justifyContent="center">
             <LinkBox title={indexedTitle}>
               <LinkOverlay href="https://indexed.finance" target="_blank">
-                <Image srcSet="/sponsor_indexed.png" title={indexedTitle} />
+                <LogoIndexed color={logoColor} />
               </LinkOverlay>
             </LinkBox>
             <LinkBox title={unicornCircleTitle}>
               <LinkOverlay href="https://twitter.com/unicorncircle" target="_blank">
-                <Image srcSet="/sponsor_unicorn_circle.png" title={unicornCircleTitle} />
+                <LogoUnicornCircle color={logoColor} />
               </LinkOverlay>
             </LinkBox>
             <LinkBox title={goodghostingTitle}>
               <LinkOverlay href="https://goodghosting.com" target="_blank">
-                <Image srcSet="/sponsor_goodghosting.png" title={goodghostingTitle} />
+                <LogoGoodGhosting color={logoColor} />
               </LinkOverlay>
             </LinkBox>
           </SimpleGrid>
-          <Text fontSize={12} mt={4} mb={2}>Thanks to these patrons who has offered to help support the server costs and development!</Text>
+          <Text fontSize={12} mt={4} mb={2} variant="brandSecondary">Thanks to these patrons who has offered to help support the server costs and development!</Text>
           <Text fontSize={12} textAlign="right"><Link href="https://twitter.com/mohamedmansour" target="_blank">Become a patron!</Link></Text>
         </Box>
       </Card>

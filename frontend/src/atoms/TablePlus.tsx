@@ -3,7 +3,7 @@
 import { Table, TableCellProps, TableColumnHeaderProps, TableProps, Td, Th, useStyleConfig } from "@chakra-ui/react"
 
 interface TablePlusProps extends TableProps {
-  variant?: 'sticky'
+  variant?: string
 }
 
 export function TablePlus(props: TablePlusProps) {
@@ -13,7 +13,7 @@ export function TablePlus(props: TablePlusProps) {
 }
 
 interface ThPlusProps extends TableColumnHeaderProps {
-  variant?: 'sticky'
+  variant?: string
 }
 
 export function ThPlus(props: ThPlusProps) {
@@ -23,7 +23,7 @@ export function ThPlus(props: ThPlusProps) {
 }
 
 interface TdPlusProps extends TableCellProps {
-  variant?: 'sticky'
+  variant?: string
 }
 
 export function TdPlus(props: TdPlusProps) {

@@ -1,8 +1,6 @@
 import {
-  Table,
   Tbody,
   Tr,
-  Td,
   Link,
   Code,
   Breadcrumb,
@@ -20,6 +18,7 @@ import { Loader } from "../organisms/Loader";
 import { useEthereum } from "../contexts/EthereumContext";
 import { Transaction } from "../libs/ethereum";
 import { layoutConfig } from "../layoutConfig";
+import { TablePlus, TdPlus } from "../atoms/TablePlus";
 
 export function EthTransactionDetail() {
   let { id } = useParams<{ id: string }>();
@@ -50,86 +49,86 @@ export function EthTransactionDetail() {
           <Text>Transaction</Text>
         </BreadcrumbItem>
       </Breadcrumb>
-      <Card flex="1" w="100%">
-        <Table colorScheme="whiteAlpha">
+      <Card flex="1" w="100%" position="relative" overflow="auto">
+        <TablePlus>
           <Tbody>
             <Tr>
-              <Td color="brand.secondaryText">Id:</Td>
-              <Td>{id}</Td>
+              <TdPlus variant='brandSecondary'>Id:</TdPlus>
+              <TdPlus>{id}</TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">From</Td>
-              <Td isTruncated>
+              <TdPlus variant='brandSecondary'>From</TdPlus>
+              <TdPlus isTruncated>
                 <Link
                   to={`/account/${transaction.from}`}
                   as={ReactLink}
                 >
                   {transaction.from}
                 </Link>
-              </Td>
+              </TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">To</Td>
-              <Td>
+              <TdPlus variant='brandSecondary'>To</TdPlus>
+              <TdPlus>
                 <Link
                   to={`/account/${transaction.to}`}
                   as={ReactLink}
                 >
                   {transaction.to}
                 </Link>
-              </Td>
+              </TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Confs</Td>
-              <Td>{transaction.confirmations}</Td>
+              <TdPlus variant='brandSecondary'>Confs</TdPlus>
+              <TdPlus>{transaction.confirmations}</TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Block Number</Td>
-              <Td>
+              <TdPlus variant='brandSecondary'>Block Number</TdPlus>
+              <TdPlus>
                 <Link
                   to={`/block/${transaction.blockNumber}`}
                   as={ReactLink}
                 >
                   {transaction.blockNumber}
                 </Link>
-              </Td>
+              </TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Gas Limit</Td>
-              <Td><BigNumberText number={transaction.gas} /></Td>
+              <TdPlus variant='brandSecondary'>Gas Limit</TdPlus>
+              <TdPlus><BigNumberText number={transaction.gas} /></TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Gas Price</Td>
-              <Td><BigNumberText number={transaction.gasPrice} /></Td>
+              <TdPlus variant='brandSecondary'>Gas Price</TdPlus>
+              <TdPlus><BigNumberText number={transaction.gasPrice} /></TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Value</Td>
-              <Td>{transaction.value}</Td>
+              <TdPlus variant='brandSecondary'>Value</TdPlus>
+              <TdPlus>{transaction.value}</TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Data</Td>
-              <Td>
+              <TdPlus variant='brandSecondary'>Data</TdPlus>
+              <TdPlus>
                 <Code w="50vw">{transaction.input}</Code>
-              </Td>
+              </TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">s</Td>
-              <Td wordBreak="break-all">{transaction.s}</Td>
+              <TdPlus variant='brandSecondary'>s</TdPlus>
+              <TdPlus wordBreak="break-all">{transaction.s}</TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">r</Td>
-              <Td>{transaction.r}</Td>
+              <TdPlus variant='brandSecondary'>r</TdPlus>
+              <TdPlus>{transaction.r}</TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">v</Td>
-              <Td>{transaction.v}</Td>
+              <TdPlus variant='brandSecondary'>v</TdPlus>
+              <TdPlus>{transaction.v}</TdPlus>
             </Tr>
             <Tr>
-              <Td color="brand.secondaryText">Type</Td>
-              <Td>{transaction.type}</Td>
+              <TdPlus variant='brandSecondary'>Type</TdPlus>
+              <TdPlus>{transaction.type}</TdPlus>
             </Tr>
           </Tbody>
-        </Table>
+        </TablePlus>
       </Card>
     </Flex>
   );

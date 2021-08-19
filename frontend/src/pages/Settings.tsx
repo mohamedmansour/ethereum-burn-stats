@@ -61,7 +61,7 @@ export function Settings() {
         </BreadcrumbItem>
       </Breadcrumb>
       <Box w="100%">
-        <Heading size="sm" color="brand.secondaryText">
+        <Heading size="sm">
           Ethereum Network
         </Heading>
         <Card mt="2">
@@ -79,7 +79,7 @@ export function Settings() {
       </Box>
 
       <Box w="100%">
-        <Heading size="sm" color="brand.secondaryText">
+        <Heading size="sm">
           Max Blocks to Render ({maxBlocks} blocks)
         </Heading>
         <Card mt="2">

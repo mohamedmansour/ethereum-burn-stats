@@ -88,11 +88,11 @@ export function BigNumberText(props: BigNumberProps) {
     )
   }
 
-  const currencyColor = removeCurrencyColor !== undefined && removeCurrencyColor ? undefined : "brand.secondaryText"
+  const currencyColor = removeCurrencyColor !== undefined && removeCurrencyColor ? undefined : "brandSecondary"
   return (
     <HStack display="inline-flex" {...rest} position="relative" title={`${state.value} ${state.currency}`}>
       <Text>{state.prettyValue}</Text>
-      {!hideCurrency && <Text color={currencyColor}>{state.currency}</Text>}
+      {!hideCurrency && <Text variant={currencyColor}>{state.currency}</Text>}
     </HStack>
   );
 }

@@ -8,7 +8,7 @@ interface LoaderProps {
 
 export function Loader(props: LoaderProps) {
   return (
-    <Center h="100vh" color="brand.primaryText">
+    <Center h="100vh">
       <Box display="flex" flexDirection="column" alignItems="center">
         <FirePit size="100px" animate={true} />
         <Text mt="40px">{props.children}</Text>

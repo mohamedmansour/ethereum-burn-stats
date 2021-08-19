@@ -3,7 +3,6 @@ import {
   Tbody,
   Thead,
   Tr,
-  Td,
   Link,
   VStack,
   Icon,
@@ -38,7 +37,7 @@ import { FirePit } from "../atoms/FirePit";
 import { BigNumberText } from "../organisms/BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "../organisms/GasUsed";
 import { layoutConfig } from "../layoutConfig";
-import { TablePlus, ThPlus } from "../atoms/TablePlus";
+import { TablePlus, TdPlus, ThPlus } from "../atoms/TablePlus";
 import { Transaction } from "../libs/ethereum";
 
 interface BlockDetailState {
@@ -151,10 +150,10 @@ export function EthBlockDetail() {
       )}
 
       {state.transactions && state.block && (
-        <Tabs variant="soft-rounded" colorScheme="whiteAlpha" flex={1} display="flex" flexDirection="column">
+        <Tabs variant="soft-rounded" flex={1} display="flex" flexDirection="column">
           <TabList mb="4">
-            <Tab color="gray">Overview</Tab>
-            <Tab color="gray">Transactions</Tab>
+            <Tab>Overview</Tab>
+            <Tab>Transactions</Tab>
           </TabList>
           <TabPanels height="100%" flex={1}>
             <TabPanel p="0" height="inherit">
@@ -204,9 +203,9 @@ export function EthBlockDetail() {
               )}
                 <Card mt="4" title="Info">
                 <Grid templateColumns={["auto", "150px auto"]} gap={4} p="2">
-                  <Text color="brand.secondaryText">Timestamp:</Text>
+                  <Text variant='brandSecondary'>Timestamp:</Text>
                   <Text>{dtf.format(state.block.timestamp * 1000)}</Text>
-                  <Text color="brand.secondaryText">Mined by:</Text>
+                  <Text variant='brandSecondary'>Mined by:</Text>
                   <Text isTruncated color="orange" position="relative">
                     <Link
                       to={`/account/${state.block.miner}`}
@@ -216,17 +215,17 @@ export function EthBlockDetail() {
                       {state.block.miner}
                     </Link>
                   </Text>
-                  <Text color="brand.secondaryText">Difficulty:</Text>
+                  <Text variant='brandSecondary'>Difficulty:</Text>
                   <Text>{utils.commify(state.block.difficulty)}</Text>
                   {state.block.stats && (
                     <>
-                      <Text color="brand.secondaryText">Gas used:</Text>
+                      <Text variant='brandSecondary'>Gas used:</Text>
                       <HStack><GasUsed gasUsed={state.block.gasUsed} /><Text>/</Text><GasUsedPercent gasUsed={state.block.gasUsed} gasTarget={state.block.stats.gasTarget} /></HStack>
-                      <Text color="brand.secondaryText">Gas target:</Text>
+                      <Text variant='brandSecondary'>Gas target:</Text>
                       <GasTarget gasTarget={state.block.stats.gasTarget} />
                     </>
                   )}
-                  <Text color="brand.secondaryText">Extra data:</Text>
+                  <Text variant='brandSecondary'>Extra data:</Text>
                   <Text wordBreak="break-all" title={'data: ' + state.block.extraData}>
                     {utils.toUtf8String(state.block.extraData, () => 0)}
                   </Text>
@@ -234,7 +233,7 @@ export function EthBlockDetail() {
               </Card>
             </TabPanel>
             <TabPanel p="0" height="inherit">
-              <Card position="relative" w="100%" h="100%" overflow="auto" >
+              <Card position="relative" w="100%" h="100%" overflow="auto">
                 {state.transactions.length === 0 && <Text>No Transactions</Text>}
                 {state.transactions.length !== 0 && (
                   <TablePlus w="100%" colorScheme="whiteAlpha">
@@ -249,8 +248,8 @@ export function EthBlockDetail() {
                     <Tbody>
                       {state.transactions.map((t) => (
                         <Tr key={t.hash}>
-                          <Td w="10%">{t.confirmations}</Td>
-                          <Td
+                          <TdPlus w="10%">{t.confirmations}</TdPlus>
+                          <TdPlus
                             w="100%"
                             position="relative"
                           >
@@ -266,13 +265,13 @@ export function EthBlockDetail() {
                             >
                               {t.hash}
                             </Link>
-                          </Td>
-                          <Td whiteSpace="nowrap" w="10%">
+                          </TdPlus>
+                          <TdPlus whiteSpace="nowrap" w="10%">
                             {t.value}
-                          </Td>
-                          <Td w="10%">
+                          </TdPlus>
+                          <TdPlus w="10%">
                             <BigNumberText number={t.gasPrice} />
-                          </Td>
+                          </TdPlus>
                         </Tr>
                       ))}
                     </Tbody>

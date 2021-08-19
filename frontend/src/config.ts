@@ -19,6 +19,11 @@ export const ChartSetting: SettingConfig = {
   convert: (value: string): string => value
 }
 
+export const DarkLightSetting: SettingConfig = {
+  verify: (value: any): boolean => DarkLightTypes.indexOf(value) !== -1,
+  convert: (value: string): string => value
+}
+
 export interface EthereumNetwork {
   name: string
   key: string
@@ -36,10 +41,15 @@ export const EthereumNetworkOptions: {
 export enum Setting {
   maxBlocksToRender = "maxBlocksToRender",
   doNotShowChart = "doNotShowChart",
-  chartType = "chartType"
+  doNotShowCurrentSession = "doNotShowCurrentSession",
+  chartType = "chartType",
+  colorMode = "chakra-ui-color-mode"
 }
 
+export type DarkLightType = "dark" | "light";
+
 export const ChartTypes: ChartType[] = ["issuance", "basefee", "tips", "gas"]
+export const DarkLightTypes: DarkLightType[] = ["dark", "light"]
 
 export const defaultNetwork = EthereumNetworkOptions['mainnet']
 export const defaultSettings: { [key: string]: DefaultSettingValue } =
@@ -52,9 +62,17 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
       config: BooleanSetting,
       defaultValue: false,
     },
+    [Setting.doNotShowCurrentSession]: {
+      config: BooleanSetting,
+      defaultValue: false,
+    },
     [Setting.chartType]: {
       config: ChartSetting,
       defaultValue: 'issuance',
+    },
+    [Setting.colorMode]: {
+      config: DarkLightSetting,
+      defaultValue: 'dark',
     },
   };
 

@@ -27,8 +27,7 @@ function RadioCard(props: RadioCardProps) {
         borderWidth="1px"
         borderRadius="sm"
         boxShadow="md"
-        borderColor="brand.secondaryText"
-        color="brand.secondaryText"
+        variant="brandSecondary"
         textAlign="center"
         pt={1}
         pb={1}

@@ -1,17 +1,27 @@
 import { extendTheme } from "@chakra-ui/react"
+import { mode } from "@chakra-ui/theme-tools"
+import { Dict } from "@chakra-ui/utils"
 import { layoutConfig } from "./layoutConfig"
 
+const secondaryColor = (props: Dict<any>) => mode('#a9a9a9', '#4e4e4e')(props)
+const backgroundColor = (props: Dict<any>) => mode('white', 'rgb(30, 30, 30)')(props)
+const borderColor = (props: Dict<any>) => mode('#eeeeee', '#292929')(props)
+
 const theme = extendTheme({
+  config: {
+    initialColorMode: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+    useSystemColorMode: false,
+  },
+  styles: {
+    global: (props: any) => ({
+      body: {
+        bg: mode('white', '#333')(props),
+        color: mode('rgb(51, 51, 51)', 'rgb(242, 242, 242)')(props)
+      }
+    })
+  },
   colors: {
     brand: {
-      headerText: '#666',
-      subheader: '#333',
-      background: '#333',
-      settings: 'hsl(212deg 21% 32%)',
-      settingsOutline: 'hsl(212deg 21% 39%)',
-      card: 'rgb(30, 30, 30)',
-      primaryText: 'white',
-      secondaryText: '#7d7d7d',
       orange: 'rgb(221, 107, 32)'
     },
   },
@@ -23,25 +33,43 @@ const theme = extendTheme({
     },
     Tooltip: {
       baseStyle: {
-        bg: 'brand.orange',
-        rounded: "lg"
-      }
+        rounded: "lg",
+        bg: "#333",
+        color: "#fff",
+        p: 4,
+        fontSize: 12,
+      },
     },
     Link: {
       baseStyle: {
-        color: "orange",
+        color: "brand.orange",
+      },
+      variants: {
+        alpha: (props: any) => ({
+          color: mode('blackAlpha.500', 'whiteAlpha.500')(props),
+        })
       }
     },
     Card: {
-      baseStyle: {
+      baseStyle: (props: any) => ({
         display: "flex",
         flexDirection: "column",
         px: 4,
         py: 3,
         rounded: "md",
-        bg: "brand.card",
-        shadow: "dark-lg",
+        bg: backgroundColor(props),
+        boxShadow: mode("rgb(0 0 0 / 7%) 0px 14px 66px, rgb(0 0 0 / 3%) 0px 10px 17px, rgb(0 0 0 / 5%) 0px 4px 7px;",
+          "rgba(0, 0, 0, 0.1) 0px 0px 0px 1px,rgba(0, 0, 0, 0.2) 0px 5px 10px,rgba(0, 0, 0, 0.4) 0px 15px 40px;")(props),
         gridGap: layoutConfig.miniGap
+      }),
+      variants: {
+        popup: {
+          bg: "#333",
+          color: "#fff",
+          p: 4,
+          rounded: "lg",
+          fontSize: 12,
+        }
       }
     },
     TablePlus: {
@@ -50,7 +78,7 @@ const theme = extendTheme({
           position: "absolute",
           top: 0,
           bottom: 0,
-          left: 0, 
+          left: 0,
           right: 0
         }
       },
@@ -59,33 +87,49 @@ const theme = extendTheme({
       },
     },
     TdPlus: {
-      baseStyle: {
+      baseStyle: (props: any) => ({
         pt: 3,
         pb: 3,
         pr: 4,
         pl: 4,
+        borderColor: borderColor(props),
+      }),
+      variants: {
+        brandSecondary: (props: any) => ({
+          color: secondaryColor(props),
+        })
       }
     },
     ThPlus: {
-      variants: {
-        sticky: {
-          position: "sticky",
-          top: -5,
-          bg: "brand.card",
-          color: "brand.secondaryText",
-          zIndex: 5,
-          textAlign: "right",
-          paddingTop: 5,
-          _notFirst: {
-            paddingLeft: 0,
-          }
+      baseStyle: (props: any) => ({
+        position: "sticky",
+        top: -5,
+        bg: backgroundColor(props),
+        color: secondaryColor(props),
+        borderColor: borderColor(props),
+        zIndex: 5,
+        textAlign: "right",
+        paddingTop: 5,
+        _notFirst: {
+          paddingLeft: 0,
         }
-      },
-      defaultProps: {
-        variant: "sticky",
-      },
+      })
+    },
+    Box: {
+      variants: {
+        brandSecondary: (props: any) => ({
+          color: secondaryColor(props)
+        })
+      }
+    },
+    Text: {
+      variants: {
+        brandSecondary: (props: any) => ({
+          color: secondaryColor(props)
+        })
+      }
     }
-  }
+  },
 })
 
 export default theme

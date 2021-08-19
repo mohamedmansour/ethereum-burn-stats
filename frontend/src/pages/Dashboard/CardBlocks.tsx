@@ -1,4 +1,4 @@
-import { Text, HStack, Icon, Box, Link, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList } from "@chakra-ui/react";
+import { Text, HStack, Icon, Box, Link, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList, LightMode } from "@chakra-ui/react";
 import { Link as ReactLink } from "react-router-dom";
 import { FaCubes } from 'react-icons/fa';
 import { VscInfo } from "react-icons/vsc";
@@ -14,13 +14,15 @@ import { maxBlocksToRenderInTable } from "../../config";
 
 function GasUsedInfo() {
   return (
-    <Box p={4}>
-      <Heading size="sm">Gas used is % of gas target</Heading>
-      <UnorderedList mt={4}>
-        <ListItem>100% == no change in base fee</ListItem>
-        <ListItem>200% == 12.5% increase in base fee</ListItem>
-        <ListItem>0% == 12.5% decrease in base fee</ListItem>
-      </UnorderedList>
+    <Box>
+      <LightMode>
+        <Heading size="sm">Gas used is % of gas target</Heading>
+        <UnorderedList mt={4}>
+          <ListItem>100% == no change in base fee</ListItem>
+          <ListItem>200% == 12.5% increase in base fee</ListItem>
+          <ListItem>0% == 12.5% decrease in base fee</ListItem>
+        </UnorderedList>
+      </LightMode>
     </Box>
   );
 }
@@ -50,11 +52,11 @@ function BlockItem({ block }: { block: BlockStats }) {
 }
 
 export function BlockList() {
-  const { data: { details, blocks } } = useBlockExplorer();
+  const { data: { blocks } } = useBlockExplorer();
 
   return (
     <Box position="relative" h="100%" flex={1} overflow="auto" whiteSpace="nowrap" ml="-10px" mr="-10px">
-      <TablePlus colorScheme="whiteAlpha">
+      <TablePlus>
         <Thead>
           <Tr>
             <ThPlus textAlign="left" width="0.1%">Latest Block</ThPlus>
@@ -62,7 +64,7 @@ export function BlockList() {
             <ThPlus>Tips</ThPlus>
             <ThPlus>Base Fee</ThPlus>
             <ThPlus>Priority Fee</ThPlus>
-            <ThPlus><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
+            <ThPlus><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" hasArrow label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
             <ThPlus>% Target</ThPlus>
             <ThPlus>Rewards</ThPlus>
             <ThPlus>Txn</ThPlus>
@@ -70,18 +72,6 @@ export function BlockList() {
           </Tr>
         </Thead>
         <Tbody>
-          <Tr>
-            <TdPlus textAlign="left">{details.currentBlock + 1}</TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-            <TdPlus m={2}><Box bg="#2a2a2a" h="20px"></Box></TdPlus>
-          </Tr>
           {blocks.slice(0, maxBlocksToRenderInTable).map((block) => (
             <BlockItem
               key={block.number}

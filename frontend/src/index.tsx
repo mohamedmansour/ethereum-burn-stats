@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { EthereumProvider } from './contexts/EthereumContext';
 import { Routing } from './templates/Routing';
-import { ChakraProvider, CSSReset } from '@chakra-ui/react';
+import { ChakraProvider, ColorModeScript, CSSReset } from '@chakra-ui/react';
 import customTheme from './theme';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { BlockExplorerProvider } from './contexts/BlockExplorerContext';
@@ -15,6 +15,7 @@ function App() {
 
   return (
     <React.StrictMode>
+      <ColorModeScript />
       <ChakraProvider theme={customTheme}>
         <CSSReset />
         <SettingsProvider>

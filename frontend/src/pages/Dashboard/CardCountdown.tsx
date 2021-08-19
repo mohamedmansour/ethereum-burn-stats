@@ -52,11 +52,11 @@ export function CardCountdown({ genesisBlock, currentBlock }: { genesisBlock: nu
         textAlign="center">
       <Box>
         <Text fontSize={[60, 60, 80]} lineHeight={['60px', '60px', '80px']}>{activation.blocksRemaining}</Text>
-        <Text fontSize={[10, 10, 12]} color="brand.secondaryText">Blocks Remaining</Text>
+        <Text fontSize={[10, 10, 12]} variant="brandSecondary">Blocks Remaining</Text>
       </Box>
       <Box pt={[2, 2, 4]}>
         <Text fontSize={[16, 16, 24]} lineHeight={['16px', '16px', '24px']}>{activation.estimatedTime}</Text>
-        <Text fontSize={[10, 10, 12]} mt={1} color="brand.secondaryText">Estimated Activation @ {activation.blockTimeInSec} sec/block</Text>
+        <Text fontSize={[10, 10, 12]} mt={1} variant="brandSecondary">Estimated Activation @ {activation.blockTimeInSec} sec/block</Text>
       </Box>
     </Card>
   );

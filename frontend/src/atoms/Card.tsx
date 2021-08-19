@@ -47,8 +47,6 @@ export function Card(props: CardProps) {
                   variant="ghost" 
                   size="sm" 
                   leftIcon={<Icon as={collapsed ? VscChevronDown : VscChevronUp} />} 
-                  _hover={{ bg: '#333' }} 
-                  _active={{ bg: '#222' }} 
                   iconSpacing={0} 
                   onClick={onCollapsedClicked}>
               </Button>

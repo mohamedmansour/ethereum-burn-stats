@@ -1,4 +1,4 @@
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Box, HStack, LightMode, Text } from "@chakra-ui/react";
 import { BigNumber, utils } from "ethers";
 import React, { useEffect, useState } from "react";
 import { Bar, XAxis, YAxis, Tooltip, TooltipProps, Legend, ComposedChart, Cell } from 'recharts';
@@ -9,6 +9,7 @@ import { Zero } from "../utils/number";
 import { BigNumberFormat, BigNumberText } from "./BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "../organisms/GasUsed";
 import { CustomResponsiveContainer } from "../atoms/CustomResponsiveContainer";
+import { Card } from "../atoms/Card";
 
 interface BaseFeeChartProps {
   chartType: ChartType
@@ -132,19 +133,21 @@ function LiveChart(props: BaseFeeChartProps) {
       }
 
       return (
-        <Box bg="brand.subheader" p="4" rounded="lg" fontSize={12} opacity={0.95}>
-          <HStack><Text color="brand.secondaryText" fontWeight="bold">Block:</Text><Text>{payload.number}</Text></HStack>
-          {(item.name === "issuance" || item.name === "reward") && <HStack><Text color="brand.secondaryText" fontWeight="bold">Rewards:</Text><BigNumberText number={block.rewards} /></HStack>}
-          {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Burned:</Text><BigNumberText number={block.burned} /></HStack>}
-          {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Net Issuance:</Text><BigNumberText number={payload.issuance} /></HStack>}
-          {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Net Reduction:</Text><Text>{payload.reduction}%</Text></HStack>}
-          {item.name === "reward" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Tips:</Text><BigNumberText number={block.tips} /></HStack>}
-          {item.name === "basefee" && <HStack><Text color="brand.secondaryText" fontWeight="bold">BaseFee:</Text><BigNumberText number={block.baseFee} /></HStack>}
-          {item.name === "basefee" && <HStack><Text color="brand.secondaryText" fontWeight="bold">PriorityFee:</Text><BigNumberText number={block.priorityFee} /></HStack>}
-          {item.name === "gas used" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Target:</Text><GasTarget gasTarget={block.gasTarget} /></HStack>}
-          {item.name === "gas used" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Used:</Text><GasUsed gasUsed={block.gasUsed} /></HStack>}
-          {item.name === "gas used" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Gas Used %:</Text><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack>}
-        </Box>
+        <Card variant="popup">
+          <LightMode>
+            <HStack><Text variant='brandSecondary' fontWeight="bold">Block:</Text><Text>{payload.number}</Text></HStack>
+            {(item.name === "issuance" || item.name === "reward") && <HStack><Text variant='brandSecondary' fontWeight="bold">Rewards:</Text><BigNumberText number={block.rewards} /></HStack>}
+            {item.name === "issuance" && <HStack><Text variant='brandSecondary' fontWeight="bold">Burned:</Text><BigNumberText number={block.burned} /></HStack>}
+            {item.name === "issuance" && <HStack><Text variant='brandSecondary' fontWeight="bold">Net Issuance:</Text><BigNumberText number={payload.issuance} /></HStack>}
+            {item.name === "issuance" && <HStack><Text variant='brandSecondary' fontWeight="bold">Net Reduction:</Text><Text>{payload.reduction}%</Text></HStack>}
+            {item.name === "reward" && <HStack><Text variant='brandSecondary' fontWeight="bold">Tips:</Text><BigNumberText number={block.tips} /></HStack>}
+            {item.name === "basefee" && <HStack><Text variant='brandSecondary' fontWeight="bold">BaseFee:</Text><BigNumberText number={block.baseFee} /></HStack>}
+            {item.name === "basefee" && <HStack><Text variant='brandSecondary' fontWeight="bold">PriorityFee:</Text><BigNumberText number={block.priorityFee} /></HStack>}
+            {item.name === "gas used" && <HStack><Text variant='brandSecondary' fontWeight="bold">Gas Target:</Text><GasTarget gasTarget={block.gasTarget} /></HStack>}
+            {item.name === "gas used" && <HStack><Text variant='brandSecondary' fontWeight="bold">Gas Used:</Text><GasUsed gasUsed={block.gasUsed} /></HStack>}
+            {item.name === "gas used" && <HStack><Text variant='brandSecondary' fontWeight="bold">Gas Used %:</Text><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack>}
+          </LightMode>
+        </Card>
       );
     }
 

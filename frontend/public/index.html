@@ -25,8 +25,6 @@
     #root {
       height: 100%;
       margin: 0;
-      background-color: #333;
-      color: white;
     }
 
     #raw-loader {
@@ -167,10 +165,28 @@
     *:focus {
       box-shadow: none !important;
     }
+
+    .chakra-ui-dark {
+      background-color: #333;
+      color: white;
+    }
+
+    .chakra-ui-light {
+      background-color: white;
+      color: #333;
+    }
   </style>
 </head>
-
 <body>
+  <script>
+    // To eliminate flashing a bit more.
+    const storedColorMode = localStorage['chakra-ui-color-mode'] || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    if (storedColorMode) {
+      document.body.classList.add('chakra-ui-dark');
+    } else {
+      document.body.classList.add('chakra-ui-light');
+    }
+  </script>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root">
     <div id="raw-loader">
@@ -186,5 +202,4 @@
     </div>
   </div>
 </body>
-
 </html>
