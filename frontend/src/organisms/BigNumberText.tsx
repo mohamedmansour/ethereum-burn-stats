@@ -38,7 +38,7 @@ export function BigNumberFormat(props: BigNumberFormatProps) {
   let value = '';
   let currency = ''
 
-  if (bignumber.lte(BigNumber.from(0))) {
+  if (bignumber.isNegative()) {
     negative = '-'
     bignumber = bignumber.abs()
   }

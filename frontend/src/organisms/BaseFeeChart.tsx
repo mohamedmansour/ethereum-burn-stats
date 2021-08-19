@@ -49,10 +49,7 @@ const chartTypeMapping = {
       dataKey: 'issuanceFormatted',
       name: 'issuance'
     },
-    secondary: {
-      dataKey: 'burnedFormatted',
-      name: 'burned'
-    },
+    secondary: null
   }
 }
 
@@ -63,7 +60,7 @@ interface ChartData {
 
 function LiveChart(props: BaseFeeChartProps) {
   const { isMobile } = useMobileDetector();
-  const { data: {blocks}, getBlockStats } = useBlockExplorer(); 
+  const { data: { blocks }, getBlockStats } = useBlockExplorer();
   const [data, setData] = useState<ChartData>()
 
   useEffect(() => {
@@ -86,12 +83,12 @@ function LiveChart(props: BaseFeeChartProps) {
 
     // Fill up the data for the last |maxItemsInChart| blocks,
     const minBounds = blocks.length > newData.length ? 0 : newData.length - blocks.length;
-    for (var i = newData.length - 1; i >= minBounds; i--)  {
+    for (var i = newData.length - 1; i >= minBounds; i--) {
       const block = blocks[Math.min(newData.length, blocks.length) - (i - minBounds) - 1]
       const chartData: { [key: string]: any } = {
         number: block.number,
         issuance: block.rewards.sub(block.burned),
-        burned: (block.rewards.sub(block.burned).lte(BigNumber.from(0)) ? block.burned.add(block.rewards.sub(block.burned)) : block.burned),
+        burned: (block.rewards.sub(block.burned).isNegative() ? block.burned.add(block.rewards.sub(block.burned)) : block.burned),
         reduction: block.burned.mul(BigNumber.from(10000)).div(block.rewards).toNumber() / 100
       }
 
@@ -109,7 +106,6 @@ function LiveChart(props: BaseFeeChartProps) {
           break;
         case "issuance":
           chartData.issuanceFormatted = parseFloat(utils.formatUnits(chartData.issuance, 'ether'))
-          chartData.burnedFormatted = parseFloat(utils.formatUnits(chartData.burned, 'ether'))
           break;
       }
 
@@ -151,7 +147,7 @@ function LiveChart(props: BaseFeeChartProps) {
         </Box>
       );
     }
-  
+
     return null;
   };
 
@@ -186,20 +182,20 @@ function LiveChart(props: BaseFeeChartProps) {
   return (
     <Box flex="1" w="99%" overflow="hidden" position="relative">
       <CustomResponsiveContainer>
-        <ComposedChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }}stackOffset="sign">
-          <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat}  width={75} />
+        <ComposedChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }} stackOffset="sign">
+          <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} width={75} />
           <XAxis dataKey="number" angle={-30} dx={50} dy={10} fontSize={10} tickCount={10} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
-          {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{fontSize: "14px"}} />}
-          <Bar type="monotone"stackId="stack" dataKey={typeMapping.primary.dataKey} fill="#FF7B24" isAnimationActive={false} name={typeMapping.primary.name}>
+          {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: "14px" }} />}
+          <Bar type="monotone" stackId="stack" dataKey={typeMapping.primary.dataKey} fill="#FF7B24" isAnimationActive={false} name={typeMapping.primary.name}>
             {data.points.map((entry, index) => {
               const isNegative = entry[typeMapping.primary.dataKey] < 0;
               return (
-                  <Cell key={`cell-${index}`} fill={isNegative? "#FFC40C" : "#FF7B24"} />
+                <Cell key={`cell-${index}`} fill={isNegative ? "#FFC40C" : "#FF7B24"} />
               )
             })}
           </Bar>
-          {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFC40C" isAnimationActive={false} name={typeMapping.secondary.name}/>}
+          {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFC40C" isAnimationActive={false} name={typeMapping.secondary.name} />}
         </ComposedChart>
       </CustomResponsiveContainer>
     </Box>
