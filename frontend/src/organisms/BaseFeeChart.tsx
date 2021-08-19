@@ -91,6 +91,7 @@ function LiveChart(props: BaseFeeChartProps) {
       const chartData: { [key: string]: any } = {
         number: block.number,
         issuance: block.rewards.sub(block.burned),
+        burned: (block.rewards.sub(block.burned).lte(BigNumber.from(0)) ? block.burned.add(block.rewards.sub(block.burned)) : block.burned),
         reduction: block.burned.mul(BigNumber.from(10000)).div(block.rewards).toNumber() / 100
       }
 
@@ -108,7 +109,7 @@ function LiveChart(props: BaseFeeChartProps) {
           break;
         case "issuance":
           chartData.issuanceFormatted = parseFloat(utils.formatUnits(chartData.issuance, 'ether'))
-          chartData.burnedFormatted = parseFloat(utils.formatUnits(block.burned, 'ether'))
+          chartData.burnedFormatted = parseFloat(utils.formatUnits(chartData.burned, 'ether'))
           break;
       }
 
@@ -139,7 +140,7 @@ function LiveChart(props: BaseFeeChartProps) {
           <HStack><Text color="brand.secondaryText" fontWeight="bold">Block:</Text><Text>{payload.number}</Text></HStack>
           {(item.name === "issuance" || item.name === "reward") && <HStack><Text color="brand.secondaryText" fontWeight="bold">Rewards:</Text><BigNumberText number={block.rewards} /></HStack>}
           {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Burned:</Text><BigNumberText number={block.burned} /></HStack>}
-          {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Net Issuance:</Text><BigNumberText number={payload.issuance.abs()} /></HStack>}
+          {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Net Issuance:</Text><BigNumberText number={payload.issuance} /></HStack>}
           {item.name === "issuance" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Net Reduction:</Text><Text>{payload.reduction}%</Text></HStack>}
           {item.name === "reward" && <HStack><Text color="brand.secondaryText" fontWeight="bold">Tips:</Text><BigNumberText number={block.tips} /></HStack>}
           {item.name === "basefee" && <HStack><Text color="brand.secondaryText" fontWeight="bold">BaseFee:</Text><BigNumberText number={block.baseFee} /></HStack>}
