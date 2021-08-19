@@ -135,7 +135,7 @@ func (h *TransactionReceiptWorker) processTransactionReceipt(rpcClient *RPCClien
 	tips.Sub(tips, burned)
 
 	if tips.Sign() == -1 {
-		log.Errorf("tips is negative, effectiveGasPrice=%s", effectiveGasPrice.String())
+		log.Errorf("tips is negative, effectiveGasPrice=%s, gasUsed=%s, transactionHash=%s, blockNumber=%d", effectiveGasPrice.String(), gasUsed.String(), param.TransactionHash, param.BlockNumber)
 	}
 
 	priorityFeePerGas := big.NewInt(0)
