@@ -37,7 +37,7 @@ function TxnInfo() {
 }
 
 function BlockItem({ block }: { block: BlockStats }) {
-  const transactionPercentage = (block.type2transactions / block.transactions * 100).toFixed(0);
+  const transactionPercentage = block.transactions === 0 ? 0 : (block.type2transactions / block.transactions * 100).toFixed(0);
   return (
     <Tr>
       <TdPlus>{block.number}</TdPlus>
