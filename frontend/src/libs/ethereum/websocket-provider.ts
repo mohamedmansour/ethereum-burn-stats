@@ -115,23 +115,7 @@ export class WebSocketProvider<EventMap extends WebSocketEventMap> extends WebSo
         this.recordSuccessfulConnection();
         this.status = WebSocketStatus.Connected;
         this.eventEmitter.emit('status', this.status);
-
-        // Make sure we get a registration callback from websocket so that can be guaranteed
-        // to be connected to these channels.
-        const ensureChannelsSubscribed = this.channelsToSubscribe.map(sub => (
-          new Promise<[keyof WebSocketEventMap, string, WebSocketMessageFormatter]>((resolve, reject) => {
-            this.send("eth_subscribe", [sub.channel]).then((data) => {
-              resolve([sub.event as keyof WebSocketEventMap, data as string, sub.formatter])
-            }).catch(e => reject(e))
-          })
-        ))
-
-        Promise.all(ensureChannelsSubscribed).then((results) => {
-          results.forEach(([name, id, formatter]) => {
-            this.ethSubcribeMap[id] = { name, formatter }
-          })
-          resolve()
-        }).catch(e => reject(e))
+        resolve();
       });
 
       this.connection.addEventListener("error", (e) => {
@@ -139,6 +123,27 @@ export class WebSocketProvider<EventMap extends WebSocketEventMap> extends WebSo
         this.eventEmitter.emit('status', this.status);
         reject(e)
       });
+    })
+  }
+
+  public subscribeToChannels() {
+    return new Promise<void>((resolve, reject) => {
+      // Make sure we get a registration callback from websocket so that can be guaranteed
+      // to be connected to these channels.
+      const ensureChannelsSubscribed = this.channelsToSubscribe.map(sub => (
+        new Promise<[keyof WebSocketEventMap, string, WebSocketMessageFormatter]>((resolve, reject) => {
+          this.send("eth_subscribe", [sub.channel]).then((data) => {
+            resolve([sub.event as keyof WebSocketEventMap, data as string, sub.formatter])
+          }).catch(e => reject(e))
+        })
+      ))
+
+      Promise.all(ensureChannelsSubscribed).then((results) => {
+        results.forEach(([name, id, formatter]) => {
+          this.ethSubcribeMap[id] = { name, formatter }
+        })
+        resolve()
+      }).catch(e => reject(e))
     })
   }
 

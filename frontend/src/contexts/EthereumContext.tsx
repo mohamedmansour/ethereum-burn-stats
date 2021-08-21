@@ -25,6 +25,7 @@ const EthereumProvider = ({
 }) => {
   const [eth, setEth] = useState<EthereumApi | undefined>()
   const [message, setMessage] = useState<string>('connecting to eth node')
+
   useEffect(() => {
     if (!url)
       return;
@@ -50,6 +51,9 @@ const EthereumProvider = ({
     
       ethereum.off('retrySuccess', onRetryCheckStatus)
       ethereum.off('retryMaxAttemptsReached', onRetryMaxAttemptsReached)
+
+      await ethereum.subscribeToChannels();
+
       setEth(ethereum)
       return true
     }
