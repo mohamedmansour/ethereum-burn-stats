@@ -1038,7 +1038,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 			hexutil.EncodeUint64(uint64(n)),
 		)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("error eth_getUncleByBlockNumberAndIndex: %v", err)
 		}
 
 		uncle := Block{}
