@@ -99,13 +99,13 @@ func (h *TransactionReceiptWorker) processTransactionReceipt(rpcClient *RPCClien
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("error getting transaction receipt: %v", err)
+		return nil, fmt.Errorf("error eth_getTransactionReceipt: %v", err)
 	}
 
 	receipt := TransactionReceipt{}
 	err = json.Unmarshal(raw, &receipt)
 	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling transaction receipt: %v", err)
+		return nil, fmt.Errorf("error eth_getTransactionReceipt Unmarshal TransactionReceipt: %v", err)
 	}
 
 	if receipt.BlockNumber == "" {
@@ -115,7 +115,7 @@ func (h *TransactionReceiptWorker) processTransactionReceipt(rpcClient *RPCClien
 
 	gasUsed, err := hexutil.DecodeBig(receipt.GasUsed)
 	if err != nil {
-		return nil, fmt.Errorf("error decoding gas used: %v", err)
+		return nil, fmt.Errorf("error decoding receipt.GasUsed: %v", err)
 	}
 
 	effectiveGasPrice := big.NewInt(0)
@@ -123,7 +123,7 @@ func (h *TransactionReceiptWorker) processTransactionReceipt(rpcClient *RPCClien
 	if receipt.EffectiveGasPrice != "" {
 		effectiveGasPrice, err = hexutil.DecodeBig(receipt.EffectiveGasPrice)
 		if err != nil {
-			return nil, fmt.Errorf("error decoding effective gas price: %v", err)
+			return nil, fmt.Errorf("error decoding receipt.EffectiveGasPrice: %v", err)
 		}
 	}
 
@@ -135,7 +135,7 @@ func (h *TransactionReceiptWorker) processTransactionReceipt(rpcClient *RPCClien
 	tips.Sub(tips, burned)
 
 	if tips.Sign() == -1 {
-		log.Errorf("tips is negative, effectiveGasPrice=%s, gasUsed=%s, transactionHash=%s, blockNumber=%d", effectiveGasPrice.String(), gasUsed.String(), param.TransactionHash, param.BlockNumber)
+		log.Errorf("tips is negative, effectiveGasPrice=%s, gasUsed=%s, transactionHash=%s, blockNumber=%d, baseFee=%s", effectiveGasPrice.String(), gasUsed.String(), param.TransactionHash, param.BlockNumber, param.BaseFee)
 	}
 
 	priorityFeePerGas := big.NewInt(0)
