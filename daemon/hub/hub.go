@@ -321,7 +321,7 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 				// fetch block, process stats, and update block stats maps
 				blockStats, blockStatsPercentiles, baseFeeNext, err := h.updateBlockStats(blockNumber, h.duplicateBlock)
 				if err != nil {
-					log.Errorf("Error getting block stats: %v", err)
+					log.Errorf("Error getting block stats for block %d: %v", blockNumber, err)
 					continue
 				}
 
@@ -971,7 +971,6 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 		false,
 	)
 	if err != nil {
-		log.Errorf("error getting block details from geth: %v", err)
 		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
 	}
 
