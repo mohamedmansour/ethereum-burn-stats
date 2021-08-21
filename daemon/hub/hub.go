@@ -971,42 +971,42 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 		false,
 	)
 	if err != nil {
-		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
+		return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("error eth_getBlockByNumber: %v", err)
 	}
 
 	block := Block{}
 	err = json.Unmarshal(rawResponse, &block)
 	if err != nil {
-		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
+		return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("error eth_getBlockByNumber Unmarshal Block: %v", err)
 	}
 
 	header := types.Header{}
 	err = json.Unmarshal(rawResponse, &header)
 	if err != nil {
-		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
+		return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("error eth_getBlockByNumber Unmarshal Header: %v", err)
 	}
 
 	gasUsed, err := hexutil.DecodeBig(block.GasUsed)
 	if err != nil {
-		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
+		return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("error decode GasUsed (%s): %v", block.GasUsed, err)
 	}
 
 	gasTarget, err := hexutil.DecodeBig(block.GasLimit)
 	if err != nil {
-		return blockStats, blockStatsPercentiles, baseFeeNextHex, err
+		return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("error decode GasLimit (%s): %v", block.GasLimit, err)
 	}
 
 	if blockNumber > londonBlock {
 		gasTarget.Div(gasTarget, big.NewInt(2))
 	}
 
-	//initial london block is 1Gwei baseFee
+	// initial london block is 1Gwei baseFee
 	baseFee := big.NewInt(1_000_000_000)
 
 	if block.BaseFeePerGas != "" {
 		baseFee, err = hexutil.DecodeBig(block.BaseFeePerGas)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("error decode BaseFeePerGas (%s): %v", block.BaseFeePerGas, err)
 		}
 	}
 
@@ -1044,8 +1044,9 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 		uncle := Block{}
 		err = json.Unmarshal(raw, &uncle)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("error eth_getUncleByBlockNumberAndIndex Unmarshal uncle: %v", err)
 		}
+
 		if uncleHash != uncle.Hash {
 			err = fmt.Errorf("uncle hash doesn't match: have %s and want %s", uncleHash, uncle.Hash)
 			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
@@ -1053,7 +1054,7 @@ func (h *Hub) updateBlockStats(blockNumber uint64, updateCache bool) (sql.BlockS
 
 		uncleBlockNumber, err := hexutil.DecodeUint64(uncle.Number)
 		if err != nil {
-			return blockStats, blockStatsPercentiles, baseFeeNextHex, err
+			return blockStats, blockStatsPercentiles, baseFeeNextHex, fmt.Errorf("error decode uncle (%s): %v", uncle.Number, err)
 		}
 
 		uncleMinerReward := getBaseReward(blockNumber)
