@@ -187,7 +187,7 @@ function LiveChart(props: BaseFeeChartProps) {
       <CustomResponsiveContainer>
         <ComposedChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }} stackOffset="sign">
           <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} width={75} />
-          <XAxis dataKey="number" angle={-30} dx={50} dy={10} fontSize={10} tickCount={10} />
+          <XAxis dataKey="number" angle={-30} dy={10} fontSize={10} tickCount={10} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
           {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: "14px" }} />}
           <Bar type="monotone" stackId="stack" dataKey={typeMapping.primary.dataKey} fill="#FF7B24" isAnimationActive={false} name={typeMapping.primary.name}>
