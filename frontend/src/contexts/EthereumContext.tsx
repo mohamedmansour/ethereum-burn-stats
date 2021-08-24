@@ -42,9 +42,9 @@ const EthereumProvider = ({
         const highestBlock = syncStatus.highestBlock
         const percentage = Math.floor((currentBlock / highestBlock) * 100)
         if (percentage === 99) {
-          setMessage(`${network.name} is not ready, state healing in progress.`)
+          setMessage(`${network.name} is not ready, state healing in progress. Processing block: ${currentBlock}/${highestBlock}`)
         } else {
-          setMessage(`${network.name} is not ready, node is syncing. ${percentage}% synced.`)
+          setMessage(`${network.name} is not ready, node is syncing. ${percentage}% synced. Processing block: ${currentBlock}/${highestBlock}`)
         }
         return false
       }

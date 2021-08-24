@@ -29,6 +29,11 @@ type totalsMap struct {
 	v  map[uint64]Totals
 }
 
+type Syncing struct {
+	CurrentBlock string `json:"currentBlock"`
+	HighestBlock string `json:"highestBlock"`
+}
+
 type Stats struct {
 	handlers map[string]func(c *Client, message jsonrpcMessage) (json.RawMessage, error)
 
@@ -41,7 +46,7 @@ type Stats struct {
 	constantinopleBlock uint64
 	londonBlock         uint64
 
-	ethSyncing bool
+	ethSyncing *Syncing
 
 	statsByBlock   statsMap
 	totalsByBlock  totalsMap
@@ -134,6 +139,11 @@ func (s *Stats) initialize(
 }
 
 func (s *Stats) initWaitForSyncingFalse() error {
+	s.ethSyncing = &Syncing{
+		CurrentBlock: "0x0",
+		HighestBlock: "0x0",
+	}
+
 	ethSyncing := true
 
 	for ethSyncing {
@@ -149,18 +159,29 @@ func (s *Stats) initWaitForSyncingFalse() error {
 
 		err = json.Unmarshal(ethSyncingRaw, &ethSyncing)
 		if err != nil {
-			return fmt.Errorf("couldn't unmarshal eth_syncing response: %v", ethSyncingRaw)
-		}
+			err = json.Unmarshal(ethSyncingRaw, &s.ethSyncing)
+			if err != nil {
+				return fmt.Errorf("couldn't unmarshal eth_syncing response: %v", ethSyncingRaw)
+			} 
 
-		if ethSyncing {
-			log.Infof("init: geth is syncing", ethSyncing)
+			current, err := hexutil.DecodeUint64(s.ethSyncing.CurrentBlock)
+			if err != nil {
+				return fmt.Errorf("couldn't decode eth_syncing CurrentBlock: %v", err)
+			} 
+
+			highest, err := hexutil.DecodeUint64(s.ethSyncing.HighestBlock)
+			if err != nil {
+				return fmt.Errorf("couldn't decode eth_syncing HighestBlock: %v", err)
+			} 
+
+			log.Infof("init: geth is syncing: %d/%d", current, highest)
 		}
 
 		time.Sleep(5 * time.Second)
 	}
 
 	log.Infof("init: geth syncing finished")
-	s.ethSyncing = false
+	s.ethSyncing = nil
 
 	return nil
 }

@@ -74,7 +74,6 @@ func New(
 	clients := make(map[*Client]bool)
 
 	s := &Stats{}
-	s.initialize(gethEndpointHTTP, dbPath, ropsten, workerCount)
 
 	h := &Hub{
 		upgrader: upgrader,
@@ -91,6 +90,9 @@ func New(
 	if err != nil {
 		return nil, err
 	}
+
+	// Run this in a goroutine so it doesn't block the websocket from working.
+	go s.initialize(gethEndpointHTTP, dbPath, ropsten, workerCount)
 
 	return h, nil
 }
@@ -109,8 +111,8 @@ func (h *Hub) initializeWebSocketHandlers() {
 		"eth_unsubscribe": h.ethUnsubscribe(),
 
 		// deprecated
-		"internal_getTotals": h.handleTotals(),
-		"eth_blockNumber":    h.ethBlockNumber(),
+		//"internal_getTotals": h.handleTotals(),
+		//"eth_blockNumber":    h.ethBlockNumber(),
 		//"eth_chainId":        h.handleFunc(),
 		//"eth_getBalance": h.handleFunc(),
 		//"eth_getBlockByNumber":     h.ethGetBlockByNumber(),
@@ -346,7 +348,12 @@ func (h *Hub) ethBlockNumber() func(c *Client, message jsonrpcMessage) (json.Raw
 
 func (h *Hub) ethSyncing() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
-		return json.RawMessage(fmt.Sprintf("%t", h.s.ethSyncing)), nil
+		if h.s.ethSyncing != nil {
+			syncJson, err := json.Marshal(h.s.ethSyncing)
+			return json.RawMessage(syncJson), err
+		} else {
+			return json.RawMessage("false"), nil
+		}
 	}
 }
 
