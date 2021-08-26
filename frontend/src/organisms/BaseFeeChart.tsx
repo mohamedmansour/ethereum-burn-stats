@@ -138,6 +138,7 @@ function LiveChart(props: BaseFeeChartProps) {
             <HStack><Text variant='brandSecondary' fontWeight="bold">Block:</Text><Text>{payload.number}</Text></HStack>
             {(item.name === "issuance" || item.name === "reward") && <HStack><Text variant='brandSecondary' fontWeight="bold">Rewards:</Text><BigNumberText number={block.rewards} /></HStack>}
             {item.name === "issuance" && <HStack><Text variant='brandSecondary' fontWeight="bold">Burned:</Text><BigNumberText number={block.burned} /></HStack>}
+            {item.name === "issuance" && <HStack><Text variant='brandSecondary' fontWeight="bold">Tips:</Text><BigNumberText number={block.tips} /></HStack>}
             {item.name === "issuance" && <HStack><Text variant='brandSecondary' fontWeight="bold">Net Issuance:</Text><BigNumberText number={payload.issuance} /></HStack>}
             {item.name === "issuance" && <HStack><Text variant='brandSecondary' fontWeight="bold">Net Reduction:</Text><Text>{payload.reduction}%</Text></HStack>}
             {item.name === "reward" && <HStack><Text variant='brandSecondary' fontWeight="bold">Tips:</Text><BigNumberText number={block.tips} /></HStack>}
