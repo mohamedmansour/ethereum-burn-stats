@@ -34,7 +34,7 @@ export function CardLatestStats() {
       </HStack>
       <HStack>
         <Text flex={1}>Ethereum Price</Text>
-        <BigNumberText number={OneEther} usdConversion={details.usdPrice} fontSize={16} textAlign="right" />
+        <BigNumberText number={OneEther} usdConversion={details.usdPrice} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
       </HStack>
     </Card>
   );

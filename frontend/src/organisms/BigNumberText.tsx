@@ -47,7 +47,7 @@ export function BigNumberFormat(props: BigNumberFormatProps) {
     value = utils.formatUnits(bignumber, props.forced)
     currency = props.forced === 'ether' ? 'ETH' : props.forced.toUpperCase()
   } else if (props.usdConversion && props.usdConversion > 1)  {
-    value = utils.formatEther(bignumber.mul(Math.floor(props.usdConversion)).toString())
+    value = utils.formatEther(bignumber.mul(Math.floor(props.usdConversion * 100)).div(BigNumber.from(100)).toString())
     currency = 'USD'
   } else {
     const formatter = autoFormatBigNumber(bignumber);
