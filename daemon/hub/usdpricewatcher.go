@@ -32,7 +32,7 @@ func (u *USDPriceWatcher) StartWatching() {
 }
 
 func (u *USDPriceWatcher) refreshCoinbasePrice(client *http.Client) error {
-	r, err := client.Get("https://api.coinbase.com/v2/prices/ETH-USD/spot")
+	r, err := client.Get("http://api.coinbase.com/v2/prices/ETH-USD/spot")
     if err != nil {
 		log.Errorln("Error getting coinbase price:", err)
         return err
