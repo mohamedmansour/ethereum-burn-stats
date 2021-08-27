@@ -1,4 +1,4 @@
-FROM golang:1.16 AS builder
+FROM golang:1.17 AS builder
 
 COPY . /go/src/github.com/mohamedmansour/ethereum-burn-stats/daemon
 WORKDIR /go/src/github.com/mohamedmansour/ethereum-burn-stats/daemon
