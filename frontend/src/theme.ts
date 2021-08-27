@@ -27,9 +27,10 @@ const theme = extendTheme({
   },
   components: {
     Divider: {
-      baseStyle: {
-        opacity: 0.05,
-      }
+      baseStyle: (props: any) => ({
+        opacity: 0.15,
+        borderColor: mode('blackAlpha.500', 'whiteAlpha.500')(props),
+      })
     },
     Tooltip: {
       baseStyle: {

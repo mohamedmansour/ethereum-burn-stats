@@ -33,7 +33,7 @@ interface BigNumberFormatProps {
 }
 
 export function BigNumberFormat(props: BigNumberFormatProps) {
-  let bignumber = props.number || Zero();
+  let bignumber = props.number || Zero;
   let negative = ''
   let value = '';
   let currency = ''
@@ -47,7 +47,7 @@ export function BigNumberFormat(props: BigNumberFormatProps) {
     value = utils.formatUnits(bignumber, props.forced)
     currency = props.forced === 'ether' ? 'ETH' : props.forced.toUpperCase()
   } else if (props.usdConversion && props.usdConversion > 1)  {
-    value = utils.formatEther(bignumber.mul(props.usdConversion).toString())
+    value = utils.formatEther(bignumber.mul(Math.floor(props.usdConversion)).toString())
     currency = 'USD'
   } else {
     const formatter = autoFormatBigNumber(bignumber);
@@ -61,10 +61,13 @@ export function BigNumberFormat(props: BigNumberFormatProps) {
   else if (currency === 'USD') maximumFractionDigits = 2;
   if (maximumFractionDigits === -1) maximumFractionDigits = 0;
 
-  const valueNumber = negative.concat(parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits}));
+  let prettyValue = negative.concat(parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits}));
+  if (currency === 'USD') {
+    prettyValue = '$' + prettyValue
+  }
 
   return {
-    prettyValue: valueNumber,
+    prettyValue,
     value,
     currency
   }
@@ -91,7 +94,7 @@ export function BigNumberText(props: BigNumberProps) {
   const currencyColor = removeCurrencyColor !== undefined && removeCurrencyColor ? undefined : "brandSecondary"
   return (
     <HStack display="inline-flex" {...rest} position="relative" title={`${state.value} ${state.currency}`}>
-      <Text>{state.prettyValue}</Text>
+      <Text flex={1}>{state.prettyValue}</Text>
       {!hideCurrency && <Text variant={currencyColor}>{state.currency}</Text>}
     </HStack>
   );

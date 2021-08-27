@@ -71,15 +71,15 @@ function LiveChart(props: BaseFeeChartProps) {
     const newData = new Array(isMobile ? maxBlocksToRenderInChartMobile : maxBlocksToRenderInChart);
     newData.fill({
       tipsFormatted: 0,
-      tips: Zero(),
+      tips: Zero,
       burnedFormatted: 0,
-      burned: Zero(),
+      burned: Zero,
       baseFeeFormatted: 0,
-      baseFee: Zero(),
+      baseFee: Zero,
       priorityFeeFormatted: 0,
-      priorityFee: Zero(),
+      priorityFee: Zero,
       gasUsedFormatted: 0,
-      gasUsed: Zero()
+      gasUsed: Zero
     })
 
     // Fill up the data for the last |maxItemsInChart| blocks,

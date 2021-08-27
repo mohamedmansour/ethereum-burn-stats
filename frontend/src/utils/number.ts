@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 
 export function BigNumberMin(x: BigNumber, y: BigNumber): BigNumber {
   return x.lt(y) ? x : y;
@@ -23,6 +23,6 @@ export function HexToNumber(num: any): number {
   return parseInt(Number(num).toString(), 10);
 }
 
-export function Zero(): BigNumber {
-  return BigNumber.from(0);
-}
+export const Zero = BigNumber.from(0);
+
+export const OneEther = utils.parseEther("1");

@@ -4,7 +4,7 @@ import { BigNumber } from 'ethers'
 import { Loader } from "../organisms/Loader";
 import { serverVersion, Setting } from "../config";
 import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
-import { BlockData, BlockStats, BlockWithTransactions, InitialData, Totals } from "../libs/ethereum";
+import { BaseData, BlockData, BlockStats, BlockWithTransactions, InitialData } from "../libs/ethereum";
 import { Announcement } from "../organisms/Announcement";
 import { useSettings } from "./SettingsContext";
 
@@ -23,13 +23,10 @@ export interface BlockExplorerSession {
   since: number
 }
 
-export interface BlockExplorerDetails {
-  totals: Totals
+export interface BlockExplorerDetails extends BaseData {
   currentBlock: number
   currentBaseFee: BigNumber
   currentPriorityFee: BigNumber
-  clients: number
-  version: string
 }
 
 interface BlocksChanged {
@@ -48,26 +45,27 @@ const DefaultExplorerData = {
   blocks: [],
   details: {
     totals: {
-      burned: Zero(),
-      rewards: Zero(),
-      tips: Zero(),
-      issuance: Zero(),
+      burned: Zero,
+      rewards: Zero,
+      tips: Zero,
+      issuance: Zero,
       netReduction: 0,
     },
-    currentBlock: 0,
-    currentBaseFee: Zero(),
-    currentPriorityFee: Zero(),
     clients: 0,
     version: 'NA',
+    usdPrice: 1,
+    currentBlock: 0,
+    currentBaseFee: Zero,
+    currentPriorityFee: Zero,
   },
   session: {
-    burned: Zero(),
-    tips: Zero(),
+    burned: Zero,
+    tips: Zero,
     blockCount: 0,
     transactionCount: 0,
-    rewards: Zero(),
-    minBaseFee: Zero(),
-    maxBaseFee: Zero(),
+    rewards: Zero,
+    minBaseFee: Zero,
+    maxBaseFee: Zero,
     since: Date.now()
   }
 }
@@ -95,18 +93,19 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
 
   const details: BlockExplorerDetails = {
     currentBlock: initialData.blockNumber,
-    currentBaseFee: initialData.blocks.length ? initialData.blocks[0].baseFee : Zero(),
-    currentPriorityFee: initialData.blocks.length ? initialData.blocks[0].priorityFee : Zero(),
+    currentBaseFee: initialData.blocks.length ? initialData.blocks[0].baseFee : Zero,
+    currentPriorityFee: initialData.blocks.length ? initialData.blocks[0].priorityFee : Zero,
     totals: initialData.totals,
     clients: initialData.clients,
-    version: initialData.version
+    version: initialData.version,
+    usdPrice: initialData.usdPrice,
   }
 
   const session: BlockExplorerSession = {
     blockCount: 0,
-    burned: Zero(),
-    rewards: Zero(),
-    tips: Zero(),
+    burned: Zero,
+    rewards: Zero,
+    tips: Zero,
     transactionCount: 0,
     since: Date.now()
   }

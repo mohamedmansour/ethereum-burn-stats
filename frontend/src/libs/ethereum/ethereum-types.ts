@@ -81,17 +81,18 @@ export interface Totals {
   netReduction: number
 }
 
-export interface InitialData {
-  blockNumber: number
-  blocks: BlockStats[]
+export interface BaseData {
   clients: number
   totals: Totals
   version: string
+  usdPrice: number
 }
 
-export interface BlockData {
+export interface InitialData extends BaseData {
+  blockNumber: number
+  blocks: BlockStats[]
+}
+
+export interface BlockData extends BaseData {
   block: BlockStats
-  clients: number
-  totals: Totals
-  version: string
 }

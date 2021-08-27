@@ -5,6 +5,7 @@ import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
 import { FirePit } from "../../atoms/FirePit";
+import { OneEther } from "../../utils/number";
 
 export function CardLatestStats() {
   const {data: {details}} = useBlockExplorer();
@@ -30,6 +31,10 @@ export function CardLatestStats() {
         <HStack flex={1}><Text>Watching the Burn</Text> <FirePit size="12px" /></HStack>
         {count === undefined && <Text>calculating ...</Text>}
         {count !== undefined && <Text>{count} users</Text>}
+      </HStack>
+      <HStack>
+        <Text flex={1}>Ethereum Price</Text>
+        <BigNumberText number={OneEther} usdConversion={details.usdPrice} fontSize={16} textAlign="right" />
       </HStack>
     </Card>
   );

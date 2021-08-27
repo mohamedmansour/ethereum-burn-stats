@@ -48,6 +48,8 @@ type Hub struct {
 
 	// block stats and totals
 	s *Stats
+
+	usd *USDPriceWatcher
 }
 
 // New initializes a Hub instance.
@@ -74,6 +76,7 @@ func New(
 	clients := make(map[*Client]bool)
 
 	s := &Stats{}
+	usd := &USDPriceWatcher{}
 
 	h := &Hub{
 		upgrader: upgrader,
@@ -83,6 +86,7 @@ func New(
 		unregister:   make(chan *Client),
 		clients:      clients,
 		s:            s,
+		usd:          usd,
 	}
 
 	h.initializeWebSocketHandlers()
@@ -92,8 +96,9 @@ func New(
 	}
 
 	// Run this in a goroutine so it doesn't block the websocket from working.
+	go usd.StartWatching()
 	go s.initialize(gethEndpointHTTP, dbPath, ropsten, workerCount)
-
+	
 	return h, nil
 }
 
@@ -195,6 +200,7 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 								Clients:     int16(clientsCount),
 								Totals:      totals,
 								Version:     version.Version,
+								USDPrice:    h.usd.Price,
 							},
 						}
 						time.Sleep(100 * time.Millisecond)
@@ -232,6 +238,7 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 						Clients:     int16(clientsCount),
 						Totals:      totals,
 						Version:     version.Version,
+						USDPrice:    h.usd.Price,
 					},
 				}
 			}
@@ -468,6 +475,7 @@ func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.
 			Clients:     int16(len(h.clients)),
 			Totals:      totals,
 			Version:     version.Version,
+			USDPrice:    h.usd.Price,
 		}
 
 		dataJSON, err := json.Marshal(data)

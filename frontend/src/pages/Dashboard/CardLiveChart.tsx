@@ -1,4 +1,4 @@
-import { useRadio, Box, UseRadioProps, useRadioGroup, Grid, Flex } from "@chakra-ui/react";
+import { useRadio, Box, UseRadioProps, useRadioGroup, Grid, Flex, HTMLChakraProps } from "@chakra-ui/react";
 import { FaChartLine } from 'react-icons/fa';
 import { useEffect, useState } from "react";
 import { Card } from "../../atoms/Card";
@@ -48,7 +48,7 @@ function RadioCard(props: RadioCardProps) {
   )
 }
 
-export function CardLiveChart() {
+export function CardLiveChart(props: HTMLChakraProps<"div">) {
   const settings = useSettings();
   const [doNotShowChart, setDoNotShowChart] = useState<boolean>(
     settings.get(Setting.doNotShowChart)
@@ -82,6 +82,7 @@ export function CardLiveChart() {
       onCollapsed={(collapsed) => setDoNotShowChart(collapsed)}
       minH={doNotShowChart ? 0 : 400}
       h={["auto", "auto", doNotShowChart ? "auto" : 400]} flexShrink={0}
+      {...props}
     >
       <Flex justifyContent={["center", "center", "flex-end"]}>
         <Grid {...group} templateColumns={["repeat(2, 1fr)", "repeat(2, 1fr)", "repeat(4, 1fr)"]} display="inline-grid" gridGap={2} mt={2} mb={2}>

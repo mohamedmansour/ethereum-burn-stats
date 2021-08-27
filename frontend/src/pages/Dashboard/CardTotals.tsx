@@ -1,37 +1,83 @@
-import { HStack, Text } from '@chakra-ui/react';
+import { Divider, HStack, Text, VStack } from '@chakra-ui/react';
 import { FaBurn } from 'react-icons/fa';
 import { Card } from "../../atoms/Card";
-import { BigNumberText } from "../../organisms/BigNumberText";
+import { BigNumberProps, BigNumberText } from "../../organisms/BigNumberText";
 import { useBlockExplorer } from '../../contexts/BlockExplorerContext';
 
 export function CardTotals() {
-  const { data: { details: { totals } } } = useBlockExplorer();
-  const amount = 1
+  const { data: { details: { totals, usdPrice } } } = useBlockExplorer();
+  const amount = usdPrice
+
+  const textStyle = {
+    flex: 1,
+    mr: 8
+  }
+
+  const cryptoStyle: Partial<BigNumberProps> = {
+    fontSize: 16,
+    textAlign: "right",
+    maximumFractionDigits: -1
+  }
+
+  const usdStyle: Partial<BigNumberProps> = {
+    fontSize: 12,
+    textAlign: "right",
+    maximumFractionDigits: -1,
+    usdConversion:amount
+  }
+
+  const rowStyle = {
+    height: "50px"
+  }
 
   return (
-    <Card 
-        title="Totals since EIP-1559"
-        icon={FaBurn}>
+    <Card
+      title="Totals since EIP-1559"
+      icon={FaBurn}>
       <HStack>
-        <Text flex={1}>Rewards</Text>
-        <BigNumberText number={totals.rewards} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
+        <Text {...textStyle}>Rewards</Text>
+        <VStack alignItems="right">
+          <BigNumberText number={totals.rewards} {...cryptoStyle} />
+          <BigNumberText number={totals.rewards} {...usdStyle} />
+        </VStack>
       </HStack>
-      <HStack>
-        <Text flex={1}>Burned</Text>
-        <BigNumberText number={totals.burned} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
+
+      <Divider />
+
+      <HStack {...rowStyle}>
+        <Text {...textStyle}>Burned</Text>
+        <VStack alignItems="right">
+          <BigNumberText number={totals.burned} {...cryptoStyle} />
+          <BigNumberText number={totals.burned} {...usdStyle} />
+        </VStack>
       </HStack>
-      <HStack>
-        <Text flex={1}>Tips</Text>
-        <BigNumberText number={totals.tips} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
+      
+      <Divider />
+
+      <HStack {...rowStyle}>
+        <Text {...textStyle}>Tips</Text>
+        <VStack alignItems="right">
+          <BigNumberText number={totals.tips} {...cryptoStyle} />
+          <BigNumberText number={totals.tips} {...usdStyle} />
+        </VStack>
       </HStack>
-      <HStack>
-        <Text flex={1}>Net Issuance</Text>
-        <BigNumberText number={totals.issuance} usdConversion={amount} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
+
+      <Divider />
+
+      <HStack {...rowStyle}>
+        <Text {...textStyle}>Net Issuance</Text>
+        <VStack alignItems="right" justifyContent="right">
+          <BigNumberText number={totals.issuance} {...cryptoStyle} />
+          <BigNumberText number={totals.issuance} {...usdStyle} />
+        </VStack>
       </HStack>
-      <HStack>
-        <Text flex={1}>Net Reduction</Text>
+
+      <Divider />
+
+      <HStack {...rowStyle}>
+        <Text {...textStyle}>Net Reduction</Text>
         <HStack display="inline-flex">
-        <Text>{totals.netReduction} %</Text>
+          <Text>{totals.netReduction} %</Text>
         </HStack>
       </HStack>
     </Card>
