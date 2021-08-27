@@ -2,7 +2,6 @@ package hub
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -26,8 +25,8 @@ func (u *USDPriceWatcher) StartWatching() {
 
 	c := time.Tick(1 * time.Minute)
 	for now := range c {
+		_ = now
 		u.refreshCoinbasePrice(client)
-		fmt.Println("tick", now, u.Price)
 	}
 }
 
