@@ -123,7 +123,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
   }
 
   const insert = (data: BlockData) => {
-    const { block, totals, clients, version } = data
+    const { block, totals, clients, version, usdPrice } = data
 
     if (blockIndex[block.number]) {
       console.log('repeat', block.number);
@@ -149,6 +149,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
     details.totals.netReduction = caclulateNetReduction(totals.burned, totals.issuance)
     details.clients = clients
     details.version = version
+    details.usdPrice = usdPrice
     session.blockCount = session.blockCount + 1
     session.transactionCount = session.transactionCount + block.transactions
     session.minBaseFee = session.minBaseFee ? BigNumberMin(block.baseFee, session.minBaseFee) : block.baseFee
