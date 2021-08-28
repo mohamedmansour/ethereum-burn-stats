@@ -6,7 +6,6 @@ import { useMobileDetector } from "../../contexts/MobileDetectorContext";
 import { CardBlocks } from "./CardBlocks";
 import { CardLiveChart } from "./CardLiveChart";
 import { CardLatestStats } from "./CardLatestStats";
-import { CardCurrentSession } from "./CardCurrentSession";
 import { CardTotals } from "./CardTotals";
 import { CardDonate, CardDonateType } from "./CardDonate";
 
@@ -31,10 +30,9 @@ export function Dashboard() {
     return (
       <DashboardLayout>
         <CardDonate type={CardDonateType.TopSideBar} />
-        <CardLiveChart />
         <CardTotals />
+        <CardLiveChart type="primary" charts={["issuance", "tips", "basefee", "gas"]} />
         <CardLatestStats />
-        <CardCurrentSession />
         <CardBlocks />
         <CardDonate type={CardDonateType.BottomSideBar} />
       </DashboardLayout>
@@ -46,14 +44,14 @@ export function Dashboard() {
       <Flex flex={1} direction="row" gridGap={layoutConfig.gap}>
         <Flex direction="column" w={300} flexShrink={0} gridGap={layoutConfig.gap}>
           <CardDonate type={CardDonateType.TopSideBar} />
+          <CardTotals />
           <CardLatestStats />
-          <CardCurrentSession />
           <CardDonate type={CardDonateType.BottomSideBar} />
         </Flex>
         <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>
           <Flex direction="row" gridGap={layoutConfig.gap}>
-            <CardTotals />
-            <CardLiveChart flex={1} />
+            <CardLiveChart flex={1} type="primary" charts={["issuance", "tips"]} />
+            <CardLiveChart flex={1} type="secondary" charts={["basefee", "gas"]} />
           </Flex>
           <CardBlocks />
         </Flex>

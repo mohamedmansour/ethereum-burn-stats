@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { Card } from "../../atoms/Card";
 import { BaseFeeChart, ChartType } from "../../organisms/BaseFeeChart";
 import { BlockStats } from "../../libs/ethereum";
-import { ChartTypes, Setting } from "../../config";
+import { Setting } from "../../config";
 import { useSettings } from "../../contexts/SettingsContext";
+import { useSetting } from "../../hooks/useSetting";
 
 interface RadioCardProps extends UseRadioProps {
   children?: React.ReactNode
@@ -19,7 +20,7 @@ function RadioCard(props: RadioCardProps) {
   const checkbox = getCheckboxProps()
 
   return (
-    <Box as="label" fontSize={12}>
+    <Box as="label" fontSize={12} userSelect="none">
       <input {...input} style={{ display: "none" }} />
       <Box
         {...checkbox}
@@ -48,45 +49,54 @@ function RadioCard(props: RadioCardProps) {
   )
 }
 
-export function CardLiveChart(props: HTMLChakraProps<"div">) {
+export interface CardLiveProps extends HTMLChakraProps<"div"> {
+  type: "primary" | "secondary"
+  charts: ChartType[]
+}
+
+function settingType(type: string) {
+  return type === "primary" ? Setting.chartType : Setting.chartSecondaryType
+}
+
+export function CardLiveChart(props: CardLiveProps) {
+  const {type, charts, ...rest} = props
+  const doNotShowChart = useSetting<boolean>(Setting.doNotShowChart);
   const settings = useSettings();
-  const [doNotShowChart, setDoNotShowChart] = useState<boolean>(
-    settings.get(Setting.doNotShowChart)
-  );
   
   const [chartType, setChartType] = useState<ChartType>(
-    settings.get(Setting.chartType)
+    settings.get(settingType(type))
   );
 
   useEffect(() => {
-    settings.set(Setting.doNotShowChart, doNotShowChart);
-  }, [settings, doNotShowChart]);
+    if (charts.indexOf(chartType) === -1) {
+      setChartType(charts[0]);
+    }
+  }, [charts, chartType]);
 
   useEffect(() => {
-    settings.set(Setting.chartType, chartType);
-  }, [settings, chartType]);
+    settings.set(settingType(type), chartType);
+  }, [settings, type, chartType]);
 
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: "chart",
-    defaultValue: chartType,
+    value: chartType,
     onChange: (value: ChartType) => setChartType(value),
   })
 
   const group = getRootProps()
-
   return (
     <Card
-      title="Live Chart"
+      title={type === "primary" ? "Live Issuance Chart" : "Live Fee Chart"}
       icon={FaChartLine}
       collapsible={doNotShowChart}
-      onCollapsed={(collapsed) => setDoNotShowChart(collapsed)}
+      onCollapsed={(collapsed) => settings.set(Setting.doNotShowChart, collapsed)}
       minH={doNotShowChart ? 0 : 400}
       h={["auto", "auto", doNotShowChart ? "auto" : 400]} flexShrink={0}
-      {...props}
+      {...rest}
     >
       <Flex justifyContent={["center", "center", "flex-end"]}>
         <Grid {...group} templateColumns={["repeat(2, 1fr)", "repeat(2, 1fr)", "repeat(4, 1fr)"]} display="inline-grid" gridGap={2} mt={2} mb={2}>
-          {ChartTypes.map((value) => {
+          {charts.map((value) => {
             const radio = getRadioProps({ value })
             return (
               <RadioCard key={value} {...radio}>
