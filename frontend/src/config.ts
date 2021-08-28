@@ -6,7 +6,7 @@ import { ChartType } from "./organisms/BaseFeeChart";
 
 export const BooleanSetting: SettingConfig = {
   verify: (value: any): boolean => (value === "true" || value === "false" || value === true || value === false),
-  convert: (value: string): boolean => (value === "true")
+  convert: (value: string): boolean => value.toString() === "true"
 }
 
 export const IntegerSetting: SettingConfig = {
@@ -43,6 +43,7 @@ export enum Setting {
   doNotShowChart = "doNotShowChart",
   doNotShowCurrentSession = "doNotShowCurrentSession",
   chartType = "chartType",
+  chartSecondaryType = "chartSecondaryType",
   colorMode = "chakra-ui-color-mode"
 }
 
@@ -69,6 +70,10 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
     [Setting.chartType]: {
       config: ChartSetting,
       defaultValue: 'issuance',
+    },
+    [Setting.chartSecondaryType]: {
+      config: ChartSetting,
+      defaultValue: 'basefee',
     },
     [Setting.colorMode]: {
       config: DarkLightSetting,
