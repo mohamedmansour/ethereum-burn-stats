@@ -1,5 +1,5 @@
 import { Box, Button, Divider, HStack, HTMLChakraProps, Icon, Spacer, Text, Tooltip, useStyleConfig } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IconType } from "react-icons"
 import { VscChevronDown, VscChevronUp } from "react-icons/vsc";
 
@@ -28,6 +28,10 @@ export function Card(props: CardProps) {
     if (onCollapsed) 
       onCollapsed(newCollapsed);
   }
+
+  useEffect(() => {
+    setCollapsed(collapsible)
+  }, [collapsible])
   
   return (
     <Box __css={styles} {...rest}>
