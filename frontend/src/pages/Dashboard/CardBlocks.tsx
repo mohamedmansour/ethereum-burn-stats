@@ -1,5 +1,4 @@
 import { Text, HStack, Icon, Box, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList, LightMode } from "@chakra-ui/react";
-import { FaCubes } from 'react-icons/fa';
 import { VscInfo } from "react-icons/vsc";
 import { Card } from "../../atoms/Card";
 import { FirePit } from "../../atoms/FirePit";
@@ -90,7 +89,6 @@ export function CardBlocks() {
   return (
     <Card
       title="Blocks"
-      icon={FaCubes}
       flex={['auto', 'auto', 1]}
       h={[600, 600, "auto"]}
     >

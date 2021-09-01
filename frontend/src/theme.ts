@@ -3,22 +3,14 @@ import { mode } from "@chakra-ui/theme-tools"
 import { Dict } from "@chakra-ui/utils"
 import { layoutConfig } from "./layoutConfig"
 
-const secondaryColor = (props: Dict<any>) => mode('#a9a9a9', '#4e4e4e')(props)
-const backgroundColor = (props: Dict<any>) => mode('white', 'rgb(30, 30, 30)')(props)
+const secondaryColor = (props: Dict<any>) => mode('#a9a9a9', '#A8A8A8')(props)
+const backgroundColor = (props: Dict<any>) => mode('white', '#1E1E1E')(props)
 const borderColor = (props: Dict<any>) => mode('#eeeeee', '#292929')(props)
 
 const theme = extendTheme({
   config: {
     initialColorMode: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
     useSystemColorMode: false,
-  },
-  styles: {
-    global: (props: any) => ({
-      body: {
-        bg: mode('white', '#333')(props),
-        color: mode('rgb(51, 51, 51)', 'rgb(242, 242, 242)')(props)
-      }
-    })
   },
   colors: {
     brand: {
@@ -57,10 +49,10 @@ const theme = extendTheme({
         flexDirection: "column",
         px: 4,
         py: 3,
-        rounded: "md",
+        rounded: "base",
         bg: backgroundColor(props),
         boxShadow: mode("rgb(0 0 0 / 7%) 0px 14px 66px, rgb(0 0 0 / 3%) 0px 10px 17px, rgb(0 0 0 / 5%) 0px 4px 7px;",
-          "rgba(0, 0, 0, 0.1) 0px 0px 0px 1px,rgba(0, 0, 0, 0.2) 0px 5px 10px,rgba(0, 0, 0, 0.4) 0px 15px 40px;")(props),
+          "0px 8px 24px rgba(0, 0, 0, 0.2)")(props),
         gridGap: layoutConfig.miniGap
       }),
       variants: {

@@ -1,5 +1,4 @@
 import { Text, HStack, Divider } from "@chakra-ui/react";
-import { FaWaveSquare } from 'react-icons/fa';
 import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
 import { BigNumberText } from "../../organisms/BigNumberText";
@@ -28,7 +27,6 @@ export function CardCurrentSession() {
   return (
     <Card
       title="Current Session"
-      icon={FaWaveSquare}
       collapsible={doNotShowCurrentSession}
       onCollapsed={(collapsed) => setDoNotShowCurrentSession(collapsed)}
     >

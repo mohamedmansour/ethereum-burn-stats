@@ -86,7 +86,7 @@ export function BigNumberText(props: BigNumberProps) {
   if (!state) {
     return (
       <HStack display="inline-flex" {...rest}>
-        <Text>0</Text>
+        <Text fontWeight={rest.fontSize === "xs" ? "medium" : "bold"}>0</Text>
       </HStack>
     )
   }
@@ -94,8 +94,8 @@ export function BigNumberText(props: BigNumberProps) {
   const currencyColor = removeCurrencyColor !== undefined && removeCurrencyColor ? undefined : "brandSecondary"
   return (
     <HStack display="inline-flex" {...rest} position="relative" title={`${state.value} ${state.currency}`}>
-      <Text flex={1}>{state.prettyValue}</Text>
-      {!hideCurrency && <Text variant={currencyColor}>{state.currency}</Text>}
+      <Text flex={1} fontWeight={rest.fontSize === "xs" ? "medium" : "bold"}>{state.prettyValue}</Text>
+      {!hideCurrency && <Text variant={currencyColor} fontSize="xs" fontWeight="light">{state.currency}</Text>}
     </HStack>
   );
 }

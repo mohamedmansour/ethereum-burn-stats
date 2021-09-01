@@ -1,5 +1,4 @@
 import { Text, Box } from "@chakra-ui/react";
-import { FaClock } from 'react-icons/fa';
 import { Card } from "../../atoms/Card";
 import { useEffect, useState } from "react";
 import { useEthereum } from "../../contexts/EthereumContext";
@@ -47,7 +46,6 @@ export function CardCountdown({ genesisBlock, currentBlock }: { genesisBlock: nu
   return (
     <Card 
         title={`${eth?.connectedNetwork.name} Countdown`}
-        icon={FaClock}
         w="100%"
         textAlign="center">
       <Box>

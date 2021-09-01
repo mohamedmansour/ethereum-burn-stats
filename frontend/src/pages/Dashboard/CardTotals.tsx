@@ -1,85 +1,48 @@
-import { Divider, HStack, Text, VStack } from '@chakra-ui/react';
-import { FaBurn } from 'react-icons/fa';
+import { HStack, Icon, Text, VStack } from '@chakra-ui/react';
+import { BigNumber } from 'ethers';
+import { IconType } from 'react-icons';
+import { FaMoneyBillWave } from 'react-icons/fa';
+import { BiLineChart } from 'react-icons/bi';
+import { AiFillPieChart } from 'react-icons/ai';
+import { IoTrophySharp } from 'react-icons/io5';
 import { Card } from "../../atoms/Card";
-import { BigNumberProps, BigNumberText } from "../../organisms/BigNumberText";
+import { BigNumberText } from "../../organisms/BigNumberText";
 import { useBlockExplorer } from '../../contexts/BlockExplorerContext';
+
+function TotalStatLine({ icon, title, value, amount }: { icon: IconType, title: string, value?: BigNumber, amount: number }) {
+  return (
+    <HStack alignItems="start" justifyContent="start" pt="6px" pb="6px">
+      <HStack justifyContent="center">
+        <Icon as={icon} color="#FAB951" />
+        <Text flex={1} mr={8} fontSize="md" fontWeight="medium">{title}</Text>
+      </HStack>
+      {value !== undefined && (
+        <VStack align="flex-end" flex={1} spacing={0}>
+          <BigNumberText number={value} fontSize="md" textAlign="right" maximumFractionDigits={-1} />
+          <BigNumberText number={value} fontSize="xs" textAlign="right" maximumFractionDigits={-1} usdConversion={amount} />
+        </VStack>
+      )}
+      {value === undefined && (
+        <HStack justify="flex-end" flex={1} spacing={0}>
+          <Text fontSize="md" fontWeight="bold" mr={2}>{amount}</Text>
+          <Text fontSize="xs" fontWeight="light" variant="brandSecondary" width="20px">%</Text>
+        </HStack>
+      )}
+    </HStack>
+  )
+}
 
 export function CardTotals() {
   const { data: { details: { totals, usdPrice } } } = useBlockExplorer();
   const amount = usdPrice
 
-  const textStyle = {
-    flex: 1,
-    mr: 8
-  }
-
-  const cryptoStyle: Partial<BigNumberProps> = {
-    fontSize: 16,
-    textAlign: "right",
-    maximumFractionDigits: -1
-  }
-
-  const usdStyle: Partial<BigNumberProps> = {
-    fontSize: 12,
-    textAlign: "right",
-    maximumFractionDigits: -1,
-    usdConversion:amount
-  }
-
-  const rowStyle = {
-    height: "50px"
-  }
-
   return (
-    <Card
-      title="Totals since EIP-1559"
-      icon={FaBurn}>
-      <HStack>
-        <Text {...textStyle}>Rewards</Text>
-        <VStack alignItems="right">
-          <BigNumberText number={totals.rewards} {...cryptoStyle} />
-          <BigNumberText number={totals.rewards} {...usdStyle} />
-        </VStack>
-      </HStack>
-
-      <Divider />
-
-      <HStack {...rowStyle}>
-        <Text {...textStyle}>Burned</Text>
-        <VStack alignItems="right">
-          <BigNumberText number={totals.burned} {...cryptoStyle} />
-          <BigNumberText number={totals.burned} {...usdStyle} />
-        </VStack>
-      </HStack>
-      
-      <Divider />
-
-      <HStack {...rowStyle}>
-        <Text {...textStyle}>Tips</Text>
-        <VStack alignItems="right">
-          <BigNumberText number={totals.tips} {...cryptoStyle} />
-          <BigNumberText number={totals.tips} {...usdStyle} />
-        </VStack>
-      </HStack>
-
-      <Divider />
-
-      <HStack {...rowStyle}>
-        <Text {...textStyle}>Net Issuance</Text>
-        <VStack alignItems="right" justifyContent="right">
-          <BigNumberText number={totals.issuance} {...cryptoStyle} />
-          <BigNumberText number={totals.issuance} {...usdStyle} />
-        </VStack>
-      </HStack>
-
-      <Divider />
-
-      <HStack {...rowStyle}>
-        <Text {...textStyle}>Net Reduction</Text>
-        <HStack display="inline-flex">
-          <Text>{totals.netReduction} %</Text>
-        </HStack>
-      </HStack>
+    <Card title="Overview" subtitle="Total stats since EIP-1559">
+      <TotalStatLine icon={IoTrophySharp} title="Rewards" value={totals.rewards} amount={amount} />
+      <TotalStatLine icon={AiFillPieChart} title="Burned" value={totals.burned} amount={amount} />
+      <TotalStatLine icon={FaMoneyBillWave} title="Tips" value={totals.tips} amount={amount} />
+      <TotalStatLine icon={BiLineChart} title="Net Issuance" value={totals.issuance} amount={amount} />
+      <TotalStatLine icon={AiFillPieChart} title="Net Reduction" amount={totals.netReduction} />
     </Card>
   );
 }

@@ -1,5 +1,4 @@
 import { useRadio, Box, UseRadioProps, useRadioGroup, Grid, Flex, HTMLChakraProps } from "@chakra-ui/react";
-import { FaChartLine } from 'react-icons/fa';
 import { useEffect, useState } from "react";
 import { Card } from "../../atoms/Card";
 import { BaseFeeChart, ChartType } from "../../organisms/BaseFeeChart";
@@ -87,7 +86,6 @@ export function CardLiveChart(props: CardLiveProps) {
   return (
     <Card
       title={type === "primary" ? "Live Issuance Chart" : "Live Fee Chart"}
-      icon={FaChartLine}
       collapsible={doNotShowChart}
       onCollapsed={(collapsed) => settings.set(Setting.doNotShowChart, collapsed)}
       minH={doNotShowChart ? 0 : 400}

@@ -12,9 +12,8 @@ import {
   SimpleGrid,
   useColorModeValue
 } from "@chakra-ui/react";
-import { Card } from "../../atoms/Card";
-import { ImHeart } from "react-icons/im";
 import { VscHeart } from "react-icons/vsc";
+import { Card } from "../../atoms/Card";
 import { LogoGoodGhosting, LogoIndexed, LogoNansen, LogoUnicornCircle } from "./Logos";
 
 export enum CardDonateType {
@@ -52,8 +51,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
     
     return (
       <Card 
-          title="Patrons"
-          icon={VscHeart}>
+          title="Patrons">
         <Box>
           <SimpleGrid columns={2} gridGap={2} mt={2} alignItems="center" justifyContent="center">
             <LinkBox title={indexedTitle}>
@@ -85,8 +83,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
 
   return (
     <Card 
-        title="Current Session"
-        icon={ImHeart}>
+        title="Current Session">
       <Box pl={4} pr={4} pb={4}>
         <Text>It's expensive hosting multiple geth instances on the cloud. Any help would be appreciated:</Text>
         <UnorderedList mt={4}>
