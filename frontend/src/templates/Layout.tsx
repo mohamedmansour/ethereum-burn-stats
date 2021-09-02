@@ -2,17 +2,15 @@ import {
   Flex,
   HStack,
   Link,
-  Box,
-  Heading,
   useColorModeValue,
 } from "@chakra-ui/react";
 import * as CSS from "csstype";
 import { Link as ReactLink } from "react-router-dom";
-import { FirePit } from "../atoms/FirePit";
 import { Footer } from "../organisms/Footer";
 import { layoutConfig } from "../layoutConfig";
 import { Announcement } from "../organisms/Announcement";
 import { ColorModeSwitcher } from "../atoms/ColorModeSwitcher";
+import { LogoWithTextIcon } from "../atoms/LogoWithTextIcon";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -45,9 +43,8 @@ export function Layout(props: LayoutProps) {
               textDecoration: "none",
             }}
           >
-            <HStack cursor="pointer">
-              <FirePit size="24px" />
-              <Heading size="lg" color={logoColor}>Watch The <Box display="inline" color="brand.orange">Burn</Box></Heading>
+            <HStack cursor="pointer" p="23px 0">
+              <LogoWithTextIcon fontSize="45px" color={logoColor} />
             </HStack>
           </Link>
         </HStack>

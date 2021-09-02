@@ -33,12 +33,12 @@ import { Card } from "../atoms/Card";
 import {
   BurnedBlockTransaction,
 } from "../contexts/BlockExplorerContext";
-import { FirePit } from "../atoms/FirePit";
 import { BigNumberText } from "../organisms/BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "../organisms/GasUsed";
 import { layoutConfig } from "../layoutConfig";
 import { TablePlus, TdPlus, ThPlus } from "../atoms/TablePlus";
 import { Transaction } from "../libs/ethereum";
+import { LogoIcon } from "../atoms/LogoIcon";
 
 interface BlockDetailState {
   block?: BurnedBlockTransaction;
@@ -192,7 +192,7 @@ export function EthBlockDetail() {
                         <Heading size="sm">
                           <HStack>
                             <Text>Burned</Text>
-                            <FirePit size="12px" />
+                            <LogoIcon />
                           </HStack>
                         </Heading>
                         <BigNumberText number={state.block.stats.burned} />
