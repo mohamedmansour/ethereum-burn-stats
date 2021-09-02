@@ -93,7 +93,7 @@ export function CardLiveChart(props: CardLiveProps) {
       {...rest}
     >
       <Flex justifyContent={["center", "center", "flex-end"]}>
-        <Grid {...group} templateColumns={["repeat(2, 1fr)", "repeat(2, 1fr)", "repeat(4, 1fr)"]} display="inline-grid" gridGap={2} mt={2} mb={2}>
+        <Grid {...group} templateColumns="repeat(2, 1fr)" display="inline-grid" gridGap={2} mt={2} mb={2}>
           {charts.map((value) => {
             const radio = getRadioProps({ value })
             return (
