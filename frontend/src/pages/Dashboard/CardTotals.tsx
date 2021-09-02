@@ -1,7 +1,7 @@
 import { HStack, Icon, Text, VStack } from '@chakra-ui/react';
 import { BigNumber } from 'ethers';
 import { IconType } from 'react-icons';
-import { FaMoneyBillWave } from 'react-icons/fa';
+import { FaBurn, FaMoneyBillWave } from 'react-icons/fa';
 import { BiLineChart } from 'react-icons/bi';
 import { AiFillPieChart } from 'react-icons/ai';
 import { IoTrophySharp } from 'react-icons/io5';
@@ -39,7 +39,7 @@ export function CardTotals() {
   return (
     <Card title="Overview" subtitle="Total stats since EIP-1559">
       <TotalStatLine icon={IoTrophySharp} title="Rewards" value={totals.rewards} amount={amount} />
-      <TotalStatLine icon={AiFillPieChart} title="Burned" value={totals.burned} amount={amount} />
+      <TotalStatLine icon={FaBurn} title="Burned" value={totals.burned} amount={amount} />
       <TotalStatLine icon={FaMoneyBillWave} title="Tips" value={totals.tips} amount={amount} />
       <TotalStatLine icon={BiLineChart} title="Net Issuance" value={totals.issuance} amount={amount} />
       <TotalStatLine icon={AiFillPieChart} title="Net Reduction" amount={totals.netReduction} />
