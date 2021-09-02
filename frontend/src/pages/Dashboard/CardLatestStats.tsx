@@ -28,13 +28,13 @@ export function CardLatestStats() {
           <BigNumberText number={details.currentPriorityFee} textAlign="right" />
         </HStack>
         <HStack w="100%">
+          <Text flex={1} fontWeight="medium">Ethereum Price</Text>
+          <BigNumberText number={OneEther} usdConversion={details.usdPrice} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
+        </HStack>
+        <HStack w="100%">
           <HStack flex={1}><Text fontWeight="medium">Watching the Burn</Text> <FirePit size="12px" /></HStack>
           {count === undefined && <Text>calculating ...</Text>}
           {count !== undefined && <Text>{count} users</Text>}
-        </HStack>
-        <HStack w="100%">
-          <Text flex={1} fontWeight="medium">Ethereum Price</Text>
-          <BigNumberText number={OneEther} usdConversion={details.usdPrice} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
         </HStack>
       </VStack>
     </Card>
