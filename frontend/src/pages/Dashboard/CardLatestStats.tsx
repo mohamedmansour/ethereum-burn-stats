@@ -2,7 +2,7 @@ import { Text, HStack, VStack, Heading, ListItem, UnorderedList } from "@chakra-
 import { useEffect, useState } from "react";
 import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
-import { BigNumberText } from "../../organisms/BigNumberText";
+import { BigNumberProps, BigNumberText } from "../../organisms/BigNumberText";
 import { FirePit } from "../../atoms/FirePit";
 import { OneEther } from "../../utils/number";
 
@@ -37,25 +37,32 @@ export function CardLatestStats() {
     setCount(details.clients);
   }, [details.clients]);
 
+  const bigNumberStyle: Partial<BigNumberProps> = {
+    valueStyle: {fontSize: "md", fontWeight: "bold"},
+    textAlign: "right"
+  }
+
   return (
     <Card title="Recent" subtitle="Latest block stats" tooltip={<RenderTooltip />}>
       <VStack align="flex-start" spacing={4}>
         <HStack w="100%">
           <Text flex={1} fontWeight="medium">Base Fee</Text>
-          <BigNumberText number={details.currentBaseFee} textAlign="right" />
+          <BigNumberText number={details.currentBaseFee} {...bigNumberStyle} />
         </HStack>
         <HStack w="100%">
           <Text flex={1} fontWeight="medium">Priority Fee</Text>
-          <BigNumberText number={details.currentPriorityFee} textAlign="right" />
+          <BigNumberText number={details.currentPriorityFee} {...bigNumberStyle} />
         </HStack>
         <HStack w="100%">
           <Text flex={1} fontWeight="medium">Ethereum Price</Text>
-          <BigNumberText number={OneEther} usdConversion={details.usdPrice} fontSize={16} textAlign="right" maximumFractionDigits={-1} />
+          <BigNumberText number={OneEther} usdConversion={details.usdPrice} fontSize={16} maximumFractionDigits={-1} {...bigNumberStyle} />
         </HStack>
         <HStack w="100%">
           <HStack flex={1}><Text fontWeight="medium">Watching the Burn</Text> <FirePit size="12px" /></HStack>
-          {count === undefined && <Text>calculating ...</Text>}
-          {count !== undefined && <Text>{count} users</Text>}
+          <HStack justify="flex-end">
+            <Text fontSize="md" fontWeight="bold">{count}</Text>
+            <Text fontSize="xs" fontWeight="light" variant="brandSecondary">USERS</Text>
+          </HStack>
         </HStack>
       </VStack>
     </Card>

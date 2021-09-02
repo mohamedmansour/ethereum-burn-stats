@@ -44,7 +44,7 @@ export function CardCurrentSession() {
       </HStack>
       <HStack>
         <HStack flex={1}><Text>Base Fee</Text><Text fontSize={12} variant="brandSecondary">(min/max)</Text></HStack>
-        <BigNumberText number={session.minBaseFee} fontSize={16} hideCurrency />
+        <BigNumberText number={session.minBaseFee} fontSize={16} />
         <Text>/</Text>
         <BigNumberText number={session.maxBaseFee} fontSize={16} />
       </HStack>

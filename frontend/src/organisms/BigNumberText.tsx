@@ -2,6 +2,7 @@ import {
   HStack,
   HTMLChakraProps,
   Text,
+  TextProps,
 } from "@chakra-ui/react";
 import { BigNumber, utils } from "ethers";
 import { useMemo } from "react";
@@ -14,9 +15,9 @@ export interface BigNumberProps extends HTMLChakraProps<"div"> {
   number: BigNumber | undefined;
   usdConversion?: number;
   maximumFractionDigits?: number
-  hideCurrency?: boolean;
   removeCurrencyColor?: boolean
-  forced?: BigNumberType
+  valueStyle?: TextProps
+  currencyStyle?: TextProps
 }
 
 interface BigNumberState {
@@ -27,7 +28,6 @@ interface BigNumberState {
 
 interface BigNumberFormatProps {
   number: BigNumber | undefined
-  forced?: BigNumberType
   usdConversion?: number
   maximumFractionDigits?: number
 }
@@ -43,10 +43,7 @@ export function BigNumberFormat(props: BigNumberFormatProps) {
     bignumber = bignumber.abs()
   }
 
-  if (props.forced && props.forced !== 'auto') {
-    value = utils.formatUnits(bignumber, props.forced)
-    currency = props.forced === 'ether' ? 'ETH' : props.forced.toUpperCase()
-  } else if (props.usdConversion && props.usdConversion > 1)  {
+  if (props.usdConversion && props.usdConversion > 1)  {
     value = utils.formatEther(bignumber.mul(Math.floor(props.usdConversion * 100)).div(BigNumber.from(100)).toString())
     currency = 'USD'
   } else {
@@ -74,19 +71,19 @@ export function BigNumberFormat(props: BigNumberFormatProps) {
 }
 
 export function BigNumberText(props: BigNumberProps) {
-  const { number, usdConversion, removeCurrencyColor, maximumFractionDigits, forced, hideCurrency, ...rest } = props;
+  const { number, usdConversion, removeCurrencyColor, maximumFractionDigits, valueStyle, currencyStyle, ...rest } = props;
   const state = useMemo<BigNumberState>(() => 
     BigNumberFormat({
       number: props.number, 
-      forced: props.forced, 
       usdConversion: props.usdConversion,
       maximumFractionDigits: props.maximumFractionDigits
-    }), [props.number, props.forced, props.usdConversion, props.maximumFractionDigits]);
+    }), [props.number, props.usdConversion, props.maximumFractionDigits]);
+
 
   if (!state) {
     return (
       <HStack display="inline-flex" {...rest}>
-        <Text fontWeight={rest.fontSize === "xs" ? "medium" : "bold"}>0</Text>
+        <Text {...valueStyle}>0</Text>
       </HStack>
     )
   }
@@ -94,8 +91,8 @@ export function BigNumberText(props: BigNumberProps) {
   const currencyColor = removeCurrencyColor !== undefined && removeCurrencyColor ? undefined : "brandSecondary"
   return (
     <HStack display="inline-flex" {...rest} position="relative" title={`${state.value} ${state.currency}`}>
-      <Text flex={1} fontWeight={rest.fontSize === "xs" ? "medium" : "bold"}>{state.prettyValue}</Text>
-      {!hideCurrency && <Text variant={currencyColor} fontSize="xs" fontWeight="light">{state.currency}</Text>}
+      <Text flex={1} {...valueStyle}>{state.prettyValue}</Text>
+      <Text variant={currencyColor} fontSize="xs" {...currencyStyle}>{state.currency}</Text>
     </HStack>
   );
 }

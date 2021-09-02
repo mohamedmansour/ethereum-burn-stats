@@ -18,8 +18,8 @@ function TotalStatLine({ icon, title, value, amount }: { icon: IconType, title: 
       </HStack>
       {value !== undefined && (
         <VStack align="flex-end" flex={1} spacing={0}>
-          <BigNumberText number={value} fontSize="md" textAlign="right" maximumFractionDigits={-1} />
-          <BigNumberText number={value} fontSize="xs" textAlign="right" maximumFractionDigits={-1} usdConversion={amount} />
+          <BigNumberText number={value} valueStyle={{fontSize: "md", fontWeight: "bold"}} maximumFractionDigits={-1} />
+          <BigNumberText number={value} valueStyle={{fontSize: "xs", fontWeight: "medium"}} maximumFractionDigits={-1} usdConversion={amount} />
         </VStack>
       )}
       {value === undefined && (
