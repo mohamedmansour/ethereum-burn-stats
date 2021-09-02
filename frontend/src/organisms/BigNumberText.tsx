@@ -92,7 +92,7 @@ export function BigNumberText(props: BigNumberProps) {
   return (
     <HStack display="inline-flex" {...rest} position="relative" title={`${state.value} ${state.currency}`}>
       <Text flex={1} {...valueStyle}>{state.prettyValue}</Text>
-      <Text variant={currencyColor} fontSize="xs" {...currencyStyle}>{state.currency}</Text>
+      <Text variant={currencyColor} fontSize="xs" fontWeight="light" {...currencyStyle}>{state.currency}</Text>
     </HStack>
   );
 }
