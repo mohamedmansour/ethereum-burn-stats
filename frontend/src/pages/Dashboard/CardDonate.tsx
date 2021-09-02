@@ -3,16 +3,14 @@ import {
   Link,
   HStack,
   Box,
-  Icon,
   ListItem,
   UnorderedList,
   LinkOverlay,
   LinkBox,
   Spacer,
   SimpleGrid,
-  useColorModeValue
+  useColorModeValue,
 } from "@chakra-ui/react";
-import { VscHeart } from "react-icons/vsc";
 import { Card } from "../../atoms/Card";
 import { LogoGoodGhosting, LogoIndexed, LogoNansen, LogoUnicornCircle } from "./Logos";
 
@@ -32,10 +30,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
           <LinkBox title={title} whiteSpace="nowrap">
             <LinkOverlay href="https://www.nansen.ai" target="_blank" display="flex">
               <HStack flex={1}>
-                <Icon as={VscHeart} />
-                <Text fontSize="md" fontWeight="bold" flex={1}>
-                  Sponsored By
-                </Text>
+                <Text size="xs" fontWeight="bold" flex={1} variant="brandSecondary">Sponsored By</Text>
                 <Spacer />
                 <LogoNansen color={logoColor} />
               </HStack>
@@ -82,8 +77,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
   }
 
   return (
-    <Card 
-        title="Current Session">
+    <Card title="Current Session">
       <Box pl={4} pr={4} pb={4}>
         <Text>It's expensive hosting multiple geth instances on the cloud. Any help would be appreciated:</Text>
         <UnorderedList mt={4}>
