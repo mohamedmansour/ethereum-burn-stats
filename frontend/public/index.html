@@ -181,6 +181,7 @@
     }
   </style>
 </head>
+
 <body>
   <script>
     // To eliminate flashing a bit more.
@@ -190,16 +191,23 @@
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root">
     <div id="raw-loader">
-      <div class="firepit firepit-animate">
-        <div class="firepit-fire">
-          <div class="firepit-flame"></div>
-          <div class="firepit-flame"></div>
-          <div class="firepit-flame"></div>
-          <div class="firepit-flame"></div>
-        </div>
-      </div>
+      <svg height="150" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="16" cy="21.766" rx="10.2342" ry="10.2342" fill="url(#paint0_linear)" />
+        <path d="M23.2367 0L8.7633 14.4987C4.76659 18.5023 4.76659 24.9936 8.7633 28.9972L23.2367 14.4986C27.2334 10.4949 27.2334 4.00366 23.2367 0Z" fill="url(#paint1_linear)" />
+        <defs>
+          <linearGradient id="paint0_linear" x1="24.3797" y1="13.2922" x2="8.94395" y2="29.0511" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#FAB951" />
+            <stop offset="1" stop-color="#FF5F52" />
+          </linearGradient>
+          <linearGradient id="paint1_linear" x1="16" y1="0" x2="16" y2="28.9972" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#C62828" />
+            <stop offset="1" stop-color="#FF5F52" />
+          </linearGradient>
+        </defs>
+      </svg>
       <div id="raw-text">loading...</div>
     </div>
   </div>
 </body>
+
 </html>

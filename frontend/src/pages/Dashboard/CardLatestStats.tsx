@@ -2,9 +2,9 @@ import { Text, HStack, VStack, Heading, ListItem, UnorderedList } from "@chakra-
 import { useEffect, useState } from "react";
 import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { Card } from "../../atoms/Card";
-import { BigNumberProps, BigNumberText } from "../../organisms/BigNumberText";
-import { FirePit } from "../../atoms/FirePit";
 import { OneEther } from "../../utils/number";
+import { LogoIcon } from "../../atoms/LogoIcon";
+import { BigNumberProps, BigNumberText } from "../../organisms/BigNumberText";
 
 function RenderTooltip() {
   return (<>
@@ -38,7 +38,7 @@ export function CardLatestStats() {
   }, [details.clients]);
 
   const bigNumberStyle: Partial<BigNumberProps> = {
-    valueStyle: {fontSize: "md", fontWeight: "bold"},
+    valueStyle: { fontSize: "md", fontWeight: "bold" },
     textAlign: "right"
   }
 
@@ -58,7 +58,7 @@ export function CardLatestStats() {
           <BigNumberText number={OneEther} usdConversion={details.usdPrice} fontSize={16} maximumFractionDigits={-1} {...bigNumberStyle} />
         </HStack>
         <HStack w="100%">
-          <HStack flex={1}><Text fontWeight="medium">Watching the Burn</Text> <FirePit size="12px" /></HStack>
+          <HStack flex={1}><Text fontWeight="medium">Watching the Burn</Text> <LogoIcon /></HStack>
           <HStack justify="flex-end">
             <Text fontSize="md" fontWeight="bold">{count}</Text>
             <Text fontSize="xs" fontWeight="light" variant="brandSecondary">USERS</Text>

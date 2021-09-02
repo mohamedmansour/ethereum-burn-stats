@@ -1,7 +1,6 @@
 import { Text, HStack, Icon, Box, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList, LightMode } from "@chakra-ui/react";
 import { VscInfo } from "react-icons/vsc";
 import { Card } from "../../atoms/Card";
-import { FirePit } from "../../atoms/FirePit";
 import { TablePlus, TdPlus, ThPlus } from "../../atoms/TablePlus";
 import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { BigNumberText } from "../../organisms/BigNumberText";
@@ -9,8 +8,8 @@ import { GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
 import { timeSince } from "../../utils/time";
 import { BlockStats } from "../../libs/ethereum";
 import { maxBlocksToRenderInTable } from "../../config";
-import React from "react";
 import { layoutConfig } from "../../layoutConfig";
+import { LogoIcon } from "../../atoms/LogoIcon";
 
 function TooltipGasUsedInfo() {
   return (
@@ -52,7 +51,7 @@ function BlockItem({ block }: { block: BlockStats }) {
   return (
     <Tr>
       <TdPlus>{block.number}</TdPlus>
-      <TdPlus><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><FirePit size="12px" /></HStack></VStack></TdPlus>
+      <TdPlus><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><LogoIcon /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.tips} /></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.baseFee} /></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.priorityFee} /></TdPlus>
