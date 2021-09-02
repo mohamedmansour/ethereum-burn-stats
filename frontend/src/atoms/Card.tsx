@@ -1,18 +1,19 @@
-import { Box, Button, Flex, Heading, HStack, HTMLChakraProps, Icon, Spacer, Text, Tooltip, useStyleConfig } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, HStack, HTMLChakraProps, Icon, LightMode, Spacer, Text, Tooltip, useStyleConfig } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { VscChevronDown, VscChevronUp } from "react-icons/vsc";
+import { MdInfoOutline } from "react-icons/md";
 
 interface CardProps extends HTMLChakraProps<"div"> {
   variant?: string
   title?: string
   subtitle?: string
-  tooltip?: string
+  tooltip?: React.ReactNode
   collapsible?: boolean
   onCollapsed?: (collapsed: boolean) => void
 }
 
-function CardTooltip({ label }: { label: string }) {
-  return <Box p={2}><Text>{label}</Text></Box>
+function CardTooltip({ label }: { label: React.ReactNode }) {
+  return <Box p={2}><LightMode>{label}</LightMode></Box>
 }
 
 export function Card(props: CardProps) {
@@ -32,15 +33,16 @@ export function Card(props: CardProps) {
     setCollapsed(collapsible)
   }, [collapsible])
 
+  if (tooltip && collapsible) {
+    throw new Error("Collapsible cards cannot have tooltips")
+  }
+
   return (
     <Box __css={styles} {...rest}>
       {title && (
         <Flex direction="column" alignItems="flex-start" gridGap={0} mb={collapsed ? 0 : 2}>
           <HStack w="100%">
-            <HStack>
-              {!tooltip && <Heading size="md" fontWeight="bold">{title}</Heading>}
-              {tooltip && <Tooltip placement="right" label={<CardTooltip label={tooltip} />}><Text fontSize="md" fontWeight="bold">{title}</Text></Tooltip>}
-            </HStack>
+            <Heading size="md" fontWeight="bold">{title}</Heading>
             {collapsible !== undefined && (
               <>
                 <Spacer />
@@ -52,6 +54,12 @@ export function Card(props: CardProps) {
                   iconSpacing={0}
                   onClick={onCollapsedClicked}>
                 </Button>
+              </>
+            )}
+            {tooltip && (
+              <>
+                <Spacer />
+                <Tooltip placement="right" label={<CardTooltip label={tooltip} />}><Box position="relative"><Icon as={MdInfoOutline} /></Box></Tooltip>
               </>
             )}
           </HStack>

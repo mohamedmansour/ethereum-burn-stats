@@ -14,8 +14,8 @@ function GasUsedInfo() {
   return (
     <Box>
       <LightMode>
-        <Heading size="sm">Gas used is % of gas target</Heading>
-        <UnorderedList mt={4}>
+        <Heading size="xs">Gas used is % of gas target</Heading>
+        <UnorderedList mt={4} spacing={2}>
           <ListItem>100% == no change in base fee</ListItem>
           <ListItem>200% == 12.5% increase in base fee</ListItem>
           <ListItem>0% == 12.5% decrease in base fee</ListItem>

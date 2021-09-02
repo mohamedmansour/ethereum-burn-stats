@@ -1,4 +1,4 @@
-import { HStack, Icon, Text, VStack } from '@chakra-ui/react';
+import { Heading, HStack, Icon, ListItem, Text, UnorderedList, VStack } from '@chakra-ui/react';
 import { BigNumber } from 'ethers';
 import { IconType } from 'react-icons';
 import { FaBurn, FaMoneyBillWave } from 'react-icons/fa';
@@ -32,12 +32,25 @@ function TotalStatLine({ icon, title, value, amount }: { icon: IconType, title: 
   )
 }
 
+function RenderTooltip() {
+  return (<>
+    <Heading size="xs">Overview explainer</Heading>
+    <UnorderedList mt={4} spacing={2}>
+      <ListItem>Rewards contains the coinbase + uncle rewards.</ListItem>
+      <ListItem>Burned is the block's <code>gas used x base fee</code>.</ListItem>
+      <ListItem>Tips is the sum of all tips given from all transactions in the block. Tips are optional.</ListItem>
+      <ListItem>Net Issuance is just <code>burned - rewards</code>. The amount of new ETH coming into circulation.</ListItem>
+      <ListItem>Net Reduction explains how much ETH issuance was reduced after EIP-1559, when this reaches above 100%, it means we are burning more than issuing. Ultra sound money!</ListItem>
+    </UnorderedList>
+  </>)
+}
+
 export function CardTotals() {
   const { data: { details: { totals, usdPrice } } } = useBlockExplorer();
   const amount = usdPrice
 
   return (
-    <Card title="Overview" subtitle="Total stats since EIP-1559">
+    <Card title="Overview" subtitle="Total stats since EIP-1559" tooltip={<RenderTooltip />}>
       <TotalStatLine icon={IoTrophySharp} title="Rewards" value={totals.rewards} amount={amount} />
       <TotalStatLine icon={FaBurn} title="Burned" value={totals.burned} amount={amount} />
       <TotalStatLine icon={FaMoneyBillWave} title="Tips" value={totals.tips} amount={amount} />
