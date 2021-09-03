@@ -1,4 +1,4 @@
-import { useRadio, Box, UseRadioProps, useRadioGroup, Grid, Flex, HTMLChakraProps } from "@chakra-ui/react";
+import { useRadio, Box, UseRadioProps, useRadioGroup, Flex, HTMLChakraProps } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { Card } from "../../atoms/Card";
 import { BaseFeeChart, ChartType } from "../../organisms/BaseFeeChart";
@@ -76,13 +76,12 @@ export function CardLiveChart(props: CardLiveProps) {
     settings.set(settingType(type), chartType);
   }, [settings, type, chartType]);
 
-  const { getRootProps, getRadioProps } = useRadioGroup({
+  const { getRadioProps } = useRadioGroup({
     name: "chart",
     value: chartType,
     onChange: (value: ChartType) => setChartType(value),
   })
 
-  const group = getRootProps()
   return (
     <Card
       title={type === "primary" ? "Live Issuance Chart" : "Live Fee Chart"}
@@ -92,17 +91,15 @@ export function CardLiveChart(props: CardLiveProps) {
       h={["auto", "auto", doNotShowChart ? "auto" : 400]} flexShrink={0}
       {...rest}
     >
-      <Flex justifyContent={["center", "center", "flex-end"]}>
-        <Grid {...group} templateColumns="repeat(2, 1fr)" display="inline-grid" gridGap={2} mt={2} mb={2}>
-          {charts.map((value) => {
-            const radio = getRadioProps({ value })
-            return (
-              <RadioCard key={value} {...radio}>
-                {value}
-              </RadioCard>
-            )
-          })}
-        </Grid>
+      <Flex justifyContent={["center", "center", "flex-end"]} gridGap={2}>
+        {charts.map((value) => {
+          const radio = getRadioProps({ value })
+          return (
+            <RadioCard key={value} {...radio}>
+              {value}
+            </RadioCard>
+          )
+        })}
       </Flex>
       <BaseFeeChart chartType={chartType} />
     </Card>

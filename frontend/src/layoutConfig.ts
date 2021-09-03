@@ -7,7 +7,7 @@ interface LayoutConfig {
 }
 
 export const layoutConfig: LayoutConfig = {
-  gap: [4, 4, 5],
-  miniGap: [1, 1, 2],
-  flexRow: ["column", "column", "row"]
+  gap: [4, 4, 4, 5],
+  miniGap: [1, 1, 1, 2],
+  flexRow: ["column", "column", "column", "row"]
 }

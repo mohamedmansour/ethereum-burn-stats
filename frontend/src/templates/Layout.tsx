@@ -23,10 +23,10 @@ export function Layout(props: LayoutProps) {
   const logoColor = useColorModeValue("black", "white")
 
   return (
-    <Flex direction="column" h="inherit">
+    <Flex direction="column" h="inherit" ml={[0, 0, 0, 8]} mr={[0, 0, 0, 8]}>
       <Flex
         as="nav"
-        align={["flex-start", "flex-start", "center"]}
+        align={["flex-start", "flex-start", "flex-start", "center"]}
         justify={"space-between"}
         direction="row"
         pt={layoutConfig.gap}

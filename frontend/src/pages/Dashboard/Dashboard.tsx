@@ -24,15 +24,15 @@ function DashboardLayout({ children }: { children: React.ReactNode; }) {
 }
 
 export function Dashboard() {
-  const { isMobile } = useMobileDetector();
+  const { isMobile, isPortrait } = useMobileDetector();
 
   if (isMobile) {
     return (
       <DashboardLayout>
         <CardDonate type={CardDonateType.TopSideBar} />
         <CardTotals />
-        <CardLiveChart type="primary" charts={["issuance", "tips", "basefee", "gas"]} />
         <CardLatestStats />
+        <CardLiveChart type="primary" charts={["issuance", "tips", "basefee", "gas"]} />
         <CardBlocks />
         <CardDonate type={CardDonateType.BottomSideBar} />
       </DashboardLayout>
@@ -49,10 +49,15 @@ export function Dashboard() {
           <CardDonate type={CardDonateType.BottomSideBar} />
         </Flex>
         <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>
-          <Flex direction="row" gridGap={layoutConfig.gap}>
-            <CardLiveChart flex={1} type="primary" charts={["issuance", "tips"]} />
-            <CardLiveChart flex={1} type="secondary" charts={["basefee", "gas"]} />
-          </Flex>
+          {isPortrait && (
+            <CardLiveChart type="primary" charts={["issuance", "tips", "basefee", "gas"]} />
+          )}
+          {!isPortrait && (
+            <Flex direction="row" gridGap={layoutConfig.gap}>
+              <CardLiveChart flex={1} type="primary" charts={["issuance", "tips"]} />
+              <CardLiveChart flex={1} type="secondary" charts={["basefee", "gas"]} />
+            </Flex>
+          )}
           <CardBlocks />
         </Flex>
       </Flex>
