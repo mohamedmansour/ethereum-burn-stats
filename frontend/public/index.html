@@ -139,26 +139,30 @@
       }
     }
 
-    ::-webkit-scrollbar {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #858585 transparent;
+    }
+
+    *::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    *::-webkit-scrollbar {
       width: 8px;
       height: 8px;
     }
 
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-corner {
+    *::-webkit-scrollbar-corner {
       background: none;
     }
 
-    ::-webkit-scrollbar-thumb {
+    *::-webkit-scrollbar-thumb {
       border-radius: 4px;
       background: #858585;
     }
 
-    ::-webkit-scrollbar-track {
+    *::-webkit-scrollbar-track {
       opacity: 0;
     }
 
