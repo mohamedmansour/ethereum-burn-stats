@@ -9,8 +9,9 @@ import { GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
 import { timeSince } from "../../utils/time";
 import { BlockStats } from "../../libs/ethereum";
 import { maxBlocksToRenderInTable } from "../../config";
+import React from "react";
 
-function GasUsedInfo() {
+function TooltipGasUsedInfo() {
   return (
     <Box>
       <LightMode>
@@ -25,7 +26,17 @@ function GasUsedInfo() {
   );
 }
 
-function TxnInfo() {
+function TooltipRewardsInfo() {
+  return (
+    <Box>
+      <LightMode>
+        <Text>Rewards is coinbase + uncle rewards</Text>
+      </LightMode>
+    </Box>
+  );
+}
+
+function TooltipTxnInfo() {
   return (
     <Box>
       <LightMode>
@@ -53,6 +64,10 @@ function BlockItem({ block }: { block: BlockStats }) {
   );
 }
 
+function ThPlusTooltip({children, tooltip}: {children: React.ReactNode, tooltip: React.ReactNode}) {
+  return <ThPlus><VStack alignItems="flex-end"><HStack><Text>{children}</Text><Tooltip placement="top" label={tooltip}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
+}
+
 export function BlockList() {
   const { data: { blocks } } = useBlockExplorer();
 
@@ -66,10 +81,10 @@ export function BlockList() {
             <ThPlus>Tips</ThPlus>
             <ThPlus>Base Fee</ThPlus>
             <ThPlus>Priority Fee</ThPlus>
-            <ThPlus><VStack alignItems="flex-end"><HStack><Text>Gas Used</Text><Tooltip placement="top" label={<GasUsedInfo />}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
+            <ThPlusTooltip tooltip={<TooltipGasUsedInfo />}>Gas Used</ThPlusTooltip>
             <ThPlus>% Target</ThPlus>
-            <ThPlus>Rewards</ThPlus>
-            <ThPlus><VStack alignItems="flex-end"><HStack><Text>Txn</Text><Tooltip placement="top" label={<TxnInfo />}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
+            <ThPlusTooltip tooltip={<TooltipRewardsInfo />}>Rewards</ThPlusTooltip>
+            <ThPlusTooltip tooltip={<TooltipTxnInfo />}>Txn</ThPlusTooltip>
             <ThPlus>Age</ThPlus>
           </Tr>
         </Thead>
