@@ -32,7 +32,7 @@ export function Dashboard() {
         <CardDonate type={CardDonateType.TopSideBar} />
         <CardTotals />
         <CardLatestStats />
-        <CardLiveChart type="primary" charts={["issuance", "tips", "basefee", "gas"]} />
+        <CardLiveChart type="primary" charts={["issuance", "basefee", "tips", "gas"]} />
         <CardBlocks />
         <CardDonate type={CardDonateType.BottomSideBar} />
       </DashboardLayout>
@@ -50,7 +50,7 @@ export function Dashboard() {
         </Flex>
         <Flex direction="column" flex={1} gridGap={layoutConfig.gap}>
           {isPortrait && (
-            <CardLiveChart type="primary" charts={["issuance", "tips", "basefee", "gas"]} />
+            <CardLiveChart type="primary" charts={["issuance", "basefee", "tips", "gas"]} />
           )}
           {!isPortrait && (
             <Flex direction="row" gridGap={layoutConfig.gap}>
