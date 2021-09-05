@@ -5,7 +5,6 @@ import { BaseFeeChart, ChartType } from "../../organisms/BaseFeeChart";
 import { BlockStats } from "../../libs/ethereum";
 import { Setting } from "../../config";
 import { useSettings } from "../../contexts/SettingsContext";
-import { useSetting } from "../../hooks/useSetting";
 
 interface RadioCardProps extends UseRadioProps {
   children?: React.ReactNode
@@ -58,10 +57,9 @@ function settingType(type: string) {
 }
 
 export function CardLiveChart(props: CardLiveProps) {
-  const {type, charts, ...rest} = props
-  const doNotShowChart = useSetting<boolean>(Setting.doNotShowChart);
+  const { type, charts, ...rest } = props
   const settings = useSettings();
-  
+
   const [chartType, setChartType] = useState<ChartType>(
     settings.get(settingType(type))
   );
@@ -85,13 +83,12 @@ export function CardLiveChart(props: CardLiveProps) {
   return (
     <Card
       title={type === "primary" ? "Live Issuance Chart" : "Live Fee Chart"}
-      collapsible={doNotShowChart}
-      onCollapsed={(collapsed) => settings.set(Setting.doNotShowChart, collapsed)}
-      minH={doNotShowChart ? 0 : 400}
-      h={{sm: "auto", md: doNotShowChart ? "auto" : 400}} flexShrink={0}
+      minH={400}
+      h={{ sm: "auto", md: 400 }}
+      flexShrink={0}
       {...rest}
     >
-      <Flex justifyContent={{sm: "center", md: "flex-end"}} gridGap={2}>
+      <Flex justifyContent={{ sm: "center", md: "flex-end" }} gridGap={2}>
         {charts.map((value) => {
           const radio = getRadioProps({ value })
           return (

@@ -19,6 +19,7 @@ export type ChartType = "tips" | "issuance" | "basefee" | "gas"
 
 const chartTypeMapping = {
   tips: {
+    width: 27,
     primary: {
       dataKey: 'rewardFormatted',
       name: 'reward'
@@ -29,6 +30,7 @@ const chartTypeMapping = {
     },
   },
   basefee: {
+    width: 32,
     primary: {
       dataKey: 'baseFeeFormatted',
       name: 'basefee'
@@ -39,6 +41,7 @@ const chartTypeMapping = {
     },
   },
   gas: {
+    width: 55,
     primary: {
       dataKey: 'gasUsedFormatted',
       name: 'gas used'
@@ -46,6 +49,7 @@ const chartTypeMapping = {
     secondary: null
   },
   issuance: {
+    width: 27,
     primary: {
       dataKey: 'issuanceFormatted',
       name: 'issuance'
@@ -155,25 +159,44 @@ function LiveChart(props: BaseFeeChartProps) {
     return null;
   };
 
+  const isZero = (input: number) => {
+    return input === -Infinity || input === Infinity || input === 0
+  }
+
   const onTickFormat = (value: any, index: number) => {
     switch (props.chartType) {
       case "basefee": {
         const realNumber = Number(value);
-        if (realNumber === -Infinity || realNumber === Infinity || realNumber === 0) {
-          return "0"
+        if (isZero(realNumber)) {
+          return "GWEI"
         }
+
         const formatter = BigNumberFormat({
           number: utils.parseUnits(realNumber.toString(), 'gwei')
         })
 
-        return formatter.prettyValue + ' GWEI'
+        return formatter.prettyValue
       }
       case "gas": {
-        return utils.commify(Number(value))
+        const realNumber = Number(value);
+        if (isZero(realNumber)) {
+          return "WEI"
+        }
+        return utils.commify(realNumber)
       }
-      case "issuance":
+      case "issuance": {
+        const realNumber = Number(value);
+        if (isZero(realNumber)) {
+          return "ETH"
+        }
+        return value
+      }
       case "tips": {
-        return parseFloat(value) + ' ETH'
+        const realNumber = Number(value);
+        if (isZero(realNumber)) {
+          return "ETH"
+        }
+        return value
       }
     }
   }
@@ -184,11 +207,11 @@ function LiveChart(props: BaseFeeChartProps) {
 
   const typeMapping = chartTypeMapping[data.chartType]
   return (
-    <Box flex="1" w="99%" overflow="hidden" position="relative">
+    <Box flex="1" overflow="hidden" position="relative">
       <CustomResponsiveContainer>
-        <ComposedChart data={data.points} margin={{ bottom: 20, right: 10, top: 10 }} stackOffset="sign">
-          <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} width={75} />
-          <XAxis dataKey="number" angle={-30} dy={10} fontSize={10} tickCount={10} />
+        <ComposedChart data={data.points} stackOffset="sign" margin={{ top: 0, left: 0, right: 0, bottom: 0 }}>
+          <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} width={typeMapping.width} />
+          <XAxis dataKey="number" angle={-30} dy={10} fontSize={10} tickCount={10} height={40} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
           {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: "14px" }} />}
           <Bar type="monotone" stackId="stack" dataKey={typeMapping.primary.dataKey} fill="#FF7B24" isAnimationActive={false} name={typeMapping.primary.name}>
