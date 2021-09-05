@@ -88,10 +88,10 @@ export function CardLiveChart(props: CardLiveProps) {
       collapsible={doNotShowChart}
       onCollapsed={(collapsed) => settings.set(Setting.doNotShowChart, collapsed)}
       minH={doNotShowChart ? 0 : 400}
-      h={["auto", "auto", doNotShowChart ? "auto" : 400]} flexShrink={0}
+      h={{sm: "auto", md: doNotShowChart ? "auto" : 400}} flexShrink={0}
       {...rest}
     >
-      <Flex justifyContent={["center", "center", "flex-end"]} gridGap={2}>
+      <Flex justifyContent={{sm: "center", md: "flex-end"}} gridGap={2}>
         {charts.map((value) => {
           const radio = getRadioProps({ value })
           return (

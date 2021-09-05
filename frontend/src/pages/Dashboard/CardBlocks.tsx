@@ -10,6 +10,7 @@ import { timeSince } from "../../utils/time";
 import { BlockStats } from "../../libs/ethereum";
 import { maxBlocksToRenderInTable } from "../../config";
 import React from "react";
+import { layoutConfig } from "../../layoutConfig";
 
 function TooltipGasUsedInfo() {
   return (
@@ -104,8 +105,8 @@ export function CardBlocks() {
   return (
     <Card
       title="Blocks"
-      flex={['auto', 'auto', 1]}
-      h={[600, 600, "auto"]}
+      flex={layoutConfig.flexStretch}
+      h={{sm: 400, md: "auto"}}
     >
       <BlockList />
     </Card>

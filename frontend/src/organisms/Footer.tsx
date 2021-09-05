@@ -7,7 +7,7 @@ export function Footer() {
   return (
     <Flex
       align="center" justify="center"
-      gridGap={[0, 0, 8]}
+      gridGap={{sm: 0, md: 8}}
       mb={4}
       mt={2}
       direction={layoutConfig.flexRow}
