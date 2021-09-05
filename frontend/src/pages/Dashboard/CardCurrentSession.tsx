@@ -27,7 +27,7 @@ export function CardCurrentSession() {
   return (
     <Card
       title="Current Session"
-      collapsible={doNotShowCurrentSession}
+      isCollapsible={doNotShowCurrentSession}
       onCollapsed={(collapsed) => setDoNotShowCurrentSession(collapsed)}
     >
       <HStack>

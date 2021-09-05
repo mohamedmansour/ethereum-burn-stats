@@ -20,7 +20,7 @@ const theme = extendTheme({
   components: {
     Divider: {
       baseStyle: (props: any) => ({
-        opacity: 0.15,
+        opacity: 0.50,
         borderColor: mode('blackAlpha.500', 'whiteAlpha.500')(props),
       })
     },
@@ -50,9 +50,11 @@ const theme = extendTheme({
         px: 4,
         py: 3,
         rounded: "base",
-        bg: backgroundColor(props),
-        boxShadow: mode("rgb(0 0 0 / 7%) 0px 14px 66px, rgb(0 0 0 / 3%) 0px 10px 17px, rgb(0 0 0 / 5%) 0px 4px 7px;",
-          "0px 8px 24px rgba(0, 0, 0, 0.2)")(props),
+        bg: props.isTransparent ? "transparent" : backgroundColor(props),
+        boxShadow: props.isTransparent 
+          ? undefined
+          : mode("rgb(0 0 0 / 7%) 0px 14px 66px, rgb(0 0 0 / 3%) 0px 10px 17px, rgb(0 0 0 / 5%) 0px 4px 7px;",
+                 "0px 8px 24px rgba(0, 0, 0, 0.2)")(props),
         gridGap: layoutConfig.miniGap
       }),
       variants: {

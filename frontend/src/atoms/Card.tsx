@@ -8,7 +8,8 @@ interface CardProps extends HTMLChakraProps<"div"> {
   title?: string
   subtitle?: string
   tooltip?: React.ReactNode
-  collapsible?: boolean
+  isCollapsible?: boolean
+  isTransparent?: boolean
   onCollapsed?: (collapsed: boolean) => void
 }
 
@@ -17,10 +18,10 @@ function CardTooltip({ label }: { label: React.ReactNode }) {
 }
 
 export function Card(props: CardProps) {
-  const { variant, children, title, collapsible, onCollapsed, subtitle, tooltip, ...rest } = props
-  const styles = useStyleConfig("Card", { variant })
+  const { variant, children, title, isTransparent, isCollapsible, onCollapsed, subtitle, tooltip, ...rest } = props
+  const styles = useStyleConfig("Card", { variant, isTransparent })
 
-  const [collapsed, setCollapsed] = useState<boolean | undefined>(collapsible);
+  const [collapsed, setCollapsed] = useState<boolean | undefined>(isCollapsible);
 
   const onCollapsedClicked = () => {
     const newCollapsed = !collapsed;
@@ -30,10 +31,10 @@ export function Card(props: CardProps) {
   }
 
   useEffect(() => {
-    setCollapsed(collapsible)
-  }, [collapsible])
+    setCollapsed(isCollapsible)
+  }, [isCollapsible])
 
-  if (tooltip && collapsible) {
+  if (tooltip && isCollapsible) {
     throw new Error("Collapsible cards cannot have tooltips")
   }
 
@@ -43,7 +44,7 @@ export function Card(props: CardProps) {
         <Flex direction="column" alignItems="flex-start" gridGap={0} mb={collapsed ? 0 : 2}>
           <HStack w="100%">
             <Heading size="md" fontWeight="bold">{title}</Heading>
-            {collapsible !== undefined && (
+            {isCollapsible !== undefined && (
               <>
                 <Spacer />
                 <Button
@@ -66,7 +67,7 @@ export function Card(props: CardProps) {
           {subtitle && <Text mt={1} fontSize="xs" variant="brandSecondary">{subtitle}</Text>}
         </Flex>
       )}
-      {(collapsible === undefined || !collapsed) && (
+      {(isCollapsible === undefined || !collapsed) && (
         <>{children}</>
       )}
     </Box>
