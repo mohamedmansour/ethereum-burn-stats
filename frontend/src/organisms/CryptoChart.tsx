@@ -7,7 +7,7 @@ import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { useMobileDetector } from "../contexts/MobileDetectorContext";
 import { Zero } from "../utils/number";
 import { BigNumberFormat, BigNumberText } from "./BigNumberText";
-import { GasTarget, GasUsed, GasUsedPercent } from "../organisms/GasUsed";
+import { GasTarget, GasUsed, GasUsedPercent } from "./GasUsed";
 import { CustomResponsiveContainer } from "../atoms/CustomResponsiveContainer";
 import { Card } from "../atoms/Card";
 

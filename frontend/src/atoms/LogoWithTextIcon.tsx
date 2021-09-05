@@ -21,12 +21,12 @@ export function LogoWithTextIcon(props: IconProps) {
       <path d="M124.303 0L23.8936 100.585C-3.83366 128.36 -3.83366 173.393 23.8936 201.168L124.303 100.584C152.03 72.8084 152.03 27.7754 124.303 0Z" fill="url(#paint1_linear)" />
       <defs>
         <linearGradient id="paint0_linear" x1="132.233" y1="92.213" x2="25.1468" y2="201.54" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FAB951" />
-          <stop offset="1" stop-color="#FF5F52" />
+          <stop stopColor="#FAB951" />
+          <stop offset="1" stopColor="#FF5F52" />
         </linearGradient>
         <linearGradient id="paint1_linear" x1="74.0981" y1="0" x2="74.0981" y2="201.168" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#C62828" />
-          <stop offset="1" stop-color="#FF5F52" />
+          <stop stopColor="#C62828" />
+          <stop offset="1" stopColor="#FF5F52" />
         </linearGradient>
       </defs>
 

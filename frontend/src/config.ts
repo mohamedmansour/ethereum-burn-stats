@@ -2,7 +2,7 @@ import {
   DefaultSettingValue,
   SettingConfig,
 } from "./contexts/SettingsContext";
-import { ChartType } from "./organisms/BaseFeeChart";
+import { ChartType } from "./organisms/CryptoChart";
 
 export const BooleanSetting: SettingConfig = {
   verify: (value: any): boolean => (value === "true" || value === "false" || value === true || value === false),
