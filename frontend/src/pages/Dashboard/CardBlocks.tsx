@@ -65,7 +65,7 @@ function BlockItem({ block }: { block: BlockStats }) {
   );
 }
 
-function ThPlusTooltip({children, tooltip}: {children: React.ReactNode, tooltip: React.ReactNode}) {
+function ThPlusTooltip({ children, tooltip }: { children: React.ReactNode, tooltip: React.ReactNode }) {
   return <ThPlus><VStack alignItems="flex-end"><HStack><Text>{children}</Text><Tooltip placement="top" label={tooltip}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
 }
 
@@ -106,7 +106,7 @@ export function CardBlocks() {
     <Card
       title="Blocks"
       flex={layoutConfig.flexStretch}
-      h={{sm: 400, md: "auto"}}
+      h={{ base: 400, md: "auto" }}
     >
       <BlockList />
     </Card>

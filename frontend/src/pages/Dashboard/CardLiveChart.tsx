@@ -84,7 +84,7 @@ export function CardLiveChart(props: CardLiveProps) {
     <Card
       title={type === "primary" ? "Live Issuance Chart" : "Live Fee Chart"}
       minH={400}
-      h={{ sm: "auto", md: 400 }}
+      h={{ base: "auto", md: 400 }}
       flexShrink={0}
       {...rest}
     >

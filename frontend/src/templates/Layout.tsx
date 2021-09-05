@@ -26,7 +26,7 @@ export function Layout(props: LayoutProps) {
     <Flex direction="column" h="inherit" ml={layoutConfig.margin} mr={layoutConfig.margin}>
       <Flex
         as="nav"
-        align={{sm: "flex-start", md: "center"}}
+        align={{ base: "flex-start", md: "center" }}
         justify={"space-between"}
         direction="row"
         pt={layoutConfig.gap}

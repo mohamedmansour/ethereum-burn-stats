@@ -9,9 +9,9 @@ interface LayoutConfig {
 }
 
 export const layoutConfig: LayoutConfig = {
-  margin: {sm: 0, md: 8},
-  gap: {sm: 4, md: 5},
-  miniGap: {sm: 1, md: 2},
-  flexRow: {sm: "column", md: "row"},
-  flexStretch: {sm: "auto", md: 1}
+  margin: { base: 0, md: 8 },
+  gap: { base: 4, md: 5 },
+  miniGap: { base: 1, md: 2 },
+  flexRow: { base: "column", md: "row" },
+  flexStretch: { base: "auto", md: 1 }
 }
