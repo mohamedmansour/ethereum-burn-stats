@@ -4,7 +4,7 @@ import { Dict } from "@chakra-ui/utils"
 import { layoutConfig } from "./layoutConfig"
 
 const secondaryColor = (props: Dict<any>) => mode('#a9a9a9', '#A8A8A8')(props)
-const backgroundColor = (props: Dict<any>) => mode('white', '#1E1E1E')(props)
+const backgroundColor = (props: Dict<any>) => mode('white', '#232635')(props)
 const borderColor = (props: Dict<any>) => mode('#eeeeee', '#292929')(props)
 
 const theme = extendTheme({
