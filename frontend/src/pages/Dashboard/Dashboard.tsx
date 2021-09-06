@@ -42,7 +42,7 @@ export function Dashboard() {
   return (
     <DashboardLayout>
       <Flex flex={1} direction="row" gridGap={layoutConfig.gap}>
-        <Flex direction="column" w={300} flexShrink={0} gridGap={layoutConfig.gap}>
+        <Flex direction="column" w={layoutConfig.sidebarWidth} flexShrink={0} gridGap={layoutConfig.gap}>
           <CardDonate type={CardDonateType.TopSideBar} />
           <CardTotals />
           <CardLatestStats />
