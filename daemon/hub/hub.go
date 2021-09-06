@@ -89,6 +89,8 @@ func New(
 		usd:          usd,
 	}
 
+	s.initialize(gethEndpointHTTP, dbPath, ropsten, workerCount)
+
 	h.initializeWebSocketHandlers()
 	err := h.initializeGrpcWebSocket(gethEndpointWebsocket)
 	if err != nil {
@@ -97,8 +99,7 @@ func New(
 
 	// Run this in a goroutine so it doesn't block the websocket from working.
 	go usd.StartWatching()
-	go s.initialize(gethEndpointHTTP, dbPath, ropsten, workerCount)
-	
+
 	return h, nil
 }
 
@@ -181,6 +182,32 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 						continue
 					}
 
+					prevBlockTimestamp, err := h.s.getBlockTimestamp(previousBlockNumber)
+					if err != nil {
+						log.Errorf("getBlockTimestamp(%d): %v", previousBlockNumber, err)
+					}
+
+					// get totals stats for current block from 30 days prior
+					totalsMonth, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-30*86400, prevBlockTimestamp)
+					if err != nil {
+						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-30*86400, prevBlockTimestamp, err)
+						continue
+					}
+
+					// get totals stats for current block from 7 days prior
+					totalsWeek, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-7*86400, prevBlockTimestamp)
+					if err != nil {
+						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-7*86400, prevBlockTimestamp, err)
+						continue
+					}
+
+					// get totals stats for current block from 24 hours prior
+					totalsDay, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-86400, prevBlockTimestamp)
+					if err != nil {
+						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-86400, prevBlockTimestamp, err)
+						continue
+					}
+
 					//get baseFeeNext for previous block
 					baseFeeNext, err := h.s.getBaseFeeNext(previousBlockNumber)
 					if err != nil {
@@ -199,6 +226,9 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 								Block:       blockStats,
 								Clients:     int16(clientsCount),
 								Totals:      totals,
+								TotalsDay:   totalsDay,
+								TotalsMonth: totalsMonth,
+								TotalsWeek:  totalsWeek,
 								Version:     version.Version,
 								USDPrice:    h.usd.Price,
 							},
@@ -221,6 +251,27 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 					continue
 				}
 
+				// get totals stats for current block from 30 days prior
+				totalsMonth, err := h.s.getTotalsTimeDelta(header.Time-30*86400, header.Time)
+				if err != nil {
+					log.Errorf("getTotalsTimeDelta(%d,%d): %v", header.Time-30*86400, header.Time, err)
+					continue
+				}
+
+				// get totals stats for current block from 7 days prior
+				totalsWeek, err := h.s.getTotalsTimeDelta(header.Time-7*86400, header.Time)
+				if err != nil {
+					log.Errorf("getTotalsTimeDelta(%d,%d): %v", header.Time-7*86400, header.Time, err)
+					continue
+				}
+
+				// get totals stats for current block from 24 hours prior
+				totalsDay, err := h.s.getTotalsTimeDelta(header.Time-86400, header.Time)
+				if err != nil {
+					log.Errorf("getTotalsTimeDelta(%d,%d): %v", header.Time-86400, header.Time, err)
+					continue
+				}
+
 				// get baseFeeNext for current block
 				baseFeeNext, err := h.s.getBaseFeeNext(blockNumber)
 				if err != nil {
@@ -237,6 +288,9 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 						Block:       blockStats,
 						Clients:     int16(clientsCount),
 						Totals:      totals,
+						TotalsDay:   totalsDay,
+						TotalsMonth: totalsMonth,
+						TotalsWeek:  totalsWeek,
 						Version:     version.Version,
 						USDPrice:    h.usd.Price,
 					},
@@ -464,9 +518,33 @@ func (h *Hub) handleTotals() func(c *Client, message jsonrpcMessage) (json.RawMe
 
 func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
-		totals, err := h.s.getTotals(h.s.latestBlock.getBlockNumber())
+		blockNumber := h.s.latestBlock.getBlockNumber()
+		totals, err := h.s.getTotals(blockNumber)
 		if err != nil {
 			log.Errorf("Error calling getTotals: %vn", err)
+		}
+
+		blockTimestamp, err := h.s.getBlockTimestamp(blockNumber)
+		if err != nil {
+			log.Errorf("getBlockTimestamp(%d): %v", blockNumber, err)
+		}
+
+		// get totals stats for current block from 30 days prior
+		totalsMonth, err := h.s.getTotalsTimeDelta(blockTimestamp-30*86400, blockTimestamp)
+		if err != nil {
+			log.Errorf("getTotalsTimeDelta(%d,%d): %v", blockTimestamp-30*86400, blockTimestamp, err)
+		}
+
+		// get totals stats for current block from 7 days prior
+		totalsWeek, err := h.s.getTotalsTimeDelta(blockTimestamp-7*86400, blockTimestamp)
+		if err != nil {
+			log.Errorf("getTotalsTimeDelta(%d,%d): %v", blockTimestamp-7*86400, blockTimestamp, err)
+		}
+
+		// get totals stats for current block from 24 hours prior
+		totalsDay, err := h.s.getTotalsTimeDelta(blockTimestamp-86400, blockTimestamp)
+		if err != nil {
+			log.Errorf("getTotalsTimeDelta(%d,%d): %v", blockTimestamp-86400, blockTimestamp, err)
 		}
 
 		data := &InitialData{
@@ -474,6 +552,9 @@ func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.
 			Blocks:      h.s.latestBlocks.getBlocks(),
 			Clients:     int16(len(h.clients)),
 			Totals:      totals,
+			TotalsDay:   totalsDay,
+			TotalsMonth: totalsMonth,
+			TotalsWeek:  totalsWeek,
 			Version:     version.Version,
 			USDPrice:    h.usd.Price,
 		}
