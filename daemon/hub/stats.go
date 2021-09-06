@@ -48,9 +48,9 @@ type Stats struct {
 
 	ethSyncing *Syncing
 
-	statsByBlock   statsMap
-	totalsByBlock  totalsMap
-	totalsBySecond totalsMap
+	statsByBlock  statsMap
+	totalsByBlock totalsMap
+	TotalsByTime  totalsMap
 
 	// Used to perform the transaction receipt fetching within a worker
 	transactionReceiptWorker *TransactionReceiptWorker
@@ -95,6 +95,7 @@ func (s *Stats) initialize(
 
 	s.statsByBlock = statsMap{v: make(map[uint64]sql.BlockStats)}
 	s.totalsByBlock = totalsMap{v: make(map[uint64]Totals)}
+	s.TotalsByTime = totalsMap{v: make(map[uint64]Totals)}
 
 	s.transactionReceiptWorker.Initialize()
 
@@ -162,17 +163,17 @@ func (s *Stats) initWaitForSyncingFalse() error {
 			err = json.Unmarshal(ethSyncingRaw, &s.ethSyncing)
 			if err != nil {
 				return fmt.Errorf("couldn't unmarshal eth_syncing response: %v", ethSyncingRaw)
-			} 
+			}
 
 			current, err := hexutil.DecodeUint64(s.ethSyncing.CurrentBlock)
 			if err != nil {
 				return fmt.Errorf("couldn't decode eth_syncing CurrentBlock: %v", err)
-			} 
+			}
 
 			highest, err := hexutil.DecodeUint64(s.ethSyncing.HighestBlock)
 			if err != nil {
 				return fmt.Errorf("couldn't decode eth_syncing HighestBlock: %v", err)
-			} 
+			}
 
 			log.Infof("init: geth is syncing: %d/%d", current, highest)
 		}
@@ -363,6 +364,112 @@ func (s *Stats) getTotals(blockNumber uint64) (Totals, error) {
 	return totals, nil
 }
 
+func (s *Stats) getBlockTimestamp(blockNumber uint64) (uint64, error) {
+	var blockStats sql.BlockStats
+	var ok bool
+	s.statsByBlock.mu.Lock()
+	defer s.statsByBlock.mu.Unlock()
+	if blockStats, ok = s.statsByBlock.v[blockNumber]; !ok {
+		return 0, fmt.Errorf("error getting block %d", blockNumber)
+	}
+
+	return blockStats.Timestamp, nil
+}
+
+func (s *Stats) getTotalsTimeDelta(startTime uint64, endTime uint64) (Totals, error) {
+	var endTotals, startTotals, totals Totals
+	var ok bool
+
+	// break up into 300second intervals as it is possible to not have a block every minute
+	startMinute := startTime / 300
+	endMinute := endTime / 300
+
+	if startTime >= endTime {
+		return Totals{}, fmt.Errorf("endTime must be greater than startTime")
+	}
+	s.TotalsByTime.mu.Lock()
+	defer s.TotalsByTime.mu.Unlock()
+	if endTotals, ok = s.TotalsByTime.v[endMinute]; !ok {
+		totals.Burned = "0x0"
+		totals.Issuance = "0x0"
+		totals.Rewards = "0x0"
+		totals.Tips = "0x0"
+		return totals, fmt.Errorf("error getting totals for block %d", endMinute)
+	}
+
+	if startTotals, ok = s.TotalsByTime.v[startMinute]; !ok {
+		totals.Burned = "0x0"
+		totals.Issuance = "0x0"
+		totals.Rewards = "0x0"
+		totals.Tips = "0x0"
+		return totals, fmt.Errorf("error getting totals for block %d", startMinute)
+	}
+
+	endBurned, err := hexutil.DecodeBig(endTotals.Burned)
+	if err != nil {
+		log.Errorf("endTotals.Burned is not a hex - %s", endTotals.Burned)
+		return totals, err
+	}
+	startBurned, err := hexutil.DecodeBig(startTotals.Burned)
+	if err != nil {
+		log.Errorf("startTotals.Burned is not a hex - %s", startTotals.Burned)
+		return totals, err
+	}
+
+	endIssuance, err := hexutil.DecodeBig(endTotals.Issuance)
+	if err != nil {
+		log.Errorf("endTotals.Issuance is not a hex - %s", endTotals.Issuance)
+		return totals, err
+	}
+	startIssuance, err := hexutil.DecodeBig(startTotals.Issuance)
+	if err != nil {
+		log.Errorf("startTotals.Issuance is not a hex - %s", startTotals.Issuance)
+		return totals, err
+	}
+
+	endRewards, err := hexutil.DecodeBig(endTotals.Rewards)
+	if err != nil {
+		log.Errorf("endTotals.Rewards is not a hex - %s", endTotals.Rewards)
+		return totals, err
+	}
+	startRewards, err := hexutil.DecodeBig(startTotals.Rewards)
+	if err != nil {
+		log.Errorf("startTotals.Rewards is not a hex - %s", startTotals.Rewards)
+		return totals, err
+	}
+
+	endTips, err := hexutil.DecodeBig(endTotals.Tips)
+	if err != nil {
+		log.Errorf("endTotals.Tips is not a hex - %s", endTotals.Tips)
+		return totals, err
+	}
+	startTips, err := hexutil.DecodeBig(startTotals.Tips)
+	if err != nil {
+		log.Errorf("startTotals.Tips is not a hex - %s", startTotals.Tips)
+		return totals, err
+	}
+
+	endBurned.Sub(endBurned, startBurned)
+	endIssuance.Sub(endIssuance, startIssuance)
+	endRewards.Sub(endRewards, startRewards)
+	endTips.Sub(endTips, startTips)
+
+	totals.Burned = hexutil.EncodeBig(endBurned)
+	totals.Issuance = hexutil.EncodeBig(endIssuance)
+	totals.Rewards = hexutil.EncodeBig(endRewards)
+	totals.Tips = hexutil.EncodeBig(endTips)
+
+	//ETH := big.NewInt(1_000_000_000_000_000_000)
+	//endBurned.Div(endBurned, ETH)
+	//endIssuance.Div(endIssuance, ETH)
+	//endRewards.Div(endRewards, ETH)
+	//endTips.Div(endTips, ETH)
+
+	//log.Infof("last %d sec totals: %s burned, %s issuance, %s rewards, %s tips", endTime-startTime, endBurned.String(), endIssuance.String(), endRewards.String(), endTips.String())
+
+	return totals, nil
+}
+
 func (s *Stats) getBlockStats() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 		b, err := message.Params.MarshalJSON()
@@ -457,8 +564,10 @@ func (s *Stats) getBaseFeeNext(blockNumber uint64) (string, error) {
 func (s *Stats) updateTotals(blockNumber uint64) error {
 	s.statsByBlock.mu.Lock()
 	s.totalsByBlock.mu.Lock()
+	s.TotalsByTime.mu.Lock()
 	defer s.statsByBlock.mu.Unlock()
 	defer s.totalsByBlock.mu.Unlock()
+	defer s.TotalsByTime.mu.Unlock()
 
 	//recalculate totals for previous 10 blocks in case blocks missed
 	for i := blockNumber - 10; i <= blockNumber; i++ {
@@ -513,6 +622,8 @@ func (s *Stats) updateTotals(blockNumber uint64) error {
 		totals.Tips = hexutil.EncodeBig(totalTips)
 
 		s.totalsByBlock.v[i] = totals
+		// break up into 300second intervals as it is possible to not have a block every minute
+		s.TotalsByTime.v[uint64(block.Timestamp)/300] = totals
 
 		//log.Infof("block %d totals: %s burned, %s issuance, %s rewards, and %s tips", i, totalBurned.String(), totalIssuance.String(), totalRewards.String(), totalTips.String())
 	}
@@ -564,6 +675,12 @@ func (s *Stats) updateAllTotals(blockNumber uint64) error {
 		s.totalsByBlock.mu.Lock()
 		s.totalsByBlock.v[uint64(block.Number)] = totals
 		s.totalsByBlock.mu.Unlock()
+
+		s.TotalsByTime.mu.Lock()
+		// break up into 300second intervals as it is possible to not have a block every minute
+		s.TotalsByTime.v[uint64(block.Timestamp)/300] = totals
+		s.TotalsByTime.mu.Unlock()
+
 		if block.Number%5000 == 0 {
 			log.Infof("block %d totals: %s burned, %s issuance, %s rewards, and %s tips", block.Number, totalBurned.String(), totalIssuance.String(), totalRewards.String(), totalTips.String())
 		}
