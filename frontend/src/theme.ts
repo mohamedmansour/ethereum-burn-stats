@@ -47,8 +47,8 @@ const theme = extendTheme({
       baseStyle: (props: any) => ({
         display: "flex",
         flexDirection: "column",
-        px: 4,
-        py: 3,
+        px: 5,
+        py: 4,
         rounded: "base",
         bg: props.isTransparent ? "transparent" : backgroundColor(props),
         boxShadow: props.isTransparent 
