@@ -473,7 +473,7 @@ func (s *Stats) getTotalsTimeDelta(startTime uint64, endTime uint64) (Totals, er
 
 	duration := time.Since(start) / time.Microsecond
 
-	log.Infof("last %d sec (%d -> %d) (%d Δ) totals: %s%s issuance, %s burned, %s rewards, %s tips (%d SI %d EI %d us)", endTime-startTime, startBlock, endBlock, delta, issuanceNeg, issuance.String(), burned.String(), rewards.String(), tips.String(), startIteration, endIteration, duration)
+	log.Debugf("last %d sec (%d -> %d) (%ds Δ) totals: %s%s issuance, %s burned, %s rewards, %s tips (%d SI %d EI %d us)", endTime-startTime, startBlock, endBlock, delta, issuanceNeg, issuance.String(), burned.String(), rewards.String(), tips.String(), startIteration, endIteration, duration)
 
 	return totals, nil
 }

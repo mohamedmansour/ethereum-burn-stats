@@ -54,6 +54,7 @@ type Hub struct {
 
 // New initializes a Hub instance.
 func New(
+	debug bool,
 	development bool,
 	gethEndpointHTTP string,
 	gethEndpointWebsocket string,
@@ -64,6 +65,10 @@ func New(
 	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
+	}
+
+	if debug {
+		log.SetLevel(logrus.DebugLevel)
 	}
 
 	if development {
