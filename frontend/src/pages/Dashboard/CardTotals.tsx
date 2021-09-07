@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Box, Heading, HStack, Icon, ListItem, Tab, TabList, TabPanel, TabPanels, Tabs, Text, UnorderedList, VStack } from '@chakra-ui/react';
+import { Box, Heading, HStack, Icon, ListItem, Tab, TabList, TabListProps, TabPanel, TabPanels, Tabs, Text, UnorderedList, useColorMode, VStack } from '@chakra-ui/react';
 import { BigNumber } from 'ethers';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import { BiLineChart } from 'react-icons/bi';
@@ -75,7 +75,7 @@ const filters = {
     
   },
   All: {
-    key: '1D',
+    key: 'All',
     title: 'Total stats since EIP-1559'
   }
 }
@@ -83,17 +83,26 @@ const filters = {
 export function CardTotals() {
   const { data: { details: { totals, totalsDay, totalsWeek, totalsMonth, usdPrice } } } = useBlockExplorer();
   const [subtitle, setSubtitle] = useState(filters.All)
+  const { colorMode } = useColorMode()
+
+  const isDark = colorMode === "dark"
 
   const tabStyle = {
     fontSize: "xs",
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
     m: "4px",
     _selected: {
       fontWeight: "bold",
-      color: "#fff",
-      bg: "rgba(255, 255, 255, 0.1)",
+      color: isDark ? "#fff" : "#000",
+      bg: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
       borderRadius: "6px"
     }
+  }
+
+  const tablistStyle: Partial<TabListProps> = {
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid rgba(0, 0, 0, 0.05)",
+    borderRadius: "6px",
+    userSelect: "none"
   }
 
   const onChange = (index: number) => {
@@ -103,7 +112,7 @@ export function CardTotals() {
   return (
     <Card title="Overview" subtitle={subtitle.title} tooltip={<RenderTooltip />}>
       <Tabs isFitted variant="unstyled" defaultIndex={3} onChange={onChange}>
-        <TabList border="1px solid rgba(255, 255, 255, 0.05)" borderRadius="6px" userSelect="none">
+        <TabList {...tablistStyle}>
           <Tab {...tabStyle}>{filters.Day.key}</Tab>
           <Tab {...tabStyle}>{filters.Week.key}</Tab>
           <Tab {...tabStyle}>{filters.Month.key}</Tab>
