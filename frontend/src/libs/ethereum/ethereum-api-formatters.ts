@@ -1,5 +1,10 @@
+import { BigNumber } from "ethers"
 import { HexToBigNumber, HexToNumber } from "../../utils/number"
-import { BaseBlock, BlockData, BlockStats, BlockWithTransactions, EthereumSyncing, InitialData, Totals, Transaction } from "./ethereum-types"
+import { BaseBlock, BaseData, BlockData, BlockStats, BlockWithTransactions, EthereumSyncing, InitialData, Totals, Transaction } from "./ethereum-types"
+
+const caclulateNetReduction = (burned: BigNumber, issuance: BigNumber): number => {
+  return burned.mul(BigNumber.from(10000)).div(burned.add(issuance)).toNumber() / 100
+}
 
 export class EthereumApiFormatters {
   static FormatTransaction(t: Transaction): Transaction {
@@ -69,19 +74,28 @@ export class EthereumApiFormatters {
     s.rewards = HexToBigNumber(s.rewards)
     s.tips = HexToBigNumber(s.tips)
     s.issuance = HexToBigNumber(s.issuance)
+    s.netReduction = caclulateNetReduction(s.burned, s.issuance)
     return s
   }
 
   static FormatInitialData(d: InitialData): InitialData {
     d.blocks = d.blocks ? d.blocks.map(b => this.FormatBlockStats(b)!) : []
-    d.totals = this.FormatTotals(d.totals)
     d.blockNumber = HexToNumber(d.blockNumber)
+    this.FormatAllTotals(d)
     return d
+  }
+
+  static FormatAllTotals(b: BaseData): BaseData {
+    b.totals = this.FormatTotals(b.totals)
+    b.totalsDay = this.FormatTotals(b.totalsDay)
+    b.totalsWeek = this.FormatTotals(b.totalsWeek)
+    b.totalsMonth = this.FormatTotals(b.totalsMonth)
+    return b
   }
   
   static FormatBlockData(b: BlockData): BlockData {
     b.block = this.FormatBlockStats(b.block)!
-    b.totals = this.FormatTotals(b.totals)
+    this.FormatAllTotals(b)
     return b
   }
 }

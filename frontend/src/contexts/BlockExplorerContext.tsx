@@ -51,6 +51,27 @@ const DefaultExplorerData = {
       issuance: Zero,
       netReduction: 0,
     },
+    totalsDay: {
+      burned: Zero,
+      rewards: Zero,
+      tips: Zero,
+      issuance: Zero,
+      netReduction: 0,
+    },
+    totalsWeek: {
+      burned: Zero,
+      rewards: Zero,
+      tips: Zero,
+      issuance: Zero,
+      netReduction: 0,
+    },
+    totalsMonth: {
+      burned: Zero,
+      rewards: Zero,
+      tips: Zero,
+      issuance: Zero,
+      netReduction: 0,
+    },
     clients: 0,
     version: 'NA',
     usdPrice: 1,
@@ -81,21 +102,18 @@ interface InMemoryIndex {
   getData: () => BlocksChanged
 }
 
-const caclulateNetReduction = (burned: BigNumber, issuance: BigNumber): number => {
-  return burned.mul(BigNumber.from(10000)).div(burned.add(issuance)).toNumber() / 100
-}
-
 const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
   const blockIndex: {[blockNumber: number]: BlockStats} = {}
   let blocks: number[] = []
-
-  initialData.totals.netReduction = caclulateNetReduction(initialData.totals.burned, initialData.totals.issuance);
 
   const details: BlockExplorerDetails = {
     currentBlock: initialData.blockNumber,
     currentBaseFee: initialData.blocks.length ? initialData.blocks[0].baseFee : Zero,
     currentPriorityFee: initialData.blocks.length ? initialData.blocks[0].priorityFee : Zero,
     totals: initialData.totals,
+    totalsDay: initialData.totalsDay,
+    totalsWeek: initialData.totalsWeek,
+    totalsMonth: initialData.totalsMonth,
     clients: initialData.clients,
     version: initialData.version,
     usdPrice: initialData.usdPrice,
@@ -123,7 +141,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
   }
 
   const insert = (data: BlockData) => {
-    const { block, totals, clients, version, usdPrice } = data
+    const { block, totals, totalsDay, totalsWeek, totalsMonth, clients, version, usdPrice } = data
 
     if (blockIndex[block.number]) {
       console.log('repeat', block.number);
@@ -146,7 +164,9 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
     details.currentPriorityFee = block.priorityFee
     details.currentBlock = block.number
     details.totals = totals
-    details.totals.netReduction = caclulateNetReduction(totals.burned, totals.issuance)
+    details.totalsDay = totalsDay
+    details.totalsWeek = totalsWeek
+    details.totalsMonth = totalsMonth
     details.clients = clients
     details.version = version
     details.usdPrice = usdPrice
