@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -45,12 +46,12 @@ type Stats struct {
 	byzantiumBlock      uint64
 	constantinopleBlock uint64
 	londonBlock         uint64
+	londonTimestamp     uint64
 
 	ethSyncing *Syncing
 
 	statsByBlock  statsMap
 	totalsByBlock totalsMap
-	TotalsByTime  totalsMap
 
 	// Used to perform the transaction receipt fetching within a worker
 	transactionReceiptWorker *TransactionReceiptWorker
@@ -66,11 +67,13 @@ func (s *Stats) initialize(
 	s.byzantiumBlock = uint64(4_370_000)
 	s.constantinopleBlock = uint64(7_280_000)
 	s.londonBlock = uint64(12_965_000)
+	s.londonTimestamp = uint64(1628166822)
 
 	if ropsten {
 		s.byzantiumBlock = uint64(1_700_000)
 		s.constantinopleBlock = uint64(4_230_000)
 		s.londonBlock = uint64(10_499_401)
+		s.londonTimestamp = uint64(1624500217)
 	}
 
 	log.Infof("Initialize rpcClientHttp '%s'", gethEndpointHTTP)
@@ -95,7 +98,6 @@ func (s *Stats) initialize(
 
 	s.statsByBlock = statsMap{v: make(map[uint64]sql.BlockStats)}
 	s.totalsByBlock = totalsMap{v: make(map[uint64]Totals)}
-	s.TotalsByTime = totalsMap{v: make(map[uint64]Totals)}
 
 	s.transactionReceiptWorker.Initialize()
 
@@ -377,32 +379,140 @@ func (s *Stats) getBlockTimestamp(blockNumber uint64) (uint64, error) {
 }
 
 func (s *Stats) getTotalsTimeDelta(startTime uint64, endTime uint64) (Totals, error) {
-	var endTotals, startTotals, totals Totals
-	var ok bool
-
-	// break up into 300second intervals as it is possible to not have a block every minute
-	startMinute := startTime / 300
-	endMinute := endTime / 300
+	start := time.Now()
+	var totals Totals
 
 	if startTime >= endTime {
 		return Totals{}, fmt.Errorf("endTime must be greater than startTime")
 	}
-	s.TotalsByTime.mu.Lock()
-	defer s.TotalsByTime.mu.Unlock()
-	if endTotals, ok = s.TotalsByTime.v[endMinute]; !ok {
-		totals.Burned = "0x0"
-		totals.Issuance = "0x0"
-		totals.Rewards = "0x0"
-		totals.Tips = "0x0"
-		return totals, fmt.Errorf("error getting totals for block %d", endMinute)
+
+	latestBlockNumber := s.latestBlock.getBlockNumber()
+
+	latestBlockTime, err := s.getBlockTimestamp(latestBlockNumber)
+	if err != nil {
+		log.Errorf("getBlockTimestamp(%d): %v", latestBlockNumber, err)
+		return totals, err
 	}
 
-	if startTotals, ok = s.TotalsByTime.v[startMinute]; !ok {
+	// start with assumption that blocks do not process faster than 5 seconds/block
+	endBlock := latestBlockNumber - (latestBlockTime-endTime)/5
+	endBlockTime, err := s.getBlockTimestamp(endBlock)
+	if err != nil {
+		log.Errorf("getBlockTimestamp(%d): %v", endBlock, err)
+		return totals, err
+	}
+
+	endIteration := 0
+
+	for endBlockTime < endTime {
+		endBlock++
+		endBlockTime, err = s.getBlockTimestamp(endBlock)
+		if err != nil {
+			log.Errorf("getBlockTimestamp(%d): %v", endBlock, err)
+			return totals, err
+		}
+		timeOffset := int64(endTime - endBlockTime)
+		if timeOffset > 2400 {
+			//assume average block time is not > 2min within 40min window
+			endBlock += uint64(timeOffset / 120)
+		}
+		endIteration++
+	}
+
+	// start with assumption that blocks do not process faster than 5 seconds/block
+	startBlock := latestBlockNumber - (latestBlockTime-startTime)/5
+	if startBlock < s.londonBlock {
+		startBlock = s.londonBlock
+	}
+	startBlockTime, err := s.getBlockTimestamp(startBlock)
+	if err != nil {
+		log.Errorf("getBlockTimestamp(%d): %v", startBlock, err)
+		return totals, err
+	}
+
+	startIteration := 0
+	for startBlockTime < startTime {
+		startBlock++
+		startBlockTime, err = s.getBlockTimestamp(startBlock)
+		if err != nil {
+			log.Errorf("getBlockTimestamp(%d): %v", startBlock, err)
+			return totals, err
+		}
+		timeOffset := int64(startTime - startBlockTime)
+		if timeOffset > 2400 {
+			//assume average block time is not > 2min within 40min window
+			startBlock += uint64(timeOffset / 120)
+		}
+		startIteration++
+	}
+
+	totals, err = s.getTotalsBlockDelta(startBlock, endBlock)
+	if err != nil {
+		log.Errorf("getTotalsBlockDelta(%d,%d): %v", startBlock, endBlock, err)
+		return totals, err
+	}
+
+	burned, _ := hexutil.DecodeBig(totals.Burned)
+	issuanceString := totals.Issuance
+	issuanceNeg := ""
+	if strings.HasPrefix(issuanceString, "-") {
+		issuanceNeg = "-"
+		issuanceString = strings.TrimLeft(issuanceString, "-")
+	}
+	issuance, _ := hexutil.DecodeBig(issuanceString)
+	rewards, _ := hexutil.DecodeBig(totals.Rewards)
+	tips, _ := hexutil.DecodeBig(totals.Tips)
+
+	delta := int64(endTime - startTime - totals.Duration)
+
+	ETH := big.NewInt(1_000_000_000_000_000_000)
+	burned.Div(burned, ETH)
+	issuance.Div(issuance, ETH)
+	rewards.Div(rewards, ETH)
+	tips.Div(tips, ETH)
+
+	duration := time.Since(start) / time.Microsecond
+
+	log.Infof("last %d sec (%d -> %d) (%d Δ) totals: %s%s issuance, %s burned, %s rewards, %s tips (%d SI %d EI %d us)", endTime-startTime, startBlock, endBlock, delta, issuanceNeg, issuance.String(), burned.String(), rewards.String(), tips.String(), startIteration, endIteration, duration)
+
+	return totals, nil
+}
+
+func (s *Stats) getTotalsBlockDelta(startBlockNumber uint64, endBlockNumber uint64) (Totals, error) {
+	var endTotals, startTotals, totals Totals
+	var ok bool
+
+	if startBlockNumber >= endBlockNumber {
+		return Totals{}, fmt.Errorf("endBlockNumber must be greater than startBlockNumber")
+	}
+	s.totalsByBlock.mu.Lock()
+	defer s.totalsByBlock.mu.Unlock()
+	if endTotals, ok = s.totalsByBlock.v[endBlockNumber]; !ok {
 		totals.Burned = "0x0"
 		totals.Issuance = "0x0"
 		totals.Rewards = "0x0"
 		totals.Tips = "0x0"
-		return totals, fmt.Errorf("error getting totals for block %d", startMinute)
+		return totals, fmt.Errorf("error getting totals for block %d", endBlockNumber)
+	}
+
+	if startTotals, ok = s.totalsByBlock.v[startBlockNumber]; !ok {
+		totals.Burned = "0x0"
+		totals.Issuance = "0x0"
+		totals.Rewards = "0x0"
+		totals.Tips = "0x0"
+		return totals, fmt.Errorf("error getting totals for block %d", startBlockNumber)
+	}
+
+	startBlockTime, err := s.getBlockTimestamp(startBlockNumber)
+	if err != nil {
+		log.Errorf("getBlockTimestamp(%d): %v", startBlockNumber, err)
+		return totals, err
+	}
+
+	endBlockTime, err := s.getBlockTimestamp(endBlockNumber)
+	if err != nil {
+		log.Errorf("getBlockTimestamp(%d): %v", endBlockNumber, err)
+		return totals, err
 	}
 
 	endBurned, err := hexutil.DecodeBig(endTotals.Burned)
@@ -455,17 +565,10 @@ func (s *Stats) getTotalsTimeDelta(startTime uint64, endTime uint64) (Totals, er
 	endTips.Sub(endTips, startTips)
 
 	totals.Burned = hexutil.EncodeBig(endBurned)
+	totals.Duration = endBlockTime - startBlockTime
 	totals.Issuance = hexutil.EncodeBig(endIssuance)
 	totals.Rewards = hexutil.EncodeBig(endRewards)
 	totals.Tips = hexutil.EncodeBig(endTips)
-
-	//ETH := big.NewInt(1_000_000_000_000_000_000)
-	//endBurned.Div(endBurned, ETH)
-	//endIssuance.Div(endIssuance, ETH)
-	//endRewards.Div(endRewards, ETH)
-	//endTips.Div(endTips, ETH)
-
-	//log.Infof("last %d sec totals: %s burned, %s issuance, %s rewards, %s tips", endTime-startTime, endBurned.String(), endIssuance.String(), endRewards.String(), endTips.String())
 
 	return totals, nil
 }
@@ -499,7 +602,7 @@ func (s *Stats) getBlockStats() func(c *Client, message jsonrpcMessage) (json.Ra
 			return nil, err
 		}
 
-		latestBlockNumber := (s.latestBlock.getBlockNumber())
+		latestBlockNumber := s.latestBlock.getBlockNumber()
 		if blockNumber > latestBlockNumber {
 			return nil, err
 		}
@@ -564,10 +667,8 @@ func (s *Stats) getBaseFeeNext(blockNumber uint64) (string, error) {
 func (s *Stats) updateTotals(blockNumber uint64) error {
 	s.statsByBlock.mu.Lock()
 	s.totalsByBlock.mu.Lock()
-	s.TotalsByTime.mu.Lock()
 	defer s.statsByBlock.mu.Unlock()
 	defer s.totalsByBlock.mu.Unlock()
-	defer s.TotalsByTime.mu.Unlock()
 
 	//recalculate totals for previous 10 blocks in case blocks missed
 	for i := blockNumber - 10; i <= blockNumber; i++ {
@@ -617,13 +718,12 @@ func (s *Stats) updateTotals(blockNumber uint64) error {
 		totalTips.Add(prevTotalTips, blockTips)
 
 		totals.Burned = hexutil.EncodeBig(totalBurned)
+		totals.Duration = block.Timestamp - s.londonTimestamp
 		totals.Issuance = hexutil.EncodeBig(totalIssuance)
 		totals.Rewards = hexutil.EncodeBig(totalRewards)
 		totals.Tips = hexutil.EncodeBig(totalTips)
 
 		s.totalsByBlock.v[i] = totals
-		// break up into 300second intervals as it is possible to not have a block every minute
-		s.TotalsByTime.v[uint64(block.Timestamp)/300] = totals
 
 		//log.Infof("block %d totals: %s burned, %s issuance, %s rewards, and %s tips", i, totalBurned.String(), totalIssuance.String(), totalRewards.String(), totalTips.String())
 	}
@@ -668,6 +768,7 @@ func (s *Stats) updateAllTotals(blockNumber uint64) error {
 		totalIssuance.Sub(totalRewards, totalBurned)
 
 		totals.Burned = hexutil.EncodeBig(totalBurned)
+		totals.Duration = block.Timestamp - s.londonTimestamp
 		totals.Issuance = hexutil.EncodeBig(totalIssuance)
 		totals.Rewards = hexutil.EncodeBig(totalRewards)
 		totals.Tips = hexutil.EncodeBig(totalTips)
@@ -675,11 +776,6 @@ func (s *Stats) updateAllTotals(blockNumber uint64) error {
 		s.totalsByBlock.mu.Lock()
 		s.totalsByBlock.v[uint64(block.Number)] = totals
 		s.totalsByBlock.mu.Unlock()
-
-		s.TotalsByTime.mu.Lock()
-		// break up into 300second intervals as it is possible to not have a block every minute
-		s.TotalsByTime.v[uint64(block.Timestamp)/300] = totals
-		s.TotalsByTime.mu.Unlock()
 
 		if block.Number%5000 == 0 {
 			log.Infof("block %d totals: %s burned, %s issuance, %s rewards, and %s tips", block.Number, totalBurned.String(), totalIssuance.String(), totalRewards.String(), totalTips.String())

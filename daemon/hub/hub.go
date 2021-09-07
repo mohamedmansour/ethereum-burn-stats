@@ -163,12 +163,12 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 				// reprocess previous block if it had been repeated
 				for h.blockRepeated {
 					h.blockRepeated = false
-					previousBlockNumber := blockNumber - 1
+					prevBlockNumber := blockNumber - 1
 
 					// fetch previous block, process stats, and update stats if changed
-					blockStats, err := h.s.processBlock(previousBlockNumber, true)
+					blockStats, err := h.s.processBlock(prevBlockNumber, true)
 					if err != nil {
-						log.Errorf("processBlock(%d, true): %v", previousBlockNumber, err)
+						log.Errorf("processBlock(%d, true): %v", prevBlockNumber, err)
 						continue
 					} else if blockStats.Number == 0 {
 						// repeated block unchanged
@@ -176,42 +176,49 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 					}
 
 					//get totals for previous block
-					totals, err := h.s.getTotals(previousBlockNumber)
+					totals, err := h.s.getTotals(prevBlockNumber)
 					if err != nil {
-						log.Errorf("getTotals(%d): %v", previousBlockNumber, err)
+						log.Errorf("getTotals(%d): %v", prevBlockNumber, err)
 						continue
 					}
 
-					prevBlockTimestamp, err := h.s.getBlockTimestamp(previousBlockNumber)
+					prevBlockTimestamp, err := h.s.getBlockTimestamp(prevBlockNumber)
 					if err != nil {
-						log.Errorf("getBlockTimestamp(%d): %v", previousBlockNumber, err)
+						log.Errorf("getBlockTimestamp(%d): %v", prevBlockNumber, err)
 					}
 
-					// get totals stats for current block from 30 days prior
+					// get totals stats for previous block from 30 days prior
 					totalsMonth, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-30*86400, prevBlockTimestamp)
 					if err != nil {
 						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-30*86400, prevBlockTimestamp, err)
 						continue
 					}
 
-					// get totals stats for current block from 7 days prior
+					// get totals stats for previous block from 7 days prior
 					totalsWeek, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-7*86400, prevBlockTimestamp)
 					if err != nil {
 						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-7*86400, prevBlockTimestamp, err)
 						continue
 					}
 
-					// get totals stats for current block from 24 hours prior
+					// get totals stats for previous block from 24 hours prior
 					totalsDay, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-86400, prevBlockTimestamp)
 					if err != nil {
 						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-86400, prevBlockTimestamp, err)
 						continue
 					}
 
-					//get baseFeeNext for previous block
-					baseFeeNext, err := h.s.getBaseFeeNext(previousBlockNumber)
+					// get totals stats for previous block from 1 hour prior
+					totalsHour, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-3600, prevBlockTimestamp)
 					if err != nil {
-						log.Errorf("getBaseFeeNext(%d): %v", previousBlockNumber, err)
+						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-3600, prevBlockTimestamp, err)
+						continue
+					}
+
+					//get baseFeeNext for previous block
+					baseFeeNext, err := h.s.getBaseFeeNext(prevBlockNumber)
+					if err != nil {
+						log.Errorf("getBaseFeeNext(%d): %v", prevBlockNumber, err)
 						continue
 					}
 
@@ -227,6 +234,7 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 								Clients:     int16(clientsCount),
 								Totals:      totals,
 								TotalsDay:   totalsDay,
+								TotalsHour:  totalsHour,
 								TotalsMonth: totalsMonth,
 								TotalsWeek:  totalsWeek,
 								Version:     version.Version,
@@ -272,6 +280,13 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 					continue
 				}
 
+				// get totals stats for current block from 1 hour prior
+				totalsHour, err := h.s.getTotalsTimeDelta(header.Time-3600, header.Time)
+				if err != nil {
+					log.Errorf("getTotalsTimeDelta(%d,%d): %v", header.Time-3600, header.Time, err)
+					continue
+				}
+
 				// get baseFeeNext for current block
 				baseFeeNext, err := h.s.getBaseFeeNext(blockNumber)
 				if err != nil {
@@ -289,6 +304,7 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 						Clients:     int16(clientsCount),
 						Totals:      totals,
 						TotalsDay:   totalsDay,
+						TotalsHour:  totalsHour,
 						TotalsMonth: totalsMonth,
 						TotalsWeek:  totalsWeek,
 						Version:     version.Version,
@@ -547,12 +563,19 @@ func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.
 			log.Errorf("getTotalsTimeDelta(%d,%d): %v", blockTimestamp-86400, blockTimestamp, err)
 		}
 
+		// get totals stats for current block from 1 hour prior
+		totalsHour, err := h.s.getTotalsTimeDelta(blockTimestamp-3600, blockTimestamp)
+		if err != nil {
+			log.Errorf("getTotalsTimeDelta(%d,%d): %v", blockTimestamp-3600, blockTimestamp, err)
+		}
+
 		data := &InitialData{
 			BlockNumber: h.s.latestBlock.getBlockNumber(),
 			Blocks:      h.s.latestBlocks.getBlocks(),
 			Clients:     int16(len(h.clients)),
 			Totals:      totals,
 			TotalsDay:   totalsDay,
+			TotalsHour:  totalsHour,
 			TotalsMonth: totalsMonth,
 			TotalsWeek:  totalsWeek,
 			Version:     version.Version,
