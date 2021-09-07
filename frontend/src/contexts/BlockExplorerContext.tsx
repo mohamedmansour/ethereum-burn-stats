@@ -264,7 +264,7 @@ const BlockExplorerProvider = ({
 
   return (
     <BlockExplorerContext.Provider
-      value={{data: data, getBlockStats: db?.getBlockStats}}>
+      value={{data: data, getBlockStats: db?.getBlockStats, error}}>
       {!db && error ? <Announcement isOverlay /> : null }
       {db ? children : <Loader>retrieving latest blocks on {eth?.connectedNetwork.name}</Loader>}
     </BlockExplorerContext.Provider>
