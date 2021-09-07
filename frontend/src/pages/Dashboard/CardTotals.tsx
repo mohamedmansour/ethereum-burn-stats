@@ -51,8 +51,8 @@ function RenderTooltip() {
 function TotalTabPanel({ totals, amount }: { totals: Totals, amount: number }) {
   return (
     <Box pt={4}>
-      <TotalStatLine icon={IoTrophySharp} title="Rewards" value={totals.rewards} amount={amount} />
       <TotalStatLine icon={LogoIcon} title="Burned" value={totals.burned} amount={amount} />
+      <TotalStatLine icon={IoTrophySharp} title="Rewards" value={totals.rewards} amount={amount} />
       <TotalStatLine icon={FaMoneyBillWave} title="Tips" value={totals.tips} amount={amount} />
       <TotalStatLine icon={BiLineChart} title="Net Issuance" value={totals.issuance} amount={amount} />
       <TotalStatLine icon={AiFillPieChart} title="Net Reduction" amount={totals.netReduction} />
@@ -103,7 +103,7 @@ export function CardTotals() {
   return (
     <Card title="Overview" subtitle={subtitle.title} tooltip={<RenderTooltip />}>
       <Tabs isFitted variant="unstyled" defaultIndex={3} onChange={onChange}>
-        <TabList border="1px solid rgba(255, 255, 255, 0.05)" borderRadius="6px">
+        <TabList border="1px solid rgba(255, 255, 255, 0.05)" borderRadius="6px" userSelect="none">
           <Tab {...tabStyle}>{filters.Day.key}</Tab>
           <Tab {...tabStyle}>{filters.Week.key}</Tab>
           <Tab {...tabStyle}>{filters.Month.key}</Tab>
