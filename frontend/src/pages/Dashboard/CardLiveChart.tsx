@@ -40,7 +40,7 @@ export function CardLiveChart(props: CardLiveProps) {
       {...rest}
     >
       <Tabs isLazy variant="unstyled" flex={1} display="flex" flexDirection="column">
-        <TabList>
+        <TabList userSelect="none">
           {charts.map((value) => (
             <Tab key={`tab-${value}`} fontSize="xl" color="gray" _selected={{ color: "white" }}>{value}</Tab>
           ))}
