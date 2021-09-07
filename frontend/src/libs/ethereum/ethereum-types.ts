@@ -84,6 +84,9 @@ export interface Totals {
 export interface BaseData {
   clients: number
   totals: Totals
+  totalsDay: Totals
+  totalsWeek: Totals
+  totalsMonth: Totals
   version: string
   usdPrice: number
 }
