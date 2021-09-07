@@ -59,7 +59,6 @@ export function Card(props: CardProps) {
             )}
             {tooltip && (
               <>
-                <Spacer />
                 <Tooltip placement="right" label={<CardTooltip label={tooltip} />}><Box position="relative"><Icon as={MdInfoOutline} /></Box></Tooltip>
               </>
             )}
