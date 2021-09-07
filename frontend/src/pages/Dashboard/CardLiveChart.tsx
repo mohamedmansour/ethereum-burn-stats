@@ -14,6 +14,19 @@ function settingType(type: string) {
   return type === "primary" ? Setting.chartType : Setting.chartSecondaryType
 }
 
+function formatNameForChart(type: ChartType) {
+  switch(type) {
+    case "basefee":
+      return "Base Fee";
+    case "gas":
+      return "Gas";
+    case "issuance":
+      return "Issuance";
+    case "tips":
+      return "Tips";
+  }
+}
+
 export function CardLiveChart(props: CardLiveProps) {
   const { type, charts, ...rest } = props
   const settings = useSettings();
@@ -42,7 +55,7 @@ export function CardLiveChart(props: CardLiveProps) {
       <Tabs isLazy variant="unstyled" flex={1} display="flex" flexDirection="column">
         <TabList userSelect="none">
           {charts.map((value) => (
-            <Tab key={`tab-${value}`} fontSize="xl" color="gray" _selected={{ color: "white" }}>{value}</Tab>
+            <Tab key={`tab-${value}`} fontSize="xl" pl={0} pt={0} pr={0} pb={2} mr={4} _selected={{ color: "white", fontWeight: "bold" }}>{formatNameForChart(value)}</Tab>
           ))}
         </TabList>
         <TabPanels display="flex" flex={1}>
