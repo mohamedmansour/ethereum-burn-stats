@@ -239,15 +239,16 @@ const BlockExplorerProvider = ({
       setDb(index);
       setData(index.getData())
 
+      // Start the websocket listener.
+      eth.on('data', onNewData)
+
       return true;
     }
 
-    init()
-
-    eth.on('data', onNewData)
+    const initialized = init()
     
     return () => {
-      eth.off('data', onNewData)
+      initialized.then(() => eth.off('data', onNewData))
     }
   }, [eth])
 
