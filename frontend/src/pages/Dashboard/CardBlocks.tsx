@@ -15,7 +15,7 @@ function TooltipGasUsedInfo() {
   return (
     <Box>
       <LightMode>
-        <Heading size="xs">Gas used is % of gas target</Heading>
+        <Text size="xs">Gas used is % of gas target</Text>
         <UnorderedList mt={4} spacing={2}>
           <ListItem>100% == no change in base fee</ListItem>
           <ListItem>200% == 12.5% increase in base fee</ListItem>
@@ -31,6 +31,16 @@ function TooltipRewardsInfo() {
     <Box>
       <LightMode>
         <Text>Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards.</Text>
+      </LightMode>
+    </Box>
+  );
+}
+
+function TooltipTipsInfo() {
+  return (
+    <Box>
+      <LightMode>
+        <Text>Tips is the gratuity on top of the basefee that each transaction can optionally have.</Text>
       </LightMode>
     </Box>
   );
@@ -84,7 +94,7 @@ export function BlockList() {
           <Tr>
             <ThPlus textAlign="left" width="0.1%">Block</ThPlus>
             <ThPlus>Burned</ThPlus>
-            <ThPlus>Tips</ThPlus>
+            <ThPlusTooltip tooltip={<TooltipTipsInfo/>}>Tips</ThPlusTooltip>
             <ThPlusTooltip tooltip={<TooltipRewardsInfo />}>Rewards</ThPlusTooltip>
             <ThPlus>Base Fee</ThPlus>
             <ThPlus>Priority Fee</ThPlus>
