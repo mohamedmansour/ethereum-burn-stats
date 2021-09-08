@@ -1,4 +1,4 @@
-import { Box, Icon, LightMode, Tooltip, TooltipProps, useStyleConfig } from "@chakra-ui/react"
+import { Box, Icon, Tooltip, TooltipProps, useStyleConfig } from "@chakra-ui/react"
 import React from "react"
 import { MdInfoOutline } from "react-icons/md"
 
