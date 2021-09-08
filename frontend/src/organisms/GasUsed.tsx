@@ -19,6 +19,6 @@ export function GasUsedPercent({gasUsed, gasTarget}: {gasUsed: BigNumber, gasTar
   const percentage = gasUsedNumber / gasTargetNumber * 100
 
   return (
-        <Text size="sm" w="50px">{percentage.toFixed(0)}%</Text>
+        <Text w="40px" fontSize="xs" variant="brandSecondary">({percentage.toFixed(0)}%)</Text>
   )
 }
