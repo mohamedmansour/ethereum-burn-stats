@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Box, Heading, HStack, Icon, ListItem, Tab, TabList, TabListProps, TabPanel, TabPanels, Tabs, Text, UnorderedList, useColorMode, VStack } from '@chakra-ui/react';
 import { BigNumber } from 'ethers';
 import { FaMoneyBillWave } from 'react-icons/fa';
@@ -11,6 +11,8 @@ import { BigNumberText } from "../../organisms/BigNumberText";
 import { useBlockExplorer } from '../../contexts/BlockExplorerContext';
 import { LogoIcon } from '../../atoms/LogoIcon';
 import { Totals } from '../../libs/ethereum';
+import { useSettings } from '../../contexts/SettingsContext';
+import { Setting, TotalFilters } from '../../config';
 
 function TotalStatLine({ icon, title, value, amount }: { icon: any, title: string, value?: BigNumber, amount: number }) {
   return (
@@ -60,35 +62,12 @@ function TotalTabPanel({ totals, amount }: { totals: Totals, amount: number }) {
   )
 }
 
-const filters = {
-  Hour: {
-    key: '1H',
-    title: 'Total stats over previous 60 minutes'
-  },
-  Day: {
-    key: '1D',
-    title: 'Total stats over previous 24 hours'
-  },
-  Week: {
-    key: '7D',
-    title: 'Total stats over previous 7 days'
-  },
-  Month: {
-    key: '1M',
-    title: 'Total stats over previous 30 days'
-    
-  },
-  All: {
-    key: 'All',
-    title: 'Total stats since EIP-1559 launch'
-  }
-}
-
 export function CardTotals() {
   const { data: { details: { totals, totalsHour, totalsDay, totalsWeek, totalsMonth, usdPrice } } } = useBlockExplorer();
-  const [subtitle, setSubtitle] = useState(filters.All)
+  const settings = useSettings();
+  const filterIndex = useMemo<number>(() => settings.get(Setting.totalFilterIndex), [settings])
+  const [subtitle, setSubtitle] = useState(TotalFilters[filterIndex])
   const { colorMode } = useColorMode()
-
   const isDark = colorMode === "dark"
 
   const tabStyle = {
@@ -109,18 +88,17 @@ export function CardTotals() {
   }
 
   const onChange = (index: number) => {
-    setSubtitle(Object.values(filters)[index])
+    settings.set(Setting.totalFilterIndex, index);
+    setSubtitle(Object.values(TotalFilters)[index])
   }
 
   return (
     <Card title="Overview" subtitle={subtitle.title} tooltip={<RenderTooltip />}>
-      <Tabs isFitted variant="unstyled" defaultIndex={3} onChange={onChange}>
+      <Tabs isFitted variant="unstyled" defaultIndex={filterIndex} onChange={onChange}>
         <TabList {...tablistStyle}>
-          <Tab {...tabStyle}>{filters.Hour.key}</Tab>
-          <Tab {...tabStyle}>{filters.Day.key}</Tab>
-          <Tab {...tabStyle}>{filters.Week.key}</Tab>
-          <Tab {...tabStyle}>{filters.Month.key}</Tab>
-          <Tab {...tabStyle}>{filters.All.key}</Tab>
+          {TotalFilters.map(filter => (
+            <Tab {...tabStyle} key={filter.key}>{filter.key}</Tab>
+          ))}
         </TabList>
         <TabPanels>
           <TabPanel p={0}>

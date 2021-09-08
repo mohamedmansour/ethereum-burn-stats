@@ -24,6 +24,11 @@ export const DarkLightSetting: SettingConfig = {
   convert: (value: string): string => value
 }
 
+export const TotalFilterSetting: SettingConfig = {
+  verify: (value: any): boolean => !isNaN(value) && parseInt(value) < TotalFilters.length,
+  convert: (value: string): number => parseInt(value)
+}
+
 export interface EthereumNetwork {
   name: string
   key: string
@@ -44,13 +49,37 @@ export enum Setting {
   doNotShowCurrentSession = "doNotShowCurrentSession",
   chartType = "chartType",
   chartSecondaryType = "chartSecondaryType",
-  colorMode = "chakra-ui-color-mode"
+  colorMode = "chakra-ui-color-mode",
+  totalFilterIndex = "totalFilterIndex",
 }
 
 export type DarkLightType = "dark" | "light";
 
 export const ChartTypes: ChartType[] = ["issuance", "basefee", "tips", "gas"]
 export const DarkLightTypes: DarkLightType[] = ["dark", "light"]
+export const TotalFilters = [
+  {
+    key: '1H',
+    title: 'Total stats over previous 60 minutes'
+  },
+  {
+    key: '1D',
+    title: 'Total stats over previous 24 hours'
+  },
+  {
+    key: '7D',
+    title: 'Total stats over previous 7 days'
+  },
+  {
+    key: '1M',
+    title: 'Total stats over previous 30 days'
+    
+  },
+  {
+    key: 'All',
+    title: 'Total stats since EIP-1559 launch'
+  }
+]
 
 export const defaultNetwork = EthereumNetworkOptions['mainnet']
 export const defaultSettings: { [key: string]: DefaultSettingValue } =
@@ -78,6 +107,10 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
     [Setting.colorMode]: {
       config: DarkLightSetting,
       defaultValue: 'dark',
+    },
+    [Setting.totalFilterIndex]: {
+      config: TotalFilterSetting,
+      defaultValue: TotalFilters.length - 1,
     },
   };
 
