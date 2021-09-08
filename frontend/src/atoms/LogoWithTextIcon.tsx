@@ -1,6 +1,11 @@
 import { Icon, IconProps } from "@chakra-ui/react";
+import { useMemo } from "react";
+
+let id = 0;
 
 export function LogoWithTextIcon(props: IconProps) {
+  const uniqueId = useMemo(() => {++id; return id;}, [])
+
   return (
     <Icon viewBox="0 0 644 222" width="2.9em" height="1em" {...props}>
       <g fill="currentColor">
@@ -17,14 +22,14 @@ export function LogoWithTextIcon(props: IconProps) {
         <path d="M574.771 167.783C576.493 168.128 578.215 168.516 579.937 168.947L585.619 153.42C583.639 152.557 581.314 151.953 578.645 151.608C576.062 151.177 573.695 150.961 571.542 150.961C565.774 150.961 560.565 151.522 555.916 152.643C551.353 153.679 547.22 154.8 543.518 156.008L528.021 220.447H547.263L559.79 168.171C560.737 167.912 561.942 167.697 563.406 167.524C564.87 167.265 566.204 167.136 567.41 167.136C570.681 167.136 573.135 167.352 574.771 167.783Z" />
         <path d="M592.177 155.49C593.641 155.059 595.233 154.584 596.955 154.067C598.763 153.463 600.743 152.945 602.896 152.514C605.134 151.996 607.588 151.608 610.257 151.349C613.012 151.004 616.112 150.832 619.555 150.832C629.715 150.832 636.689 153.765 640.477 159.631C644.265 165.497 644.911 173.519 642.414 183.699L633.632 220.447H614.39L622.913 184.475C623.43 182.232 623.817 180.076 624.076 178.005C624.42 175.849 624.42 173.994 624.076 172.441C623.731 170.802 622.913 169.508 621.622 168.559C620.416 167.524 618.522 167.006 615.939 167.006C613.443 167.006 610.903 167.265 608.32 167.783L595.793 220.447H576.551L592.177 155.49Z" />
       </g>
-      <circle cx="74.0981" cy="151" r="71" fill="url(#paint0_linear)" />
-      <path d="M124.303 0L23.8936 100.585C-3.83366 128.36 -3.83366 173.393 23.8936 201.168L124.303 100.584C152.03 72.8084 152.03 27.7754 124.303 0Z" fill="url(#paint1_linear)" />
+      <circle cx="74.0981" cy="151" r="71" fill={`url(#paint${uniqueId}_circle)`} />
+      <path d="M124.303 0L23.8936 100.585C-3.83366 128.36 -3.83366 173.393 23.8936 201.168L124.303 100.584C152.03 72.8084 152.03 27.7754 124.303 0Z" fill={`url(#paint${uniqueId}_flame)`} />
       <defs>
-        <linearGradient id="paint0_linear" x1="132.233" y1="92.213" x2="25.1468" y2="201.54" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`paint${uniqueId}_circle`} x1="132.233" y1="92.213" x2="25.1468" y2="201.54" gradientUnits="userSpaceOnUse">
           <stop stopColor="#FAB951" />
           <stop offset="1" stopColor="#FF5F52" />
         </linearGradient>
-        <linearGradient id="paint1_linear" x1="74.0981" y1="0" x2="74.0981" y2="201.168" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`paint${uniqueId}_flame`} x1="74.0981" y1="0" x2="74.0981" y2="201.168" gradientUnits="userSpaceOnUse">
           <stop stopColor="#C62828" />
           <stop offset="1" stopColor="#FF5F52" />
         </linearGradient>
