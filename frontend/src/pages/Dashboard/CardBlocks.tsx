@@ -125,7 +125,6 @@ export function BlockList() {
 export function CardBlocks() {
   return (
     <Card
-      title="Blocks"
       flex={layoutConfig.flexStretch}
       h={{ base: 400, md: "auto" }}
     >
