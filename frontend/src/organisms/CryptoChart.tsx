@@ -209,12 +209,12 @@ function LiveChart(props: BaseFeeChartProps) {
   return (
     <Box flex="1" overflow="hidden" position="relative">
       <CustomResponsiveContainer>
-        <ComposedChart data={data.points} stackOffset="sign" margin={{ top: 0, left: 0, right: 0, bottom: 0 }}>
+        <ComposedChart data={data.points} stackOffset="sign" margin={{ top: 0, left: 0, right: 0, bottom: 0 }} barGap={0} barCategoryGap={-1 }>
           <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} width={typeMapping.width} />
           <XAxis dataKey="number" angle={-30} dy={10} fontSize={10} tickCount={10} height={40} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
           {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: "14px" }} />}
-          <Bar type="monotone" stackId="stack" dataKey={typeMapping.primary.dataKey} fill="#FF7B24" isAnimationActive={false} name={typeMapping.primary.name}>
+          <Bar type="monotone" stackId="stack" dataKey={typeMapping.primary.dataKey} fill="#FF7B24" isAnimationActive={false} stroke="" name={typeMapping.primary.name}>
             {data.points.map((entry, index) => {
               const isNegative = entry[typeMapping.primary.dataKey] < 0;
               return (
@@ -222,7 +222,7 @@ function LiveChart(props: BaseFeeChartProps) {
               )
             })}
           </Bar>
-          {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFC40C" isAnimationActive={false} name={typeMapping.secondary.name} />}
+          {typeMapping.secondary && <Bar type="monotone" stackId="stack" dataKey={typeMapping.secondary.dataKey} fill="#FFC40C"  stroke="" isAnimationActive={false} name={typeMapping.secondary.name} />}
         </ComposedChart>
       </CustomResponsiveContainer>
     </Box>

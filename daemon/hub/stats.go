@@ -84,7 +84,7 @@ func (s *Stats) initialize(
 	}
 
 	s.latestBlock = newLatestBlock()
-	s.latestBlocks = newLatestBlocks(150)
+	s.latestBlocks = newLatestBlocks(300)
 
 	s.db, err = sql.ConnectDatabase(dbPath)
 	if err != nil {
