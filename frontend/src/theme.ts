@@ -18,6 +18,14 @@ const theme = extendTheme({
     },
   },
   components: {
+    Tabs: {
+      parts: ["tab"],
+      baseStyle: (props: any) => ({
+        tab: {
+          color: secondaryColor(props),
+        }
+      }),
+    },
     Divider: {
       baseStyle: (props: any) => ({
         opacity: 0.50,

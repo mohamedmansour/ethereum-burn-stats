@@ -1,4 +1,4 @@
-import { HTMLChakraProps, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
+import { HTMLChakraProps, Tab, TabList, TabPanel, TabPanels, Tabs, useColorModeValue } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { Card } from "../../atoms/Card";
 import { BaseFeeChart, ChartType } from "../../organisms/CryptoChart";
@@ -30,7 +30,7 @@ function formatNameForChart(type: ChartType) {
 export function CardLiveChart(props: CardLiveProps) {
   const { type, charts, ...rest } = props
   const settings = useSettings();
-
+  const color = useColorModeValue("black", "white")
   const [chartType, setChartType] = useState<ChartType>(
     settings.get(settingType(type))
   );
@@ -55,7 +55,7 @@ export function CardLiveChart(props: CardLiveProps) {
       <Tabs isLazy variant="unstyled" flex={1} display="flex" flexDirection="column">
         <TabList userSelect="none">
           {charts.map((value) => (
-            <Tab key={`tab-${value}`} fontSize="xl" pl={0} pt={0} pr={0} pb={2} mr={4} _selected={{ color: "white", fontWeight: "bold" }}>{formatNameForChart(value)}</Tab>
+            <Tab key={`tab-${value}`} fontSize="xl" pl={0} pt={0} pr={0} pb={2} mr={4} _selected={{ color, fontWeight: "bold" }}>{formatNameForChart(value)}</Tab>
           ))}
         </TabList>
         <TabPanels display="flex" flex={1}>
