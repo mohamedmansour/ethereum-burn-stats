@@ -61,6 +61,10 @@ function TotalTabPanel({ totals, amount }: { totals: Totals, amount: number }) {
 }
 
 const filters = {
+  Hour: {
+    key: '1H',
+    title: 'Total stats since last hour'
+  },
   Day: {
     key: '1D',
     title: 'Total stats since yesterday'
@@ -81,7 +85,7 @@ const filters = {
 }
 
 export function CardTotals() {
-  const { data: { details: { totals, totalsDay, totalsWeek, totalsMonth, usdPrice } } } = useBlockExplorer();
+  const { data: { details: { totals, totalsHour, totalsDay, totalsWeek, totalsMonth, usdPrice } } } = useBlockExplorer();
   const [subtitle, setSubtitle] = useState(filters.All)
   const { colorMode } = useColorMode()
 
@@ -112,12 +116,16 @@ export function CardTotals() {
     <Card title="Overview" subtitle={subtitle.title} tooltip={<RenderTooltip />}>
       <Tabs isFitted variant="unstyled" defaultIndex={3} onChange={onChange}>
         <TabList {...tablistStyle}>
+          <Tab {...tabStyle}>{filters.Hour.key}</Tab>
           <Tab {...tabStyle}>{filters.Day.key}</Tab>
           <Tab {...tabStyle}>{filters.Week.key}</Tab>
           <Tab {...tabStyle}>{filters.Month.key}</Tab>
           <Tab {...tabStyle}>{filters.All.key}</Tab>
         </TabList>
         <TabPanels>
+          <TabPanel p={0}>
+            <TotalTabPanel totals={totalsHour} amount={usdPrice} />
+          </TabPanel>
           <TabPanel p={0}>
             <TotalTabPanel totals={totalsDay} amount={usdPrice} />
           </TabPanel>

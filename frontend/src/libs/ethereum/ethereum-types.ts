@@ -79,11 +79,13 @@ export interface Totals {
   tips: BigNumber
   issuance: BigNumber
   netReduction: number
+  duration: number
 }
 
 export interface BaseData {
   clients: number
   totals: Totals
+  totalsHour: Totals
   totalsDay: Totals
   totalsWeek: Totals
   totalsMonth: Totals

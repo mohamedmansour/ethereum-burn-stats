@@ -87,6 +87,7 @@ export class EthereumApiFormatters {
 
   static FormatAllTotals(b: BaseData): BaseData {
     b.totals = this.FormatTotals(b.totals)
+    b.totalsHour = this.FormatTotals(b.totalsHour)
     b.totalsDay = this.FormatTotals(b.totalsDay)
     b.totalsWeek = this.FormatTotals(b.totalsWeek)
     b.totalsMonth = this.FormatTotals(b.totalsMonth)

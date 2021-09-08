@@ -4,7 +4,7 @@ import { BigNumber } from 'ethers'
 import { Loader } from "../organisms/Loader";
 import { maxBlocksToRenderInChart, maxBlocksToRenderInChartMobile, serverVersion } from "../config";
 import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
-import { BaseData, BlockData, BlockStats, BlockWithTransactions, InitialData } from "../libs/ethereum";
+import { BaseData, BlockData, BlockStats, BlockWithTransactions, InitialData, Totals } from "../libs/ethereum";
 import { Announcement } from "../organisms/Announcement";
 import { isMobileWidth } from "./MobileDetectorContext";
 
@@ -40,38 +40,23 @@ type BlockExplorerContextType = {
   error?: string
   getBlockStats?(index: number): BlockStats | undefined
 }
+const DefaultTotals: Totals = {
+  burned: Zero,
+  rewards: Zero,
+  tips: Zero,
+  issuance: Zero,
+  netReduction: 0,
+  duration: 0
+}
 
 const DefaultExplorerData = {
   blocks: [],
   details: {
-    totals: {
-      burned: Zero,
-      rewards: Zero,
-      tips: Zero,
-      issuance: Zero,
-      netReduction: 0,
-    },
-    totalsDay: {
-      burned: Zero,
-      rewards: Zero,
-      tips: Zero,
-      issuance: Zero,
-      netReduction: 0,
-    },
-    totalsWeek: {
-      burned: Zero,
-      rewards: Zero,
-      tips: Zero,
-      issuance: Zero,
-      netReduction: 0,
-    },
-    totalsMonth: {
-      burned: Zero,
-      rewards: Zero,
-      tips: Zero,
-      issuance: Zero,
-      netReduction: 0,
-    },
+    totals: DefaultTotals,
+    totalsHour: DefaultTotals,
+    totalsDay: DefaultTotals,
+    totalsWeek: DefaultTotals,
+    totalsMonth: DefaultTotals,
     clients: 0,
     version: 'NA',
     usdPrice: 1,
@@ -110,6 +95,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
     currentBaseFee: initialData.blocks.length ? initialData.blocks[0].baseFee : Zero,
     currentPriorityFee: initialData.blocks.length ? initialData.blocks[0].priorityFee : Zero,
     totals: initialData.totals,
+    totalsHour: initialData.totalsHour,
     totalsDay: initialData.totalsDay,
     totalsWeek: initialData.totalsWeek,
     totalsMonth: initialData.totalsMonth,
@@ -136,7 +122,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
   }
 
   const insert = (data: BlockData) => {
-    const { block, totals, totalsDay, totalsWeek, totalsMonth, clients, version, usdPrice } = data
+    const { block, totals, totalsHour, totalsDay, totalsWeek, totalsMonth, clients, version, usdPrice } = data
 
     if (blockIndex[block.number]) {
       console.log('repeat', block.number);
@@ -159,6 +145,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
     details.currentPriorityFee = block.priorityFee
     details.currentBlock = block.number
     details.totals = totals
+    details.totalsHour = totalsHour
     details.totalsDay = totalsDay
     details.totalsWeek = totalsWeek
     details.totalsMonth = totalsMonth
