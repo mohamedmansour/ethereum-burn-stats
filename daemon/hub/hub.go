@@ -517,13 +517,15 @@ func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.
 			return nil, err
 		}
 
+		var blockCount int
 		if len(params) == 0 {
-			return nil, fmt.Errorf("no parameters provided %s", message.Method)
-		}
-
-		blockCount, ok := params[0].(float64)
-		if !ok {
-			return nil, fmt.Errorf("block count is not a number - %s", params[0])
+			blockCount = 300
+		} else {
+			blockCountFloat, ok := params[0].(float64)
+			if !ok {
+				return nil, fmt.Errorf("block count is not a number - %s", params[0])
+			}
+			blockCount = int(blockCountFloat)
 		}
 
 		blockNumber := h.s.latestBlock.getBlockNumber()
@@ -563,7 +565,7 @@ func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.
 
 		data := &InitialData{
 			BlockNumber: h.s.latestBlock.getBlockNumber(),
-			Blocks:      h.s.latestBlocks.getBlocks(int(blockCount)),
+			Blocks:      h.s.latestBlocks.getBlocks(blockCount),
 			Clients:     int16(len(h.clients)),
 			Totals:      totals,
 			TotalsDay:   totalsDay,
