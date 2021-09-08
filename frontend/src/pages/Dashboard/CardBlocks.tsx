@@ -15,7 +15,7 @@ function TooltipGasUsedInfo() {
   return (
     <Box>
       <LightMode>
-        <Text size="xs">Gas used is % of gas target</Text>
+        <Text size="xs">Gas used is % of gas target. The base fee for the next block will change depending on the percentage:</Text>
         <UnorderedList mt={4} spacing={2}>
           <ListItem>100% == no change in base fee</ListItem>
           <ListItem>200% == 12.5% increase in base fee</ListItem>
@@ -74,7 +74,14 @@ function BlockItem({ block }: { block: BlockStats }) {
           </HStack>
         </VStack>
       </TdPlus>
-      <TdPlus textAlign="right">{block.transactions} ({transactionPercentage}%)</TdPlus>
+      <TdPlus textAlign="right">
+        <VStack alignItems="flex-end">
+          <HStack>
+            <Text>{block.transactions}</Text>
+            <Text variant="brandSecondary" fontSize="xs" w="40px">({transactionPercentage}%)</Text>
+          </HStack>
+        </VStack>
+      </TdPlus>
       <TdPlus textAlign="right">{timeSince(block.timestamp)}</TdPlus>
     </Tr>
   );
@@ -94,7 +101,7 @@ export function BlockList() {
           <Tr>
             <ThPlus textAlign="left" width="0.1%">Block</ThPlus>
             <ThPlus>Burned</ThPlus>
-            <ThPlusTooltip tooltip={<TooltipTipsInfo/>}>Tips</ThPlusTooltip>
+            <ThPlusTooltip tooltip={<TooltipTipsInfo />}>Tips</ThPlusTooltip>
             <ThPlusTooltip tooltip={<TooltipRewardsInfo />}>Rewards</ThPlusTooltip>
             <ThPlus>Base Fee</ThPlus>
             <ThPlus>Priority Fee</ThPlus>
