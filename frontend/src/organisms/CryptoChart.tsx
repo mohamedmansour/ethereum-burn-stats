@@ -1,7 +1,8 @@
-import { Box, HStack, LightMode, Text } from "@chakra-ui/react";
+import { Box, HStack, LightMode, Text, VStack } from "@chakra-ui/react";
 import { BigNumber, utils } from "ethers";
 import React, { useEffect, useState } from "react";
 import { Bar, XAxis, YAxis, Tooltip, TooltipProps, Legend, ComposedChart, Cell } from 'recharts';
+import { ContentType, Props } from "recharts/types/component/DefaultLegendContent";
 import { maxBlocksToRenderInChart, maxBlocksToRenderInChartMobile } from "../config";
 import { useBlockExplorer } from "../contexts/BlockExplorerContext";
 import { useMobileDetector } from "../contexts/MobileDetectorContext";
@@ -201,6 +202,25 @@ function LiveChart(props: BaseFeeChartProps) {
     }
   }
 
+  const renderLegend = (props: Props): ContentType => {
+    const { payload } = props;
+    if (!payload)
+      return <></>
+
+    return (
+      <HStack justify="flex-end" gridGap={4}>
+        {
+          payload.map((entry) => (
+            <HStack key={entry.value}>
+              <Box bg={entry.color} w={3} h={3} rounded='full'></Box>
+              <Text variant="brandSecondary">{entry.value}</Text>
+            </HStack>
+          ))
+        }
+      </HStack>
+    );
+  }
+
   if (!data) {
     return null;
   }
@@ -213,7 +233,7 @@ function LiveChart(props: BaseFeeChartProps) {
           <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} width={typeMapping.width} />
           <XAxis dataKey="number" angle={-30} dy={10} fontSize={10} tickCount={10} height={40} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
-          {typeMapping.secondary && <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: "14px" }} />}
+          {typeMapping.secondary && <Legend align="right" verticalAlign="top" content={renderLegend} />}
           <Bar type="monotone" stackId="stack" dataKey={typeMapping.primary.dataKey} fill="#FF7B24" isAnimationActive={false} stroke="" name={typeMapping.primary.name}>
             {data.points.map((entry, index) => {
               const isNegative = entry[typeMapping.primary.dataKey] < 0;
