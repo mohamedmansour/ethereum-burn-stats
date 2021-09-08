@@ -209,7 +209,7 @@ function LiveChart(props: BaseFeeChartProps) {
   return (
     <Box flex="1" overflow="hidden" position="relative">
       <CustomResponsiveContainer>
-        <ComposedChart data={data.points} stackOffset="sign" margin={{ top: 0, left: 0, right: 0, bottom: 0 }} barGap={0} barCategoryGap={-1 }>
+        <ComposedChart data={data.points} stackOffset="sign" margin={{ top: 0, left: 0, right: 0, bottom: 0 }} barGap={0} barCategoryGap={0}>
           <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} width={typeMapping.width} />
           <XAxis dataKey="number" angle={-30} dy={10} fontSize={10} tickCount={10} height={40} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
