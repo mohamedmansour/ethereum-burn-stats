@@ -36,7 +36,7 @@ function RenderTooltip() {
   return (<>
     <Heading size="xs">Overview explainer</Heading>
     <UnorderedList mt={4} spacing={2}>
-      <ListItem>Rewards contains the coinbase + uncle rewards.</ListItem>
+      <ListItem>Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards.</ListItem>
       <ListItem>Burned is the block's <code>gas used x base fee</code>.</ListItem>
       <ListItem>Tips is the sum of all tips given from all transactions in the block. Tips are optional.</ListItem>
       <ListItem>Net Issuance is just <code>burned - rewards</code>. The amount of new ETH coming into circulation.</ListItem>

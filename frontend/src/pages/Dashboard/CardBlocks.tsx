@@ -31,7 +31,7 @@ function TooltipRewardsInfo() {
   return (
     <Box>
       <LightMode>
-        <Text>Rewards is coinbase + uncle rewards</Text>
+	      <Text>Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards</Text>
       </LightMode>
     </Box>
   );
