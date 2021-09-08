@@ -106,13 +106,13 @@ const theme = extendTheme({
     ThPlus: {
       baseStyle: (props: any) => ({
         position: "sticky",
-        top: -5,
+        top: 0,
         bg: backgroundColor(props),
         color: secondaryColor(props),
         borderColor: borderColor(props),
         zIndex: 5,
         textAlign: "right",
-        paddingTop: 5,
+        paddingTop: 0,
         _notFirst: {
           paddingLeft: 0,
         }
