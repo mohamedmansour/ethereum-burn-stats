@@ -45,6 +45,22 @@ export function CardLiveChart(props: CardLiveProps) {
     settings.set(settingType(type), chartType);
   }, [settings, type, chartType]);
 
+  const tabStyle = {
+    fontSize: "xl",
+    pl: 0,
+    pt: 0,
+    pr: 0,
+    pb: 2,
+    mr: 4,
+    mb: 4,
+    borderBottom: "2px solid transparent",
+
+    _selected: {
+      color,
+      borderBottomColor: "white"
+    }
+  }
+
   return (
     <Card
       minH={400}
@@ -55,7 +71,7 @@ export function CardLiveChart(props: CardLiveProps) {
       <Tabs isLazy variant="unstyled" flex={1} display="flex" flexDirection="column">
         <TabList userSelect="none">
           {charts.map((value) => (
-            <Tab key={`tab-${value}`} fontSize="xl" pl={0} pt={0} pr={0} pb={2} mr={4} _selected={{ color, fontWeight: "bold" }}>{formatNameForChart(value)}</Tab>
+            <Tab key={`tab-${value}`} {...tabStyle} >{formatNameForChart(value)}</Tab>
           ))}
         </TabList>
         <TabPanels display="flex" flex={1}>
