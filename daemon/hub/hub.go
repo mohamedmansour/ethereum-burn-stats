@@ -120,15 +120,6 @@ func (h *Hub) initializeWebSocketHandlers() {
 		// proxy to rpc
 		"eth_subscribe":   h.ethSubscribe(),
 		"eth_unsubscribe": h.ethUnsubscribe(),
-
-		// deprecated
-		//"internal_getTotals": h.handleTotals(),
-		//"eth_blockNumber":    h.ethBlockNumber(),
-		//"eth_chainId":        h.handleFunc(),
-		//"eth_getBalance": h.handleFunc(),
-		//"eth_getBlockByNumber":     h.ethGetBlockByNumber(),
-		//"eth_getTransactionByHash": h.handleFunc(),
-		//"internal_getBlockStats":  h.s.getBlockStats(),
 	}
 }
 
@@ -419,15 +410,6 @@ func (h *Hub) serveWebSocket(w http.ResponseWriter, r *http.Request) {
 	go client.readPump()
 }
 
-func (h *Hub) ethBlockNumber() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
-	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
-		blockNumber := h.s.latestBlock.getBlockNumber()
-		blockNumberHex := hexutil.EncodeUint64(blockNumber)
-
-		return json.RawMessage(fmt.Sprintf("\"%s\"", blockNumberHex)), nil
-	}
-}
-
 func (h *Hub) ethSyncing() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 		if h.s.ethSyncing != nil {
@@ -522,23 +504,28 @@ func toBlockNumArg(number *big.Int) string {
 	return hexutil.EncodeBig(number)
 }
 
-func (h *Hub) handleTotals() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
-	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
-		totals, err := h.s.getTotals(h.s.latestBlock.getBlockNumber())
-		if err != nil {
-			log.Errorf("Error calling getTotals: %vn", err)
-		}
-		totalsJSON, err := json.Marshal(totals)
-		if err != nil {
-			log.Errorf("Error marshaling block stats: %vn", err)
-		}
-
-		return json.RawMessage(totalsJSON), nil
-	}
-}
-
 func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
 	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+		b, err := message.Params.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+
+		var params []interface{}
+		err = json.Unmarshal(b, &params)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(params) == 0 {
+			return nil, fmt.Errorf("no parameters provided %s", message.Method)
+		}
+
+		blockCount, ok := params[0].(float64)
+		if !ok {
+			return nil, fmt.Errorf("block count is not a number - %s", params[0])
+		}
+
 		blockNumber := h.s.latestBlock.getBlockNumber()
 		totals, err := h.s.getTotals(blockNumber)
 		if err != nil {
@@ -576,7 +563,7 @@ func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.
 
 		data := &InitialData{
 			BlockNumber: h.s.latestBlock.getBlockNumber(),
-			Blocks:      h.s.latestBlocks.getBlocks(),
+			Blocks:      h.s.latestBlocks.getBlocks(int(blockCount)),
 			Clients:     int16(len(h.clients)),
 			Totals:      totals,
 			TotalsDay:   totalsDay,

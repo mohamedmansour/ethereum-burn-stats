@@ -90,4 +90,4 @@ export const serverVersion = "2.0.0";
 export const maxBlocksToRenderInTable = 50;
 export const maxBlocksToRenderInChart = 300;
 export const maxBlocksToRenderInTableMobile = 25;
-export const maxBlocksToRenderInChartMobile = 75;
+export const maxBlocksToRenderInChartMobile = 100;

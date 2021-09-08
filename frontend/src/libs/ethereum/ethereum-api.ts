@@ -59,9 +59,9 @@ export class EthereumApi extends WebSocketProvider<EthereumWebSocketEventMap> {
     return EthereumApiFormatters.FormatBlockStats(result)
   }
 
-  public async getInitialData(): Promise<InitialData> {
+  public async getInitialData(blockCount: number): Promise<InitialData> {
     const key = `${this.connectedNetwork.chainId}getInitialData()`
-    const result = await this.cachedExecutor<InitialData>(key, () => this.send('internal_getInitialData', []))
+    const result = await this.cachedExecutor<InitialData>(key, () => this.send('internal_getInitialData', [blockCount]))
     return EthereumApiFormatters.FormatInitialData(result);
   }
 }

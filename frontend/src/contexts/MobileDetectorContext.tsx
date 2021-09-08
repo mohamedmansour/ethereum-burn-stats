@@ -14,7 +14,7 @@ const MobileDetectorContext = React.createContext<MobileDetectorContextType>({
 
 const useMobileDetector = () => useContext(MobileDetectorContext);
 
-const isMobileWidth = (): boolean => {
+export const isMobileWidth = (): boolean => {
   return window.innerWidth < 600
 }
 
