@@ -19,7 +19,7 @@ export const isMobileWidth = (): boolean => {
 }
 
 const isPortraitWidth = (): boolean => {
-  return window.innerWidth < 1024
+  return window.innerWidth < 1280
 }
 
 const MobileDetectorProvider = ({
