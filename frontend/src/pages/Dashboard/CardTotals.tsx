@@ -89,7 +89,6 @@ export function CardTotals() {
 
   const tabStyle = {
     fontSize: "xs",
-    color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
     m: "4px",
     _selected: {
       fontWeight: "bold",
@@ -100,7 +99,7 @@ export function CardTotals() {
   }
 
   const tablistStyle: Partial<TabListProps> = {
-    border: isDark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid rgba(0, 0, 0, 0.05)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.1)",
     borderRadius: "6px",
     userSelect: "none"
   }
