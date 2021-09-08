@@ -9,8 +9,8 @@ const borderColor = (props: Dict<any>) => mode('#eeeeee', '#292929')(props)
 const popupColor = (props: Dict<any>) => ({
     rounded: "lg",
     p: 4,
-    color:  mode('black', 'white')(props),
-    bg: mode('#eee', '#333')(props),
+    color: "white",
+    bg: "#333",
     fontSize: "sm",
     filter: "drop-shadow(0px 8px 24px rgba(0, 0, 0, 0.2))"
 })
