@@ -85,9 +85,9 @@ export const defaultSettings: { [key: string]: DefaultSettingValue } =
 export const maxReconnectionAttempts = 10;
 
 // Sync version with server.
-export const serverVersion = "1.1.0";
+export const serverVersion = "2.0.0";
 
 export const maxBlocksToRenderInTable = 50;
-export const maxBlocksToRenderInChart = 150;
+export const maxBlocksToRenderInChart = 300;
 export const maxBlocksToRenderInTableMobile = 25;
 export const maxBlocksToRenderInChartMobile = 75;
