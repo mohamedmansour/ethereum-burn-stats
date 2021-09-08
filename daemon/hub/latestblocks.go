@@ -20,9 +20,13 @@ func newLatestBlocks(maxBlocks int) *LatestBlocks {
 	}
 }
 
-func (lb *LatestBlocks) getBlocks() []sql.BlockStats {
+func (lb *LatestBlocks) getBlocks(blockCount int) []sql.BlockStats {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
+
+	if len(lb.blocks) > blockCount {
+		return lb.blocks[0:blockCount]
+	}
 
 	return lb.blocks
 }

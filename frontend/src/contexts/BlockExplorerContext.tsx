@@ -2,11 +2,11 @@ import { useContext, createContext, useEffect, useState } from "react"
 import { useEthereum } from "./EthereumContext"
 import { BigNumber } from 'ethers'
 import { Loader } from "../organisms/Loader";
-import { serverVersion, Setting } from "../config";
+import { maxBlocksToRenderInChart, maxBlocksToRenderInChartMobile, serverVersion } from "../config";
 import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
 import { BaseData, BlockData, BlockStats, BlockWithTransactions, InitialData } from "../libs/ethereum";
 import { Announcement } from "../organisms/Announcement";
-import { useSettings } from "./SettingsContext";
+import { isMobileWidth } from "./MobileDetectorContext";
 
 export interface BurnedBlockTransaction extends BlockWithTransactions {
   stats?: BlockStats
@@ -97,7 +97,6 @@ const useBlockExplorer = () => useContext(BlockExplorerContext);
 
 interface InMemoryIndex {
   insert: (data: BlockData) => void
-  setMaxBlocksToRender: (maxBlocks: number) => void
   getBlockStats: (index: number) => BlockStats | undefined
   getData: () => BlocksChanged
 }
@@ -134,10 +133,6 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
       session,
       blocks: blocks.map((blockNumber: number) => blockIndex[blockNumber]),
     }
-  }
-
-  const setMaxBlocksToRender = (maxBlocks: number) => {
-    console.log('Max Blocks');
   }
 
   const insert = (data: BlockData) => {
@@ -195,7 +190,6 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
 
   return {
     insert,
-    setMaxBlocksToRender,
     getBlockStats,
     getData
   }
@@ -207,7 +201,6 @@ const BlockExplorerProvider = ({
   children: React.ReactNode
 }) => {
   const { eth } = useEthereum()
-  const settings = useSettings()
   const [db, setDb] = useState<InMemoryIndex>()
   const [error, setError] = useState<string>()
   const [data, setData] = useState<BlocksChanged>(DefaultExplorerData)
@@ -236,31 +229,27 @@ const BlockExplorerProvider = ({
       setData(index.getData())
     }
 
-    const onMaxBlocksToRenderChanged = (value: number) => {
-      index.setMaxBlocksToRender(value);
-    }
-
     const init = async () => {
-      const initialData = await eth.getInitialData()
+      const initialData = await eth.getInitialData(isMobileWidth() ? maxBlocksToRenderInChartMobile : maxBlocksToRenderInChart)
       if (onVersionError(initialData.version)) {
-        return;
+        return false;
       }
 
       index = CreateMemoryIndex(initialData)
       setDb(index);
       setData(index.getData())
+
+      return true;
     }
 
     init()
 
     eth.on('data', onNewData)
-    settings.on(Setting.maxBlocksToRender, onMaxBlocksToRenderChanged)
     
     return () => {
       eth.off('data', onNewData)
-      settings.off(Setting.maxBlocksToRender, onMaxBlocksToRenderChanged)
     }
-  }, [eth, settings])
+  }, [eth])
 
   return (
     <BlockExplorerContext.Provider
