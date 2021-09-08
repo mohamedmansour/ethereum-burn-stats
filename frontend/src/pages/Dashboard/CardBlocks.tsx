@@ -30,7 +30,7 @@ function TooltipRewardsInfo() {
   return (
     <Box>
       <LightMode>
-	      <Text>Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards</Text>
+        <Text>Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards.</Text>
       </LightMode>
     </Box>
   );
@@ -53,11 +53,17 @@ function BlockItem({ block }: { block: BlockStats }) {
       <TdPlus>{block.number}</TdPlus>
       <TdPlus><VStack alignItems="flex-end"><HStack><BigNumberText number={block.burned} /><LogoIcon /></HStack></VStack></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.tips} /></TdPlus>
+      <TdPlus textAlign="right"><BigNumberText number={block.rewards} /></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.baseFee} /></TdPlus>
       <TdPlus textAlign="right"><BigNumberText number={block.priorityFee} /></TdPlus>
-      <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsed gasUsed={block.gasUsed} /></HStack></VStack></TdPlus>
-      <TdPlus textAlign="right"><VStack alignItems="flex-end"><HStack><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack></VStack></TdPlus>
-      <TdPlus textAlign="right"><BigNumberText number={block.rewards} /></TdPlus>
+      <TdPlus textAlign="right">
+        <VStack alignItems="flex-end">
+          <HStack>
+            <GasUsed gasUsed={block.gasUsed} />
+            <GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} />
+          </HStack>
+        </VStack>
+      </TdPlus>
       <TdPlus textAlign="right">{block.transactions} ({transactionPercentage}%)</TdPlus>
       <TdPlus textAlign="right">{timeSince(block.timestamp)}</TdPlus>
     </Tr>
@@ -79,11 +85,10 @@ export function BlockList() {
             <ThPlus textAlign="left" width="0.1%">Block</ThPlus>
             <ThPlus>Burned</ThPlus>
             <ThPlus>Tips</ThPlus>
+            <ThPlusTooltip tooltip={<TooltipRewardsInfo />}>Rewards</ThPlusTooltip>
             <ThPlus>Base Fee</ThPlus>
             <ThPlus>Priority Fee</ThPlus>
             <ThPlusTooltip tooltip={<TooltipGasUsedInfo />}>Gas Used</ThPlusTooltip>
-            <ThPlus>% Target</ThPlus>
-            <ThPlusTooltip tooltip={<TooltipRewardsInfo />}>Rewards</ThPlusTooltip>
             <ThPlusTooltip tooltip={<TooltipTxnInfo />}>Txn</ThPlusTooltip>
             <ThPlus>Age</ThPlus>
           </Tr>
