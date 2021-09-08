@@ -45,8 +45,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
     const goodghostingTitle = "The new addictive way to save. Our savings pools reward regular savers with higher interest rates. Start building the financial habits you deserve."
     
     return (
-      <Card 
-          title="Patrons">
+      <Card title="Patrons" subtitle="Thanks to these patrons who has offered to help support the server costs and development!">
         <Box>
           <SimpleGrid columns={2} gridGap={2} mt={2} alignItems="center" justifyContent="center">
             <LinkBox title={indexedTitle}>
@@ -65,7 +64,6 @@ export function CardDonate({ type }: { type: CardDonateType }) {
               </LinkOverlay>
             </LinkBox>
           </SimpleGrid>
-          <Text fontSize={12} mt={4} mb={2} variant="brandSecondary">Thanks to these patrons who has offered to help support the server costs and development!</Text>
           <Text fontSize={12} textAlign="right"><Link href="https://twitter.com/mohamedmansour" target="_blank">Become a patron!</Link></Text>
         </Box>
       </Card>
