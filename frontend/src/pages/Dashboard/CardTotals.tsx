@@ -63,24 +63,24 @@ function TotalTabPanel({ totals, amount }: { totals: Totals, amount: number }) {
 const filters = {
   Hour: {
     key: '1H',
-    title: 'Total stats since last hour'
+    title: 'Total stats over previous 60 minutes'
   },
   Day: {
     key: '1D',
-    title: 'Total stats since yesterday'
+    title: 'Total stats over previous 24 hours'
   },
   Week: {
     key: '7D',
-    title: 'Total stats since last week'
+    title: 'Total stats over previous 7 days'
   },
   Month: {
     key: '1M',
-    title: 'Total stats since last month'
+    title: 'Total stats over previous 30 days'
     
   },
   All: {
     key: 'All',
-    title: 'Total stats since EIP-1559'
+    title: 'Total stats since EIP-1559 launch'
   }
 }
 
@@ -93,7 +93,7 @@ export function CardTotals() {
 
   const tabStyle = {
     fontSize: "xs",
-    m: "4px",
+    m: 1,
     _selected: {
       fontWeight: "bold",
       color: isDark ? "#fff" : "#000",
