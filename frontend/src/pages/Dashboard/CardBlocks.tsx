@@ -1,5 +1,4 @@
-import { Text, HStack, Icon, Box, Tbody, Thead, Tooltip, Tr, VStack, Heading, ListItem, UnorderedList, LightMode } from "@chakra-ui/react";
-import { VscInfo } from "react-icons/vsc";
+import { Text, HStack, Box, Tbody, Thead, Tr, VStack, ListItem, UnorderedList } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
 import { TablePlus, TdPlus, ThPlus } from "../../atoms/TablePlus";
 import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
@@ -10,49 +9,36 @@ import { BlockStats } from "../../libs/ethereum";
 import { maxBlocksToRenderInTable } from "../../config";
 import { layoutConfig } from "../../layoutConfig";
 import { LogoIcon } from "../../atoms/LogoIcon";
+import { TooltipPlus } from "../../atoms/TooltipPlus";
 
 function TooltipGasUsedInfo() {
   return (
     <Box>
-      <LightMode>
-        <Text size="xs">Gas used is % of gas target. The base fee for the next block will change depending on the percentage:</Text>
-        <UnorderedList mt={4} spacing={2}>
-          <ListItem>100% == no change in base fee</ListItem>
-          <ListItem>200% == 12.5% increase in base fee</ListItem>
-          <ListItem>0% == 12.5% decrease in base fee</ListItem>
-        </UnorderedList>
-      </LightMode>
+      <Text size="xs">Gas used is % of gas target. The base fee for the next block will change depending on the percentage:</Text>
+      <UnorderedList mt={4} spacing={2}>
+        <ListItem>100% == no change in base fee</ListItem>
+        <ListItem>200% == 12.5% increase in base fee</ListItem>
+        <ListItem>0% == 12.5% decrease in base fee</ListItem>
+      </UnorderedList>
     </Box>
   );
 }
 
 function TooltipRewardsInfo() {
   return (
-    <Box>
-      <LightMode>
-        <Text>Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards.</Text>
-      </LightMode>
-    </Box>
+    <Text>Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards.</Text>
   );
 }
 
 function TooltipTipsInfo() {
   return (
-    <Box>
-      <LightMode>
-        <Text>Tips is the gratuity on top of the basefee that each transaction can optionally have.</Text>
-      </LightMode>
-    </Box>
+    <Text>Tips is the gratuity on top of the basefee that each transaction can optionally have.</Text>
   );
 }
 
 function TooltipTxnInfo() {
   return (
-    <Box>
-      <LightMode>
-        <Text>Total Transactions in this block (% type 2)</Text>
-      </LightMode>
-    </Box>
+    <Text>Total Transactions in this block (% type 2)</Text>
   );
 }
 
@@ -88,7 +74,7 @@ function BlockItem({ block }: { block: BlockStats }) {
 }
 
 function ThPlusTooltip({ children, tooltip }: { children: React.ReactNode, tooltip: React.ReactNode }) {
-  return <ThPlus><VStack alignItems="flex-end"><HStack><Text>{children}</Text><Tooltip placement="top" label={tooltip}><Box><Icon as={VscInfo} fontSize={16} /></Box></Tooltip></HStack></VStack></ThPlus>
+  return <ThPlus><VStack alignItems="flex-end"><HStack><Text>{children}</Text><TooltipPlus placement="top" label={tooltip} /></HStack></VStack></ThPlus>
 }
 
 export function BlockList() {

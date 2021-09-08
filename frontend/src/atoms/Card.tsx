@@ -1,7 +1,7 @@
-import { Box, Button, Flex, Heading, HStack, HTMLChakraProps, Icon, LightMode, Spacer, Text, Tooltip, useStyleConfig } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, HStack, HTMLChakraProps, Icon, Spacer, Text, useStyleConfig } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { VscChevronDown, VscChevronUp } from "react-icons/vsc";
-import { MdInfoOutline } from "react-icons/md";
+import { TooltipPlus } from "./TooltipPlus";
 
 interface CardProps extends HTMLChakraProps<"div"> {
   variant?: string
@@ -11,10 +11,6 @@ interface CardProps extends HTMLChakraProps<"div"> {
   isCollapsible?: boolean
   isTransparent?: boolean
   onCollapsed?: (collapsed: boolean) => void
-}
-
-function CardTooltip({ label }: { label: React.ReactNode }) {
-  return <Box p={2}><LightMode>{label}</LightMode></Box>
 }
 
 export function Card(props: CardProps) {
@@ -58,9 +54,7 @@ export function Card(props: CardProps) {
               </>
             )}
             {tooltip && (
-              <>
-                <Tooltip placement="right" label={<CardTooltip label={tooltip} />}><Box position="relative"><Icon as={MdInfoOutline} /></Box></Tooltip>
-              </>
+              <TooltipPlus placement="right" label={tooltip} />
             )}
           </HStack>
           {subtitle && <Text mt={1} fontSize="xs" variant="brandSecondary">{subtitle}</Text>}

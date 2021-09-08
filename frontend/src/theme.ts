@@ -6,6 +6,14 @@ import { layoutConfig } from "./layoutConfig"
 const secondaryColor = (props: Dict<any>) => mode('#a9a9a9', '#A8A8A8')(props)
 const backgroundColor = (props: Dict<any>) => mode('white', '#232635')(props)
 const borderColor = (props: Dict<any>) => mode('#eeeeee', '#292929')(props)
+const popupColor = (props: Dict<any>) => ({
+    rounded: "lg",
+    p: 4,
+    color:  mode('black', 'white')(props),
+    bg: mode('#eee', '#333')(props),
+    fontSize: "sm",
+    filter: "drop-shadow(0px 8px 24px rgba(0, 0, 0, 0.2))"
+})
 
 const theme = extendTheme({
   config: {
@@ -32,14 +40,8 @@ const theme = extendTheme({
         borderColor: mode('blackAlpha.500', 'whiteAlpha.500')(props),
       })
     },
-    Tooltip: {
-      baseStyle: {
-        rounded: "lg",
-        bg: "#333",
-        color: "#fff",
-        p: 4,
-        fontSize: 12,
-      },
+    TooltipPlus: {
+      baseStyle: popupColor,
     },
     Link: {
       baseStyle: {
@@ -66,13 +68,7 @@ const theme = extendTheme({
         gridGap: layoutConfig.miniGap
       }),
       variants: {
-        popup: {
-          bg: "#333",
-          color: "#fff",
-          p: 4,
-          rounded: "lg",
-          fontSize: 12,
-        }
+        popup: popupColor
       }
     },
     TablePlus: {

@@ -1,4 +1,4 @@
-import { Box, HStack, LightMode, Text, VStack } from "@chakra-ui/react";
+import { Box, HStack, LightMode, Text } from "@chakra-ui/react";
 import { BigNumber, utils } from "ethers";
 import React, { useEffect, useState } from "react";
 import { Bar, XAxis, YAxis, Tooltip, TooltipProps, Legend, ComposedChart, Cell } from 'recharts';

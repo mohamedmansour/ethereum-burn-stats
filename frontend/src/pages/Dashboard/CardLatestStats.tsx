@@ -8,7 +8,7 @@ import { BigNumberProps, BigNumberText } from "../../organisms/BigNumberText";
 
 function RenderTooltip() {
   return (<>
-    <Heading size="xs">Recent explainer</Heading>
+    <Heading size="xs" fontWeight="bold">Recent explainer</Heading>
     <UnorderedList mt={4} spacing={2}>
       <ListItem>
         Every block has a base fee, the minimum price per unit of gas for inclusion

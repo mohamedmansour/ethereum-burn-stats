@@ -37,7 +37,7 @@ function TotalStatLine({ icon, title, value, amount }: { icon: any, title: strin
 
 function RenderTooltip() {
   return (<>
-    <Heading size="xs">Overview explainer</Heading>
+    <Heading size="xs" fontWeight="bold">Overview explainer</Heading>
     <UnorderedList mt={4} spacing={2}>
       <ListItem>Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards.</ListItem>
       <ListItem>Burned is the block's <code>gas used x base fee</code>.</ListItem>
