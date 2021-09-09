@@ -196,8 +196,9 @@ func (s *Stats) initWaitForSyncingFalse() error {
 
 			log.Infof("init: geth is syncing: %d/%d", current, highest)
 		}
-
-		time.Sleep(5 * time.Second)
+		if ethSyncing {
+			time.Sleep(5 * time.Second)
+		}
 	}
 
 	log.Infof("init: geth syncing finished")
