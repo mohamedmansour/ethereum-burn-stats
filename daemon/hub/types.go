@@ -60,6 +60,7 @@ type TransactionReceipt struct {
 
 // Totals type represents a single aggregate of all the data.
 type Totals struct {
+	ID       string `json:"id"`
 	Burned   string `json:"burned"`
 	Duration uint64 `json:"duration"`
 	Issuance string `json:"issuance"`
@@ -93,4 +94,11 @@ type BlockData struct {
 	TotalsWeek  Totals         `json:"totalsWeek"`
 	Version     string         `json:"version"`
 	USDPrice    float64        `json:"usdPrice"`
+}
+
+// ClientData type represents the data that the server sends at every new block.
+type AggregatesData struct {
+	TotalsPerDay   []Totals `json:"totalsPerDay"`
+	TotalsPerHour  []Totals `json:"totalsPerHour"`
+	TotalsPerMonth []Totals `json:"totalsPerMonth"`
 }

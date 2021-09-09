@@ -19,9 +19,10 @@ import (
 var log = logrus.StandardLogger()
 
 var allowedEthSubscriptions = map[string]bool{
-	"blockStats":   true,
-	"clientsCount": true,
-	"data":         true,
+	"blockStats":     true,
+	"clientsCount":   true,
+	"data":           true,
+	"aggregatesData": true,
 }
 
 // Hub maintains the set of active clients and subscriptions messages to the
@@ -112,8 +113,9 @@ func (h *Hub) initializeWebSocketHandlers() {
 	h.handlers = map[string]func(c *Client, message jsonrpcMessage) (json.RawMessage, error){
 
 		// internal custom geth commands.
-		"internal_getInitialData": h.handleInitialData(),
-		"eth_syncing":             h.ethSyncing(),
+		"internal_getInitialData":           h.handleInitialData(),
+		"internal_getInitialAggregatesData": h.handleInitialAggregatesData(),
+		"eth_syncing":                       h.ethSyncing(),
 
 		// proxy to geth
 
@@ -218,6 +220,8 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 						continue
 					}
 
+					h.s.updateAggregateTotals(prevBlockNumber)
+
 					// skip broadcast if block unchanged
 					if blockStats.Number != 0 {
 						// broadcast updated block to subscribers
@@ -235,6 +239,11 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 								TotalsWeek:  totalsWeek,
 								Version:     version.Version,
 								USDPrice:    h.usd.Price,
+							},
+							"aggregatesData": &AggregatesData{
+								TotalsPerDay:   h.s.totalsPerDay.getTotals(1),
+								TotalsPerHour:  h.s.totalsPerHour.getTotals(1),
+								TotalsPerMonth: h.s.totalsPerMonth.getTotals(1),
 							},
 						}
 						time.Sleep(100 * time.Millisecond)
@@ -290,6 +299,8 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 					continue
 				}
 
+				h.s.updateAggregateTotals(blockNumber)
+
 				// broadcast new block to subscribers
 				h.subscription <- map[string]interface{}{
 					"blockStats":   blockStats,
@@ -305,6 +316,11 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 						TotalsWeek:  totalsWeek,
 						Version:     version.Version,
 						USDPrice:    h.usd.Price,
+					},
+					"aggregatesData": &AggregatesData{
+						TotalsPerDay:   h.s.totalsPerDay.getTotals(1),
+						TotalsPerHour:  h.s.totalsPerHour.getTotals(1),
+						TotalsPerMonth: h.s.totalsPerMonth.getTotals(1),
 					},
 				}
 			}
@@ -502,6 +518,45 @@ func toBlockNumArg(number *big.Int) string {
 	}
 
 	return hexutil.EncodeBig(number)
+}
+
+func (h *Hub) handleInitialAggregatesData() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+	return func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
+		b, err := message.Params.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+
+		var params []interface{}
+		err = json.Unmarshal(b, &params)
+		if err != nil {
+			return nil, err
+		}
+
+		var periodCount int
+		if len(params) == 0 {
+			periodCount = 300
+		} else {
+			periodCountFloat, ok := params[0].(float64)
+			if !ok {
+				return nil, fmt.Errorf("block count is not a number - %s", params[0])
+			}
+			periodCount = int(periodCountFloat)
+		}
+
+		data := &AggregatesData{
+			TotalsPerDay:   h.s.totalsPerDay.getTotals(periodCount),
+			TotalsPerHour:  h.s.totalsPerHour.getTotals(periodCount),
+			TotalsPerMonth: h.s.totalsPerMonth.getTotals(periodCount),
+		}
+
+		dataJSON, err := json.Marshal(data)
+		if err != nil {
+			log.Errorf("Error marshaling block stats: %vn", err)
+		}
+
+		return json.RawMessage(dataJSON), nil
+	}
 }
 
 func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.RawMessage, error) {
