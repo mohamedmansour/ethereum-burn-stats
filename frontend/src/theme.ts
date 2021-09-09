@@ -27,12 +27,30 @@ const theme = extendTheme({
   },
   components: {
     Tabs: {
-      parts: ["tab"],
-      baseStyle: (props: any) => ({
-        tab: {
-          color: secondaryColor(props),
-        }
-      }),
+      parts: ["tab", "tablist", "tabpanel"],
+      variants: {
+        inline: (props: any) => ({
+          tab: {
+            color: secondaryColor(props),
+            fontSize: "xs",
+            m: 1,
+            _selected: {
+              fontWeight: "bold",
+              color: mode("#000", "#fff")(props),
+              bg: mode("rgba(0, 0, 0, 0.1)", "rgba(255, 255, 255, 0.1)")(props),
+              borderRadius: "6px"
+            }
+          },
+          tablist: {
+            border: mode("1px solid rgba(0, 0, 0, 0.1)", "1px solid rgba(255, 255, 255, 0.1)")(props),
+            borderRadius: "6px",
+            userSelect: "none"
+          },
+          tabpanel: {
+            p: 0
+          }
+        })
+      }
     },
     Divider: {
       baseStyle: (props: any) => ({

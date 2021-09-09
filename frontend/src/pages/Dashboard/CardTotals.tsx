@@ -70,23 +70,6 @@ export function CardTotals() {
   const { colorMode } = useColorMode()
   const isDark = colorMode === "dark"
 
-  const tabStyle = {
-    fontSize: "xs",
-    m: 1,
-    _selected: {
-      fontWeight: "bold",
-      color: isDark ? "#fff" : "#000",
-      bg: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
-      borderRadius: "6px"
-    }
-  }
-
-  const tablistStyle: Partial<TabListProps> = {
-    border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.1)",
-    borderRadius: "6px",
-    userSelect: "none"
-  }
-
   const onChange = (index: number) => {
     settings.set(Setting.totalFilterIndex, index);
     setSubtitle(Object.values(TotalFilters)[index])
@@ -94,26 +77,26 @@ export function CardTotals() {
 
   return (
     <Card title="Overview" subtitle={subtitle.title} tooltip={<RenderTooltip />}>
-      <Tabs isFitted variant="unstyled" defaultIndex={filterIndex} onChange={onChange}>
-        <TabList {...tablistStyle}>
+      <Tabs isFitted variant="inline" defaultIndex={filterIndex} onChange={onChange}>
+        <TabList>
           {TotalFilters.map(filter => (
-            <Tab {...tabStyle} key={filter.key}>{filter.key}</Tab>
+            <Tab key={filter.key}>{filter.key}</Tab>
           ))}
         </TabList>
         <TabPanels>
-          <TabPanel p={0}>
+          <TabPanel>
             <TotalTabPanel totals={totalsHour} amount={usdPrice} />
           </TabPanel>
-          <TabPanel p={0}>
+          <TabPanel>
             <TotalTabPanel totals={totalsDay} amount={usdPrice} />
           </TabPanel>
-          <TabPanel p={0}>
+          <TabPanel>
             <TotalTabPanel totals={totalsWeek} amount={usdPrice} />
           </TabPanel>
-          <TabPanel p={0}>
+          <TabPanel>
             <TotalTabPanel totals={totalsMonth} amount={usdPrice} />
           </TabPanel>
-          <TabPanel p={0}>
+          <TabPanel>
             <TotalTabPanel totals={totals} amount={usdPrice} />
           </TabPanel>
         </TabPanels>
