@@ -64,8 +64,9 @@ func New(
 	workerCount int,
 ) (*Hub, error) {
 	upgrader := &websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
+		EnableCompression: true,
+		ReadBufferSize:    1024,
+		WriteBufferSize:   1024,
 	}
 
 	if debug {
