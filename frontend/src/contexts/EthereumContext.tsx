@@ -49,9 +49,6 @@ const EthereumProvider = ({
         return false
       }
     
-      ethereum.off('retrySuccess', onRetryCheckStatus)
-      ethereum.off('retryMaxAttemptsReached', onRetryMaxAttemptsReached)
-
       await ethereum.subscribeToChannels();
 
       setEth(ethereum)
