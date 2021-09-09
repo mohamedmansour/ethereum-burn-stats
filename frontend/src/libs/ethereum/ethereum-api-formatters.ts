@@ -1,26 +1,13 @@
 import { BigNumber } from "ethers"
+import { AggregatesData } from "."
 import { HexToBigNumber, HexToNumber } from "../../utils/number"
-import { BaseBlock, BaseData, BlockData, BlockStats, BlockWithTransactions, EthereumSyncing, InitialData, Totals, Transaction } from "./ethereum-types"
+import { BaseBlock, BaseData, BlockData, BlockStats,  EthereumSyncing, InitialData, Totals } from "./ethereum-types"
 
 const caclulateNetReduction = (burned: BigNumber, issuance: BigNumber): number => {
   return burned.mul(BigNumber.from(10000)).div(burned.add(issuance)).toNumber() / 100
 }
 
 export class EthereumApiFormatters {
-  static FormatTransaction(t: Transaction): Transaction {
-    t.nonce = HexToNumber(t.nonce)
-    t.blockNumber = HexToNumber(t.blockNumber)
-    t.transactionIndex = HexToNumber(t.transactionIndex)
-    t.type = HexToNumber(t.type)
-    t.v = HexToNumber(t.v)
-    t.gas = HexToBigNumber(t.gas)
-    t.gasPrice = HexToBigNumber(t.gasPrice)
-    t.maxPriorityFeePerGas = HexToBigNumber(t.maxPriorityFeePerGas)
-    t.maxFeePerGas = HexToBigNumber(t.maxFeePerGas)
-    t.confirmations = 0
-    return t
-  }
-
   static FormatBlock(b: BaseBlock): BaseBlock {
     b.baseFeePerGas = HexToBigNumber(b.baseFeePerGas)
     b.gasLimit = HexToBigNumber(b.gasLimit)
@@ -46,12 +33,6 @@ export class EthereumApiFormatters {
     b.timestamp = HexToNumber(b.timestamp)
     b.transactions = HexToNumber(b.transactions)
     b.type2transactions = HexToNumber(b.type2transactions)
-    return b
-  }
-
-  static FormatBlockWithTransactions(b: BlockWithTransactions): BlockWithTransactions {
-    b = EthereumApiFormatters.FormatBlock(b) as BlockWithTransactions
-    b.transactions = (b.transactions || []).map(EthereumApiFormatters.FormatTransaction)
     return b
   }
 

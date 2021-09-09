@@ -19,8 +19,6 @@ import (
 var log = logrus.StandardLogger()
 
 var allowedEthSubscriptions = map[string]bool{
-	"blockStats":     true,
-	"clientsCount":   true,
 	"data":           true,
 	"aggregatesData": true,
 }
@@ -304,8 +302,6 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 
 				// broadcast new block to subscribers
 				h.subscription <- map[string]interface{}{
-					"blockStats":   blockStats,
-					"clientsCount": clientsCount,
 					"data": &BlockData{
 						BaseFeeNext: baseFeeNext,
 						Block:       blockStats,

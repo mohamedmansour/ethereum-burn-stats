@@ -23,7 +23,6 @@ export interface WebSocketEventMap {
 type WebSocketMessageFormatter = ((result: unknown) => unknown) | undefined
 
 interface WebSocketSubscriptionMap<EventMap extends WebSocketEventMap> {
-  channel: string
   event: keyof EventMap | keyof WebSocketEventMap
   formatter?: WebSocketMessageFormatter
 }
@@ -132,7 +131,7 @@ export class WebSocketProvider<EventMap extends WebSocketEventMap> extends WebSo
       // to be connected to these channels.
       const ensureChannelsSubscribed = this.channelsToSubscribe.map(sub => (
         new Promise<[keyof WebSocketEventMap, string, WebSocketMessageFormatter]>((resolve, reject) => {
-          this.send("eth_subscribe", [sub.channel]).then((data) => {
+          this.send("eth_subscribe", [sub.event]).then((data) => {
             resolve([sub.event as keyof WebSocketEventMap, data as string, sub.formatter])
           }).catch(e => reject(e))
         })

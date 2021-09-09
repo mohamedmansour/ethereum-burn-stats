@@ -4,13 +4,9 @@ import { BigNumber } from 'ethers'
 import { Loader } from "../organisms/Loader";
 import { maxBlocksToRenderInChart, maxBlocksToRenderInChartMobile, serverVersion } from "../config";
 import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
-import { BaseData, BlockData, BlockStats, BlockWithTransactions, InitialData, Totals } from "../libs/ethereum";
+import { BaseData, BlockData, BlockStats, InitialData, Totals } from "../libs/ethereum";
 import { Announcement } from "../organisms/Announcement";
 import { isMobileWidth } from "./MobileDetectorContext";
-
-export interface BurnedBlockTransaction extends BlockWithTransactions {
-  stats?: BlockStats
-}
 
 export interface BlockExplorerSession {
   burned: BigNumber

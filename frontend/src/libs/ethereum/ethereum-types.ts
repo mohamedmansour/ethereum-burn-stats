@@ -48,31 +48,6 @@ export interface Block extends BaseBlock {
   transactions: string[]
 }
 
-export interface BlockWithTransactions extends BaseBlock {
-  transactions: Transaction[];
-}
-
-export interface Transaction {
-  blockHash: string
-  from: string
-  hash: string
-  input: string
-  r: string
-  s: string
-  to: string
-  value: string
-  nonce: number
-  blockNumber: number
-  transactionIndex: number
-  type: number
-  v: number
-  gas: BigNumber
-  gasPrice: BigNumber
-  maxPriorityFeePerGas: BigNumber
-  maxFeePerGas: BigNumber
-  confirmations: number
-}
-
 export interface Totals {
   burned: BigNumber
   rewards: BigNumber
