@@ -18,7 +18,8 @@
             "mode": "auto",
             "program": "${workspaceFolder}/daemon",
             "args": [
-                "--db-path=${workspaceFolder}/watchtheburn.db"
+                "--db-path=${workspaceFolder}/watchtheburn.db",
+                "--worker-count=16"
             ]
         }
     ]
