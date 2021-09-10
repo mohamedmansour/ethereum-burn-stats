@@ -80,4 +80,11 @@ export class EthereumApiFormatters {
     this.FormatAllTotals(b)
     return b
   }
+
+  static FormatAggregatesData(d: AggregatesData): AggregatesData {
+    d.totalsPerHour = d.totalsPerHour.map(t => ({...this.FormatTotals(t), id: t.id}))
+    d.totalsPerDay = d.totalsPerDay.map(t => ({...this.FormatTotals(t), id: t.id}))
+    d.totalsPerMonth = d.totalsPerMonth.map(t => ({...this.FormatTotals(t), id: t.id}))
+    return d
+  }
 }

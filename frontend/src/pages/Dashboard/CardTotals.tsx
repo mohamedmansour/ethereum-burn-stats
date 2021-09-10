@@ -1,6 +1,6 @@
 
 import { useMemo, useState } from 'react';
-import { Box, Heading, HStack, Icon, ListItem, Tab, TabList, TabListProps, TabPanel, TabPanels, Tabs, Text, UnorderedList, useColorMode, VStack } from '@chakra-ui/react';
+import { Box, Heading, HStack, Icon, ListItem, Tab, TabList, TabPanel, TabPanels, Tabs, Text, UnorderedList, VStack } from '@chakra-ui/react';
 import { BigNumber } from 'ethers';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import { BiLineChart } from 'react-icons/bi';
@@ -67,8 +67,6 @@ export function CardTotals() {
   const settings = useSettings();
   const filterIndex = useMemo<number>(() => settings.get(Setting.totalFilterIndex), [settings])
   const [subtitle, setSubtitle] = useState(TotalFilters[filterIndex])
-  const { colorMode } = useColorMode()
-  const isDark = colorMode === "dark"
 
   const onChange = (index: number) => {
     settings.set(Setting.totalFilterIndex, index);

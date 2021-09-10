@@ -54,7 +54,10 @@ export interface Totals {
   tips: BigNumber
   issuance: BigNumber
   netReduction: number
-  duration: number
+}
+
+export interface TotalsWithId extends Totals {
+  id: string
 }
 
 export interface BaseData {
@@ -75,4 +78,10 @@ export interface InitialData extends BaseData {
 
 export interface BlockData extends BaseData {
   block: BlockStats
+}
+
+export interface AggregatesData {
+  totalsPerHour: TotalsWithId[]
+  totalsPerDay: TotalsWithId[]
+  totalsPerMonth: TotalsWithId[]
 }

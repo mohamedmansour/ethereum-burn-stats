@@ -1,10 +1,11 @@
 import { EthereumNetwork } from "../../config";
 import { WebSocketProvider, WebSocketEventMap } from "./websocket-provider";
 import { EthereumApiFormatters } from "./ethereum-api-formatters";
-import { BlockData, EthereumSyncing, InitialData } from "./ethereum-types";
+import { AggregatesData, BlockData, EthereumSyncing, InitialData } from "./ethereum-types";
 
 interface EthereumWebSocketEventMap extends WebSocketEventMap {
-  "data": BlockData
+  "data": BlockData,
+  "aggregatesData": AggregatesData
 }
 
 /**
@@ -18,6 +19,8 @@ interface EthereumWebSocketEventMap extends WebSocketEventMap {
 export class EthereumApi extends WebSocketProvider<EthereumWebSocketEventMap> {
   constructor(public connectedNetwork: EthereumNetwork, url: string, maxReconnectionAttempts: number) {
     super(url, maxReconnectionAttempts, [
+      // Disable aggregates socket for now since we need to lazy load this.
+      // { event: 'aggregatesData', formatter: (d: any) => EthereumApiFormatters.FormatAggregatesData(d) },
       { event: 'data', formatter: (d: any) => EthereumApiFormatters.FormatBlockData(d) },
     ])
   }
@@ -30,5 +33,11 @@ export class EthereumApi extends WebSocketProvider<EthereumWebSocketEventMap> {
     const key = `${this.connectedNetwork.chainId}getInitialData()`
     const result = await this.cachedExecutor<InitialData>(key, () => this.send('internal_getInitialData', [blockCount]))
     return EthereumApiFormatters.FormatInitialData(result);
+  }
+
+  public async getInitialAggregatesData(periodCount?: number): Promise<AggregatesData> {
+    const key = `${this.connectedNetwork.chainId}getInitialAggregatesData(${periodCount})`
+    const result = await this.cachedExecutor<AggregatesData>(key, () => this.send('internal_getInitialAggregatesData', periodCount ? [periodCount]: []), 10000)
+    return EthereumApiFormatters.FormatAggregatesData(result)
   }
 }

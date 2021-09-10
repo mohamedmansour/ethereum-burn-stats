@@ -42,7 +42,6 @@ const DefaultTotals: Totals = {
   tips: Zero,
   issuance: Zero,
   netReduction: 0,
-  duration: 0
 }
 
 const DefaultExplorerData = {
