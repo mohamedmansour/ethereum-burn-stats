@@ -6,7 +6,7 @@ import { BigNumberText } from "../../organisms/BigNumberText";
 import { GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
 import { timeSince } from "../../utils/time";
 import { BlockStats } from "../../libs/ethereum";
-import { maxBlocksToRenderInTable } from "../../config";
+import { maxBlocksToRenderInTable, Tooltips } from "../../config";
 import { layoutConfig } from "../../layoutConfig";
 import { LogoIcon } from "../../atoms/LogoIcon";
 import { TooltipPlus } from "../../atoms/TooltipPlus";
@@ -21,24 +21,6 @@ function TooltipGasUsedInfo() {
         <ListItem>0% == 12.5% decrease in base fee</ListItem>
       </UnorderedList>
     </Box>
-  );
-}
-
-function TooltipRewardsInfo() {
-  return (
-    <Text>Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards.</Text>
-  );
-}
-
-function TooltipTipsInfo() {
-  return (
-    <Text>Tips is the gratuity on top of the basefee that each transaction can optionally have.</Text>
-  );
-}
-
-function TooltipTxnInfo() {
-  return (
-    <Text>Total Transactions in this block (% type 2)</Text>
   );
 }
 
@@ -86,13 +68,13 @@ export function BlockList() {
         <Thead>
           <Tr>
             <ThPlus textAlign="left" width="0.1%">Block</ThPlus>
-            <ThPlus>Burned</ThPlus>
-            <ThPlusTooltip tooltip={<TooltipTipsInfo />}>Tips</ThPlusTooltip>
-            <ThPlusTooltip tooltip={<TooltipRewardsInfo />}>Rewards</ThPlusTooltip>
-            <ThPlus>Base Fee</ThPlus>
-            <ThPlus>Priority Fee</ThPlus>
+            <ThPlusTooltip tooltip={Tooltips.burned}>Burned</ThPlusTooltip>
+            <ThPlusTooltip tooltip={Tooltips.tips}>Tips</ThPlusTooltip>
+            <ThPlusTooltip tooltip={Tooltips.rewards}>Rewards</ThPlusTooltip>
+            <ThPlusTooltip tooltip={Tooltips.baseFee}>Base Fee</ThPlusTooltip>
+            <ThPlusTooltip tooltip={Tooltips.priorityFee}>Priority Fee</ThPlusTooltip>
             <ThPlusTooltip tooltip={<TooltipGasUsedInfo />}>Gas Used</ThPlusTooltip>
-            <ThPlusTooltip tooltip={<TooltipTxnInfo />}>Txn</ThPlusTooltip>
+            <ThPlusTooltip tooltip={Tooltips.transactions}>Txn</ThPlusTooltip>
             <ThPlus>Age</ThPlus>
           </Tr>
         </Thead>

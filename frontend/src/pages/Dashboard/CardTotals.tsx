@@ -12,7 +12,7 @@ import { useBlockExplorer } from '../../contexts/BlockExplorerContext';
 import { LogoIcon } from '../../atoms/LogoIcon';
 import { Totals } from '../../libs/ethereum';
 import { useSettings } from '../../contexts/SettingsContext';
-import { Setting, TotalFilters } from '../../config';
+import { Setting, Tooltips, TotalFilters } from '../../config';
 
 function TotalStatLine({ icon, title, value, amount }: { icon: any, title: string, value?: BigNumber, amount: number }) {
   return (
@@ -41,11 +41,11 @@ function RenderTooltip() {
   return (<>
     <Heading size="xs" fontWeight="bold">Overview explainer</Heading>
     <UnorderedList mt={4} spacing={2}>
-      <ListItem>Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards.</ListItem>
-      <ListItem>Burned is the block's <code>gas used x base fee</code>.</ListItem>
-      <ListItem>Tips is the sum of all tips given from all transactions in the block. Tips are optional.</ListItem>
-      <ListItem>Net Issuance is just <code>burned - rewards</code>. The amount of new ETH coming into circulation.</ListItem>
-      <ListItem>Net Reduction explains how much ETH issuance was reduced after EIP-1559, when this reaches above 100%, it means we are burning more than issuing. Ultra sound money!</ListItem>
+      <ListItem>{Tooltips.rewards}</ListItem>
+      <ListItem>{Tooltips.burned}</ListItem>
+      <ListItem>{Tooltips.tips}</ListItem>
+      <ListItem>{Tooltips.netIssuance}</ListItem>
+      <ListItem>{Tooltips.netReduction}</ListItem>
     </UnorderedList>
   </>)
 }

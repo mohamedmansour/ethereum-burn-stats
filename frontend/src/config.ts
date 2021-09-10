@@ -39,8 +39,8 @@ export interface EthereumNetwork {
 export const EthereumNetworkOptions: {
   [key: string]: EthereumNetwork
 } = {
-  mainnet: { name: "Mainnet", key: "mainnet", genesis: 12965000, chainId: 1},
-  staging: { name: "Staging", key: "staging", genesis: 12965000, chainId: 1},
+  mainnet: { name: "Mainnet", key: "mainnet", genesis: 12965000, chainId: 1 },
+  staging: { name: "Staging", key: "staging", genesis: 12965000, chainId: 1 },
 };
 
 export enum Setting {
@@ -73,7 +73,6 @@ export const TotalFilters = [
   {
     key: '1M',
     title: 'Total stats over previous 30 days'
-    
   },
   {
     key: 'All',
@@ -83,37 +82,47 @@ export const TotalFilters = [
 
 export const defaultNetwork = EthereumNetworkOptions['mainnet']
 export const defaultSettings: { [key: string]: DefaultSettingValue } =
-  {
-    [Setting.maxBlocksToRender]: {
-      config: IntegerSetting,
-      defaultValue: 50,
-    },
-    [Setting.doNotShowChart]: {
-      config: BooleanSetting,
-      defaultValue: false,
-    },
-    [Setting.doNotShowCurrentSession]: {
-      config: BooleanSetting,
-      defaultValue: false,
-    },
-    [Setting.chartType]: {
-      config: ChartSetting,
-      defaultValue: 'issuance',
-    },
-    [Setting.chartSecondaryType]: {
-      config: ChartSetting,
-      defaultValue: 'basefee',
-    },
-    [Setting.colorMode]: {
-      config: DarkLightSetting,
-      defaultValue: 'dark',
-    },
-    [Setting.totalFilterIndex]: {
-      config: TotalFilterSetting,
-      defaultValue: TotalFilters.length - 1,
-    },
-  };
+{
+  [Setting.maxBlocksToRender]: {
+    config: IntegerSetting,
+    defaultValue: 50,
+  },
+  [Setting.doNotShowChart]: {
+    config: BooleanSetting,
+    defaultValue: false,
+  },
+  [Setting.doNotShowCurrentSession]: {
+    config: BooleanSetting,
+    defaultValue: false,
+  },
+  [Setting.chartType]: {
+    config: ChartSetting,
+    defaultValue: 'issuance',
+  },
+  [Setting.chartSecondaryType]: {
+    config: ChartSetting,
+    defaultValue: 'basefee',
+  },
+  [Setting.colorMode]: {
+    config: DarkLightSetting,
+    defaultValue: 'dark',
+  },
+  [Setting.totalFilterIndex]: {
+    config: TotalFilterSetting,
+    defaultValue: TotalFilters.length - 1,
+  },
+};
 
+export const Tooltips = {
+  rewards: "Rewards is newly minted ethereum: block reward + uncle rewards + uncle inclusion rewards.",
+  burned: "Burned is the amount of ETH removed from circulation: gas used x base fee.",
+  tips: "Tips is the gratuity on top of the basefee that each transaction can optionally have.",
+  netIssuance: "Net Issuance the amount of new ETH coming into circulation: burned - rewards.",
+  netReduction: "Net Reduction explains how much ETH issuance was reduced after EIP-1559, when this reaches above 100%, it means we are burning more than issuing. Ultra sound money!",
+  transactions: "Total Transactions in this block (% type 2).",
+  baseFee: "Base Fee is the algorithmically determined price you pay for a transaction.",
+  priorityFee: "Priority Fee is a tip to encourage faster inclusion by miners. This shows the least fee you need to add to be included."
+}
 // Max WebSocket Reconnection Attempts.
 export const maxReconnectionAttempts = 10;
 
