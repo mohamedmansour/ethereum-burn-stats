@@ -58,14 +58,14 @@ func main() {
 			panic(err)
 		}
 		
-		StorePercentage(*percentage, 90, blocksFull)
-		StorePercentage(*percentage, 95, blocksFull)
-		StorePercentage(*percentage, 99, blocksFull)
+		StorePercentage(*percentage, 190, blocksFull)
+		StorePercentage(*percentage, 195, blocksFull)
+		StorePercentage(*percentage, 199, blocksFull)
 	}
 
-	PrintPercentageFull(90, blocksFull, totalBlocks)
-	PrintPercentageFull(95, blocksFull, totalBlocks)
-	PrintPercentageFull(99, blocksFull, totalBlocks)
+	PrintPercentageFull(190, blocksFull, totalBlocks)
+	PrintPercentageFull(195, blocksFull, totalBlocks)
+	PrintPercentageFull(199, blocksFull, totalBlocks)
 }
 
 func StorePercentage(percentage float64, percentile int, blocksFull map[int]int) {
@@ -86,7 +86,8 @@ func PrintPercentageFull(percentile int, blocksFull map[int]int, totalBlocks int
 	percentageFull := float64(fullCount) / float64(totalBlocks) * 100
 	consecutiveCount := blocksFull[percentile+200]
 	consecutiveFull := float64(consecutiveCount) / float64(totalBlocks) * 100
-	fmt.Printf("%d percentile: %d/%d (%.2f%%) blocks are full. %d/%d (%.2f%%) consecutive full.\n", percentile, fullCount, totalBlocks, percentageFull, consecutiveCount, fullCount, consecutiveFull)
+	percentileNormalized := percentile - 100
+	fmt.Printf("%d percentile: %d/%d (%.2f%%) blocks are full. %d/%d (%.2f%%) consecutive full.\n", percentileNormalized, fullCount, totalBlocks, percentageFull, consecutiveCount, fullCount, consecutiveFull)
 }
 
 func ProcessPercentage(block BlockStats) (*float64, error) {
@@ -104,6 +105,6 @@ func ProcessPercentage(block BlockStats) (*float64, error) {
 		return &percentage, nil
 	}
 
-	percentage := float64(gasUsed) / float64(gasTarget) * 100
+	percentage := (float64(gasUsed) / float64(gasTarget) * 100)
 	return &percentage, nil
 }
