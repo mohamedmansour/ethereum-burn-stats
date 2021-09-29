@@ -10,11 +10,12 @@ interface CardProps extends HTMLChakraProps<"div"> {
   tooltip?: React.ReactNode
   isCollapsible?: boolean
   isTransparent?: boolean
+  rightSection?: React.ReactNode
   onCollapsed?: (collapsed: boolean) => void
 }
 
 export function Card(props: CardProps) {
-  const { variant, children, title, isTransparent, isCollapsible, onCollapsed, subtitle, tooltip, ...rest } = props
+  const { variant, children, title, isTransparent, isCollapsible, rightSection, onCollapsed, subtitle, tooltip, ...rest } = props
   const styles = useStyleConfig("Card", { variant, isTransparent })
 
   const [collapsed, setCollapsed] = useState<boolean | undefined>(isCollapsible);
@@ -30,8 +31,8 @@ export function Card(props: CardProps) {
     setCollapsed(isCollapsible)
   }, [isCollapsible])
 
-  if (tooltip && isCollapsible) {
-    throw new Error("Collapsible cards cannot have tooltips")
+  if (rightSection && isCollapsible) {
+    throw new Error("Collapsible cards cannot have rightSection")
   }
 
   return (
@@ -40,6 +41,9 @@ export function Card(props: CardProps) {
         <Flex direction="column" alignItems="flex-start" gridGap={0} mb={collapsed ? 0 : 2}>
           <HStack w="100%">
             <Heading size="md" fontWeight="bold">{title}</Heading>
+            {tooltip && (
+              <TooltipPlus placement="right" label={tooltip} />
+            )}
             {isCollapsible !== undefined && (
               <>
                 <Spacer />
@@ -53,8 +57,11 @@ export function Card(props: CardProps) {
                 </Button>
               </>
             )}
-            {tooltip && (
-              <TooltipPlus placement="right" label={tooltip} />
+            {rightSection && (
+              <>
+                <Spacer />
+                {rightSection}
+              </>
             )}
           </HStack>
           {subtitle && <Text mt={1} fontSize="xs" variant="brandSecondary">{subtitle}</Text>}
