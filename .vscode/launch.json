@@ -19,7 +19,17 @@
             "program": "${workspaceFolder}/daemon",
             "args": [
                 "--db-path=${workspaceFolder}/watchtheburn.db",
-                "--worker-count=16"
+                "--worker-count=2"
+            ]
+        },
+        {
+            "name": "Launch Stats",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/analysis",
+            "args": [
+                "--db-path=${workspaceFolder}/watchtheburn.db"
             ]
         }
     ]
