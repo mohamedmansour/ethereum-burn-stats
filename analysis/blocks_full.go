@@ -7,6 +7,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/params"
 	_ "github.com/mattn/go-sqlite3"
 	watchtheburn "github.com/mohamedmansour/ethereum-burn-stats/daemon/sql"
 )
@@ -82,17 +83,12 @@ const (
 	ConsecutiveCount      = 3
 )
 
-const (
-	Wei   = 1
-	GWei  = 1e9
-	Ether = 1e18
-)
-
 type ComplexRecord struct {
 	Total big.Int
 	Min big.Int
 	Max big.Int
 }
+
 type RecordStreak struct {
 	StartBlock uint
 	EndBlock uint
@@ -159,29 +155,39 @@ func (b *BlocksFull) PrintPercentageFull(percentile int) {
 		- Largest Streak (from %d to %d):
 			- %d blocks
 			- %.2f%% EIP-1559 transactions (%d/%d)
-			- %.2fETH burned (%.2fETH min, %.2fETH max)
-			- %.2fETH tips (%.2fETH min, %.2fETH max)
+			- %.2f ETH rewards (%.2f ETH min, %.2f ETH max, %.2f ETH avg)
+			- %.2f ETH burned (%.2f ETH min, %.2f ETH max, %.2f ETH avg)
+			- %.2f ETH tips (%.2f ETH min, %.2f ETH max, %.2f ETH avg)
+			- %.2f GWEI basefee (%.2f GWEI min, %.2f GWEI max, %.2f GWEI avg)
 	`,	percentile, 
 		percentageFull, fullCount, b.totalBlocks,
-		consecutiveFull, consecutiveCount, fullCount,
+		consecutiveFull, consecutiveCount, b.totalBlocks,
 		recordStreak.StartBlock, recordStreak.EndBlock,
 		recordStreak.Count(),
 		float64(recordStreak.TotalType2Transactions) / float64(recordStreak.TotalTransactions) * 100, recordStreak.TotalType2Transactions, recordStreak.TotalTransactions,
-		b.formatEther(&recordStreak.Burned.Total), b.formatEther(&recordStreak.Burned.Min), b.formatEther(&recordStreak.Burned.Max),
-		b.formatEther(&recordStreak.Tips.Total), b.formatEther(&recordStreak.Tips.Min), b.formatEther(&recordStreak.Tips.Max),
+		b.formatEther(&recordStreak.Rewards.Total), b.formatEther(&recordStreak.Rewards.Min), b.formatEther(&recordStreak.Rewards.Max), b.formatAverageEther(&recordStreak.Rewards.Total, recordStreak.Count()),
+		b.formatEther(&recordStreak.Burned.Total), b.formatEther(&recordStreak.Burned.Min), b.formatEther(&recordStreak.Burned.Max), b.formatAverageEther(&recordStreak.Burned.Total, recordStreak.Count()),
+		b.formatEther(&recordStreak.Tips.Total), b.formatEther(&recordStreak.Tips.Min), b.formatEther(&recordStreak.Tips.Max), b.formatAverageEther(&recordStreak.Tips.Total, recordStreak.Count()),
+		b.formatGwei(&recordStreak.BaseFee.Total), b.formatGwei(&recordStreak.BaseFee.Min), b.formatGwei(&recordStreak.BaseFee.Max), b.formatAverageGwei(&recordStreak.BaseFee.Total, recordStreak.Count()),
 	)
 }
 
-func (b *BlocksFull) format(number *big.Int, precision float64) float64 {
-	return (float64(number.Int64()) / precision)
+func (b* BlocksFull) formatAverageEther(total *big.Int, count uint) float64 {
+	return  b.formatEther(total) / float64(count)
 }
 
-func (b *BlocksFull) formatEther(number *big.Int) float64 {
-	return b.format(number, Ether)
+func (b* BlocksFull) formatAverageGwei(total *big.Int, count uint) float64 {
+	return  b.formatGwei(total) / float64(count)
 }
 
-func (b *BlocksFull) formatGwei(number *big.Int) float64 {
-	return b.format(number, GWei)
+func (b *BlocksFull) formatEther(value *big.Int) float64 {
+	ether, _ := new(big.Float).Quo(new(big.Float).SetInt(value), new(big.Float).SetInt(big.NewInt(params.Ether))).Float64()
+	return ether
+}
+
+func (b *BlocksFull) formatGwei(value *big.Int) float64 {
+	gwei, _ := new(big.Float).Quo(new(big.Float).SetInt(value), new(big.Float).SetInt(big.NewInt(params.GWei))).Float64()
+	return gwei
 }
 
 func (b *BlocksFull) storePercentage(block WatchTheBurnBlockStat, percentile int) {
@@ -256,7 +262,11 @@ func (b *BlocksFull) initializeComplexRecord(value big.Int) ComplexRecord {
 }
 
 func (b *BlocksFull) updateComplexRecord(complex ComplexRecord, value big.Int) ComplexRecord {
-	complex.Total.Add(&complex.Total, &value)
+	total := big.NewInt(0)
+	total.Add(total, &complex.Total)
+	total.Add(total, &value)
+	complex.Total = *total
+	
 	if complex.Min.Cmp(&value) == 1 {
 		complex.Min = value
 	}
