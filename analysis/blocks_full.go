@@ -159,6 +159,7 @@ func (b *BlocksFull) PrintPercentageFull(percentile int) {
 			- %.2f ETH burned (%.2f ETH min, %.2f ETH max, %.2f ETH avg)
 			- %.2f ETH tips (%.2f ETH min, %.2f ETH max, %.2f ETH avg)
 			- %.2f GWEI basefee (%.2f GWEI min, %.2f GWEI max, %.2f GWEI avg)
+			- %.2f GWEI priorityfee (%.2f GWEI min, %.2f GWEI max, %.2f GWEI avg)
 	`,	percentile, 
 		percentageFull, fullCount, b.totalBlocks,
 		consecutiveFull, consecutiveCount, b.totalBlocks,
@@ -169,6 +170,7 @@ func (b *BlocksFull) PrintPercentageFull(percentile int) {
 		b.formatEther(&recordStreak.Burned.Total), b.formatEther(&recordStreak.Burned.Min), b.formatEther(&recordStreak.Burned.Max), b.formatAverageEther(&recordStreak.Burned.Total, recordStreak.Count()),
 		b.formatEther(&recordStreak.Tips.Total), b.formatEther(&recordStreak.Tips.Min), b.formatEther(&recordStreak.Tips.Max), b.formatAverageEther(&recordStreak.Tips.Total, recordStreak.Count()),
 		b.formatGwei(&recordStreak.BaseFee.Total), b.formatGwei(&recordStreak.BaseFee.Min), b.formatGwei(&recordStreak.BaseFee.Max), b.formatAverageGwei(&recordStreak.BaseFee.Total, recordStreak.Count()),
+		b.formatGwei(&recordStreak.PriorityFee.Total), b.formatGwei(&recordStreak.PriorityFee.Min), b.formatGwei(&recordStreak.PriorityFee.Max), b.formatAverageGwei(&recordStreak.PriorityFee.Total, recordStreak.Count()),
 	)
 }
 
@@ -213,6 +215,8 @@ func (b *BlocksFull) storePercentage(block WatchTheBurnBlockStat, percentile int
 				b.recordStreaks[percentile] = *b.currentStreaks[percentile]
 			}
 			b.blocksFull[consecutivePercentile] = append(b.blocksFull[consecutivePercentile], block) // Mark consecutive full blocks
+
+			fmt.Printf("%d to %d = %d", b.currentStreaks[percentile].StartBlock, b.currentStreaks[percentile].EndBlock, b.currentStreaks[percentile].Count())
 		}
 
 		if clearTrackingPercentile {
