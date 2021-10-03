@@ -33,12 +33,12 @@ const Patrons = [
     url: "https://twitter.com/unicorncircle" ,
     description: "Unicorn Circle: The one and only Unicorn Circle 🦄⭕️ | Always on the hunt for new Business Unicorns!"
   },
-  {
-    id: 'goodghosting',
-    logo: LogoGoodGhosting,
-    url: "https://goodghosting.com",
-    description: "GoodGhosting: The new addictive way to save. Our savings pools reward regular savers with higher interest rates. Start building the financial habits you deserve."
-  },
+  // {
+  //   id: 'goodghosting',
+  //   logo: LogoGoodGhosting,
+  //   url: "https://goodghosting.com",
+  //   description: "GoodGhosting: The new addictive way to save. Our savings pools reward regular savers with higher interest rates. Start building the financial habits you deserve."
+  // },
   {
     id: 'frontier',
     logo: LogoFrontier,
