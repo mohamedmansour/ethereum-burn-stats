@@ -57,7 +57,7 @@ export function CardLiveChart(props: CardLiveProps) {
 
     _selected: {
       color,
-      borderBottomColor: "white"
+      borderBottomColor: color
     }
   }
 
