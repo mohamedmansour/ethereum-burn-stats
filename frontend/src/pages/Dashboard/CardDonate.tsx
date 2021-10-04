@@ -12,8 +12,9 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
-import { LogoGoodGhosting, LogoIndexed, LogoNansen, LogoUnicornCircle } from "./Logos";
+import { LogoIndexed, LogoNansen, LogoUnicornCircle } from "./Logos";
 import { LogoFrontier } from "./Logos/LogoFrontier";
+import { LogoHotCross } from "./Logos/LogoHotCross";
 
 export enum CardDonateType {
   TopSideBar,
@@ -44,7 +45,13 @@ const Patrons = [
     logo: LogoFrontier,
     url: "https://frontier.xyz/",
     description: "Frontier: Native, seamless, cross-chain DeFi aggregation layer"
-  }
+  },
+  {
+    id: 'hotcross',
+    logo: LogoHotCross ,
+    url: "https://hotcross.com/",
+    description: "Hot Cross is a multi-chain tool suite created for both blockchain teams and their communities."
+  },
 ]
 
 export function CardDonate({ type }: { type: CardDonateType }) {
