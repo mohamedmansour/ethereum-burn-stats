@@ -101,7 +101,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
               </LinkBox>
             ))}
           </SimpleGrid>
-          <Text fontSize={12} textAlign="right"><Link href="https://twitter.com/mohamedmansour" target="_blank">Become a patron!</Link></Text>
+          <Text fontSize={12} textAlign="right" mt={2}><Link href="https://twitter.com/mohamedmansour" target="_blank">Become a patron!</Link></Text>
         </Box>
       </Card>
     )
