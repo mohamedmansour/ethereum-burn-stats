@@ -63,7 +63,7 @@ const Patrons = [
   {
     id: 'mycointainer',
     logo: LogoMyCointainer ,
-    url: "https://www.mycointainer.com/",
+    url: "https://bit.ly/mc-wtb",
     description: "MyCointainer: Live a Rewarding Life"
   },
 ]
