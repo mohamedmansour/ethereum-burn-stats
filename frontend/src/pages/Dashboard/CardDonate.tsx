@@ -15,6 +15,7 @@ import { Card } from "../../atoms/Card";
 import { LogoIndexed, LogoNansen, LogoUnicornCircle } from "./Logos";
 import { LogoFrontier } from "./Logos/LogoFrontier";
 import { LogoHotCross } from "./Logos/LogoHotCross";
+import { LogoThales } from "./Logos/LogoThales";
 
 export enum CardDonateType {
   TopSideBar,
@@ -51,6 +52,12 @@ const Patrons = [
     logo: LogoHotCross ,
     url: "https://hotcross.com/",
     description: "Hot Cross is a multi-chain tool suite created for both blockchain teams and their communities."
+  },
+  {
+    id: 'thales',
+    logo: LogoThales ,
+    url: "https://thales.market/",
+    description: "Thales: Binary options re-imagined. Permissionless, non-custodial, and fun!"
   },
 ]
 
