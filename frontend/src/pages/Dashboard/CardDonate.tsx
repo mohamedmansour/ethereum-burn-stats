@@ -15,6 +15,7 @@ import { Card } from "../../atoms/Card";
 import { LogoIndexed, LogoNansen, LogoUnicornCircle } from "./Logos";
 import { LogoFrontier } from "./Logos/LogoFrontier";
 import { LogoHotCross } from "./Logos/LogoHotCross";
+import { LogoMyCointainer } from "./Logos/LogoMyCointainer";
 import { LogoThales } from "./Logos/LogoThales";
 
 export enum CardDonateType {
@@ -59,6 +60,12 @@ const Patrons = [
     url: "https://thales.market/",
     description: "Thales: Binary options re-imagined. Permissionless, non-custodial, and fun!"
   },
+  {
+    id: 'mycointainer',
+    logo: LogoMyCointainer ,
+    url: "https://bit.ly/mc-wtb",
+    description: "MyCointainer: Live a Rewarding Life"
+  },
 ]
 
 export function CardDonate({ type }: { type: CardDonateType }) {
@@ -94,7 +101,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
               </LinkBox>
             ))}
           </SimpleGrid>
-          <Text fontSize={12} textAlign="right"><Link href="https://twitter.com/mohamedmansour" target="_blank">Become a patron!</Link></Text>
+          <Text fontSize={12} textAlign="right" mt={2}><Link href="https://twitter.com/mohamedmansour" target="_blank">Become a patron!</Link></Text>
         </Box>
       </Card>
     )
