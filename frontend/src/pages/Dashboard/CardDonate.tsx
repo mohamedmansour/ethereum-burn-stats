@@ -15,6 +15,7 @@ import { Card } from "../../atoms/Card";
 import { LogoIndexed, LogoNansen, LogoUnicornCircle } from "./Logos";
 import { LogoFrontier } from "./Logos/LogoFrontier";
 import { LogoHotCross } from "./Logos/LogoHotCross";
+import { LogoMyCointainer } from "./Logos/LogoMyCointainer";
 import { LogoThales } from "./Logos/LogoThales";
 
 export enum CardDonateType {
@@ -58,6 +59,12 @@ const Patrons = [
     logo: LogoThales ,
     url: "https://thales.market/",
     description: "Thales: Binary options re-imagined. Permissionless, non-custodial, and fun!"
+  },
+  {
+    id: 'mycointainer',
+    logo: LogoMyCointainer ,
+    url: "https://www.mycointainer.com/",
+    description: "MyCointainer: Live a Rewarding Life"
   },
 ]
 
