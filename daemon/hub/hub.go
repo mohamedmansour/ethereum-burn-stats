@@ -137,11 +137,17 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 		return fmt.Errorf("WebSocket cannot subscribe to newHeads: %v", err)
 	}
 
+	error_chan := make(chan bool)
+
 	go func() {
 		for {
 			select {
 			case err := <-sub.Err():
-				log.Errorln("Error: ", err)
+				log.Errorln("Geth WS Error: ", err)
+				time.Sleep(12 * time.Second)
+				error_chan <- true
+				return
+				
 			case header := <-headers:
 				// clientsCount is quantity of active subscriptions/users
 				clientsCount := len(h.clients)
@@ -324,6 +330,12 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 		}
 	}()
 
+	go func() {
+		<-error_chan
+		log.Errorln("Reconnecting to Geth WS")
+		h.initializeGrpcWebSocket(gethEndpointWebsocket)
+	}()
+	
 	return nil
 }
 
