@@ -7,6 +7,7 @@ import { CustomResponsiveContainer } from '../../atoms/CustomResponsiveContainer
 import { Tooltips } from '../../config'
 import { useEthereum } from '../../contexts/EthereumContext'
 import { TotalsWithId } from '../../libs/ethereum'
+import { capitalizeFirstLetter } from '../../utils/strings'
 import { ChartData, ChartDataBucket, TimeBucket } from './HistoricalTypes'
 
 interface ChartRange {
@@ -20,9 +21,9 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
     const payload = props.payload[0] as any
     const item = {
       timestamp: payload.payload.timestamp,
-      value: payload.value,
-      name: payload.name,
-      tips: payload.payload.tips
+      value: utils.commify(payload.value) + ' ETH',
+      name: capitalizeFirstLetter(payload.name),
+      tips: utils.commify(payload.payload.tips) + ' ETH',
     }
 
     return (
