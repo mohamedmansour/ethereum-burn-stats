@@ -13,12 +13,16 @@ export function GasUsed({gasUsed}: {gasUsed: BigNumber}) {
   )
 }
 
-export function GasUsedPercent({gasUsed, gasTarget}: {gasUsed: BigNumber, gasTarget: BigNumber}) {
+export function GasUsedPercent({gasUsed, gasTarget, basicStyle }: {gasUsed: BigNumber, gasTarget: BigNumber, basicStyle?: boolean}) {
   const gasUsedNumber = gasUsed.toNumber()
   const gasTargetNumber = gasTarget.toNumber()
-  const percentage = gasUsedNumber / gasTargetNumber * 100
+  const percentage = (gasUsedNumber / gasTargetNumber * 100).toFixed(0)
+
+  if (basicStyle) {
+    return <Text>{percentage}%</Text>
+  }
 
   return (
-        <Text w="40px" fontSize="xs" variant="brandSecondary">({percentage.toFixed(0)}%)</Text>
+        <Text w="40px" fontSize="xs" variant="brandSecondary">({percentage}%)</Text>
   )
 }

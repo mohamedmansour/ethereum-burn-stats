@@ -155,7 +155,7 @@ function LiveChart(props: BaseFeeChartProps) {
             {item.name === "basefee" && <HStack><Text variant='brandSecondary' fontWeight="bold">PriorityFee:</Text><BigNumberText number={block.priorityFee} /></HStack>}
             {item.name === "gas used" && <HStack><Text variant='brandSecondary' fontWeight="bold">Gas Target:</Text><GasTarget gasTarget={block.gasTarget} /></HStack>}
             {item.name === "gas used" && <HStack><Text variant='brandSecondary' fontWeight="bold">Gas Used:</Text><GasUsed gasUsed={block.gasUsed} /></HStack>}
-            {item.name === "gas used" && <HStack><Text variant='brandSecondary' fontWeight="bold">Gas Used %:</Text><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} /></HStack>}
+            {item.name === "gas used" && <HStack><Text variant='brandSecondary' fontWeight="bold">Gas Used:</Text><GasUsedPercent gasUsed={block.gasUsed} gasTarget={block.gasTarget} basicStyle={true} /></HStack>}
           </LightMode>
         </Card>
       );
