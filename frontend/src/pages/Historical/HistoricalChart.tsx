@@ -27,7 +27,7 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
             <Text variant='brandSecondary' fontWeight="bold">{item.name}:</Text>
             <Text>{item.value}</Text>
           </HStack>
-          {item.name === "rewards" && (
+          {item.name === "Rewards" && (
             <HStack>
               <Text variant='brandSecondary' fontWeight="bold">Tips:</Text>
               <Text>{item.tips}</Text>
