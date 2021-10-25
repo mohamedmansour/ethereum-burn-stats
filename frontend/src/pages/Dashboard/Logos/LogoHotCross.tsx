@@ -10,8 +10,8 @@ export function LogoHotCross({ color }: { color: string }) {
       <path opacity=".17" d="M24.428 11.444c-.02-.182-.057-.363-.084-.548a10.677 10.677 0 0 0-5.366-7.469 10.673 10.673 0 0 1 2.951 5.649l.071.547A10.663 10.663 0 0 1 11.42 21.61h-.336c-.336 0-.628-.037-.937-.074A10.578 10.578 0 0 1 6.32 20.31a10.657 10.657 0 0 0 7.216 3.123h.336a10.66 10.66 0 0 0 10.637-10.648c0-.448-.026-.896-.08-1.34Z" fill="#25604E"/>
       <defs>
         <radialGradient id="a" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(11.9199 0 0 11.9218 10.366 11.252)">
-          <stop stop-color="#B4DED7"/>
-          <stop offset="1" stop-color="#21686E"/>
+          <stop stopColor="#B4DED7"/>
+          <stop offset="1" stopColor="#21686E"/>
         </radialGradient>
       </defs>
     </svg>
