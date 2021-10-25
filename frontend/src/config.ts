@@ -121,7 +121,7 @@ export const Tooltips = {
   netReduction: "Net Reduction explains how much ETH issuance was reduced after EIP-1559, when this reaches above 100%, it means we are burning more than issuing. Ultra sound money!",
   transactions: "Total Transactions in this block (% type 2).",
   baseFee: "Base Fee is the algorithmically determined price you pay for a transaction.",
-  priorityFee: "Priority Fee is a tip to encourage faster inclusion by miners. This shows the least fee you need to add to be included."
+  priorityFee: "Priority Fee is a tip to encourage faster inclusion by miners. This shows the median fee provided to be included in block."
 }
 // Max WebSocket Reconnection Attempts.
 export const maxReconnectionAttempts = 10;
