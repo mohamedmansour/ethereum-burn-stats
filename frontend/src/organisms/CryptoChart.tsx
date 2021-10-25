@@ -11,6 +11,7 @@ import { BigNumberFormat, BigNumberText } from "./BigNumberText";
 import { GasTarget, GasUsed, GasUsedPercent } from "./GasUsed";
 import { CustomResponsiveContainer } from "../atoms/CustomResponsiveContainer";
 import { Card } from "../atoms/Card";
+import { absoluteTime, timeSince } from "../utils/time";
 
 interface BaseFeeChartProps {
   chartType: ChartType
@@ -92,6 +93,8 @@ function LiveChart(props: BaseFeeChartProps) {
     for (var i = newData.length - 1; i >= minBounds; i--) {
       const block = blocks[Math.min(newData.length, blocks.length) - (i - minBounds) - 1]
       const chartData: { [key: string]: any } = {
+        timestamp: absoluteTime(block.timestamp),
+        timeago: timeSince(block.timestamp),
         number: block.number,
         issuance: block.rewards.sub(block.burned),
         burned: (block.rewards.sub(block.burned).isNegative() ? block.burned.add(block.rewards.sub(block.burned)) : block.burned),
@@ -140,6 +143,7 @@ function LiveChart(props: BaseFeeChartProps) {
       return (
         <Card variant="popup">
           <LightMode>
+            <HStack><Text variant='brandSecondary' fontWeight="bold">Date:</Text><Text>{payload.timestamp}</Text><Text variant='brandSecondary' fontSize="xs">({payload.timeago})</Text></HStack>
             <HStack><Text variant='brandSecondary' fontWeight="bold">Block:</Text><Text>{payload.number}</Text></HStack>
             {(item.name === "issuance" || item.name === "reward") && <HStack><Text variant='brandSecondary' fontWeight="bold">Rewards:</Text><BigNumberText number={block.rewards} /></HStack>}
             {item.name === "issuance" && <HStack><Text variant='brandSecondary' fontWeight="bold">Burned:</Text><BigNumberText number={block.burned} /></HStack>}

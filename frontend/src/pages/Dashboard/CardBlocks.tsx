@@ -4,7 +4,7 @@ import { TablePlus, TdPlus, ThPlus } from "../../atoms/TablePlus";
 import { useBlockExplorer } from "../../contexts/BlockExplorerContext";
 import { BigNumberText } from "../../organisms/BigNumberText";
 import { GasUsed, GasUsedPercent } from "../../organisms/GasUsed";
-import { timeSince } from "../../utils/time";
+import { absoluteTime, timeSince } from "../../utils/time";
 import { BlockStats } from "../../libs/ethereum";
 import { maxBlocksToRenderInTable, Tooltips } from "../../config";
 import { layoutConfig } from "../../layoutConfig";
@@ -50,7 +50,7 @@ function BlockItem({ block }: { block: BlockStats }) {
           </HStack>
         </VStack>
       </TdPlus>
-      <TdPlus textAlign="right">{timeSince(block.timestamp)}</TdPlus>
+      <TdPlus textAlign="right" title={absoluteTime(block.timestamp)}>{timeSince(block.timestamp)}</TdPlus>
     </Tr>
   );
 }

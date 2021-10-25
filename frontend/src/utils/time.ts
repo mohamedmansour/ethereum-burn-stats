@@ -9,8 +9,8 @@ const DURATION_IN_SECONDS = {
 
 const rtf1 = new Intl.RelativeTimeFormat(navigator.language, { style: 'narrow' });
 
-export function timeSince(timestamp: number) {
-  const seconds = Math.abs(Math.floor((Date.now() / 1000) - timestamp))
+export function timeSince(blockTimestamp: number) {
+  const seconds = Math.abs(Math.floor((Date.now() / 1000) - blockTimestamp))
   let formattedText = ''
   if (seconds > DURATION_IN_SECONDS.year)
     formattedText = rtf1.format(-1 * Math.floor(seconds / DURATION_IN_SECONDS.year), 'year')
@@ -32,4 +32,8 @@ export function timeSince(timestamp: number) {
   }
 
   return formattedText
+}
+
+export function absoluteTime(blockTimestamp: number) {
+  return new Intl.DateTimeFormat(navigator.language, { hour: 'numeric', minute: '2-digit', second: '2-digit'}).format(blockTimestamp * 1000)
 }
