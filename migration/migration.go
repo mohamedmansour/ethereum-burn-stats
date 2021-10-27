@@ -25,12 +25,14 @@ var (
 
 func main() {
 	flag.Parse()
-
+	
+	// Connect to SQLite
 	sqliteDb, err := sql.Open("sqlite3", *sqliteDbPath)
 	if err != nil {
 		panic(err)
 	}
 
+	// Connect to postgres
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		*postgresHost, *postgresPort, *postgresUser, *postgresPassword, *postgresDatabase)
 
@@ -48,8 +50,8 @@ func main() {
 		panic(err)
 	}
 
-	queryCount := "SELECT number as count FROM block_stats ORDER BY number DESC LIMIT 1"
-	rowCount, err := sqliteDb.Query(queryCount)
+	// Make sure there are rows in the table.
+	rowCount, err := sqliteDb.Query("SELECT number as count FROM block_stats ORDER BY number DESC LIMIT 1")
 	if err != nil {
 		panic(err)
 	}
@@ -62,8 +64,23 @@ func main() {
 		}
 	}
 
-	queryAll := "SELECT * FROM block_stats"
-	rows, err := sqliteDb.Query(queryAll)
+	// Find the latest block to start from.
+	rowCount, err = postgreDb.Query("SELECT number as count FROM block_stats ORDER BY number DESC LIMIT 1")
+	if err != nil {
+		panic(err)
+	}
+
+	if rowCount.Next() {
+		err = rowCount.Scan(&count)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	fmt.Println("Starting from block count: ", count)
+
+	// Get all the blocks after the latest block stored.
+	rows, err := sqliteDb.Query("SELECT * FROM block_stats WHERE number > $1", count)
 	if err != nil {
 		panic(err)
 	}
@@ -77,6 +94,7 @@ func main() {
 	rowsAdded := 0
 	start := time.Now()
 
+	// Iterate over the rows and insert them into the postgres database.
 	for rows.Next() {
 		var cl watchtheburn.BlockStats
 		err = rows.Scan(&cl.Number, &cl.Timestamp, &cl.BaseFee, &cl.Burned, &cl.GasTarget, &cl.GasUsed, &cl.PriorityFee, &cl.Rewards, &cl.Tips, &cl.Transactions, &cl.Type2Transactions)
@@ -109,6 +127,7 @@ func main() {
 
 		rowsAdded++
 
+		// Commit every 1000 rows.
 		if rowsAdded % 1000 == 0 {
 			delta := time.Since(start)
 			fmt.Printf("%d rows added in %v\n", rowsAdded, delta.Seconds())
@@ -117,6 +136,7 @@ func main() {
 				panic(err)
 			}
 
+			// Start a new transaction.
 			txn, err = postgreDb.Begin()
 			if err != nil {
 				panic(err)
@@ -125,6 +145,7 @@ func main() {
 		}
 	}
 	
+	// Commit the remaining.
 	fmt.Println("Committing")
 	err = txn.Commit()
 	if err != nil {
