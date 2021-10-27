@@ -216,7 +216,7 @@ func (b *BlocksFull) storePercentage(block WatchTheBurnBlockStat, percentile int
 			}
 			b.blocksFull[consecutivePercentile] = append(b.blocksFull[consecutivePercentile], block) // Mark consecutive full blocks
 
-			fmt.Printf("%d to %d = %d", b.currentStreaks[percentile].StartBlock, b.currentStreaks[percentile].EndBlock, b.currentStreaks[percentile].Count())
+			// fmt.Printf("%d to %d = %d\n", b.currentStreaks[percentile].StartBlock, b.currentStreaks[percentile].EndBlock, b.currentStreaks[percentile].Count())
 		}
 
 		if clearTrackingPercentile {
