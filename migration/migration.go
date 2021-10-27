@@ -146,7 +146,7 @@ func main() {
 	}
 	
 	// Commit the remaining.
-	fmt.Println("Committing")
+	fmt.Println("End block count: ", rowsAdded + int(count))
 	err = txn.Commit()
 	if err != nil {
 		panic(err)
