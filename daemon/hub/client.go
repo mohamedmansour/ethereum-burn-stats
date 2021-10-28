@@ -24,6 +24,10 @@ const (
 	maxMessageSize = 512
 )
 
+var (
+	newline = []byte{'\n'}
+)
+
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	mu sync.Mutex
@@ -177,15 +181,20 @@ func (c *Client) writePump() {
 				return
 			}
 
-			m := message[0:len(message):len(message)] // force new allocation on append
+			w, err := c.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				return
+			}
+			w.Write(message)
+
+			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
 			for i := 0; i < n; i++ {
-				m = append(m, '\n')
-				m = append(m, <-c.send...)
+				w.Write(newline)
+				w.Write(<-c.send)
 			}
-			
-			err := c.conn.WriteMessage(websocket.TextMessage, m)
-			if err != nil {
+
+			if err := w.Close(); err != nil {
 				return
 			}
 
