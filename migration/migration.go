@@ -25,6 +25,7 @@ var (
 
 func main() {
 	flag.Parse()
+	appStart := time.Now()
 	
 	// Connect to SQLite
 	sqliteDb, err := sql.Open("sqlite3", *sqliteDbPath)
@@ -77,7 +78,7 @@ func main() {
 		}
 	}
 
-	fmt.Println("Starting from block count: ", count)
+	fmt.Printf("Starting from block number %d\n", count)
 
 	// Get all the blocks after the latest block stored.
 	rows, err := sqliteDb.Query("SELECT * FROM block_stats WHERE number > $1", count)
@@ -129,8 +130,7 @@ func main() {
 
 		// Commit every 1000 rows.
 		if rowsAdded % 1000 == 0 {
-			delta := time.Since(start)
-			fmt.Printf("%d rows added in %v\n", rowsAdded, delta.Seconds())
+			fmt.Printf("%d blocks migrated in %vs\n", rowsAdded, time.Since(start).Seconds())
 			err = txn.Commit()
 			if err != nil {
 				panic(err)
@@ -146,7 +146,13 @@ func main() {
 	}
 	
 	// Commit the remaining.
-	fmt.Println("End block count: ", rowsAdded + int(count))
+	if rowsAdded == 0 {
+		fmt.Printf("Nothing to migrate, upto date! Latest block at %d.\nCompleted in %vs\n", int(count), time.Since(start).Seconds())
+	} else {
+		fmt.Printf("%d blocks migrated in %vs\n", rowsAdded, time.Since(start).Seconds())
+		fmt.Printf("Total of %d blocks migrated. Ended at block %d.\nCompleted in %vs\n", rowsAdded, rowsAdded + int(count), time.Since(appStart).Seconds())
+	}
+
 	err = txn.Commit()
 	if err != nil {
 		panic(err)
