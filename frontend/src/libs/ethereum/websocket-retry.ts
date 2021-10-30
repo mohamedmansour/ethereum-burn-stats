@@ -5,7 +5,7 @@ export abstract class WebSocketRetry {
   private retry = 0;
   private startReconnectingTime = 0;
 
-  constructor(private maxRetry: number) { }
+  constructor(private maxRetry: number, private maxDelayInSeconds = 90) { }
 
   public attemptReconnect() {
     if (this.maxRetry <= this.retry) {
@@ -21,8 +21,10 @@ export abstract class WebSocketRetry {
     }
 
     this.retry = this.retry + 1;
-    const delayInSeconds = Math.max(Math.min(Math.pow(2, this.retry)
-      + this.randInt(-this.retry, this.retry), 600), 1) + 3;
+    const delayInSeconds = Math.min(
+      this.maxDelayInSeconds, 
+      Math.max(Math.min(Math.pow(2, this.retry) + this.randInt(-this.retry, this.retry), 600), 1) + 3
+    );
 
     console.info('[retry]', `Attempting to reconnect in ${delayInSeconds}s`);
     this.onRetryAttempt(delayInSeconds, this.retry);
