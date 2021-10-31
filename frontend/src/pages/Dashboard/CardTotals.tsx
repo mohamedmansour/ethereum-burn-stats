@@ -80,7 +80,7 @@ export function CardTotals() {
   }
 
   return (
-    <Card title="Overview" subtitle={subtitle.title} tooltip={<RenderTooltip />} rightSection={<HistoricalButton />}>
+    <Card title="Overview" subtitle={subtitle.title} tooltip={<RenderTooltip />} /*rightSection={<HistoricalButton />}*/>
       <Tabs isFitted variant="inline" defaultIndex={filterIndex} onChange={onChange}>
         <TabList>
           {TotalFilters.map(filter => (
