@@ -58,9 +58,12 @@ export function BigNumberFormat(props: BigNumberFormatProps) {
   else if (currency === 'USD') maximumFractionDigits = 2;
   if (maximumFractionDigits === -1) maximumFractionDigits = 0;
 
-  let prettyValue = negative.concat(parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits}));
+  let prettyValue = value;
+  const valueNumber = parseFloat(negative.concat(value));
   if (currency === 'USD') {
-    prettyValue = '$' + prettyValue
+    prettyValue = valueNumber.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits, style: 'currency', currency: 'USD'});
+  } else {
+    prettyValue = valueNumber.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits});
   }
 
   return {
