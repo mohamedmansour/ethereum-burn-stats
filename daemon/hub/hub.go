@@ -40,9 +40,6 @@ type Hub struct {
 	// Unregister requests from clients.
 	unregister chan *Client
 
-	// used to track repeated blocks
-	blockRepeated bool
-
 	handlers map[string]func(c *Client, message jsonrpcMessage) (json.RawMessage, error)
 
 	// block stats and totals
@@ -154,104 +151,14 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 				// latestBlockNumber is highest processed block to date
 				latestBlockNumber := h.s.latestBlock.getBlockNumber()
 
-				// determine if new block message is repeat of previous block
-				blockNumber := header.Number.Uint64()
-				if latestBlockNumber == blockNumber {
-					h.blockRepeated = true
+				// Only process the previously found block instead of the latest block.
+				// This will make the hub discover the block slower but it will prevent
+				// the hub from processing the same block twice.
+				blockNumber := header.Number.Uint64() - 1
+
+				if blockNumber <= latestBlockNumber {
 					log.Warnf("block %s repeated", header.Number.String())
 					continue
-				}
-
-				// reprocess previous block if it had been repeated
-				for h.blockRepeated {
-					h.blockRepeated = false
-					prevBlockNumber := blockNumber - 1
-
-					// fetch previous block, process stats, and update stats if changed
-					blockStats, err := h.s.processBlock(prevBlockNumber, true)
-					if err != nil {
-						log.Errorf("processBlock(%d, true): %v", prevBlockNumber, err)
-						continue
-					} else if blockStats.Number == 0 {
-						// repeated block unchanged
-						continue
-					}
-
-					//get totals for previous block
-					totals, err := h.s.getTotals(prevBlockNumber)
-					if err != nil {
-						log.Errorf("getTotals(%d): %v", prevBlockNumber, err)
-						continue
-					}
-
-					prevBlockTimestamp, err := h.s.getBlockTimestamp(prevBlockNumber)
-					if err != nil {
-						log.Errorf("getBlockTimestamp(%d): %v", prevBlockNumber, err)
-					}
-
-					// get totals stats for previous block from 30 days prior
-					totalsMonth, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-30*86400, prevBlockTimestamp)
-					if err != nil {
-						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-30*86400, prevBlockTimestamp, err)
-						continue
-					}
-
-					// get totals stats for previous block from 7 days prior
-					totalsWeek, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-7*86400, prevBlockTimestamp)
-					if err != nil {
-						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-7*86400, prevBlockTimestamp, err)
-						continue
-					}
-
-					// get totals stats for previous block from 24 hours prior
-					totalsDay, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-86400, prevBlockTimestamp)
-					if err != nil {
-						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-86400, prevBlockTimestamp, err)
-						continue
-					}
-
-					// get totals stats for previous block from 1 hour prior
-					totalsHour, err := h.s.getTotalsTimeDelta(prevBlockTimestamp-3600, prevBlockTimestamp)
-					if err != nil {
-						log.Errorf("getTotalsTimeDelta(%d,%d): %v", prevBlockTimestamp-3600, prevBlockTimestamp, err)
-						continue
-					}
-
-					//get baseFeeNext for previous block
-					baseFeeNext, err := h.s.getBaseFeeNext(prevBlockNumber)
-					if err != nil {
-						log.Errorf("getBaseFeeNext(%d): %v", prevBlockNumber, err)
-						continue
-					}
-
-					h.s.updateAggregateTotals(prevBlockNumber)
-
-					// skip broadcast if block unchanged
-					if blockStats.Number != 0 {
-						// broadcast updated block to subscribers
-						h.subscription <- map[string]interface{}{
-							"blockStats":   blockStats,
-							"clientsCount": clientsCount,
-							"data": &BlockData{
-								BaseFeeNext: baseFeeNext,
-								Block:       blockStats,
-								Clients:     int16(clientsCount),
-								Totals:      totals,
-								TotalsDay:   totalsDay,
-								TotalsHour:  totalsHour,
-								TotalsMonth: totalsMonth,
-								TotalsWeek:  totalsWeek,
-								Version:     version.Version,
-								USDPrice:    h.usd.Price,
-							},
-							"aggregatesData": &AggregatesData{
-								TotalsPerDay:   h.s.totalsPerDay.getTotals(1),
-								TotalsPerHour:  h.s.totalsPerHour.getTotals(1),
-								TotalsPerMonth: h.s.totalsPerMonth.getTotals(1),
-							},
-						}
-						time.Sleep(100 * time.Millisecond)
-					}
 				}
 
 				// fetch current block, process stats, and update stats
