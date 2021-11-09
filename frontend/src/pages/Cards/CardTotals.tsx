@@ -1,6 +1,6 @@
 
 import { useMemo, useState } from 'react';
-import { Box, Button, Heading, HStack, Icon, ListItem, Tab, TabList, TabPanel, TabPanels, Tabs, Text, UnorderedList, VStack } from '@chakra-ui/react';
+import { Box, Heading, HStack, Icon, ListItem, Tab, TabList, TabPanel, TabPanels, Tabs, Text, UnorderedList, VStack } from '@chakra-ui/react';
 import { BigNumber } from 'ethers';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import { BiLineChart } from 'react-icons/bi';
@@ -13,7 +13,6 @@ import { LogoIcon } from '../../atoms/LogoIcon';
 import { Totals } from '../../libs/ethereum';
 import { useSettings } from '../../contexts/SettingsContext';
 import { Setting, Tooltips, TotalFilters } from '../../config';
-import { useHistory } from 'react-router';
 
 function TotalStatLine({ icon, title, value, amount }: { icon: any, title: string, value?: BigNumber, amount: number }) {
   return (
@@ -63,11 +62,6 @@ function TotalTabPanel({ totals, amount }: { totals: Totals, amount: number }) {
   )
 }
 
-function HistoricalButton() {
-  const history = useHistory()
-  return <Button size="xs" variant="outline" onClick={() => history.push("/historical")}>view history</Button>
-}
-
 export function CardTotals() {
   const { data: { details: { totals, totalsHour, totalsDay, totalsWeek, totalsMonth, usdPrice } } } = useBlockExplorer();
   const settings = useSettings();
@@ -80,7 +74,7 @@ export function CardTotals() {
   }
 
   return (
-    <Card title="Overview" subtitle={subtitle.title} tooltip={<RenderTooltip />} /*rightSection={<HistoricalButton />}*/>
+    <Card title="Overview" subtitle={subtitle.title} tooltip={<RenderTooltip />}>
       <Tabs isFitted variant="inline" defaultIndex={filterIndex} onChange={onChange}>
         <TabList>
           {TotalFilters.map(filter => (

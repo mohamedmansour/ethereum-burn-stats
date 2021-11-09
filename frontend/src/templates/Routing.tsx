@@ -1,23 +1,19 @@
 import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { Layout } from './Layout';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
-import { Settings } from '../pages/Settings';
 import { Historical } from '../pages/Historical/Historical';
+import { Settings } from '../pages/Settings/Settings';
+import { About } from '../pages/About/About';
 
 export function Routing() {
   return (
     <BrowserRouter>
-      <Layout direction="column">
+      <Layout>
         <Switch>
-          <Route exact path="/settings">
-            <Settings />
-          </Route>
-          <Route exact path="/historical">
-            <Historical />
-          </Route>
-          <Route exact path="/">
-            <Dashboard />
-          </Route>
+          <Route exact path="/settings" component={Settings} />
+          <Route exact path="/insights" component={Historical} />
+          <Route exact path="/about" component={About} />
+          <Route exact path="/" component={Dashboard} />
           <Redirect to="/" />
         </Switch>
       </Layout>

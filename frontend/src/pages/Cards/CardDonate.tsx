@@ -12,7 +12,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
-import { LogoIndexed, LogoNansen, LogoUnicornCircle } from "./Logos";
+import { LogoIndexed, LogoNansen } from "./Logos";
 import { LogoFrontier } from "./Logos/LogoFrontier";
 import { LogoHotCross } from "./Logos/LogoHotCross";
 import { LogoMyCointainer } from "./Logos/LogoMyCointainer";
@@ -31,31 +31,19 @@ const Patrons = [
     description: "indexed.finance: defi investing made easy, crypto indexes and yield aggregators"
   },
   {
-    id: 'unicorn',
-    logo: LogoUnicornCircle,
-    url: "https://twitter.com/unicorncircle" ,
-    description: "Unicorn Circle: The one and only Unicorn Circle 🦄⭕️ | Always on the hunt for new Business Unicorns!"
-  },
-  // {
-  //   id: 'goodghosting',
-  //   logo: LogoGoodGhosting,
-  //   url: "https://goodghosting.com",
-  //   description: "GoodGhosting: The new addictive way to save. Our savings pools reward regular savers with higher interest rates. Start building the financial habits you deserve."
-  // },
-  {
-    id: 'frontier',
+    id: 'frontier', // September 10 - 2
     logo: LogoFrontier,
     url: "https://frontier.xyz/",
     description: "Frontier: Native, seamless, cross-chain DeFi aggregation layer"
   },
   {
-    id: 'hotcross',
+    id: 'hotcross', // October 5th - 2
     logo: LogoHotCross ,
     url: "https://hotcross.com/",
     description: "Hot Cross is a multi-chain tool suite created for both blockchain teams and their communities."
   },
   {
-    id: 'thales',
+    id: 'thales', // October 5th - 3
     logo: LogoThales ,
     url: "https://thales.market/",
     description: "Thales: Binary options re-imagined. Permissionless, non-custodial, and fun!"

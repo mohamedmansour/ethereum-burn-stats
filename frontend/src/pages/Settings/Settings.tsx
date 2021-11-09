@@ -15,13 +15,13 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link as ReactLink } from "react-router-dom";
-import { Card } from "../atoms/Card";
-import { Setting, EthereumNetworkOptions } from "../config";
-import { useEthereum } from "../contexts/EthereumContext";
-import { useSettings } from "../contexts/SettingsContext";
-import { layoutConfig } from "../layoutConfig";
-import { debounce } from "../utils/debounce";
-import { navigateToSubdomain } from "../utils/subdomain";
+import { Card } from "../../atoms/Card";
+import { Setting, EthereumNetworkOptions } from "../../config";
+import { useEthereum } from "../../contexts/EthereumContext";
+import { useSettings } from "../../contexts/SettingsContext";
+import { layoutConfig } from "../../layoutConfig";
+import { debounce } from "../../utils/debounce";
+import { navigateToSubdomain } from "../../utils/subdomain";
 
 export function Settings() {
   const { eth } = useEthereum()

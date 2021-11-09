@@ -63,8 +63,8 @@ export function CardLiveChart(props: CardLiveProps) {
 
   return (
     <Card
-      minH={400}
-      h={{ base: "auto", md: 400 }}
+      minH={350}
+      h={{ base: "auto", md: 350 }}
       flexShrink={0}
       {...rest}
     >

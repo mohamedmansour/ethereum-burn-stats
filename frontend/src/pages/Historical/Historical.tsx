@@ -1,4 +1,4 @@
-import { Tab, TabList, TabPanel, TabPanels, Tabs, Text, VStack } from '@chakra-ui/react'
+import { HStack, Tab, TabList, TabPanel, TabPanels, Tabs, Text, VStack } from '@chakra-ui/react'
 import { utils } from 'ethers'
 import { useEffect, useState } from 'react'
 import { Tooltips } from '../../config'
@@ -18,7 +18,6 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket }) {
   const { data, type } = bucket
   return (
     <VStack gridGap={4} mt={8} align="flex-start">
-      <Text>Displaying the last {data.length} {type}s</Text>
       <HistoricalChart
         title="Burned"
         dataKey={["burned"]}
@@ -41,9 +40,18 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket }) {
   )
 }
 
+function TabTitle({ bucket }: { bucket: ChartDataBucket | undefined }) {
+  if (!bucket) return null
+  return (
+    <Text flex={1} align="left">Displaying the last {bucket.data.length} {bucket.type}s</Text>
+  )
+}
+
 export function Historical() {
   const ethereum = useEthereum()
   const [data, setData] = useState<ChartRange>()
+  const [bucket, setBucket] = useState<ChartDataBucket>()
+
   useEffect(() => {
     if (!ethereum.eth) {
       return
@@ -88,11 +96,14 @@ export function Historical() {
         }
       ))
 
-      setData({
+      const mutatedData: ChartRange = {
         hour: { type: "hour", data: formatToChartData(response.totalsPerHour, 'hour').reverse() },
         day: { type: "day", data: formatToChartData(response.totalsPerDay, 'day').reverse() },
         month: { type: "month", data: formatToChartData(response.totalsPerMonth, 'month').reverse() },
-      });
+      }
+
+      setData(mutatedData);
+      setBucket(mutatedData.hour)
     }
 
     init()
@@ -103,12 +114,15 @@ export function Historical() {
   }
 
   return (
-    <Tabs variant="inline" isLazy>
-      <TabList display="inline-flex">
-        <Tab>Hour</Tab>
-        <Tab>Day</Tab>
-        <Tab>Month</Tab>
-      </TabList>
+    <Tabs variant="inline" isLazy onChange={(index) => setBucket(index === 0 ? data.hour : index === 1 ? data.day : data.month)}>
+      <HStack>
+        <TabTitle bucket={bucket} />
+        <TabList display="inline-flex">
+          <Tab>Hour</Tab>
+          <Tab>Day</Tab>
+          <Tab>Month</Tab>
+        </TabList>
+      </HStack>
       <TabPanels>
         <TabPanel><TotalTabPanel bucket={data.hour} /></TabPanel>
         <TabPanel><TotalTabPanel bucket={data.day} /></TabPanel>

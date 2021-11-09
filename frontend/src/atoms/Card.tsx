@@ -40,7 +40,7 @@ export function Card(props: CardProps) {
       {title && (
         <Flex direction="column" alignItems="flex-start" gridGap={0} mb={collapsed ? 0 : 2}>
           <HStack w="100%">
-            <Heading size="md" fontWeight="bold">{title}</Heading>
+            <Heading userSelect="none" size="md" fontWeight="bold">{title}</Heading>
             {tooltip && (
               <TooltipPlus placement="right" label={tooltip} />
             )}

@@ -39,7 +39,7 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
   }
 
   return null;
-};
+}
 
 export function HistoricalChart({ data, title, tooltip, type, dataKey }: { data: ChartData[], title: string, tooltip: string, type: TimeBucket, dataKey: (keyof ChartData)[] }) {
   const cartesianLineColor = useColorModeValue("red.500", "red.200")
@@ -53,7 +53,7 @@ export function HistoricalChart({ data, title, tooltip, type, dataKey }: { data:
   }
 
   return (
-    <Card title={`${title} per ${type}`} h="300px" w="100%" tooltip={tooltip} position="relative">
+    <Card title={`${title} per ${type}`} h="250px" w="100%" tooltip={tooltip} position="relative">
       <CustomResponsiveContainer>
         <ComposedChart data={data} stackOffset="sign" margin={{ top: 0, left: 0, right: 0, bottom: 0 }} syncId="1">
           <CartesianGrid strokeDasharray="3 3" stroke={cartesianLineColor} />
