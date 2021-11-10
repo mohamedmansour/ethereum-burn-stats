@@ -15,11 +15,11 @@ const MobileDetectorContext = React.createContext<MobileDetectorContextType>({
 const useMobileDetector = () => useContext(MobileDetectorContext);
 
 export const isMobileWidth = (): boolean => {
-  return window.innerWidth < 600
+  return window.outerWidth < 600
 }
 
 const isPortraitWidth = (): boolean => {
-  return window.innerWidth < 1280
+  return window.outerWidth < 1280
 }
 
 const MobileDetectorProvider = ({
