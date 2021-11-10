@@ -33,13 +33,12 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-function NavigationItem({ currentPage, path, label, style }: { currentPage: string, path: string, label: string , style?: HTMLChakraProps<any>}) {
-  const color = useColorModeValue("#000", "#fff")
+function NavigationItem({ currentPage, path, label, style, activeColor }: { currentPage: string, path: string, label: string, activeColor: string, style?: HTMLChakraProps<any> }) {
   return (
     <>
       {currentPage === path
-        ? (<Text {...style} userSelect="none" cursor="default" color={color} fontWeight="bold">{label}</Text>)
-        : (<BreadcrumbLink {...style} userSelect="none" as={ReactLink} to={path}>{label}</BreadcrumbLink>)
+        ? (<Text {...style} userSelect="none" cursor="default" color={activeColor}>{label}</Text>)
+        : (<BreadcrumbLink {...style} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" as={ReactLink} to={path}>{label}</BreadcrumbLink>)
       }
     </>
   )
@@ -49,6 +48,7 @@ function Navigation({ isMobile }: { isMobile: boolean }) {
   const history = useHistory();
   const [currentPage, setCurrentPage] = useState(history.location.pathname);
   const color = useColorModeValue("rgba(0, 0, 0, 0.4)", "rgba(255, 255, 255, 0.4)")
+  const activeColor = useColorModeValue("#000", "#fff")
 
   useEffect(() => {
     const unregisterListener = history.listen(() => {
@@ -72,23 +72,23 @@ function Navigation({ isMobile }: { isMobile: boolean }) {
   return (
     <Breadcrumb separator=" " spacing={8} fontSize={18} lineHeight="21px" color={color} whiteSpace="nowrap">
       <BreadcrumbItem {...itemStyle}>
-        <NavigationItem style={linkStyle} currentPage={currentPage} path="/" label="Blocks" />
+        <NavigationItem style={linkStyle} currentPage={currentPage} path="/" label="Blocks" activeColor={activeColor} />
       </BreadcrumbItem>
 
       <BreadcrumbItem {...itemStyle}>
-        <NavigationItem style={linkStyle} currentPage={currentPage} path="/insights" label="Insights" />
+        <NavigationItem style={linkStyle} currentPage={currentPage} path="/insights" label="Insights" activeColor={activeColor} />
       </BreadcrumbItem>
 
       <BreadcrumbItem {...itemStyle}>
-        <NavigationItem style={linkStyle} currentPage={currentPage} path="/about" label="About" />
+        <NavigationItem style={linkStyle} currentPage={currentPage} path="/about" label="About" activeColor={activeColor} />
       </BreadcrumbItem>
 
       <BreadcrumbItem {...itemStyle}>
-        <BreadcrumbLink {...linkStyle} userSelect="none" target="_blank" href="https://github.com/mohamedmansour/ethereum-burn-stats">Source code</BreadcrumbLink>
+        <BreadcrumbLink {...linkStyle} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" target="_blank" href="https://github.com/mohamedmansour/ethereum-burn-stats">Source code</BreadcrumbLink>
       </BreadcrumbItem>
 
       <BreadcrumbItem {...itemStyle}>
-        <BreadcrumbLink {...linkStyle} userSelect="none" target="_blank" href="https://gitcoin.co/grants/1709/ethereum-tools-and-educational-grant">
+        <BreadcrumbLink {...linkStyle} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" target="_blank" href="https://gitcoin.co/grants/1709/ethereum-tools-and-educational-grant">
           <TooltipPlus label="Please help support the server costs, hosting Geth is not cheap 🖤 You can donate through Gitcon Grant, or through website sponsorships." textAlign="center" placement="top">
             <Text>Donate</Text>
           </TooltipPlus>
@@ -197,7 +197,7 @@ export function Layout(props: LayoutProps) {
   const { isMobile, showNavigation } = useMobileDetector();
 
   return (
-    <Flex direction="column" h="inherit"  ml={layoutConfig.gap} mr={layoutConfig.gap}>
+    <Flex direction="column" h="inherit" ml={layoutConfig.gap} mr={layoutConfig.gap}>
       <Flex
         as="nav"
         align="center"
