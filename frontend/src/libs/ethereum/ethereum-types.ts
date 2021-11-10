@@ -49,6 +49,7 @@ export interface Block extends BaseBlock {
 }
 
 export interface Totals {
+  baseFee: BigNumber
   burned: BigNumber
   rewards: BigNumber
   tips: BigNumber

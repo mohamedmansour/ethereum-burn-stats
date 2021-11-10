@@ -1,5 +1,6 @@
 export interface ChartData {
     timestamp: string
+    baseFee: number
     burned: number
     issuance: number
     rewards: number
