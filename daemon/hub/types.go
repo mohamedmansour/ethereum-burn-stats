@@ -61,6 +61,7 @@ type TransactionReceipt struct {
 // Totals type represents a single aggregate of all the data.
 type Totals struct {
 	ID       string `json:"id"`
+	BaseFee  string `json:"baseFee,omitempty"`
 	Burned   string `json:"burned"`
 	Duration uint64 `json:"duration"`
 	Issuance string `json:"issuance"`

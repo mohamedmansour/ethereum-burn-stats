@@ -120,7 +120,8 @@ export const Tooltips = {
   netIssuance: "Net Issuance the amount of new ETH coming into circulation: burned - rewards.",
   netReduction: "Net Reduction explains how much ETH issuance was reduced after EIP-1559, when this reaches above 100%, it means we are burning more than issuing. Ultra sound money!",
   transactions: "Total Transactions in this block (% type 2).",
-  baseFee: "Base Fee is the algorithmically determined price you pay for a transaction.",
+  baseFee: "Base Fee is the algorithmically determined price you pay per unit of gas for a transaction. GasQuantity * baseFee is burned.",
+  baseFeeMedian: "Base Fee is the algorithmically determined price you pay per unit of gas for a transaction. This shows the median baseFee for all blocks in period.",
   priorityFee: "Priority Fee is a tip to encourage faster inclusion by miners. This shows the median fee provided to be included in block."
 }
 // Max WebSocket Reconnection Attempts.
