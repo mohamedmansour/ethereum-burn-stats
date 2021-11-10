@@ -95,7 +95,7 @@ export function Historical() {
       const formatToChartData = (totals: TotalsWithId[], bucket: TimeBucket) => totals.map<ChartData>(total => (
         {
           timestamp: formatTimestampToDateString(total.id, bucket),
-          baseFee: parseFloat(utils.formatUnits(total.baseFee, 'gwei')),
+          baseFee: total.baseFee,
           burned: parseFloat(utils.formatUnits(total.burned, 'ether')),
           issuance: parseFloat(utils.formatUnits(total.issuance, 'ether')),
           rewards: parseFloat(utils.formatUnits(total.rewards, 'ether')),
