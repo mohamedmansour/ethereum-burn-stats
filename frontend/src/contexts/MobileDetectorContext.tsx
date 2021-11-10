@@ -5,21 +5,27 @@ import { debounce } from '../utils/debounce';
 type MobileDetectorContextType = {
   isMobile: boolean
   isPortrait: boolean
+  showNavigation: boolean
 }
 
 const MobileDetectorContext = React.createContext<MobileDetectorContextType>({
   isMobile: false,
-  isPortrait: false
+  isPortrait: false,
+  showNavigation: true
 })
 
 const useMobileDetector = () => useContext(MobileDetectorContext);
 
 export const isMobileWidth = (): boolean => {
-  return window.outerWidth < 600
+  return window.outerWidth < 768
 }
 
 const isPortraitWidth = (): boolean => {
   return window.outerWidth < 1280
+}
+
+const isNavigationWidth = (): boolean => {
+  return window.outerWidth < 1048
 }
 
 const MobileDetectorProvider = ({
@@ -29,14 +35,16 @@ const MobileDetectorProvider = ({
 }) => {
   const [layout, setLayout] = useState<MobileDetectorContextType>({
     isMobile: isMobileWidth(),
-    isPortrait: isPortraitWidth()
+    isPortrait: isPortraitWidth(),
+    showNavigation: isNavigationWidth()
   })
 
   useEffect(() => {
     const onResize = debounce(() => {
       setLayout({
         isMobile: isMobileWidth(),
-        isPortrait: isPortraitWidth()
+        isPortrait: isPortraitWidth(),
+        showNavigation: isNavigationWidth()
       })
     }, 200)
     window.addEventListener('resize', onResize)

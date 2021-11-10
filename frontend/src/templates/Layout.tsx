@@ -2,7 +2,6 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  Button,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -10,7 +9,8 @@ import {
   DrawerOverlay,
   Flex,
   HStack,
-  Icon,
+  HTMLChakraProps,
+  IconButton,
   Link,
   Text,
   useColorModeValue,
@@ -33,13 +33,13 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-function NavigationItem({ currentPage, path, label }: { currentPage: string, path: string, label: string }) {
+function NavigationItem({ currentPage, path, label, style }: { currentPage: string, path: string, label: string , style?: HTMLChakraProps<any>}) {
   const color = useColorModeValue("#000", "#fff")
   return (
     <>
       {currentPage === path
-        ? (<Text userSelect="none" cursor="default" color={color} fontWeight="bold">{label}</Text>)
-        : (<BreadcrumbLink userSelect="none" as={ReactLink} to={path}>{label}</BreadcrumbLink>)
+        ? (<Text {...style} userSelect="none" cursor="default" color={color} fontWeight="bold">{label}</Text>)
+        : (<BreadcrumbLink {...style} userSelect="none" as={ReactLink} to={path}>{label}</BreadcrumbLink>)
       }
     </>
   )
@@ -61,29 +61,33 @@ function Navigation({ isMobile }: { isMobile: boolean }) {
   const itemStyle = isMobile ? {
     display: "flex",
     width: "100%",
-    padding: 4
   } : null;
 
+  const linkStyle: HTMLChakraProps<any> = isMobile ? {
+    padding: 4,
+    width: "inherit",
+  } : {};
+
   return (
-    <Breadcrumb separator=" " spacing={8} fontSize={18} lineHeight="21px" color={color}>
+    <Breadcrumb separator=" " spacing={8} fontSize={18} lineHeight="21px" color={color} whiteSpace="nowrap">
       <BreadcrumbItem {...itemStyle}>
-        <NavigationItem currentPage={currentPage} path="/" label="Blocks" />
+        <NavigationItem style={linkStyle} currentPage={currentPage} path="/" label="Blocks" />
       </BreadcrumbItem>
 
       <BreadcrumbItem {...itemStyle}>
-        <NavigationItem currentPage={currentPage} path="/insights" label="Insights" />
+        <NavigationItem style={linkStyle} currentPage={currentPage} path="/insights" label="Insights" />
       </BreadcrumbItem>
 
       <BreadcrumbItem {...itemStyle}>
-        <NavigationItem currentPage={currentPage} path="/about" label="About" />
+        <NavigationItem style={linkStyle} currentPage={currentPage} path="/about" label="About" />
       </BreadcrumbItem>
 
       <BreadcrumbItem {...itemStyle}>
-        <BreadcrumbLink userSelect="none" target="_blank" href="https://github.com/mohamedmansour/ethereum-burn-stats">Source code</BreadcrumbLink>
+        <BreadcrumbLink {...linkStyle} userSelect="none" target="_blank" href="https://github.com/mohamedmansour/ethereum-burn-stats">Source code</BreadcrumbLink>
       </BreadcrumbItem>
 
       <BreadcrumbItem {...itemStyle}>
-        <BreadcrumbLink userSelect="none" target="_blank" href="https://gitcoin.co/grants/1709/ethereum-tools-and-educational-grant">
+        <BreadcrumbLink {...linkStyle} userSelect="none" target="_blank" href="https://gitcoin.co/grants/1709/ethereum-tools-and-educational-grant">
           <TooltipPlus label="Please help support the server costs, hosting Geth is not cheap 🖤 You can donate through Gitcon Grant, or through website sponsorships." textAlign="center" placement="top">
             <Text>Donate</Text>
           </TooltipPlus>
@@ -148,7 +152,16 @@ function MenuPopup({ isMobile }: { isMobile: boolean }) {
 
   return (
     <>
-      <Button ref={btnRef} variant="ghost" onClick={onOpen} leftIcon={<Icon as={VscMenu} />} iconSpacing={0} h="100%" />
+      <IconButton
+        size="md"
+        fontSize="lg"
+        variant="ghost"
+        color="current"
+        marginLeft="2"
+        onClick={onOpen}
+        icon={<VscMenu />}
+        aria-label="Expand the navigation menu"
+      />
       <Drawer
         isOpen={isOpen}
         placement="top"
@@ -180,7 +193,7 @@ function MenuInline({ isMobile }: { isMobile: boolean }) {
 }
 
 export function Layout(props: LayoutProps) {
-  const { isMobile } = useMobileDetector();
+  const { isMobile, showNavigation } = useMobileDetector();
 
   return (
     <Flex direction="column" h="inherit" ml={layoutConfig.margin} mr={layoutConfig.margin}>
@@ -190,19 +203,18 @@ export function Layout(props: LayoutProps) {
         justify={"space-between"}
         direction="row"
         pl={layoutConfig.gap}
-        pr={layoutConfig.gap}
       >
         <HStack w={layoutConfig.sidebarWidth}>
           <Logo />
         </HStack>
-        {isMobile ? <MenuPopup isMobile={isMobile} /> : <MenuInline isMobile={isMobile} />}
+        {showNavigation ? <MenuPopup isMobile={showNavigation} /> : <MenuInline isMobile={showNavigation} />}
       </Flex>
 
       <Announcement />
 
       <Flex flex={1} direction={isMobile ? "column" : "row"} ml={isMobile ? layoutConfig.gap : 0} mr={isMobile ? layoutConfig.gap : 0} mb={isMobile ? layoutConfig.gap : 0}>
         <Sidebar isMobile={isMobile} />
-        <Flex flex={1} direction="column" ml={isMobile ? 0 : layoutConfig.gap} mb={layoutConfig.margin} gridGap={layoutConfig.gap}>
+        <Flex flex={1} direction="column" ml={isMobile ? 0 : layoutConfig.gap} mb={{ base: 4, md: 8 }} gridGap={layoutConfig.gap}>
           {props.children}
         </Flex>
       </Flex>

@@ -1,53 +1,57 @@
 import Icon from "@chakra-ui/icon"
-import { Link, HStack, Text, SimpleGrid, Center } from "@chakra-ui/layout"
+import { Link, HStack, Text, Box, Flex } from "@chakra-ui/layout"
 import { VscGithub, VscTwitter } from "react-icons/vsc"
 import { Card } from "../../atoms/Card"
 import { LogoIcon } from "../../atoms/LogoIcon"
-import { LogoWithTextIcon } from "../../atoms/LogoWithTextIcon"
 
 export function About() {
   return (
     <>
       <Card title="Creators">
-        <HStack>
-          <Text variant="brandSecondary">Lead Dev and Maintainer: </Text>
-          <Link href="https://twitter.com/mohamedmansour">
-            <HStack>
-              <Icon as={VscTwitter} title="Follow Mohamed Mansour on Twitter" />
-              <Text>@mohamedmansour</Text>
-            </HStack>
-          </Link>
-        </HStack>
+        <Flex direction={{ base: "column", md: "column", lg: "row" }} gridGap={{ base: 4, md: 4, lg: 8 }} >
+          <Box>
+            <Text variant="brandSecondary">Team: </Text>
+            <Link href="https://twitter.com/mohamedmansour">
+              <HStack>
+                <Icon as={VscTwitter} title="Follow Mohamed Mansour on Twitter" />
+                <Text>@mohamedmansour</Text>
+              </HStack>
+            </Link>
+            <Link href="https://github.com/stevengcook">
+              <HStack>
+                <Icon as={VscGithub} title="Follow Steve Cook on GitHub" />
+                <Text>@stevengcook</Text>
+              </HStack>
+            </Link>
+            <Link href="https://twitter.com/erensong" target="_blank">
+              <HStack>
+                <Icon as={VscTwitter} title="Follow Eren Song on Twitter" />
+                <Text>@erensong</Text>
+              </HStack>
+            </Link>
+            <Link href="https://twitter.com/vdWijden" target="_blank">
+              <HStack>
+                <Icon as={VscTwitter} title="Follow Marius Van Der Wijden on Twitter" />
+                <Text>@vdWijden</Text>
+              </HStack>
+            </Link>
+          </Box>
 
-        <HStack>
-          <Text variant="brandSecondary">Lead Designer and Logo: </Text>
-          <Link href="https://twitter.com/erensong" target="_blank">
-            <HStack>
-              <Icon as={VscTwitter} title="Follow Eren Song on Twitter" />
-              <Text>@erensong</Text>
-            </HStack>
-          </Link>
-        </HStack>
+          <Box>
+            <Text variant="brandSecondary">Open Sourced: </Text>
+            <Link href="https://github.com/mohamedmansour/ethereum-burn-stats" target="_blank">
+              <HStack>
+                <Icon as={VscGithub} title="Contribute to Ethereum Burn Stats on GitHub" />
+                <Text>ethereum-burn-stats</Text>
+              </HStack>
+            </Link>
+          </Box>
 
-        <HStack>
-          <Text variant="brandSecondary">Open Sourced: </Text>
-          <Link href="https://github.com/mohamedmansour/ethereum-burn-stats" target="_blank">
-            <HStack>
-              <Icon as={VscGithub} title="Contribute to Ethereum Burn Stats on GitHub" />
-              <Text>GitHub</Text>
-            </HStack>
-          </Link>
-        </HStack>
-
-        <HStack>
-          <Text variant="brandSecondary">Tech Stack: </Text>
-          <Text>Golang, TypeScript, Chakra</Text>
-        </HStack>
-
-        <HStack>
-          <Text variant="brandSecondary">Infra: </Text>
-          <Text>Linux, Geth</Text>
-        </HStack>
+          <Box>
+            <Text variant="brandSecondary">Tech Stack: </Text>
+            <Text>Golang, TypeScript, Chakra</Text>
+          </Box>
+        </Flex>
       </Card>
 
       <Card title="History">
@@ -74,30 +78,6 @@ export function About() {
           <Link href="https://notes.ethereum.org/@vbuterin/eip-1559-faq" target="_blank">wrote a great blog post</Link> explaining
           what it is in detail.
         </Text>
-      </Card>
-
-      <Card title="Branding">
-        <Text>
-          The amazing branding was created by Eren Song, and she holds the copyright of the logo. The logo resembles a flame, but in
-          a unique way morphed into a letter B for burn. The text is a custom font that looks like an action movie.
-        </Text>
-        <Text>
-          If you need to hire a very experienced and professional designer, please contact her on <Link href="https://twitter.com/erensong" target="_blank">Twitter</Link>!
-        </Text>
-        <SimpleGrid columns={[1,2]} spacing={4}>
-          <Center bg="black" p={4}>
-            <LogoWithTextIcon fontSize="90px" color="white" />
-          </Center>
-          <Center bg="white" p={4}>
-            <LogoWithTextIcon fontSize="90px" color="black" />
-          </Center>
-          <Center bg="black" p={4}>
-            <LogoIcon fontSize="250px" color="white" />
-          </Center>
-          <Center bg="white" p={4}>
-            <LogoIcon fontSize="250px" color="black" />
-          </Center>
-        </SimpleGrid>
       </Card>
     </>
   )
