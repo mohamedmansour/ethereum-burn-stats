@@ -216,6 +216,7 @@ export function Layout(props: LayoutProps) {
         <Sidebar isMobile={isMobile} />
         <Flex flex={1} direction="column" ml={isMobile ? 0 : layoutConfig.gap} mb={layoutConfig.gap} gridGap={layoutConfig.gap}>
           {props.children}
+          {isMobile && <CardDonate type={CardDonateType.BottomSideBar} />}
         </Flex>
       </Flex>
     </Flex>
