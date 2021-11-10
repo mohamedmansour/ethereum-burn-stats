@@ -3,6 +3,7 @@ import { utils } from 'ethers'
 import { useEffect, useState } from 'react'
 import { Tooltips } from '../../config'
 import { useEthereum } from '../../contexts/EthereumContext'
+import { layoutConfig } from '../../layoutConfig'
 import { TotalsWithId } from '../../libs/ethereum'
 import { HistoricalChart } from './HistoricalChart'
 import { ChartData, ChartDataBucket, TimeBucket } from './HistoricalTypes'
@@ -17,7 +18,7 @@ interface ChartRange {
 function TotalTabPanel({ bucket }: { bucket: ChartDataBucket }) {
   const { data, type } = bucket
   return (
-    <VStack gridGap={4} mt={8} align="flex-start">
+    <VStack spacing={0} gridGap={layoutConfig.gap} mt={8} align="flex-start">
       <HistoricalChart
         title="Burned"
         dataKey={["burned"]}
@@ -43,7 +44,7 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket }) {
 function TabTitle({ bucket }: { bucket: ChartDataBucket | undefined }) {
   if (!bucket) return null
   return (
-    <Text flex={1} align="left">Displaying the last {bucket.data.length} {bucket.type}s</Text>
+    <Text flex={1} pr={4} align="right" variant="brandSecondary">{bucket.data.length} {bucket.type}s</Text>
   )
 }
 

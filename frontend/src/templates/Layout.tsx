@@ -58,10 +58,11 @@ function Navigation({ isMobile }: { isMobile: boolean }) {
     return () => unregisterListener()
   }, [history])
 
-  const itemStyle = isMobile ? {
+  const itemStyle: HTMLChakraProps<any> = isMobile ? {
     display: "flex",
     width: "100%",
-  } : null;
+    flexDirection: "column",
+  } : {};
 
   const linkStyle: HTMLChakraProps<any> = isMobile ? {
     padding: 4,
@@ -184,7 +185,7 @@ function MenuPopup({ isMobile }: { isMobile: boolean }) {
 function MenuInline({ isMobile }: { isMobile: boolean }) {
   return (
     <>
-      <Flex flex={1}>
+      <Flex flex={1} ml={layoutConfig.gap}>
         <Navigation isMobile={isMobile} />
       </Flex>
       <ColorModeSwitcher justifySelf="flex-end" />
@@ -196,13 +197,12 @@ export function Layout(props: LayoutProps) {
   const { isMobile, showNavigation } = useMobileDetector();
 
   return (
-    <Flex direction="column" h="inherit" ml={layoutConfig.margin} mr={layoutConfig.margin}>
+    <Flex direction="column" h="inherit"  ml={layoutConfig.gap} mr={layoutConfig.gap}>
       <Flex
         as="nav"
-        align={{ base: "flex-start", md: "center" }}
+        align="center"
         justify={"space-between"}
         direction="row"
-        pl={layoutConfig.gap}
       >
         <HStack w={layoutConfig.sidebarWidth}>
           <Logo />
@@ -212,9 +212,9 @@ export function Layout(props: LayoutProps) {
 
       <Announcement />
 
-      <Flex flex={1} direction={isMobile ? "column" : "row"} ml={isMobile ? layoutConfig.gap : 0} mr={isMobile ? layoutConfig.gap : 0} mb={isMobile ? layoutConfig.gap : 0}>
+      <Flex flex={1} direction={isMobile ? "column" : "row"} mb={isMobile ? layoutConfig.gap : 0}>
         <Sidebar isMobile={isMobile} />
-        <Flex flex={1} direction="column" ml={isMobile ? 0 : layoutConfig.gap} mb={{ base: 4, md: 8 }} gridGap={layoutConfig.gap}>
+        <Flex flex={1} direction="column" ml={isMobile ? 0 : layoutConfig.gap} mb={layoutConfig.gap} gridGap={layoutConfig.gap}>
           {props.children}
         </Flex>
       </Flex>
