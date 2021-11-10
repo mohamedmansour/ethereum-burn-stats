@@ -11,7 +11,7 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
     const payload = props.payload[0] as any
     const item = {
       timestamp: payload.payload.timestamp,
-      value: utils.commify(payload.value) + ' ETH',
+      value: utils.commify(payload.value) + (payload.dataKey === "baseFee" ? " GWEI" : " ETH"),
       name: capitalizeFirstLetter(payload.name),
       tips: utils.commify(payload.payload.tips) + ' ETH',
     }
@@ -47,6 +47,8 @@ export function HistoricalChart({ data, title, tooltip, type, dataKey }: { data:
   const onTickFormat = (value: any, index: number) => {
     const realNumber = Number(value);
     if (!realNumber) {
+      if (dataKey[0] === "baseFee")
+        return "GWEI"
       return "ETH"
     }
     return utils.commify(realNumber)
