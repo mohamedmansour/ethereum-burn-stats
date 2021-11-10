@@ -37,6 +37,7 @@ type BlockExplorerContextType = {
   getBlockStats?(index: number): BlockStats | undefined
 }
 const DefaultTotals: Totals = {
+  baseFee: 0,
   burned: Zero,
   rewards: Zero,
   tips: Zero,

@@ -20,6 +20,12 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket }) {
   return (
     <VStack spacing={0} gridGap={layoutConfig.gap} mt={8} align="flex-start">
       <HistoricalChart
+        title="BaseFee"
+        dataKey={["baseFee"]}
+        tooltip={Tooltips.baseFeeMedian}
+        type={type}
+        data={data} />
+      <HistoricalChart
         title="Burned"
         dataKey={["burned"]}
         tooltip={Tooltips.burned}
@@ -89,6 +95,7 @@ export function Historical() {
       const formatToChartData = (totals: TotalsWithId[], bucket: TimeBucket) => totals.map<ChartData>(total => (
         {
           timestamp: formatTimestampToDateString(total.id, bucket),
+          baseFee: total.baseFee,
           burned: parseFloat(utils.formatUnits(total.burned, 'ether')),
           issuance: parseFloat(utils.formatUnits(total.issuance, 'ether')),
           rewards: parseFloat(utils.formatUnits(total.rewards, 'ether')),

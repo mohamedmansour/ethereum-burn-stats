@@ -58,14 +58,28 @@ type TransactionReceipt struct {
 	Type              string           `json:"type"`
 }
 
+type BaseFeePercentiles struct {
+	Maximum      uint `json:"Maximum"`
+	Median       uint `json:"Median"`
+	Minimum      uint `json:"Minimum"`
+	Tenth        uint `json:"Tenth"`
+	TwentyFifth  uint `json:"twentyFifth"`
+	SeventyFifth uint `json:"seventyFifth"`
+	Ninetieth    uint `json:"ninetieth"`
+	NinetyFifth  uint `json:"ninetyFifth"`
+	NinetyNinth  uint `json:"ninetyNinth"`
+}
+
 // Totals type represents a single aggregate of all the data.
 type Totals struct {
-	ID       string `json:"id"`
-	Burned   string `json:"burned"`
-	Duration uint64 `json:"duration"`
-	Issuance string `json:"issuance"`
-	Rewards  string `json:"rewards"`
-	Tips     string `json:"tips"`
+	ID                 string             `json:"id"`
+	BaseFee            uint               `json:"baseFee,omitempty"`
+	BaseFeePercentiles BaseFeePercentiles `json:"baseFeePercentiles,omitempty"`
+	Burned             string             `json:"burned"`
+	Duration           uint64             `json:"duration"`
+	Issuance           string             `json:"issuance"`
+	Rewards            string             `json:"rewards"`
+	Tips               string             `json:"tips"`
 }
 
 // InitialData type represents the initial data that the client requests.
