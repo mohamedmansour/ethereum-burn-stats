@@ -501,7 +501,6 @@ func (s *Stats) getTotalsTimeDelta(startTime uint64, endTime uint64) (Totals, er
 	}
 	totals.ID = id
 
-	baseFee, _ := hexutil.DecodeBig(totals.BaseFee)
 	burned, _ := hexutil.DecodeBig(totals.Burned)
 	issuanceString := totals.Issuance
 	issuanceNeg := ""
@@ -516,8 +515,6 @@ func (s *Stats) getTotalsTimeDelta(startTime uint64, endTime uint64) (Totals, er
 	delta := int64(endTime - startTime - totals.Duration)
 
 	ETH := big.NewInt(1_000_000_000_000_000_000)
-	nETH := big.NewInt(1_000_000_000)
-	baseFee.Div(baseFee, nETH)
 	burned.Div(burned, ETH)
 	issuance.Div(issuance, ETH)
 	rewards.Div(rewards, ETH)
@@ -525,23 +522,21 @@ func (s *Stats) getTotalsTimeDelta(startTime uint64, endTime uint64) (Totals, er
 
 	duration := time.Since(start) / time.Microsecond
 
-	log.Debugf("(%d -> %d) (%ds period) (%ds Δ) totals: %s baseFee, %s%s issuance, %s burned, %s rewards, %s tips (%d SI %d EI %d us)", startBlock, endBlock, endTime-startTime, delta, baseFee.String(), issuanceNeg, issuance.String(), burned.String(), rewards.String(), tips.String(), startIteration, endIteration, duration)
+	log.Debugf("(%d -> %d) (%ds period) (%ds Δ) totals: %d baseFee, %s%s issuance, %s burned, %s rewards, %s tips (%d SI %d EI %d us)", startBlock, endBlock, endTime-startTime, delta, totals.BaseFeePercentiles.Median, issuanceNeg, issuance.String(), burned.String(), rewards.String(), tips.String(), startIteration, endIteration, duration)
 
 	return totals, nil
 }
 
-func (s *Stats) getPercentilesBlockDelta(startBlockNumber uint64, endBlockNumber uint64) (string, []sql.BlockStatsPercentiles, error) {
-	var blockStatsPercentiles []sql.BlockStatsPercentiles
-
-	//id := fmt.Sprintf("%d:%d", startBlockNumber, endBlockNumber)
+func (s *Stats) getBaseFeePercentilesBlockDelta(startBlockNumber uint64, endBlockNumber uint64) (BaseFeePercentiles, error) {
+	var baseFeePercentiles BaseFeePercentiles
 
 	if startBlockNumber > endBlockNumber {
-		return "", blockStatsPercentiles, fmt.Errorf("endBlockNumber must be greater than startBlockNumber")
+		return baseFeePercentiles, fmt.Errorf("endBlockNumber must be greater than startBlockNumber")
 	}
 	s.statsByBlock.mu.Lock()
 	defer s.statsByBlock.mu.Unlock()
 
-	var allBaseFeeMwei []uint64
+	var allBaseFeeGwei []uint64
 
 	blockNumber := startBlockNumber
 
@@ -552,38 +547,32 @@ func (s *Stats) getPercentilesBlockDelta(startBlockNumber uint64, endBlockNumber
 		if err != nil {
 			baseFee = big.NewInt(0)
 			log.Errorf("block.BaseFee is not a hex - %s", block.BaseFee)
-			return "", blockStatsPercentiles, err
+			return baseFeePercentiles, err
 		}
 
-		baseFeeMwei := baseFee.Div(baseFee, big.NewInt(1_000_000))
+		baseFeeGwei := baseFee.Div(baseFee, big.NewInt(1_000_000_000))
 
-		allBaseFeeMwei = append(allBaseFeeMwei, baseFeeMwei.Uint64())
+		allBaseFeeGwei = append(allBaseFeeGwei, baseFeeGwei.Uint64())
 
 		blockNumber++
 	}
 
 	// sort slices that will be used for percentile calculations later
-	sort.Slice(allBaseFeeMwei, func(i, j int) bool { return allBaseFeeMwei[i] < allBaseFeeMwei[j] })
+	sort.Slice(allBaseFeeGwei, func(i, j int) bool { return allBaseFeeGwei[i] < allBaseFeeGwei[j] })
 
-	blockStatsPercentiles = append(blockStatsPercentiles, sql.BlockStatsPercentiles{
-		Number:       uint(blockNumber),
-		Metric:       "BaseFee",
-		Maximum:      uint(getPercentileSortedUint64(allBaseFeeMwei, 100)),
-		Median:       uint(getPercentileSortedUint64(allBaseFeeMwei, 50)),
-		Minimum:      uint(getPercentileSortedUint64(allBaseFeeMwei, 0)),
-		Tenth:        uint(getPercentileSortedUint64(allBaseFeeMwei, 10)),
-		TwentyFifth:  uint(getPercentileSortedUint64(allBaseFeeMwei, 25)),
-		SeventyFifth: uint(getPercentileSortedUint64(allBaseFeeMwei, 75)),
-		Ninetieth:    uint(getPercentileSortedUint64(allBaseFeeMwei, 90)),
-		NinetyFifth:  uint(getPercentileSortedUint64(allBaseFeeMwei, 95)),
-		NinetyNinth:  uint(getPercentileSortedUint64(allBaseFeeMwei, 99)),
-	})
+	baseFeePercentiles = BaseFeePercentiles{
+		Maximum:      uint(getPercentileSortedUint64(allBaseFeeGwei, 100)),
+		Median:       uint(getPercentileSortedUint64(allBaseFeeGwei, 50)),
+		Minimum:      uint(getPercentileSortedUint64(allBaseFeeGwei, 0)),
+		Tenth:        uint(getPercentileSortedUint64(allBaseFeeGwei, 10)),
+		TwentyFifth:  uint(getPercentileSortedUint64(allBaseFeeGwei, 25)),
+		SeventyFifth: uint(getPercentileSortedUint64(allBaseFeeGwei, 75)),
+		Ninetieth:    uint(getPercentileSortedUint64(allBaseFeeGwei, 90)),
+		NinetyFifth:  uint(getPercentileSortedUint64(allBaseFeeGwei, 95)),
+		NinetyNinth:  uint(getPercentileSortedUint64(allBaseFeeGwei, 99)),
+	}
 
-	baseFee := big.NewInt(int64(getPercentileSortedUint64(allBaseFeeMwei, 50)))
-	baseFee.Mul(baseFee, big.NewInt(1_000_000))
-	baseFeeString := hexutil.EncodeBig(baseFee)
-
-	return baseFeeString, blockStatsPercentiles, nil
+	return baseFeePercentiles, nil
 }
 
 func (s *Stats) getTotalsBlockDelta(startBlockNumber uint64, endBlockNumber uint64) (Totals, error) {
@@ -674,14 +663,15 @@ func (s *Stats) getTotalsBlockDelta(startBlockNumber uint64, endBlockNumber uint
 	endRewards.Sub(endRewards, startRewards)
 	endTips.Sub(endTips, startTips)
 
-	baseFee, _, err := s.getPercentilesBlockDelta(startBlockNumber, endBlockNumber)
+	baseFeePercentiles, err := s.getBaseFeePercentilesBlockDelta(startBlockNumber, endBlockNumber)
 	if err != nil {
 		log.Errorf("getPercentilesBlockDelta(%d,%d): %v", startBlockNumber, endBlockNumber, err)
 		return totals, err
 	}
 
 	totals.ID = id
-	totals.BaseFee = baseFee
+	totals.BaseFee = baseFeePercentiles.Median
+	totals.BaseFeePercentiles = baseFeePercentiles
 	totals.Burned = hexutil.EncodeBig(endBurned)
 	totals.Duration = endBlockTime - startBlockTime
 	totals.Issuance = hexutil.EncodeBig(endIssuance)
