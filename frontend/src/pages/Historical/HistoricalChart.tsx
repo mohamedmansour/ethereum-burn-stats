@@ -28,13 +28,17 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
           {item.name === "BaseFeePercentiles.Minimum" && (
             <>
               <HStack>
-                <Text variant='brandSecondary' fontWeight="bold">Median:</Text>
-                <Text>{payload.payload.baseFeePercentiles.Median} GWEI</Text>
-              </HStack>
-              <HStack>
-                <Text variant='brandSecondary' fontWeight="bold">Min / Max:</Text>
+                <Box w={4} h={4} bg="#FF7B24" rounded="full" />
+                <Text variant='brandSecondary' fontWeight="bold">Min /</Text>
+                <Box w={4} h={4} bg="#d43532" rounded="full" />
+                <Text variant='brandSecondary' fontWeight="bold">Max:</Text>
                 <Text>{payload.payload.baseFeePercentiles.Minimum} / {" "}
                   {payload.payload.baseFeePercentiles.Maximum} GWEI</Text>
+              </HStack>
+              <HStack>
+                <Box w={4} h={4} bg="#FFC40C" rounded="full" />
+                <Text variant='brandSecondary' fontWeight="bold">Median:</Text>
+                <Text>{payload.payload.baseFeePercentiles.Median} GWEI</Text>
               </HStack>
               <HStack>
                 <Text variant='brandSecondary' fontWeight="bold">10th / 25th:</Text>
@@ -62,10 +66,12 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
           {item.name === "Rewards" && (
             <>
               <HStack>
+                <Box w={4} h={4} bg="#FF7B24" rounded="full" />
                 <Text variant='brandSecondary' fontWeight="bold">Rewards:</Text>
                 <Text>{item.value}</Text>
               </HStack>
               <HStack>
+                <Box w={4} h={4} bg="#FFC40C" rounded="full" />
                 <Text variant='brandSecondary' fontWeight="bold">Tips:</Text>
                 <Text>{item.tips}</Text>
               </HStack>
@@ -188,7 +194,7 @@ export function HistoricalChart({
               />
               <Bar yAxisId="left" type="monotone" dataKey={`${percentilesKey}.Minimum`} stroke="#FF7B24" fill="#FF7B24" stackId="percentile" isAnimationActive={false} />
               <Bar yAxisId="left" type="monotone" dataKey={`${percentilesKey}.Median`} stroke="#FFC40C" fill="#FFC40C" stackId="percentile" isAnimationActive={false} />
-              <Area yAxisId="right" type="monotone" dataKey={`${percentilesKey}.Maximum`} stroke="#000" strokeWidth={1} fill="rgba(0,0,0,0.3)" dot={false} isAnimationActive={false} />
+              <Area yAxisId="right" type="monotone" dataKey={`${percentilesKey}.Maximum`} stroke="#d43532" strokeWidth={2} fill="rgba(0,0,0,0.3)" dot={false} isAnimationActive={false} />
             </>
           )}
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
