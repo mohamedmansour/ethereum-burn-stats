@@ -128,7 +128,7 @@ export const Tooltips = {
 export const maxReconnectionAttempts = 10;
 
 // Sync version with server.
-export const serverVersion = "2.0.0";
+export const serverVersion = "3.0.0";
 
 export const maxBlocksToRenderInTable = 50;
 export const maxBlocksToRenderInChart = 300;
