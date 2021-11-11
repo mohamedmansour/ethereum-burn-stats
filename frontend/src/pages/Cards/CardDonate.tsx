@@ -12,10 +12,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
-import { LogoIndexed, LogoNansen } from "./Logos";
-import { LogoFrontier } from "./Logos/LogoFrontier";
-import { LogoHotCross } from "./Logos/LogoHotCross";
-import { LogoThales } from "./Logos/LogoThales";
+import { LogoFrontier, LogoHotCross, LogoNansen, LogoThales } from "./Logos";
 
 export enum CardDonateType {
   TopSideBar,
@@ -23,12 +20,6 @@ export enum CardDonateType {
 }
 
 const Patrons = [
-  {
-    id: 'indexed',
-    logo: LogoIndexed,
-    url: "https://indexed.finance",
-    description: "indexed.finance: defi investing made easy, crypto indexes and yield aggregators"
-  },
   {
     id: 'frontier', // September 10 - 2
     logo: LogoFrontier,

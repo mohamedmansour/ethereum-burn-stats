@@ -1,10 +1,9 @@
-import { LightMode, HStack, useColorModeValue, Text, Box, Skeleton, Center, Spinner } from "@chakra-ui/react";
+import { LightMode, HStack, useColorModeValue, Text, Box, Center, Spinner } from "@chakra-ui/react";
 import { utils } from "ethers";
 import { TooltipProps, ComposedChart, YAxis, XAxis, Bar, Cell, Tooltip, Area, Legend } from "recharts";
 import { ContentType, Props } from "recharts/types/component/DefaultLegendContent";
 import { Card } from "../../atoms/Card";
 import { CustomResponsiveContainer } from "../../atoms/CustomResponsiveContainer";
-import { Loader } from "../../organisms/Loader";
 import { capitalizeFirstLetter } from "../../utils/strings";
 import { ChartData, ChartDataBucket } from "./HistoricalTypes";
 
