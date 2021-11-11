@@ -50,6 +50,10 @@ export function CardLatestStats() {
           <BigNumberText number={details.currentBaseFee} {...bigNumberStyle} />
         </HStack>
         <HStack w="100%">
+          <Text flex={1} fontWeight="medium">Next Base Fee</Text>
+          <BigNumberText number={details.baseFeeNext} {...bigNumberStyle} />
+        </HStack>
+        <HStack w="100%">
           <Text flex={1} fontWeight="medium">Priority Fee</Text>
           <BigNumberText number={details.currentPriorityFee} {...bigNumberStyle} />
         </HStack>

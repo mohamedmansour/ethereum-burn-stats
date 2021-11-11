@@ -84,6 +84,7 @@ type Totals struct {
 
 // InitialData type represents the initial data that the client requests.
 type InitialData struct {
+	BaseFeeNext string           `json:"baseFeeNext"`
 	Blocks      []sql.BlockStats `json:"blocks"`
 	Clients     int16            `json:"clients"`
 	Totals      Totals           `json:"totals"`

@@ -539,7 +539,14 @@ func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.
 			log.Errorf("getTotalsTimeDelta(%d,%d): %v", blockTimestamp-3600, blockTimestamp, err)
 		}
 
+		// get baseFeeNext for current block
+		baseFeeNext, err := h.s.getBaseFeeNext(blockNumber)
+		if err != nil {
+			log.Errorf("getBaseFeeNext(%d): %v", blockNumber, err)
+		}
+
 		data := &InitialData{
+			BaseFeeNext: baseFeeNext,
 			BlockNumber: h.s.latestBlock.getBlockNumber(),
 			Blocks:      h.s.latestBlocks.getBlocks(blockCount),
 			Clients:     int16(len(h.clients)),
