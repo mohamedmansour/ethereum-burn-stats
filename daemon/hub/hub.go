@@ -174,32 +174,38 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 					log.Errorf("getTotals(%d): %v", blockNumber, err)
 					continue
 				}
+				
+				blockTime, err := h.s.getBlockTimestamp(blockNumber)
+				if err != nil {
+					log.Errorf("getBlockTimestamp(%d): %v", blockNumber, err)
+					continue
+				}
 
 				// get totals stats for current block from 30 days prior
-				totalsMonth, err := h.s.getTotalsTimeDelta(header.Time-30*86400, header.Time)
+				totalsMonth, err := h.s.getTotalsTimeDelta(blockTime-30*86400, blockTime)
 				if err != nil {
-					log.Errorf("getTotalsTimeDelta(%d,%d): %v", header.Time-30*86400, header.Time, err)
+					log.Errorf("getTotalsTimeDelta(%d,%d): %v", blockTime-30*86400, blockTime, err)
 					continue
 				}
 
 				// get totals stats for current block from 7 days prior
-				totalsWeek, err := h.s.getTotalsTimeDelta(header.Time-7*86400, header.Time)
+				totalsWeek, err := h.s.getTotalsTimeDelta(blockTime-7*86400, blockTime)
 				if err != nil {
-					log.Errorf("getTotalsTimeDelta(%d,%d): %v", header.Time-7*86400, header.Time, err)
+					log.Errorf("getTotalsTimeDelta(%d,%d): %v", blockTime-7*86400, blockTime, err)
 					continue
 				}
 
 				// get totals stats for current block from 24 hours prior
-				totalsDay, err := h.s.getTotalsTimeDelta(header.Time-86400, header.Time)
+				totalsDay, err := h.s.getTotalsTimeDelta(blockTime-86400, blockTime)
 				if err != nil {
-					log.Errorf("getTotalsTimeDelta(%d,%d): %v", header.Time-86400, header.Time, err)
+					log.Errorf("getTotalsTimeDelta(%d,%d): %v", blockTime-86400, blockTime, err)
 					continue
 				}
 
 				// get totals stats for current block from 1 hour prior
-				totalsHour, err := h.s.getTotalsTimeDelta(header.Time-3600, header.Time)
+				totalsHour, err := h.s.getTotalsTimeDelta(blockTime-3600, blockTime)
 				if err != nil {
-					log.Errorf("getTotalsTimeDelta(%d,%d): %v", header.Time-3600, header.Time, err)
+					log.Errorf("getTotalsTimeDelta(%d,%d): %v", blockTime-3600, blockTime, err)
 					continue
 				}
 
