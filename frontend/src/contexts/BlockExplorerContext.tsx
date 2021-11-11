@@ -38,6 +38,17 @@ type BlockExplorerContextType = {
 }
 const DefaultTotals: Totals = {
   baseFee: 0,
+  baseFeePercentiles: {
+    Maximum: 0,
+    Median: 0,
+    Minimum: 0,
+    Tenth: 0,
+    ninetieth: 0,
+    ninetyFifth: 0,
+    ninetyNinth: 0,
+    seventyFifth: 0,
+    twentyFifth: 0,
+  },
   burned: Zero,
   rewards: Zero,
   tips: Zero,

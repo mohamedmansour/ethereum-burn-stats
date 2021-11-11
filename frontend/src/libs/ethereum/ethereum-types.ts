@@ -48,8 +48,21 @@ export interface Block extends BaseBlock {
   transactions: string[]
 }
 
+export interface Percentiles {
+  Maximum: number,
+  Median: number,
+  Minimum: number,
+  Tenth: number,
+  twentyFifth: number,
+  seventyFifth: number,
+  ninetieth: number,
+  ninetyFifth: number,
+  ninetyNinth: number,
+}
+
 export interface Totals {
   baseFee: number
+  baseFeePercentiles: Percentiles
   burned: BigNumber
   rewards: BigNumber
   tips: BigNumber

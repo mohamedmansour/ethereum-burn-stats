@@ -22,6 +22,7 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket }) {
       <HistoricalChart
         title="BaseFee"
         dataKey={["baseFee"]}
+        percentilesKey="baseFeePercentiles"
         tooltip={Tooltips.baseFeeMedian}
         type={type}
         data={data} />
@@ -32,15 +33,15 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket }) {
         type={type}
         data={data} />
       <HistoricalChart
-        title="Rewards and Tips"
-        dataKey={["rewards", "tips"]}
-        tooltip={`${Tooltips.rewards} ${Tooltips.tips}`}
-        type={type}
-        data={data} />
-      <HistoricalChart
         title="Net Issuance"
         dataKey={["issuance"]}
         tooltip={Tooltips.netIssuance}
+        type={type}
+        data={data} />
+      <HistoricalChart
+        title="Rewards and Tips"
+        dataKey={["rewards", "tips"]}
+        tooltip={`${Tooltips.rewards} ${Tooltips.tips}`}
         type={type}
         data={data} />
     </VStack>
@@ -96,6 +97,7 @@ export function Historical() {
         {
           timestamp: formatTimestampToDateString(total.id, bucket),
           baseFee: total.baseFee,
+          baseFeePercentiles: total.baseFeePercentiles,
           burned: parseFloat(utils.formatUnits(total.burned, 'ether')),
           issuance: parseFloat(utils.formatUnits(total.issuance, 'ether')),
           rewards: parseFloat(utils.formatUnits(total.rewards, 'ether')),

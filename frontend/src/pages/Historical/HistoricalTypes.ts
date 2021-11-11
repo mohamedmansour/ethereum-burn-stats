@@ -1,6 +1,9 @@
+import { Percentiles } from "../../libs/ethereum";
+
 export interface ChartData {
     timestamp: string
     baseFee: number
+    baseFeePercentiles: Percentiles
     burned: number
     issuance: number
     rewards: number
