@@ -120,18 +120,6 @@ function Logo() {
 }
 
 function Sidebar({ isMobile }: { isMobile: boolean }) {
-  const history = useHistory();
-  const [showSideBar, setShowSideBar] = useState(history.location.pathname === "/");
-
-  useEffect(() => {
-    const unregisterListener = history.listen(() => {
-      setShowSideBar(history.location.pathname === "/")
-    });
-    return () => unregisterListener()
-  }, [history])
-
-  if (isMobile && !showSideBar) return null;
-
   return (
     <Flex
       direction="column"
@@ -196,6 +184,16 @@ function MenuInline({ isMobile }: { isMobile: boolean }) {
 export function Layout(props: LayoutProps) {
   const { isMobile, showNavigation } = useMobileDetector();
 
+  const history = useHistory();
+  const [showSideBar, setShowSideBar] = useState(!isMobile || history.location.pathname === "/");
+
+  useEffect(() => {
+    const unregisterListener = history.listen(() => {
+      setShowSideBar(!isMobile || history.location.pathname === "/")
+    });
+    return () => unregisterListener()
+  }, [isMobile, history])
+
   return (
     <Flex direction="column" h="inherit" ml={layoutConfig.gap} mr={layoutConfig.gap}>
       <Flex
@@ -213,10 +211,10 @@ export function Layout(props: LayoutProps) {
       <Announcement />
 
       <Flex flex={1} direction={isMobile ? "column" : "row"} mb={isMobile ? layoutConfig.gap : 0}>
-        <Sidebar isMobile={isMobile} />
+        {showSideBar && <Sidebar isMobile={isMobile} /> }
         <Flex flex={1} direction="column" ml={isMobile ? 0 : layoutConfig.gap} mb={layoutConfig.gap} gridGap={layoutConfig.gap}>
           {props.children}
-          {isMobile && <CardDonate type={CardDonateType.BottomSideBar} />}
+          {isMobile && showSideBar && <CardDonate type={CardDonateType.BottomSideBar} />}
         </Flex>
       </Flex>
     </Flex>

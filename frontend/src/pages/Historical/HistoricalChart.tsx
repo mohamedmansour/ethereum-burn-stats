@@ -179,7 +179,7 @@ export function HistoricalChart({
               />
               <Bar yAxisId="left" type="monotone" dataKey={`${percentilesKey}.Minimum`} stroke="#FF7B24" fill="#FF7B24" stackId="percentile" isAnimationActive={false} />
               <Bar yAxisId="left" type="monotone" dataKey={`${percentilesKey}.Median`} stroke="#FFC40C" fill="#FFC40C" stackId="percentile" isAnimationActive={false} />
-              <Area yAxisId="right" type="monotone" dataKey={`${percentilesKey}.Maximum`} stroke="#000" strokeWidth={3} fill="rgba(0,0,0,0.3)" dot={false} isAnimationActive={false} />
+              <Area yAxisId="right" type="monotone" dataKey={`${percentilesKey}.Maximum`} stroke="#000" strokeWidth={1} fill="rgba(0,0,0,0.3)" dot={false} isAnimationActive={false} />
             </>
           )}
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
