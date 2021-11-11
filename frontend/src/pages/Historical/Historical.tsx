@@ -15,8 +15,7 @@ interface ChartRange {
 }
 
 
-function TotalTabPanel({ bucket }: { bucket: ChartDataBucket }) {
-  const { data, type } = bucket
+function TotalTabPanel({ bucket }: { bucket: ChartDataBucket | undefined }) {
   return (
     <VStack spacing={0} gridGap={layoutConfig.gap} mt={8} align="flex-start">
       <HistoricalChart
@@ -24,34 +23,32 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket }) {
         dataKey={["baseFee"]}
         percentilesKey="baseFeePercentiles"
         tooltip={Tooltips.baseFeeMedian}
-        type={type}
-        data={data} />
+        bucket={bucket} />
       <HistoricalChart
         title="Burned"
         dataKey={["burned"]}
         tooltip={Tooltips.burned}
-        type={type}
-        data={data} />
+        bucket={bucket} />
       <HistoricalChart
         title="Net Issuance"
         dataKey={["issuance"]}
         tooltip={Tooltips.netIssuance}
-        type={type}
-        data={data} />
+        bucket={bucket} />
       <HistoricalChart
         title="Rewards and Tips"
         dataKey={["rewards", "tips"]}
         tooltip={`${Tooltips.rewards} ${Tooltips.tips}`}
-        type={type}
-        data={data} />
+        bucket={bucket} />
     </VStack>
   )
 }
 
 function TabTitle({ bucket }: { bucket: ChartDataBucket | undefined }) {
-  if (!bucket) return null
   return (
-    <Text flex={1} pr={4} align="right" variant="brandSecondary">{bucket.data.length} {bucket.type}s</Text>
+    <Text flex={1} pr={4} align="right" variant="brandSecondary">
+      {bucket && (<>{bucket.data.length} {bucket.type}s</>)}
+      {!bucket && (<>Rendering... please wait!</>)}
+    </Text>
   )
 }
 
@@ -119,12 +116,8 @@ export function Historical() {
     init()
   }, [ethereum])
 
-  if (!data) {
-    return null
-  }
-
   return (
-    <Tabs variant="inline" isLazy onChange={(index) => setBucket(index === 0 ? data.hour : index === 1 ? data.day : data.month)}>
+    <Tabs variant="inline" isLazy onChange={(index) => data && setBucket(index === 0 ? data.hour : index === 1 ? data.day : data.month)}>
       <HStack>
         <TabTitle bucket={bucket} />
         <TabList display="inline-flex">
@@ -134,9 +127,9 @@ export function Historical() {
         </TabList>
       </HStack>
       <TabPanels>
-        <TabPanel><TotalTabPanel bucket={data.hour} /></TabPanel>
-        <TabPanel><TotalTabPanel bucket={data.day} /></TabPanel>
-        <TabPanel><TotalTabPanel bucket={data.month} /></TabPanel>
+        <TabPanel><TotalTabPanel bucket={data && data.hour} /></TabPanel>
+        <TabPanel><TotalTabPanel bucket={data && data.day} /></TabPanel>
+        <TabPanel><TotalTabPanel bucket={data && data.month} /></TabPanel>
       </TabPanels>
     </Tabs>
   )

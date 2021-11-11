@@ -1,11 +1,12 @@
-import { LightMode, HStack, useColorModeValue, Text, Box } from "@chakra-ui/react";
+import { LightMode, HStack, useColorModeValue, Text, Box, Skeleton, Center, Spinner } from "@chakra-ui/react";
 import { utils } from "ethers";
 import { TooltipProps, ComposedChart, YAxis, XAxis, Bar, Cell, Tooltip, Area, Legend } from "recharts";
 import { ContentType, Props } from "recharts/types/component/DefaultLegendContent";
 import { Card } from "../../atoms/Card";
 import { CustomResponsiveContainer } from "../../atoms/CustomResponsiveContainer";
+import { Loader } from "../../organisms/Loader";
 import { capitalizeFirstLetter } from "../../utils/strings";
-import { ChartData, TimeBucket } from "./HistoricalTypes";
+import { ChartData, ChartDataBucket } from "./HistoricalTypes";
 
 const CustomTooltip = (props: TooltipProps<string, string>) => {
   if (props.active && props.payload && props.payload.length) {
@@ -80,21 +81,30 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
 }
 
 export function HistoricalChart({
-  data,
+  bucket,
   title,
   tooltip,
-  type,
   dataKey,
   percentilesKey
 }: {
-  data: ChartData[],
+  bucket: ChartDataBucket | undefined,
   title: string,
   tooltip: string,
-  type: TimeBucket,
   dataKey: (keyof ChartData)[],
   percentilesKey?: keyof ChartData
 }) {
+
   const labelColor = useColorModeValue('#a9a9a9', '#A8A8A8')
+
+  if (!bucket) {
+    return (
+      <Card title={`${title} per hour`} height="300px" width="100%" >
+        <Center h="100%"><Spinner /></Center>
+      </Card>
+    )
+  }
+  
+  const { data, type } = bucket
 
   const onTickFormat = (value: any, index: number) => {
     const realNumber = Number(value);
