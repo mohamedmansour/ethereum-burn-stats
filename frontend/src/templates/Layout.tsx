@@ -1,7 +1,4 @@
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -16,7 +13,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import { Link as ReactLink, useHistory } from "react-router-dom";
+import { Link as ReactLink, useLocation } from "react-router-dom";
 import { layoutConfig } from "../layoutConfig";
 import { Announcement } from "../organisms/Announcement";
 import { ColorModeSwitcher } from "../atoms/ColorModeSwitcher";
@@ -38,63 +35,51 @@ function NavigationItem({ currentPage, path, label, style, activeColor }: { curr
     <>
       {currentPage === path
         ? (<Text {...style} userSelect="none" cursor="default" color={activeColor}>{label}</Text>)
-        : (<BreadcrumbLink {...style} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" as={ReactLink} to={path}>{label}</BreadcrumbLink>)
+        : (<Link {...style} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" as={ReactLink} to={path}>{label}</Link>)
       }
     </>
   )
 }
 
 function Navigation({ isMobile }: { isMobile: boolean }) {
-  const history = useHistory();
-  const [currentPage, setCurrentPage] = useState(history.location.pathname);
+  const location = useLocation();
+  const [currentPage, setCurrentPage] = useState(location.pathname);
   const color = useColorModeValue("rgba(0, 0, 0, 0.4)", "rgba(255, 255, 255, 0.4)")
   const activeColor = useColorModeValue("#000", "#fff")
 
   useEffect(() => {
-    const unregisterListener = history.listen(() => {
-      setCurrentPage(history.location.pathname)
-    });
-
-    return () => unregisterListener()
-  }, [history])
+    setCurrentPage(location.pathname)
+  }, [location])
 
   const itemStyle: HTMLChakraProps<any> = isMobile ? {
-    display: "flex",
     width: "100%",
     flexDirection: "column",
+    padding: 4,
   } : {};
 
   const linkStyle: HTMLChakraProps<any> = isMobile ? {
-    padding: 4,
     width: "inherit",
-  } : {};
+    color
+  } : {
+    color
+  };
 
   return (
-    <Breadcrumb separator=" " spacing={8} fontSize={18} lineHeight="21px" color={color} whiteSpace="nowrap">
-      <BreadcrumbItem {...itemStyle}>
+    <Flex {...itemStyle} gridGap={8} fontSize={18} lineHeight="21px" whiteSpace="nowrap">
         <NavigationItem style={linkStyle} currentPage={currentPage} path="/" label="Blocks" activeColor={activeColor} />
-      </BreadcrumbItem>
 
-      <BreadcrumbItem {...itemStyle}>
         <NavigationItem style={linkStyle} currentPage={currentPage} path="/insights" label="Insights" activeColor={activeColor} />
-      </BreadcrumbItem>
 
-      <BreadcrumbItem {...itemStyle}>
         <NavigationItem style={linkStyle} currentPage={currentPage} path="/about" label="About" activeColor={activeColor} />
-      </BreadcrumbItem>
 
-      <BreadcrumbItem {...itemStyle}>
-        <BreadcrumbLink {...linkStyle} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" target="_blank" href="https://github.com/mohamedmansour/ethereum-burn-stats">Source code</BreadcrumbLink>
-      </BreadcrumbItem>
+        <Link {...linkStyle} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" target="_blank" href="https://github.com/mohamedmansour/ethereum-burn-stats">Source code</Link>
 
-      <BreadcrumbItem {...itemStyle}>
-        <BreadcrumbLink {...linkStyle} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" target="_blank" href="https://gitcoin.co/grants/1709/ethereum-tools-and-educational-grant">
+        <Link {...linkStyle} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" target="_blank" href="https://gitcoin.co/grants/1709/ethereum-tools-and-educational-grant">
           <TooltipPlus label="Please help support the server costs, hosting Geth is not cheap 🖤 You can donate through Gitcon Grant, or through website sponsorships." textAlign="center" placement="top">
             <Text>Donate</Text>
           </TooltipPlus>
-        </BreadcrumbLink>
-      </BreadcrumbItem>
-    </Breadcrumb>
+        </Link>
+    </Flex>
   )
 }
 
@@ -184,15 +169,12 @@ function MenuInline({ isMobile }: { isMobile: boolean }) {
 export function Layout(props: LayoutProps) {
   const { isMobile, showNavigation } = useMobileDetector();
 
-  const history = useHistory();
-  const [showSideBar, setShowSideBar] = useState(!isMobile || history.location.pathname === "/");
+  const location = useLocation();
+  const [showSideBar, setShowSideBar] = useState(!isMobile || location.pathname === "/");
 
   useEffect(() => {
-    const unregisterListener = history.listen(() => {
-      setShowSideBar(!isMobile || history.location.pathname === "/")
-    });
-    return () => unregisterListener()
-  }, [isMobile, history])
+    setShowSideBar(!isMobile || location.pathname === "/")
+  }, [isMobile, location])
 
   return (
     <Flex direction="column" h="inherit" ml={layoutConfig.gap} mr={layoutConfig.gap}>
