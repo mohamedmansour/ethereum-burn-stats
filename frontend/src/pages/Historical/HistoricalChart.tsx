@@ -29,12 +29,12 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
             <>
               <HStack>
                 <Text variant='brandSecondary' fontWeight="bold">Median:</Text>
-                <Text>{payload.payload.baseFeePercentiles.Maximum} GWEI</Text>
+                <Text>{payload.payload.baseFeePercentiles.Median} GWEI</Text>
               </HStack>
               <HStack>
                 <Text variant='brandSecondary' fontWeight="bold">Min / Max:</Text>
                 <Text>{payload.payload.baseFeePercentiles.Minimum} / {" "}
-                  {payload.payload.baseFeePercentiles.Median} GWEI</Text>
+                  {payload.payload.baseFeePercentiles.Maximum} GWEI</Text>
               </HStack>
               <HStack>
                 <Text variant='brandSecondary' fontWeight="bold">10th / 25th:</Text>
