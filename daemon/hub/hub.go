@@ -230,7 +230,7 @@ func (h *Hub) initializeGrpcWebSocket(gethEndpointWebsocket string) error {
 						TotalsMonth: totalsMonth,
 						TotalsWeek:  totalsWeek,
 						Version:     version.Version,
-						USDPrice:    h.usd.Price,
+						USDPrice:    h.usd.GetPrice(),
 					},
 					"aggregatesData": &AggregatesData{
 						TotalsPerDay:   h.s.totalsPerDay.getTotals(1),
@@ -549,7 +549,7 @@ func (h *Hub) handleInitialData() func(c *Client, message jsonrpcMessage) (json.
 			TotalsMonth: totalsMonth,
 			TotalsWeek:  totalsWeek,
 			Version:     version.Version,
-			USDPrice:    h.usd.Price,
+			USDPrice:    h.usd.GetPrice(),
 		}
 
 		dataJSON, err := json.Marshal(data)
