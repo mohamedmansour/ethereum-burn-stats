@@ -312,11 +312,11 @@ func (s *Stats) initGetLatestBlocks(highestBlockInDB uint64) error {
 func (s *Stats) getMissingBlocks() error {
 	var blockNumbers, missingBlockNumbers []uint64
 
+	s.statsByBlock.mu.Lock()
 	if _, ok := s.statsByBlock.v[s.londonBlock]; !ok {
 		missingBlockNumbers = append(missingBlockNumbers, s.londonBlock)
 	}
 
-	s.statsByBlock.mu.Lock()
 	for _, b := range s.statsByBlock.v {
 		blockNumbers = append(blockNumbers, uint64(b.Number))
 	}
@@ -773,8 +773,9 @@ func (s *Stats) getBaseFeeNext(blockNumber uint64) (string, error) {
 
 func (s *Stats) updateTotals(blockNumber uint64) error {
 	s.statsByBlock.mu.Lock()
-	s.totalsByBlock.mu.Lock()
 	defer s.statsByBlock.mu.Unlock()
+
+	s.totalsByBlock.mu.Lock()
 	defer s.totalsByBlock.mu.Unlock()
 
 	//recalculate totals for previous 10 blocks in case blocks missed
