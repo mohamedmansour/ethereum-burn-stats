@@ -59,15 +59,10 @@ type TransactionReceipt struct {
 }
 
 type BaseFeePercentiles struct {
-	Maximum      uint `json:"Maximum"`
-	Median       uint `json:"Median"`
-	Minimum      uint `json:"Minimum"`
-	Tenth        uint `json:"Tenth"`
-	TwentyFifth  uint `json:"twentyFifth"`
-	SeventyFifth uint `json:"seventyFifth"`
-	Ninetieth    uint `json:"ninetieth"`
-	NinetyFifth  uint `json:"ninetyFifth"`
-	NinetyNinth  uint `json:"ninetyNinth"`
+	Maximum   uint `json:"Maximum"`
+	Median    uint `json:"Median"`
+	Minimum   uint `json:"Minimum"`
+	Ninetieth uint `json:"ninetieth"`
 }
 
 // Totals type represents a single aggregate of all the data.

@@ -541,11 +541,15 @@ func (s *Stats) getBaseFeePercentilesBlockDelta(startBlockNumber uint64, endBloc
 	blockNumber := startBlockNumber
 
 	for blockNumber <= endBlockNumber {
-		block := s.statsByBlock.v[blockNumber]
+		var block sql.BlockStats
+		var ok bool
+
+		if block, ok = s.statsByBlock.v[blockNumber]; !ok {
+			return baseFeePercentiles, fmt.Errorf("block stats for block %d does not exist", blockNumber)
+		}
 
 		baseFee, err := hexutil.DecodeBig(block.BaseFee)
 		if err != nil {
-			baseFee = big.NewInt(0)
 			log.Errorf("block.BaseFee is not a hex - %s", block.BaseFee)
 			return baseFeePercentiles, err
 		}
@@ -561,15 +565,10 @@ func (s *Stats) getBaseFeePercentilesBlockDelta(startBlockNumber uint64, endBloc
 	sort.Slice(allBaseFeeGwei, func(i, j int) bool { return allBaseFeeGwei[i] < allBaseFeeGwei[j] })
 
 	baseFeePercentiles = BaseFeePercentiles{
-		Maximum:      uint(getPercentileSortedUint64(allBaseFeeGwei, 100)),
-		Median:       uint(getPercentileSortedUint64(allBaseFeeGwei, 50)),
-		Minimum:      uint(getPercentileSortedUint64(allBaseFeeGwei, 0)),
-		Tenth:        uint(getPercentileSortedUint64(allBaseFeeGwei, 10)),
-		TwentyFifth:  uint(getPercentileSortedUint64(allBaseFeeGwei, 25)),
-		SeventyFifth: uint(getPercentileSortedUint64(allBaseFeeGwei, 75)),
-		Ninetieth:    uint(getPercentileSortedUint64(allBaseFeeGwei, 90)),
-		NinetyFifth:  uint(getPercentileSortedUint64(allBaseFeeGwei, 95)),
-		NinetyNinth:  uint(getPercentileSortedUint64(allBaseFeeGwei, 99)),
+		Maximum:   uint(getPercentileSortedUint64(allBaseFeeGwei, 100)),
+		Median:    uint(getPercentileSortedUint64(allBaseFeeGwei, 50)),
+		Minimum:   uint(getPercentileSortedUint64(allBaseFeeGwei, 0)),
+		Ninetieth: uint(getPercentileSortedUint64(allBaseFeeGwei, 90)),
 	}
 
 	return baseFeePercentiles, nil
