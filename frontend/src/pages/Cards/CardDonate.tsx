@@ -12,7 +12,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
-import { LogoFrontier, LogoHotCross, LogoNansen, LogoThales } from "./Logos";
+import { LogoFrontier, LogoHotCross, LogoNansen, LogoThales, LogoTracer } from "./Logos";
 
 export enum CardDonateType {
   TopSideBar,
@@ -27,7 +27,7 @@ const Patrons = [
     description: "Frontier: Native, seamless, cross-chain DeFi aggregation layer"
   },
   {
-    id: 'hotcross', // October 5th - 2
+    id: 'hotcross', // November 11th - 6
     logo: LogoHotCross ,
     url: "https://hotcross.com/",
     description: "Hot Cross is a multi-chain tool suite created for both blockchain teams and their communities."
@@ -37,6 +37,12 @@ const Patrons = [
     logo: LogoThales ,
     url: "https://thales.market/",
     description: "Thales: Binary options re-imagined. Permissionless, non-custodial, and fun!"
+  },
+  {
+    id: 'tracer', // November 12th - 3
+    logo: LogoTracer ,
+    url: "https://tracer.finance?utm_campaign=wtb&utm_medium=web",
+    description: "Tracer is an open-source, smart contract protocol for derivatives to manage and hedge price risk to any market"
   }
 ]
 
