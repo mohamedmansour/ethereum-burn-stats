@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -16,7 +17,8 @@ type CoinbaseSpotResponse struct {
 }
 
 type USDPriceWatcher struct {
-	Price float64
+	price float64
+	priceMutex sync.RWMutex
 }
 
 func (u *USDPriceWatcher) StartWatching() {
@@ -28,6 +30,12 @@ func (u *USDPriceWatcher) StartWatching() {
 		_ = now
 		u.refreshCoinbasePrice(client)
 	}
+}
+
+func (u *USDPriceWatcher) GetPrice() float64 {
+	u.priceMutex.RLock()
+	defer u.priceMutex.RUnlock()
+	return u.price
 }
 
 func (u *USDPriceWatcher) refreshCoinbasePrice(client *http.Client) error {
@@ -45,7 +53,10 @@ func (u *USDPriceWatcher) refreshCoinbasePrice(client *http.Client) error {
         return err
     }
 	
-	u.Price, err = strconv.ParseFloat(response.Data.Amount, 64)
+	u.priceMutex.Lock()
+	u.price, err = strconv.ParseFloat(response.Data.Amount, 64)
+	u.priceMutex.Unlock()
+	
 	if err != nil {
 		log.Errorln("Error parsing coinbase price:", err)
 		return err
