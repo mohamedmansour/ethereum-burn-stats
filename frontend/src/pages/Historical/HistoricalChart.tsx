@@ -1,6 +1,6 @@
-import { LightMode, HStack, useColorModeValue, Text, Box, Center, Spinner } from "@chakra-ui/react";
+import { LightMode, HStack, Text, Box, Center, Spinner } from "@chakra-ui/react";
 import { utils } from "ethers";
-import { TooltipProps, ComposedChart, YAxis, XAxis, Bar, Cell, Tooltip, Area, Legend } from "recharts";
+import { TooltipProps, ComposedChart, YAxis, XAxis, Bar, Cell, Tooltip, Legend } from "recharts";
 import { ContentType, Props } from "recharts/types/component/DefaultLegendContent";
 import { Card } from "../../atoms/Card";
 import { CustomResponsiveContainer } from "../../atoms/CustomResponsiveContainer";
@@ -29,11 +29,8 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
             <>
               <HStack>
                 <Box w={4} h={4} bg="#FF7B24" rounded="full" />
-                <Text variant='brandSecondary' fontWeight="bold">Min /</Text>
-                <Box w={4} h={4} bg="#d43532" rounded="full" />
-                <Text variant='brandSecondary' fontWeight="bold">Max:</Text>
-                <Text>{payload.payload.baseFeePercentiles.Minimum} / {" "}
-                  {payload.payload.baseFeePercentiles.Maximum} GWEI</Text>
+                <Text variant='brandSecondary' fontWeight="bold">Min:</Text>
+                <Text>{payload.payload.baseFeePercentiles.Minimum} GWEI</Text>
               </HStack>
               <HStack>
                 <Box w={4} h={4} bg="#FFC40C" rounded="full" />
@@ -41,19 +38,9 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
                 <Text>{payload.payload.baseFeePercentiles.Median} GWEI</Text>
               </HStack>
               <HStack>
-                <Text variant='brandSecondary' fontWeight="bold">10th / 25th:</Text>
-                <Text>{payload.payload.baseFeePercentiles.Tenth} / {" "}
-                  {payload.payload.baseFeePercentiles.twentyFifth} GWEI</Text>
-              </HStack>
-              <HStack>
-                <Text variant='brandSecondary' fontWeight="bold">75th / 90th:</Text>
-                <Text>{payload.payload.baseFeePercentiles.seventyFifth} / {" "}
-                  {payload.payload.baseFeePercentiles.ninetieth} GWEI</Text>
-              </HStack>
-              <HStack>
-                <Text variant='brandSecondary' fontWeight="bold">95th / 99th:</Text>
-                <Text>{payload.payload.baseFeePercentiles.ninetyFifth} / {" "}
-                  {payload.payload.baseFeePercentiles.ninetyNinth} GWEI</Text>
+                <Box w={4} h={4} bg="#d43532" rounded="full" />
+                <Text variant='brandSecondary' fontWeight="bold">90p / Max:</Text>
+                <Text>{payload.payload.baseFeePercentiles.ninetieth} / {payload.payload.baseFeePercentiles.Maximum} GWEI</Text>
               </HStack>
             </>
           )}
@@ -99,8 +86,6 @@ export function HistoricalChart({
   percentilesKey?: keyof ChartData
 }) {
 
-  const labelColor = useColorModeValue('#a9a9a9', '#A8A8A8')
-
   if (!bucket) {
     return (
       <Card title={`${title} per hour`} height="300px" width="100%" >
@@ -125,6 +110,7 @@ export function HistoricalChart({
     if (value === "baseFeePercentiles.Minimum") return "min"
     if (value === "baseFeePercentiles.Median") return "median"
     if (value === "baseFeePercentiles.Maximum") return "max"
+    if (value === "baseFeePercentiles.ninetieth") return "90p"
     return value
   }
 
@@ -146,21 +132,21 @@ export function HistoricalChart({
       </HStack>
     );
   }
-
+console.log(data)
   return (
     <Card title={`${title} per ${type}`} h="300px" w="100%" tooltip={tooltip} position="relative">
       <CustomResponsiveContainer>
         <ComposedChart data={data} stackOffset="sign" margin={{ top: 0, left: 0, right: 0, bottom: 0 }} syncId="1">
 
           {!percentilesKey && (
-            <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} yAxisId="left" />
+            <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
           )}
 
           <XAxis dataKey="timestamp" angle={-30} dy={10} fontSize={10} tickCount={10} height={40} />
 
           {!percentilesKey && (
             <>
-              <Bar yAxisId="left" type="monotone" dataKey={dataKey[0]} stackId="stack" fillOpacity={1} fill="#FF7B24" strokeWidth={2} isAnimationActive={false}>
+              <Bar type="monotone" dataKey={dataKey[0]} stackId="stack" fillOpacity={1} fill="#FF7B24" strokeWidth={2} isAnimationActive={false}>
                 {data.map((entry, index) => {
                   const isNegative = entry[dataKey[0]] < 0;
                   return (
@@ -171,7 +157,7 @@ export function HistoricalChart({
               {dataKey.length > 1 && (
                 <>
                   <Legend align="right" verticalAlign="top" content={renderLegend} />
-                  <Bar yAxisId="left" type="monotone" stackId="stack" dataKey={dataKey[1]} fill="#FFC40C" isAnimationActive={false} />
+                  <Bar type="monotone" stackId="stack" dataKey={dataKey[1]} fill="#FFC40C" isAnimationActive={false} />
                 </>
               )}
             </>
@@ -180,21 +166,10 @@ export function HistoricalChart({
           {percentilesKey && (
             <>
               <Legend align="right" verticalAlign="top" content={renderLegend} />
-              <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} yAxisId="left"
-                label={{ value: 'min / median', angle: -90, position: "insideLeft", fill: labelColor }} />
-              <YAxis
-                type="number"
-                domain={[0, 'auto']}
-                fontSize={10}
-                tickLine={false}
-                tickFormatter={onTickFormat}
-                yAxisId="right"
-                orientation="right"
-                label={{ value: 'max', angle: 90, position: "insideRight", fill: labelColor }}
-              />
-              <Bar yAxisId="left" type="monotone" dataKey={`${percentilesKey}.Minimum`} stroke="#FF7B24" fill="#FF7B24" stackId="percentile" isAnimationActive={false} />
-              <Bar yAxisId="left" type="monotone" dataKey={`${percentilesKey}.Median`} stroke="#FFC40C" fill="#FFC40C" stackId="percentile" isAnimationActive={false} />
-              <Area yAxisId="right" type="monotone" dataKey={`${percentilesKey}.Maximum`} stroke="#d43532" strokeWidth={2} fill="rgba(0,0,0,0.3)" dot={false} isAnimationActive={false} />
+              <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
+              <Bar type="monotone" dataKey={`${percentilesKey}.Minimum`} stroke="#FF7B24" fill="#FF7B24" stackId="percentile" isAnimationActive={false} />
+              <Bar type="monotone" dataKey={`${percentilesKey}.Median`} stroke="#FFC40C" fill="#FFC40C" stackId="percentile" isAnimationActive={false} />
+              <Bar type="monotone" dataKey={`${percentilesKey}.ninetieth`} stroke="#d83935" fill="#d83935" stackId="percentile" isAnimationActive={false} />
             </>
           )}
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a2a' }} />
