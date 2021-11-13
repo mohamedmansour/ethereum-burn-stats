@@ -522,25 +522,109 @@ func (s *Stats) getTotalsTimeDelta(startTime uint64, endTime uint64) (Totals, er
 
 	duration := time.Since(start) / time.Microsecond
 
-	log.Debugf("(%d -> %d) (%ds period) (%ds Δ) totals: %d baseFee, %s%s issuance, %s burned, %s rewards, %s tips (%d SI %d EI %d us)", startBlock, endBlock, endTime-startTime, delta, totals.BaseFeePercentiles.Median, issuanceNeg, issuance.String(), burned.String(), rewards.String(), tips.String(), startIteration, endIteration, duration)
+	log.Debugf("(%d -> %d) (%ds period) (%ds Δ) totals: %s%s issuance, %s burned, %s rewards, %s tips (%d SI %d EI %d us)", startBlock, endBlock, endTime-startTime, delta, issuanceNeg, issuance.String(), burned.String(), rewards.String(), tips.String(), startIteration, endIteration, duration)
 
 	return totals, nil
 }
 
-func (s *Stats) getBaseFeePercentilesBlockDelta(startBlockNumber uint64, endBlockNumber uint64) (BaseFeePercentiles, error) {
+func (s *Stats) getBaseFeePercentilesTimeDelta(startTime uint64, endTime uint64) (BaseFeePercentiles, error) {
+	start := time.Now()
 	var baseFeePercentiles BaseFeePercentiles
 
-	if startBlockNumber > endBlockNumber {
-		return baseFeePercentiles, fmt.Errorf("endBlockNumber must be greater than startBlockNumber")
+	if startTime >= endTime {
+		return baseFeePercentiles, fmt.Errorf("endTime must be greater than startTime")
 	}
+
+	// set startTime to no less than london timestamp
+	if startTime < s.londonTimestamp {
+		startTime = s.londonTimestamp
+	}
+
+	latestBlockNumber := s.latestBlock.getBlockNumber()
+
+	latestBlockTime, err := s.getBlockTimestamp(latestBlockNumber)
+	if err != nil {
+		log.Errorf("getBlockTimestamp(%d): %v", latestBlockNumber, err)
+		return baseFeePercentiles, err
+	}
+
+	if endTime > latestBlockTime {
+		endTime = latestBlockTime
+	}
+
+	// start with assumption that blocks do not process faster than 5 seconds/block
+	endBlock := latestBlockNumber - (latestBlockTime-endTime)/5
+
+	//set endBlock to no less than london block
+	if endBlock < s.londonBlock {
+		endBlock = s.londonBlock
+	}
+	endBlockTime, err := s.getBlockTimestamp(endBlock)
+	if err != nil {
+		log.Errorf("getBlockTimestamp(%d): %v", endBlock, err)
+		return baseFeePercentiles, err
+	}
+
+	endIteration := 0
+
+	for endBlockTime < endTime {
+		endBlockTime, err = s.getBlockTimestamp(endBlock + 1)
+		if err != nil {
+			log.Errorf("getBlockTimestamp(%d): %v", endBlock, err)
+			return baseFeePercentiles, err
+		}
+		timeOffset := int64(endTime - endBlockTime)
+		if timeOffset > 2400 {
+			//assume average block time is not > 2min within 40min window
+			endBlock += uint64(timeOffset / 120)
+		}
+		if endBlockTime < endTime {
+			endBlock++
+		}
+		endIteration++
+
+	}
+
+	if startTime > latestBlockTime {
+		startTime = latestBlockTime
+	}
+	// start with assumption that blocks do not process faster than 5 seconds/block
+	startBlock := latestBlockNumber - (latestBlockTime-startTime)/5
+	if startBlock < s.londonBlock {
+		startBlock = s.londonBlock
+	}
+	startBlockTime, err := s.getBlockTimestamp(startBlock)
+	if err != nil {
+		log.Errorf("getBlockTimestamp(%d): %v", startBlock, err)
+		return baseFeePercentiles, err
+	}
+
+	startIteration := 0
+	for startBlockTime < startTime {
+		startBlockTime, err = s.getBlockTimestamp(startBlock + 1)
+		if err != nil {
+			log.Errorf("getBlockTimestamp(%d): %v", startBlock, err)
+			return baseFeePercentiles, err
+		}
+		timeOffset := int64(startTime - startBlockTime)
+		if timeOffset > 2400 {
+			//assume average block time is not > 2min within 40min window
+			startBlock += uint64(timeOffset / 120)
+		}
+		if startBlockTime < startTime {
+			startBlock++
+		}
+		startIteration++
+	}
+
 	s.statsByBlock.mu.Lock()
 	defer s.statsByBlock.mu.Unlock()
 
 	var allBaseFeeGwei []uint64
 
-	blockNumber := startBlockNumber
+	blockNumber := startBlock
 
-	for blockNumber <= endBlockNumber {
+	for blockNumber <= endBlock {
 		var block sql.BlockStats
 		var ok bool
 
@@ -570,6 +654,10 @@ func (s *Stats) getBaseFeePercentilesBlockDelta(startBlockNumber uint64, endBloc
 		Minimum:   uint(getPercentileSortedUint64(allBaseFeeGwei, 0)),
 		Ninetieth: uint(getPercentileSortedUint64(allBaseFeeGwei, 90)),
 	}
+
+	duration := time.Since(start) / time.Microsecond
+
+	log.Debugf("(%d -> %d) (%ds period) basefees: %d min, %d median, %d, max, %d 90p (%d SI %d EI %d us)", startBlock, endBlock, endTime-startTime, baseFeePercentiles.Minimum, baseFeePercentiles.Median, baseFeePercentiles.Maximum, baseFeePercentiles.Ninetieth, startIteration, endIteration, duration)
 
 	return baseFeePercentiles, nil
 }
@@ -662,15 +750,7 @@ func (s *Stats) getTotalsBlockDelta(startBlockNumber uint64, endBlockNumber uint
 	endRewards.Sub(endRewards, startRewards)
 	endTips.Sub(endTips, startTips)
 
-	baseFeePercentiles, err := s.getBaseFeePercentilesBlockDelta(startBlockNumber, endBlockNumber)
-	if err != nil {
-		log.Errorf("getPercentilesBlockDelta(%d,%d): %v", startBlockNumber, endBlockNumber, err)
-		return totals, err
-	}
-
 	totals.ID = id
-	totals.BaseFee = baseFeePercentiles.Median
-	totals.BaseFeePercentiles = baseFeePercentiles
 	totals.Burned = hexutil.EncodeBig(endBurned)
 	totals.Duration = endBlockTime - startBlockTime
 	totals.Issuance = hexutil.EncodeBig(endIssuance)
@@ -922,6 +1002,12 @@ func (s *Stats) updateAggregateTotals(blockNumber uint64) error {
 		log.Errorf("getTotalsTimeDelta(%d, %d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
 		return err
 	}
+	baseFeePercentiles, err := s.getBaseFeePercentilesTimeDelta(uint64(startPeriod.Unix()), uint64(endPeriod.Unix()))
+	if err != nil {
+		log.Errorf("getPercentilesTimeDelta(%d,%d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
+		return err
+	}
+	totals.BaseFeePercentiles = baseFeePercentiles
 	s.totalsPerMonth.addPeriod(totals)
 
 	//update daily totals
@@ -930,6 +1016,11 @@ func (s *Stats) updateAggregateTotals(blockNumber uint64) error {
 	totals, err = s.getTotalsTimeDelta(uint64(startPeriod.Unix()), uint64(endPeriod.Unix()))
 	if err != nil {
 		log.Errorf("getTotalsTimeDelta(%d, %d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
+		return err
+	}
+	baseFeePercentiles, err = s.getBaseFeePercentilesTimeDelta(uint64(startPeriod.Unix()), uint64(endPeriod.Unix()))
+	if err != nil {
+		log.Errorf("getPercentilesTimeDelta(%d,%d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
 		return err
 	}
 	s.totalsPerDay.addPeriod(totals)
@@ -942,6 +1033,12 @@ func (s *Stats) updateAggregateTotals(blockNumber uint64) error {
 		log.Errorf("getTotalsTimeDelta(%d, %d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
 		return err
 	}
+	baseFeePercentiles, err = s.getBaseFeePercentilesTimeDelta(uint64(startPeriod.Unix()), uint64(endPeriod.Unix()))
+	if err != nil {
+		log.Errorf("getPercentilesTimeDelta(%d,%d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
+		return err
+	}
+	totals.BaseFeePercentiles = baseFeePercentiles
 	s.totalsPerHour.addPeriod(totals)
 
 	return nil
@@ -968,7 +1065,12 @@ func (s *Stats) updateAllAggregateTotals(blockNumber uint64) error {
 			log.Errorf("getTotalsTimeDelta(%d, %d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
 			return err
 		}
-
+		baseFeePercentiles, err := s.getBaseFeePercentilesTimeDelta(uint64(startPeriod.Unix()), uint64(endPeriod.Unix()))
+		if err != nil {
+			log.Errorf("getPercentilesTimeDelta(%d,%d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
+			return err
+		}
+		totals.BaseFeePercentiles = baseFeePercentiles
 		s.totalsPerHour.addPeriod(totals)
 
 		startPeriod = endPeriod
@@ -984,7 +1086,12 @@ func (s *Stats) updateAllAggregateTotals(blockNumber uint64) error {
 			log.Errorf("getTotalsTimeDelta(%d, %d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
 			return err
 		}
-
+		baseFeePercentiles, err := s.getBaseFeePercentilesTimeDelta(uint64(startPeriod.Unix()), uint64(endPeriod.Unix()))
+		if err != nil {
+			log.Errorf("getPercentilesTimeDelta(%d,%d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
+			return err
+		}
+		totals.BaseFeePercentiles = baseFeePercentiles
 		s.totalsPerDay.addPeriod(totals)
 
 		startPeriod = endPeriod
@@ -1000,7 +1107,12 @@ func (s *Stats) updateAllAggregateTotals(blockNumber uint64) error {
 			log.Errorf("getTotalsTimeDelta(%d, %d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
 			return err
 		}
-
+		baseFeePercentiles, err := s.getBaseFeePercentilesTimeDelta(uint64(startPeriod.Unix()), uint64(endPeriod.Unix()))
+		if err != nil {
+			log.Errorf("getPercentilesTimeDelta(%d,%d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
+			return err
+		}
+		totals.BaseFeePercentiles = baseFeePercentiles
 		s.totalsPerMonth.addPeriod(totals)
 
 		startPeriod = endPeriod
