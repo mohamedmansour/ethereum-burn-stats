@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Tooltips } from '../../config'
 import { useEthereum } from '../../contexts/EthereumContext'
 import { layoutConfig } from '../../layoutConfig'
-import { TotalsWithId } from '../../libs/ethereum'
+import { Percentiles, TotalsWithId } from '../../libs/ethereum'
 import { HistoricalChart } from './HistoricalChart'
 import { ChartData, ChartDataBucket, TimeBucket } from './HistoricalTypes'
 
@@ -90,11 +90,23 @@ export function Historical() {
         }
       }
 
+      // Since the chart software adds all the stacked bars, it really doesn't make
+      // sense since we are not getting the total of base fee, so for the ones we are
+      // rendering, just subract it so the number shows the maximum base fee.
+      const normalizePercentiles = (percentiles: Percentiles): Percentiles => {
+        return {
+          Minimum: percentiles.Minimum,
+          Median: percentiles.Median - percentiles.Minimum,
+          Maximum: percentiles.Maximum,
+          ninetieth: percentiles.ninetieth - percentiles.Median,
+        }
+      }
+
       const formatToChartData = (totals: TotalsWithId[], bucket: TimeBucket) => totals.map<ChartData>(total => (
         {
           timestamp: formatTimestampToDateString(total.id, bucket),
           baseFee: total.baseFee,
-          baseFeePercentiles: total.baseFeePercentiles,
+          baseFeePercentiles: normalizePercentiles(total.baseFeePercentiles),
           burned: parseFloat(utils.formatUnits(total.burned, 'ether')),
           issuance: parseFloat(utils.formatUnits(total.issuance, 'ether')),
           rewards: parseFloat(utils.formatUnits(total.rewards, 'ether')),

@@ -35,12 +35,12 @@ const CustomTooltip = (props: TooltipProps<string, string>) => {
               <HStack>
                 <Box w={4} h={4} bg="#FFC40C" rounded="full" />
                 <Text variant='brandSecondary' fontWeight="bold">Median:</Text>
-                <Text>{payload.payload.baseFeePercentiles.Median} GWEI</Text>
+                <Text>{payload.payload.baseFeePercentiles.Median + payload.payload.baseFeePercentiles.Minimum} GWEI</Text>
               </HStack>
               <HStack>
                 <Box w={4} h={4} bg="#d43532" rounded="full" />
                 <Text variant='brandSecondary' fontWeight="bold">90p / Max:</Text>
-                <Text>{payload.payload.baseFeePercentiles.ninetieth} / {payload.payload.baseFeePercentiles.Maximum} GWEI</Text>
+                <Text>{payload.payload.baseFeePercentiles.ninetieth + payload.payload.baseFeePercentiles.Median + payload.payload.baseFeePercentiles.Minimum} / {payload.payload.baseFeePercentiles.Maximum} GWEI</Text>
               </HStack>
             </>
           )}
@@ -132,7 +132,7 @@ export function HistoricalChart({
       </HStack>
     );
   }
-console.log(data)
+
   return (
     <Card title={`${title} per ${type}`} h="300px" w="100%" tooltip={tooltip} position="relative">
       <CustomResponsiveContainer>
