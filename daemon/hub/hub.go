@@ -318,6 +318,7 @@ func (h *Hub) listen() {
 func (h *Hub) ListenAndServe(addr string) error {
 	go h.listen()
 
+	http.HandleFunc("/health", h.serveHealth)
 	http.HandleFunc("/", h.serveWebSocket)
 
 	err := http.ListenAndServe(addr, nil)
