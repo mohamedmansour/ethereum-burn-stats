@@ -1,8 +1,9 @@
 import { HStack, Tab, TabList, TabPanel, TabPanels, Tabs, Text, VStack } from '@chakra-ui/react'
 import { utils } from 'ethers'
-import { useEffect, useState } from 'react'
-import { Tooltips } from '../../config'
+import { useEffect, useMemo, useState } from 'react'
+import { Setting, Tooltips } from '../../config'
 import { useEthereum } from '../../contexts/EthereumContext'
+import { useSettings } from '../../contexts/SettingsContext'
 import { layoutConfig } from '../../layoutConfig'
 import { Percentiles, TotalsWithId } from '../../libs/ethereum'
 import { HistoricalChart } from './HistoricalChart'
@@ -22,7 +23,7 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket | undefined }) {
         title="BaseFee"
         dataKey={["baseFee"]}
         percentilesKey="baseFeePercentiles"
-        tooltip={Tooltips.baseFeeMedian}
+        tooltip={Tooltips.baseFeeInsights}
         bucket={bucket} />
       <HistoricalChart
         title="Burned"
@@ -43,19 +44,30 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket | undefined }) {
   )
 }
 
-function TabTitle({ bucket }: { bucket: ChartDataBucket | undefined }) {
+function TabTitle({ data, index }: { data: ChartRange | undefined, index: number }) {
+  let title: string
+  if (!data) {
+    title = "Rendering... please wait!"
+  } else {
+    let type = index === 0 ? data.hour.type : index === 1 ? data.day.type : data.month.type
+    let length = (index === 0 ? data.hour.data : index === 1 ? data.day.data : data.month.data).length
+    title = `${length} ${type}s`
+  }
+  
+
   return (
     <Text flex={1} pr={4} align="right" variant="brandSecondary">
-      {bucket && (<>{bucket.data.length} {bucket.type}s</>)}
-      {!bucket && (<>Rendering... please wait!</>)}
+      {title}
     </Text>
   )
 }
 
 export function Historical() {
+  const settings = useSettings();
   const ethereum = useEthereum()
   const [data, setData] = useState<ChartRange>()
-  const [bucket, setBucket] = useState<ChartDataBucket>()
+  const initialBucketIndex = useMemo(() => { return settings.get(Setting.insightBucket) }, [settings])
+  const [bucketIndex, setBucketIndex] = useState(initialBucketIndex)
 
   useEffect(() => {
     if (!ethereum.eth) {
@@ -121,17 +133,24 @@ export function Historical() {
         month: { type: "month", data: formatToChartData(response.totalsPerMonth, 'month').reverse() },
       }
 
-      setData(mutatedData);
-      setBucket(mutatedData.hour)
+      setData(mutatedData)
     }
 
     init()
-  }, [ethereum])
+  }, [initialBucketIndex, ethereum])
 
+  const onTabChange = (index: number) => {
+    if (!data)
+      return
+    setBucketIndex(index)
+    settings.set(Setting.insightBucket, index)
+  }
+
+  console.log('Changed', initialBucketIndex, data)
   return (
-    <Tabs variant="inline" isLazy onChange={(index) => data && setBucket(index === 0 ? data.hour : index === 1 ? data.day : data.month)}>
+    <Tabs defaultIndex={initialBucketIndex} variant="inline" isLazy onChange={(index) => onTabChange(index)}>
       <HStack>
-        <TabTitle bucket={bucket} />
+        <TabTitle data={data} index={bucketIndex} />
         <TabList display="inline-flex">
           <Tab>Hour</Tab>
           <Tab>Day</Tab>
