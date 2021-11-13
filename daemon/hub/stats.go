@@ -499,7 +499,15 @@ func (s *Stats) getTotalsTimeDelta(startTime uint64, endTime uint64) (Totals, er
 		log.Errorf("getTotalsBlockDelta(%d,%d): %v", startBlock, endBlock, err)
 		return totals, err
 	}
+
+	baseFeePercentiles, err := s.getBaseFeePercentilesBlockDelta(startBlock, endBlock)
+	if err != nil {
+		log.Errorf("getPercentilesBlockDelta(%d,%d): %v", startBlock, endBlock, err)
+		return totals, err
+	}
+
 	totals.ID = id
+	totals.BaseFeePercentiles = baseFeePercentiles
 
 	burned, _ := hexutil.DecodeBig(totals.Burned)
 	issuanceString := totals.Issuance
@@ -662,15 +670,7 @@ func (s *Stats) getTotalsBlockDelta(startBlockNumber uint64, endBlockNumber uint
 	endRewards.Sub(endRewards, startRewards)
 	endTips.Sub(endTips, startTips)
 
-	baseFeePercentiles, err := s.getBaseFeePercentilesBlockDelta(startBlockNumber, endBlockNumber)
-	if err != nil {
-		log.Errorf("getPercentilesBlockDelta(%d,%d): %v", startBlockNumber, endBlockNumber, err)
-		return totals, err
-	}
-
 	totals.ID = id
-	totals.BaseFee = baseFeePercentiles.Median
-	totals.BaseFeePercentiles = baseFeePercentiles
 	totals.Burned = hexutil.EncodeBig(endBurned)
 	totals.Duration = endBlockTime - startBlockTime
 	totals.Issuance = hexutil.EncodeBig(endIssuance)
@@ -925,9 +925,9 @@ func (s *Stats) updateAggregateTotals(blockNumber uint64) error {
 	s.totalsPerMonth.addPeriod(totals)
 
 	//update daily totals
-	startPeriod = beginningOfDayTimeFromEpoch(epoch)
-	endPeriod = startPeriod.AddDate(0, 0, 1)
-	totals, err = s.getTotalsTimeDelta(uint64(startPeriod.Unix()), uint64(endPeriod.Unix()))
+	startPeriod := beginningOfDayTimeFromEpoch(epoch)
+	endPeriod := startPeriod.AddDate(0, 0, 1)
+	totals, err := s.getTotalsTimeDelta(uint64(startPeriod.Unix()), uint64(endPeriod.Unix()))
 	if err != nil {
 		log.Errorf("getTotalsTimeDelta(%d, %d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
 		return err
