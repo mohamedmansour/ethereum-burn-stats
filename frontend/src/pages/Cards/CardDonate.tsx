@@ -35,7 +35,7 @@ const Patrons = [
   {
     id: 'thales', // October 5th - 3
     logo: LogoThales ,
-    url: "https://thales.market/",
+    url: "https://thalesmarket.io/",
     description: "Thales: Binary options re-imagined. Permissionless, non-custodial, and fun!"
   },
   {
