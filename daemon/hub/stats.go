@@ -772,9 +772,6 @@ func (s *Stats) getBaseFeeNext(blockNumber uint64) (string, error) {
 }
 
 func (s *Stats) updateTotals(blockNumber uint64) error {
-	s.statsByBlock.mu.Lock()
-	defer s.statsByBlock.mu.Unlock()
-
 	s.totalsByBlock.mu.Lock()
 	defer s.totalsByBlock.mu.Unlock()
 
@@ -786,7 +783,10 @@ func (s *Stats) updateTotals(blockNumber uint64) error {
 		totalRewards := big.NewInt(0)
 		totalTips := big.NewInt(0)
 
+		s.statsByBlock.mu.Lock()
 		block := s.statsByBlock.v[i]
+		s.statsByBlock.mu.Unlock()
+
 		blockBurned, err := hexutil.DecodeBig(block.Burned)
 		if err != nil {
 			blockBurned = big.NewInt(0)
