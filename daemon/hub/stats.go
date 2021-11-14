@@ -1023,6 +1023,7 @@ func (s *Stats) updateAggregateTotals(blockNumber uint64) error {
 		log.Errorf("getPercentilesTimeDelta(%d,%d): %v", startPeriod.Unix(), endPeriod.Unix(), err)
 		return err
 	}
+	totals.BaseFeePercentiles = baseFeePercentiles
 	s.totalsPerDay.addPeriod(totals)
 
 	//update hourly totals
