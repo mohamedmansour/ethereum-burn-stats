@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
 import { LogoFrontier, LogoHotCross, LogoNansen, LogoThales, LogoTracer } from "./Logos";
+import { LogoRealityCards } from "./Logos/LogoRealityCards";
 
 export enum CardDonateType {
   TopSideBar,
@@ -43,6 +44,12 @@ const Patrons = [
     logo: LogoTracer ,
     url: "https://tracer.finance?utm_campaign=wtb&utm_medium=web",
     description: "Tracer is an open-source, smart contract protocol for derivatives to manage and hedge price risk to any market"
+  },
+  {
+    id: 'realitycards', // November 18th - 3
+    logo: LogoRealityCards ,
+    url: "https://beta.realitycards.io/",
+    description: "The world's only prediction market built around NFTs. Don't bet on an outcome, own it!"
   }
 ]
 
