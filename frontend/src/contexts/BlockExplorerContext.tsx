@@ -1,6 +1,6 @@
 import { useContext, createContext, useEffect, useState } from "react"
 import { useEthereum } from "./EthereumContext"
-import { BigNumber } from 'ethers'
+import { BigNumber, utils } from 'ethers'
 import { Loader } from "../organisms/Loader";
 import { maxBlocksToRenderInChart, maxBlocksToRenderInChartMobile, serverVersion } from "../config";
 import { BigNumberMax, BigNumberMin, Zero } from "../utils/number";
@@ -91,6 +91,7 @@ interface InMemoryIndex {
 const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
   const blockIndex: {[blockNumber: number]: BlockStats} = {}
   let blocks: number[] = []
+  let originalTitle = document.title
 
   const details: BlockExplorerDetails = {
     currentBlock: initialData.blockNumber,
@@ -121,6 +122,11 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
       session,
       blocks: blocks.map((blockNumber: number) => blockIndex[blockNumber]),
     }
+  }
+
+  const updateTitle = () => {
+    const baseFeeInGwei = parseInt(utils.formatUnits(details.currentBaseFee, 'gwei'))
+    document.title = baseFeeInGwei + " GWEI | " +  originalTitle
   }
 
   const insert = (data: BlockData) => {
@@ -162,6 +168,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
     blockIndex[block.number] = block
     blocks = [block.number, ...blocks]
     
+    updateTitle()
   }
 
   const getBlockStats = (blockNumber: number): BlockStats => {
@@ -176,6 +183,8 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
     blockIndex[block.number] = block
     blocks.push(block.number)
   })
+
+  updateTitle()
 
   return {
     insert,
