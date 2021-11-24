@@ -86,18 +86,21 @@ export function Historical() {
               hour: 'numeric',
               day: 'numeric',
               month: 'short',
-              timeZone: 'UTC'
+              timeZone: 'UTC',
+              timeZoneName: 'short'
             }).format(date)
           case 'day':
             return new Intl.DateTimeFormat(navigator.language, {
               day: 'numeric',
               month: 'short',
-              timeZone: 'UTC'
+              timeZone: 'UTC',
+              timeZoneName: 'short'
             }).format(date)
           case 'month':
             return new Intl.DateTimeFormat(navigator.language, {
               month: 'long',
-              timeZone: 'UTC'
+              timeZone: 'UTC',
+              timeZoneName: 'short'
             }).format(date)
         }
       }
