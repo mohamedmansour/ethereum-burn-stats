@@ -1,4 +1,4 @@
-import { HStack, Tab, TabList, TabPanel, TabPanels, Tabs, Text, VStack } from '@chakra-ui/react'
+import { Flex, Tab, TabList, TabPanel, TabPanels, Tabs, Text, VStack } from '@chakra-ui/react'
 import { utils } from 'ethers'
 import { useEffect, useMemo, useState } from 'react'
 import { Setting, Tooltips } from '../../config'
@@ -51,12 +51,12 @@ function TabTitle({ data, index }: { data: ChartRange | undefined, index: number
   } else {
     let type = index === 0 ? data.hour.type : index === 1 ? data.day.type : data.month.type
     let length = (index === 0 ? data.hour.data : index === 1 ? data.day.data : data.month.data).length
-    title = `${length} ${type}s`
+    title = `Displaying the last ${length} ${type}s of data in UTC`
   }
   
 
   return (
-    <Text flex={1} pr={4} align="right" variant="brandSecondary">
+    <Text flex={1} pr={4} textAlign="right" variant="brandSecondary">
       {title}
     </Text>
   )
@@ -87,20 +87,17 @@ export function Historical() {
               day: 'numeric',
               month: 'short',
               timeZone: 'UTC',
-              timeZoneName: 'short'
             }).format(date)
           case 'day':
             return new Intl.DateTimeFormat(navigator.language, {
               day: 'numeric',
               month: 'short',
               timeZone: 'UTC',
-              timeZoneName: 'short'
             }).format(date)
           case 'month':
             return new Intl.DateTimeFormat(navigator.language, {
               month: 'long',
               timeZone: 'UTC',
-              timeZoneName: 'short'
             }).format(date)
         }
       }
@@ -149,17 +146,16 @@ export function Historical() {
     settings.set(Setting.insightBucket, index)
   }
 
-  console.log('Changed', initialBucketIndex, data)
   return (
     <Tabs defaultIndex={initialBucketIndex} variant="inline" isLazy onChange={(index) => onTabChange(index)}>
-      <HStack>
+      <Flex direction={layoutConfig.flexRow} align="center">
         <TabTitle data={data} index={bucketIndex} />
-        <TabList display="inline-flex">
+        <TabList>
           <Tab>Hour</Tab>
           <Tab>Day</Tab>
           <Tab>Month</Tab>
         </TabList>
-      </HStack>
+      </Flex>
       <TabPanels>
         <TabPanel><TotalTabPanel bucket={data && data.hour} /></TabPanel>
         <TabPanel><TotalTabPanel bucket={data && data.day} /></TabPanel>
