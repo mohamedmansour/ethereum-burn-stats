@@ -8,7 +8,7 @@ If you have a local Ethereum (we use geth but you can use any ETH client) instan
 ## Donate towards Server Costs 💰
 The costs of running this experiment is pretty high since it requires a dev version of Geth to be up and running which requires lots of memory and cpu. The VM and SSD storage currently costs exactly $200/month USD. If you would like to help out with the costs, please reach out to me. 
 
-If you would like to tip, my ethereum address is `mansour.eth`, or my [gitcoin grant](https://gitcoin.co/grants/1709/ethereum-2-educational-grant).
+If you would like to tip, my [gitcoin grant](https://gitcoin.co/grants/1709/watchtheburncom).
 
 ## Setup dev environment ⚙
 

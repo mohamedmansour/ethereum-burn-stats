@@ -22,13 +22,13 @@ export enum CardDonateType {
 
 const Patrons = [
   {
-    id: 'frontier', // September 10 - 2
+    id: 'frontier', // Nov 9 - 6
     logo: LogoFrontier,
     url: "https://frontier.xyz/",
     description: "Frontier: Native, seamless, cross-chain DeFi aggregation layer"
   },
   {
-    id: 'hotcross', // November 11th - 6
+    id: 'hotcross', // Oct 5th - 2
     logo: LogoHotCross ,
     url: "https://hotcross.com/",
     description: "Hot Cross is a multi-chain tool suite created for both blockchain teams and their communities."
@@ -101,7 +101,7 @@ export function CardDonate({ type }: { type: CardDonateType }) {
       <Box pl={4} pr={4} pb={4}>
         <Text>It's expensive hosting multiple geth instances on the cloud. Any help would be appreciated:</Text>
         <UnorderedList mt={4}>
-          <ListItem>Through our <Link href="https://gitcoin.co/grants/1709/ethereum-tools-and-educational-grant">Gitcoin Grant</Link></ListItem>
+          <ListItem>Through our <Link href="https://gitcoin.co/grants/1709/watchtheburncom">Gitcoin Grant</Link></ListItem>
           <ListItem>Monthly sponsorships, in a card like this. Contact us on <Link href="https://twitter.com/mohamedmansour">Twitter</Link></ListItem>
         </UnorderedList>
       </Box>

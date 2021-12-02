@@ -74,7 +74,7 @@ function Navigation({ isMobile }: { isMobile: boolean }) {
 
         <Link {...linkStyle} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" target="_blank" href="https://github.com/mohamedmansour/ethereum-burn-stats">Source code</Link>
 
-        <Link {...linkStyle} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" target="_blank" href="https://gitcoin.co/grants/1709/ethereum-tools-and-educational-grant">
+        <Link {...linkStyle} _hover={{ textDecoration: "none", color: activeColor }} userSelect="none" target="_blank" href="https://gitcoin.co/grants/1709/watchtheburncom">
           <TooltipPlus label="Please help support the server costs, hosting Geth is not cheap 🖤 You can donate through Gitcon Grant, or through website sponsorships." textAlign="center" placement="top">
             <Text>Donate</Text>
           </TooltipPlus>

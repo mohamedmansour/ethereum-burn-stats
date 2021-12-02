@@ -58,5 +58,11 @@
     "http-proxy-middleware": "^2.0.1",
     "request": "^2.88.2",
     "typescript": "^4.4.4"
-  }
+  },
+  "funding": [
+    {
+      "type": "individual",
+      "url": "https://gitcoin.co/grants/1709/watchtheburncom"
+    }
+  ]
 }
