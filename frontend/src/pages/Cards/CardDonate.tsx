@@ -14,6 +14,7 @@ import {
 import { Card } from "../../atoms/Card";
 import { LogoFrontier, LogoHotCross, LogoNansen, LogoThales, LogoTracer } from "./Logos";
 import { LogoRealityCards } from "./Logos/LogoRealityCards";
+import { LogoUnmarshal } from "./Logos/LogoUnmarshal";
 
 export enum CardDonateType {
   TopSideBar,
@@ -50,6 +51,12 @@ const Patrons = [
     logo: LogoRealityCards ,
     url: "https://beta.realitycards.io/",
     description: "The world's only prediction market built around NFTs. Don't bet on an outcome, own it!"
+  },
+  {
+    id: 'unmarshal', // December 22nd - 3
+    logo: LogoUnmarshal ,
+    url: "https://unmarshal.io/",
+    description: "The easiest way to query Blockchain data from Ethereum, Binance Smart Chain and Polygon!"
   }
 ]
 
