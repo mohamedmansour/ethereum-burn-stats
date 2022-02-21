@@ -1,6 +1,6 @@
 import { EventEmitter } from "../event";
 import { RetryAttempt, WebSocketRetry } from "./websocket-retry";
-import LRU from 'lru-cache';
+import LRUCache from 'lru-cache';
 
 export enum WebSocketStatus {
   Connecting,
@@ -46,14 +46,24 @@ interface AsyncMessage<T> {
   result?: string
 }
 
+// TODO: This is for the V7 upgrade, wait till we have a new version of @types/lru-cache
+// then this extra override can be removed.
+// https://github.com/DefinitelyTyped/DefinitelyTyped/pull/58707
+declare module "lru-cache" {
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  interface Options<K, V> { // 
+    ttl: number;
+  }
+}
+
 export class WebSocketProvider<EventMap extends WebSocketEventMap> extends WebSocketRetry {
   private eventEmitter = EventEmitter<keyof EventMap>()
   private connection: WebSocket;
   private asyncId: number = 0
   private promiseMap: { [key: number]: [(value: any | PromiseLike<any>) => void, (e: unknown) => void] } = {}
-  private cache = new LRU({
+  private cache = new LRUCache({
     max: 10000,
-    maxAge: 1000 * 60 * 60  // 1 hour
+    ttl: 1000 * 60 * 60  // 1 hour
   });
   private _status: WebSocketStatus = WebSocketStatus.Connecting
   private ethSubcribeMap: { [key: string]: WebSocketSubscribedEvent } = {}
