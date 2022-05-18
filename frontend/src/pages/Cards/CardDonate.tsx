@@ -12,7 +12,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { Card } from "../../atoms/Card";
-import { LogoFrontier, LogoNansen, LogoThales, LogoUnmarshal } from "./Logos";
+import { LogoFrontier, LogoNansen } from "./Logos";
 
 export enum CardDonateType {
   TopSideBar,
@@ -25,18 +25,6 @@ const Patrons = [
     logo: LogoFrontier,
     url: "https://frontier.xyz/",
     description: "Frontier: Native, seamless, cross-chain DeFi aggregation layer"
-  },
-  {
-    id: 'thales', // January 5th - 3
-    logo: LogoThales ,
-    url: "https://thalesmarket.io/",
-    description: "Thales: Binary options re-imagined. Permissionless, non-custodial, and fun!"
-  },
-  {
-    id: 'unmarshal', // December 22nd - 3
-    logo: LogoUnmarshal ,
-    url: "https://unmarshal.io/",
-    description: "The easiest way to query Blockchain data from Ethereum, Binance Smart Chain and Polygon!"
   }
 ]
 
