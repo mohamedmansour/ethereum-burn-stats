@@ -15,6 +15,49 @@ interface ChartRange {
   month: ChartDataBucket
 }
 
+
+/**
+ * flatten the dotted key to extract the numerical value in the charts.
+ */
+function extractValueFromDottedKey(key: string, data: ChartData): number {
+  const keySplit = key.split('.')
+  let value: Object = data
+
+  for (let i = 0; i < keySplit.length; i++) {
+    if (Object.keys(value).indexOf(keySplit[i]) !== -1) {
+      value = (value as any)[keySplit[i]]
+    } else {
+      break
+    }
+  }
+  
+  // Guaranteed to be a number.
+  return value as number
+}
+
+/**
+ * returns the 99th percentile of the chart data so the y-axis can be capped. This should make it that brief
+ * outliers don't break usability of the dashboard for an entire year.
+ */
+function get99thPercentileValue(key: string, dataList: ChartData[] | undefined) : number | 'auto' {
+  if (!dataList) return 'auto'
+  
+  // The percentile to cap the y-axis at.
+  const percentile = 0.99;
+
+  // The extra percentage to add to the top of the y-axis.
+  const percentilePadding = 1.1;
+
+  // Sort the values.
+  const percentiles = dataList.map(d => extractValueFromDottedKey(key, d)).sort((a, b) => a - b)
+
+  // Figure out the perentile index by
+  const percentilesIndex = Math.ceil(percentile * percentiles.length);
+  const nintyNinethPercentile = percentiles[percentilesIndex - 2];
+
+  return Math.ceil(nintyNinethPercentile * percentilePadding);
+}
+
 function TotalTabPanel({ bucket }: { bucket: ChartDataBucket | undefined }) {
   return (
     <VStack spacing={0} gridGap={layoutConfig.gap} mt={8} align="flex-start">
@@ -24,13 +67,13 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket | undefined }) {
         percentilesKey="baseFeePercentiles"
         tooltip={Tooltips.baseFeeInsights}
         bucket={bucket}
-        maxDomainY={'auto'} />
+        maxDomainY={get99thPercentileValue('baseFeePercentiles.ninetieth', bucket?.data)} />
       <HistoricalChart
         title="Burned"
         dataKey={["burned"]}
         tooltip={Tooltips.burned}
         bucket={bucket}
-        maxDomainY={'auto'} />
+        maxDomainY={get99thPercentileValue('burned', bucket?.data)} />
       <HistoricalChart
         title="Net Issuance"
         dataKey={["issuance"]}

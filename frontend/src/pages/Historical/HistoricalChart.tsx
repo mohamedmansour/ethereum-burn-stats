@@ -85,7 +85,7 @@ export function HistoricalChart({
   tooltip: string,
   dataKey: (keyof ChartData)[],
   percentilesKey?: keyof ChartData
-  maxDomainY: number | string
+  maxDomainY: number | 'auto'
 }) {
 
   if (!bucket) {
