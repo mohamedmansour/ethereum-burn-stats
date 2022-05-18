@@ -15,7 +15,6 @@ interface ChartRange {
   month: ChartDataBucket
 }
 
-
 function TotalTabPanel({ bucket }: { bucket: ChartDataBucket | undefined }) {
   return (
     <VStack spacing={0} gridGap={layoutConfig.gap} mt={8} align="flex-start">
@@ -24,22 +23,26 @@ function TotalTabPanel({ bucket }: { bucket: ChartDataBucket | undefined }) {
         dataKey={["baseFee"]}
         percentilesKey="baseFeePercentiles"
         tooltip={Tooltips.baseFeeInsights}
-        bucket={bucket} />
+        bucket={bucket}
+        maxDomainY={'auto'} />
       <HistoricalChart
         title="Burned"
         dataKey={["burned"]}
         tooltip={Tooltips.burned}
-        bucket={bucket} />
+        bucket={bucket}
+        maxDomainY={'auto'} />
       <HistoricalChart
         title="Net Issuance"
         dataKey={["issuance"]}
         tooltip={Tooltips.netIssuance}
-        bucket={bucket} />
+        bucket={bucket}
+        maxDomainY={'auto'} />
       <HistoricalChart
         title="Rewards and Tips"
         dataKey={["rewards", "tips"]}
         tooltip={`${Tooltips.rewards} ${Tooltips.tips}`}
-        bucket={bucket} />
+        bucket={bucket}
+        maxDomainY={'auto'} />
     </VStack>
   )
 }

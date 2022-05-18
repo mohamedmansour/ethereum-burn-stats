@@ -77,13 +77,15 @@ export function HistoricalChart({
   title,
   tooltip,
   dataKey,
-  percentilesKey
+  percentilesKey,
+  maxDomainY
 }: {
   bucket: ChartDataBucket | undefined,
   title: string,
   tooltip: string,
   dataKey: (keyof ChartData)[],
   percentilesKey?: keyof ChartData
+  maxDomainY: number | string
 }) {
 
   if (!bucket) {
@@ -139,7 +141,7 @@ export function HistoricalChart({
         <ComposedChart data={data} stackOffset="sign" margin={{ top: 0, left: 0, right: 0, bottom: 0 }} syncId="1">
 
           {!percentilesKey && (
-            <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
+            <YAxis type="number" domain={[0, maxDomainY]} fontSize={10} tickLine={false} tickFormatter={onTickFormat} allowDataOverflow />
           )}
 
           <XAxis dataKey="timestamp" angle={-30} dy={10} fontSize={10} tickCount={10} height={40} />
@@ -166,7 +168,7 @@ export function HistoricalChart({
           {percentilesKey && (
             <>
               <Legend align="right" verticalAlign="top" content={renderLegend} />
-              <YAxis type="number" domain={[0, 'auto']} fontSize={10} tickLine={false} tickFormatter={onTickFormat} />
+              <YAxis type="number" fontSize={10} domain={[0, maxDomainY]} tickLine={false} tickFormatter={onTickFormat} allowDataOverflow />
               <Bar type="monotone" dataKey={`${percentilesKey}.Minimum`} stroke="#FF7B24" fill="#FF7B24" stackId="percentile" isAnimationActive={false} />
               <Bar type="monotone" dataKey={`${percentilesKey}.Median`} stroke="#FFC40C" fill="#FFC40C" stackId="percentile" isAnimationActive={false} />
               <Bar type="monotone" dataKey={`${percentilesKey}.ninetieth`} stroke="#d83935" fill="#d83935" stackId="percentile" isAnimationActive={false} />
