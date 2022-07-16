@@ -54,6 +54,7 @@ const DefaultTotals: Totals = {
 const DefaultExplorerData = {
   blocks: [],
   details: {
+    baseFeeNext: Zero,
     totals: DefaultTotals,
     totalsHour: DefaultTotals,
     totalsDay: DefaultTotals,
@@ -94,6 +95,7 @@ const CreateMemoryIndex = (initialData: InitialData): InMemoryIndex => {
   let originalTitle = document.title
 
   const details: BlockExplorerDetails = {
+    baseFeeNext: initialData.baseFeeNext,
     currentBlock: initialData.blockNumber,
     currentBaseFee: initialData.blocks.length ? initialData.blocks[0].baseFee : Zero,
     currentPriorityFee: initialData.blocks.length ? initialData.blocks[0].priorityFee : Zero,

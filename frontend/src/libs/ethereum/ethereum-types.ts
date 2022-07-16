@@ -70,6 +70,7 @@ export interface TotalsWithId extends Totals {
 }
 
 export interface BaseData {
+  baseFeeNext: BigNumber
   clients: number
   totals: Totals
   totalsHour: Totals

@@ -62,6 +62,7 @@ export class EthereumApiFormatters {
   static FormatInitialData(d: InitialData): InitialData {
     d.blocks = d.blocks ? d.blocks.map(b => this.FormatBlockStats(b)!) : []
     d.blockNumber = HexToNumber(d.blockNumber)
+    d.baseFeeNext = HexToBigNumber(d.baseFeeNext)
     this.FormatAllTotals(d)
     return d
   }
